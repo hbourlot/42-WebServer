@@ -2,6 +2,8 @@
 
 
 #include <iostream>
+#include <sys/socket.h>
+
 #define BORA {
 #define BIRL }
 
