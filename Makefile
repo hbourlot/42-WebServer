@@ -60,7 +60,7 @@ NAME			= webServer
 SRC_FILES 		= $(addprefix $(SRC_DIR), $(C_FUNCTIONS:=.cpp))
 OBJS_SRC 		= $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB				= libwebserver.a
-C_FUNCTIONS		= lets_go
+C_FUNCTIONS		= lets_go server
 
 
 all:			$(NAME)
