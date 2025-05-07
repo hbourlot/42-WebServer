@@ -1,5 +1,9 @@
-#include "../inc/server.hpp"
+#include "server.hpp"
+#include <sys/socket.h>
 
-void sartServer(){
-    
+Server::Server(){
+	this->socketFd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+}
+
+Server::~Server(){
 }
