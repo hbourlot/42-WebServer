@@ -1,6 +1,6 @@
 #include "webserver.hpp"
 #include "server.hpp"
-#include "Parsing.hpp"
+#include "CheckConfName.hpp"
 // CRUD : create, read, update, delete
 
 // int	main(int ac, char *av[])
@@ -15,8 +15,10 @@ int main(int ac, char *av[]){
 		return -1;
 	}
 
-	if (!checkConfExtension(av[1]))
-		return -1;
+	if (!CheckConfName::checkConfExtension(av[1]) || 
+		!CheckConfName::checkConfOpen(av[1]))
+			return -1;
 	
-		std::cout << "Valid confing file" << std::endl;
+	ReadConfig::readConf(av[1]);
+	std::cout << "Valid confing file" << std::endl;
 }
