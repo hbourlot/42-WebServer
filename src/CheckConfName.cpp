@@ -1,8 +1,8 @@
-#include "Parsing.hpp"
+#include "CheckConfig.hpp"
 #include <iostream>
 #include <fstream>
 
-bool    checkConfExtension(char* file){
+bool    CheckConfig::checkConfExtension(char* file){
     std::string extension = file;
     size_t      size = extension.size(); // Start at the end of the file
 
@@ -21,13 +21,14 @@ bool    checkConfExtension(char* file){
     return (true);
 }
 
-bool    checkConfOpen(char* file){
+bool    CheckConfig::checkConfOpen(char* file){
     std::ifstream fileFd;
     fileFd.open(file); // Opens the file
 
-    if (!fileFd.is_open()) // It will check if could open the file
+    if (!fileFd.is_open()){ // It will check if could open the file
         std::cerr << "Error: Couldn't open the configuration file" << std::endl;
-
-    std::string line;
+        return (false);
+    }
+    fileFd.close();
     return true;
 }

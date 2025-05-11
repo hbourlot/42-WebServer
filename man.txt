@@ -262,4 +262,64 @@ Esse projeto não é só para escrever um servidor — ele ensina como funciona 
 
 Se quiser, posso te ajudar a montar uma estrutura de arquivos e classes para o servidor e o parser de config, ou criar pequenos exercícios para estudar cada parte.
 
-Quer começar por sockets TCP + poll? Ou quer ajuda com o parser de configuração?
+🔍 1. GET — Obter dados
+
+    Objetivo: Pedir dados ao servidor (ex: uma página HTML, uma imagem, um ficheiro).
+
+    Não envia corpo no pedido.
+
+    Não altera nada no servidor.
+
+🧪 Exemplo:
+
+GET /index.html HTTP/1.1
+Host: localhost:8080
+
+Resposta:
+
+HTTP/1.1 200 OK
+Content-Type: text/html
+
+<html>...</html>
+
+📝 2. POST — Enviar dados
+
+    Objetivo: Enviar dados do cliente para o servidor (formulários, uploads, etc.)
+
+    O corpo do pedido contém os dados (ex: um ficheiro, JSON, texto).
+
+    Pode criar ou modificar recursos no servidor.
+
+🧪 Exemplo (upload de ficheiro):
+
+POST /upload HTTP/1.1
+Host: localhost:8080
+Content-Type: text/plain
+Content-Length: 17
+
+Olá, ficheiro novo!
+
+Resposta:
+
+HTTP/1.1 201 Created
+
+❌ 3. DELETE — Apagar recurso
+
+    Objetivo: Pedir ao servidor para apagar um ficheiro ou recurso.
+
+    Pode ter ou não corpo, mas normalmente só indica o que apagar na URL.
+
+🧪 Exemplo:
+
+DELETE /files/teste.txt HTTP/1.1
+Host: localhost:8080
+
+Resposta:
+
+HTTP/1.1 200 OK
+Content-Type: text/plain
+
+Ficheiro apagado com sucesso.
+
+    ⚠️ Em muitos servidores (e no teu webserv), precisas configurar permissões para permitir DELETE.
+
