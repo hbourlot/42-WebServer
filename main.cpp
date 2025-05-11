@@ -1,9 +1,22 @@
 #include "webserver.hpp"
 #include "server.hpp"
+#include "Parsing.hpp"
 // CRUD : create, read, update, delete
 
-int	main(int ac, char *av[])
-{
-	Server server;
-	(void)server;
+// int	main(int ac, char *av[])
+// {
+// 	Server server;
+// 	(void)server;
+// }
+
+int main(int ac, char *av[]){
+	if (ac != 2){
+		std::cerr << "No confing file in input" << std::endl;
+		return -1;
+	}
+
+	if (!checkConfExtension(av[1]))
+		return -1;
+	
+		std::cout << "Valid confing file" << std::endl;
 }
