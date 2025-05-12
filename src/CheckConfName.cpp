@@ -1,8 +1,8 @@
-#include "CheckConfig.hpp"
+#include "CheckConfName.hpp"
 #include <iostream>
 #include <fstream>
 
-bool    CheckConfig::checkConfExtension(char* file){
+bool    CheckConfName::checkConfExtension(char* file){
     std::string extension = file;
     size_t      size = extension.size(); // Start at the end of the file
 
@@ -21,7 +21,7 @@ bool    CheckConfig::checkConfExtension(char* file){
     return (true);
 }
 
-bool    CheckConfig::checkConfOpen(char* file){
+bool    CheckConfName::checkConfOpen(char* file){
     std::ifstream fileFd;
     fileFd.open(file); // Opens the file
 
