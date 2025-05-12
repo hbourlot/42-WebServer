@@ -1,5 +1,6 @@
 #pragma once
+#include "Configs.hpp"
 
-class ReadConfig{
-    static bool readConfig(char* conf);
+struct ReadConfig{
+    static bool setConfigs(char* conf);
 };
