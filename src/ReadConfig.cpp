@@ -27,14 +27,30 @@ std::string	getInfo(std::string& noSpaceLine){
 	return noSpaceLine.substr(i, noSpaceLine.find(';') - i); // '- i' I have to discard the 'i' size
 }
 
+int	getType(std::string& trimedLine){
+	if (trimedLine == "host")
+		return 1;
+	else if (trimedLine == "port")
+		return 2;
+	else if (trimedLine == "server_name")
+		return 3;
+	else if (trimedLine == "client_max_body_size")
+		return 4;
+	else if (trimedLine == "error_page")
+		return 5;
+	
+}
+
 bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Configs& configs){
 	std::string noSpaceLine; // Gets the string without the initial spaces	
 	std::string trimedLine; // Stores the atribute of the server
 	Server server;
 	
 	server.maxRequest = 10; // Set the max value by default
-
 	while (std::getline(confFd, line)){ // Finish the server config block
+		switch(){
+
+		}
 		noSpaceLine = removeSpace(line);
 		trimedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
 		

@@ -23,8 +23,9 @@ int main(int ac, char *av[]){
 	Configs configs;
 	if (!ReadConfig::setConfigs(av[1], configs))
 		std::cout << "Invalid config file" << std::endl;
-	else 
+	else {
 		std::cout << "Valid confing file" << std::endl;
-	printConfigs(configs);
+		printConfigs(configs);
+	}
 	
 }
