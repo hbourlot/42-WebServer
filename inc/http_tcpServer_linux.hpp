@@ -32,6 +32,7 @@ namespace http {
 			void runServer();
 
 		private:
+			// MAYBE YOU STRUCT HERE?? 😇
 			std::string m_ip_address;
 			int m_port, m_socket, m_new_socket, bytesReceived, bytesSend;
 			long m_incomingMessage;
