@@ -40,7 +40,7 @@ namespace http {
 			std::string m_serverMessage;
 
 			int startServer();
-			void closeServer();
+			void shutDownServer();
 			void startListen();
 			void acceptConnection(SOCKET &new_socket);
 			void readRequest();

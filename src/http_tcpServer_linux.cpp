@@ -13,7 +13,7 @@ namespace http {
 	TcpServer::~TcpServer() {
 		close(m_socket);
 		close(m_new_socket);
-		exit(1); // Exit with a failure code
+		// exit(1); // Exit with a failure code
 	}
 
 	int TcpServer::startServer() {
@@ -38,10 +38,10 @@ namespace http {
 		return 0;
 	}
 
-	void TcpServer::closeServer() {
+	void TcpServer::shutDownServer() {
 		close(m_socket);
 		close(m_new_socket);
-		exit(0); // Exit with failure code??
+		// exit(0); // Exit with failure code??
 	}
 
 	void TcpServer::startListen() {
@@ -65,29 +65,32 @@ namespace http {
 			   << inet_ntoa(m_socketAddress.sin_addr)
 			   << "; PORT: " << ntohs(m_socketAddress.sin_port);
 			exitWithError(ss.str());
+		} else {
+			std::cout << "----- Connection Accepted" << std::endl;
 		}
 	}
 
 	void TcpServer::readRequest() {
 		char buffer[BUFFER_SIZE] = {0};
 
-		bytesReceived = read(m_new_socket, buffer, BUFFER_SIZE);
+		bytesReceived = read(m_new_socket, buffer, BUFFER_SIZE - 1);
 		if (bytesReceived < 0) {
 			exitWithError("Failed to read bytes from client socket connection");
 		}
+		buffer[bytesReceived] = '\0';
 	}
 
 	void TcpServer::sendResponse() {
-
 		m_serverMessage = "HTTP/1.1 200 OK\r\n"
 						  "Content-Type: text/plain\r\n"
 						  "Content-Length: 13\r\n"
 						  "Connection: close\r\n"
 						  "\r\n"
 						  "Hello, world!";
-		bytesSend = write(m_new_socket, m_serverMessage.c_str(),
-						  m_serverMessage.size());
-		if (bytesSend < 0) {
+
+		ssize_t bytesSent = send(m_new_socket, m_serverMessage.c_str(),
+								 m_serverMessage.size(), 0);
+		if (bytesSent < 0) {
 			log("Error sending response to client");
 		} else {
 			log("----- Server Response sent to client -----\n\n");
@@ -98,15 +101,15 @@ namespace http {
 
 		startListen();
 
-		while (1) {
-			SOCKET client_socket;
-			m_new_socket = client_socket;
-			acceptConnection(client_socket);
+		// SOCKET client_socket;
+		// m_new_socket = client_socket;
+		// acceptConnection(client_socket);
 
-			readRequest();
-			sendResponse();
-		}
-		// close(m_new_socket);
+		acceptConnection(m_new_socket);
+
+		readRequest();
+		sendResponse();
+		close(m_new_socket);
 	}
 
 } // namespace http
