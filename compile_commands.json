@@ -1,0 +1,30 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-std=c++98",
+      "-c",
+      "-I./inc/",
+      "-o",
+      "obj/src/http_tcpServer_linux.o",
+      "src/http_tcpServer_linux.cpp"
+    ],
+    "directory": "/Users/hugobourlot/Projects/42-WebServer",
+    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer_linux.cpp",
+    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer_linux.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-std=c++98",
+      "-c",
+      "-I./inc/",
+      "-o",
+      "obj/src/server_linux.o",
+      "src/server_linux.cpp"
+    ],
+    "directory": "/Users/hugobourlot/Projects/42-WebServer",
+    "file": "/Users/hugobourlot/Projects/42-WebServer/src/server_linux.cpp",
+    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/server_linux.o"
+  }
+]
