@@ -10,7 +10,7 @@ struct Route{
 
 struct Server{
 	std::string					host; // Stores the host IP
-	std::string					port; // Stores the port to listen
+	int							port; // Stores the port to listen
 	std::string					serverName; // Stores the name server
 	std::map<int, std::string>	errorPage; // Stores the error pages
 	int							maxRequest; // Stores the maximum requests that the client can do
