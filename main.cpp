@@ -2,6 +2,7 @@
 #include "server.hpp"
 #include "CheckConfName.hpp"
 #include "ReadConfig.hpp"
+#include "Debug.hpp"
 // CRUD : create, read, update, delete
 
 // int	main(int ac, char *av[])
@@ -19,7 +20,11 @@ int main(int ac, char *av[]){
 	if (!CheckConfName::checkConfExtension(av[1]) || 
 		!CheckConfName::checkConfOpen(av[1]))
 			return -1;
+	Configs configs;
+	if (!ReadConfig::setConfigs(av[1], configs))
+		std::cout << "Invalid config file" << std::endl;
+	else 
+		std::cout << "Valid confing file" << std::endl;
+	printConfigs(configs);
 	
-	ReadConfig::setConfigs(av[1]);
-	std::cout << "Valid confing file" << std::endl;
 }
