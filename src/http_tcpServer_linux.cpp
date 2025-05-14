@@ -1,4 +1,8 @@
 #include "http_tcpServer_linux.hpp"
+#include "http_tcpServerException_linux.hpp"
+#include <iostream>
+#include <ostream>
+#include <system_error>
 
 namespace http {
 
@@ -19,7 +23,8 @@ namespace http {
 	int TcpServer::startServer() {
 		m_socket = socket(AF_INET, SOCK_STREAM, 0); // Creates a socket
 		if (m_socket < 0) {
-			exitWithError("Cannot create socket");
+			throw TcpServerException("Cannot create socket");
+			// exitWithError("Cannot create socket");
 			return 1;
 		}
 
@@ -31,7 +36,8 @@ namespace http {
 
 		if (bind(m_socket, (sockaddr *)&m_socketAddress, m_socketAddress_len) <
 			0) {
-			exitWithError("Cannot bind socket to address");
+			throw TcpServerException("Cannot bind socket to address");
+			// exitWithError("Cannot bind socket to address");
 			return 1;
 		}
 
@@ -46,7 +52,7 @@ namespace http {
 
 	void TcpServer::startListen() {
 		if (listen(m_socket, 20) < 0) {
-			exitWithError("Socket Listen failed");
+			throw TcpServerException("Socket Listen failed");
 		}
 
 		std::ostringstream ss; // Output string stream for logging
@@ -61,12 +67,13 @@ namespace http {
 							&m_socketAddress_len);
 		if (new_socket < 0) {
 			std::ostringstream ss;
-			ss << "Server failed to accept incoming connection from ADDRESS: "
-			   << inet_ntoa(m_socketAddress.sin_addr)
-			   << "; PORT: " << ntohs(m_socketAddress.sin_port);
-			exitWithError(ss.str());
+			ss << "Server failed to accept incoming connection from =>\n"
+				  "[ADDRESS: "
+			   << inet_ntoa(m_socketAddress.sin_addr) << "]\n"
+			   << "[PORT: " << ntohs(m_socketAddress.sin_port) << "]\n";
+			throw TcpServerException(ss.str());
 		} else {
-			std::cout << "----- Connection Accepted" << std::endl;
+			std::cout << "----- Connection Accepted 🟩" << std::endl;
 		}
 	}
 
@@ -75,7 +82,8 @@ namespace http {
 
 		bytesReceived = read(m_new_socket, buffer, BUFFER_SIZE - 1);
 		if (bytesReceived < 0) {
-			exitWithError("Failed to read bytes from client socket connection");
+			throw TcpServerException(
+				"Failed to read bytes from client socket connection");
 		}
 		buffer[bytesReceived] = '\0';
 	}
@@ -99,16 +107,30 @@ namespace http {
 
 	void TcpServer::runServer() {
 
-		startListen();
+		try {
+			startListen();
+		} catch (const TcpServerException &e) {
+			std::cerr << "Error while starting to listen => " << e.what()
+					  << std::endl;
+			return;
+		}
+
+		// while (true) {
+		try {
+			acceptConnection(m_new_socket);
+			readRequest();
+			sendResponse();
+
+		} catch (const TcpServerException &e) {
+			std::cerr << "Error handling client connection => " << e.what()
+					  << std::endl;
+		}
+		// }
 
 		// SOCKET client_socket;
 		// m_new_socket = client_socket;
 		// acceptConnection(client_socket);
 
-		acceptConnection(m_new_socket);
-
-		readRequest();
-		sendResponse();
 		close(m_new_socket);
 	}
 
