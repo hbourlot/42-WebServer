@@ -4,6 +4,7 @@
 #include <map>
 
 struct Route{
+	std::string					path;
 	std::string					methods;
     std::string                 root;
 };
