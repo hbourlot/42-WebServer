@@ -5,6 +5,13 @@
 #include <iostream>
 #include <cstdlib>
 
+#define HOST 1
+#define PORT 2
+#define SERVER_NAME 3
+#define CLIENT_MAX_BDY 4
+#define ERROR_PAGE 5
+#define ROUTE 6
+
 std::string removeSpace(std::string& line){
 	int i = 0;
 
@@ -27,18 +34,28 @@ std::string	getInfo(std::string& noSpaceLine){
 	return noSpaceLine.substr(i, noSpaceLine.find(';') - i); // '- i' I have to discard the 'i' size
 }
 
-int	getType(std::string& trimedLine){
+int	getTypeRoute(std::string& trimedLine){
+	return 10;
+}
+
+bool	ReadConfig::setRouteConfig(std::ifstream& confFd, std::string& line, Server& server){
+	return true;
+}
+
+int	getTypeServer(std::string& trimedLine){
 	if (trimedLine == "host")
-		return 1;
+		return HOST;
 	else if (trimedLine == "port")
-		return 2;
+		return PORT;
 	else if (trimedLine == "server_name")
-		return 3;
+		return SERVER_NAME;
 	else if (trimedLine == "client_max_body_size")
-		return 4;
+		return CLIENT_MAX_BDY;
 	else if (trimedLine == "error_page")
-		return 5;
-	
+		return ERROR_PAGE;
+	else if (trimedLine == "route")
+		return ROUTE;
+	return 7;
 }
 
 bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Configs& configs){
@@ -48,28 +65,43 @@ bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Confi
 	
 	server.maxRequest = 10; // Set the max value by default
 	while (std::getline(confFd, line)){ // Finish the server config block
-		switch(){
+		noSpaceLine = removeSpace(line);
+		trimedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
 
+		if (trimedLine[0] == '}') // Finish the server info
+			break;
+
+		switch(getTypeServer(trimedLine)){
+			case HOST:
+				server.host = getInfo(noSpaceLine); // Get the information in string
+				break;
+	
+			case PORT:
+				server.port = std::atoi(getInfo(noSpaceLine).c_str()); // Convert the string into a int
+				break;
+		
+			case SERVER_NAME:
+				server.serverName = getInfo(noSpaceLine); // Gets the server name
+				break;
+			
+			case CLIENT_MAX_BDY:
+				if (getInfo(noSpaceLine) != "10M") // Verify if the value is valid
+					throw std::invalid_argument("Error: Invalid client_max_body, the only one is 10\n");
+				break;
+			
+			case ERROR_PAGE:
+				std::cout << "Found an error_page" << std::endl;
+				break;
+			
+			case ROUTE:
+				setRouteConfig(confFd, line, server);
+				break;
+
+			default:
+				break;
 		}
 		noSpaceLine = removeSpace(line);
 		trimedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
-		
-		if (noSpaceLine[0] == '}') // Checks if it is the closed brackets
-			break;
-		if (trimedLine == "host") // Set the host information for the server
-			server.host = getInfo(noSpaceLine); // Get the information in string
-		else if (trimedLine == "port")
-			server.port = std::atoi(getInfo(noSpaceLine).c_str()); // Convert the string into a int
-		else if (trimedLine == "server_name")
-			server.serverName = getInfo(noSpaceLine); // Gets the server name
-		else if (trimedLine == "client_max_body_size"){
-			if (getInfo(noSpaceLine) != "10M") // Verify if the value is valid
-				throw std::invalid_argument("Error: Invalid client_max_body, the only one is 10\n");
-		}
-		else if (trimedLine == "error_page"){
-			// get error_page
-			std::cout << "Found an error_page" << std::endl;
-		}
 	}
 	configs.servers.push_back(server);
 	return (true);
