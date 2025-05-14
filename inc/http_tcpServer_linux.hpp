@@ -1,5 +1,6 @@
 #pragma once
 
+#include "http_tcpServerException_linux.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <iostream>
