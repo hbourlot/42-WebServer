@@ -12,6 +12,9 @@
 #define ERROR_PAGE 5
 #define ROUTE 6
 
+#define METHODS 7
+#define ROOT 8
+
 std::string removeSpace(std::string& line){
 	int i = 0;
 
@@ -34,15 +37,77 @@ std::string	getInfo(std::string& noSpaceLine){
 	return noSpaceLine.substr(i, noSpaceLine.find(';') - i); // '- i' I have to discard the 'i' size
 }
 
-int	getTypeRoute(std::string& trimedLine){
+std::string routePath(std::string& line){
+	int i;
+	
+	for (i = 0; line[i] && line[i] == ' '; i++) //Skip the spaces
+		continue;
+	
+	int j;
+	for (j = 0; line[j] && line[j] != ' ' && line[j] != '{'; j++) // Gets the path size
+		continue;
+
+	return line.substr(i,j + 1); // Return the path
+}
+
+void	getMethods(std::string trimedLine, std::vector<std::string>& methods){ // Function to get the route methods
+	while (trimedLine.find(' ') != std::string::npos){ // Loops until has no more spaces
+		trimedLine = trimedLine.substr(0, trimedLine.find(' ')); // Gets the method
+		methods.push_back(trimedLine); // Push the method to the vector
+	}
+}
+
+int		getTypeRoute(std::string& trimedLine){ // Function to check the information to set
+	if (trimedLine == "methods")
+		return METHODS;
+	if (trimedLine == "root")
+		return ROOT;
+
 	return 10;
 }
 
-bool	ReadConfig::setRouteConfig(std::ifstream& confFd, std::string& line, Server& server){
+bool	ReadConfig::setRouteConfig(std::ifstream& confFd, std::string line, Server& server){
+	std::string noSpaceLine; // Gets the string without the initial spaces	
+	std::string trimedLine; // Stores the atribute of the route
+	Route route;
+
+	route.path = routePath(line); // Sets the route path
+
+	while (std::getline(confFd, line)){
+		noSpaceLine = removeSpace(line);
+		trimedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
+
+		if (trimedLine[0] == '}')
+			break;
+		
+		switch(getTypeRoute(trimedLine)){
+			case METHODS:
+				getMethods(trimedLine, route.methods);
+				break;
+			case ROOT:
+				route.root = getInfo(noSpaceLine);
+				break;
+			default:
+				break;
+
+		}
+	}
+	(void)noSpaceLine;
+	(void)trimedLine;
+	(void)route;
+	(void)confFd;
+	(void)server;
+	server.routes.push_back(route);
 	return true;
 }
 
-int	getTypeServer(std::string& trimedLine){
+void 	getErrorPage(std::string noSpaceLine, Server& server){
+	int i = 0;
+	
+	while (server.errorPage.inser) // <------------ FIQUEI AQUI 
+}
+
+int		getTypeServer(std::string& trimedLine){ // Return the type of information to use on switch
 	if (trimedLine == "host")
 		return HOST;
 	else if (trimedLine == "port")
@@ -61,7 +126,7 @@ int	getTypeServer(std::string& trimedLine){
 bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Configs& configs){
 	std::string noSpaceLine; // Gets the string without the initial spaces	
 	std::string trimedLine; // Stores the atribute of the server
-	Server server;
+	Server server; // Variable to save all the information
 	
 	server.maxRequest = 10; // Set the max value by default
 	while (std::getline(confFd, line)){ // Finish the server config block
@@ -90,11 +155,11 @@ bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Confi
 				break;
 			
 			case ERROR_PAGE:
-				std::cout << "Found an error_page" << std::endl;
+				getErrorPage(noSpaceLine, server);
 				break;
 			
 			case ROUTE:
-				setRouteConfig(confFd, line, server);
+				setRouteConfig(confFd, noSpaceLine.substr(noSpaceLine.find(' ')), server);
 				break;
 
 			default:
@@ -103,7 +168,7 @@ bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Confi
 		noSpaceLine = removeSpace(line);
 		trimedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
 	}
-	configs.servers.push_back(server);
+	configs.servers.push_back(server); // Send the information for the main config
 	return (true);
 }
 
