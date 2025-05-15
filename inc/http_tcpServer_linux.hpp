@@ -4,7 +4,9 @@
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <iostream>
+#include <ostream>
 #include <sstream>
+#include <string>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -47,6 +49,7 @@ namespace http {
 			void acceptConnection(SOCKET &new_socket);
 			void readRequest();
 			void sendResponse();
+			bool validateRequest(const std::string &requestPath);
 	};
 
 } // namespace http
