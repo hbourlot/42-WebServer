@@ -4,5 +4,5 @@
 struct ReadConfig{
     static bool setConfigs(char* conf, Configs& configs);
 	static bool setServerConfig(std::ifstream& confFd, std::string& line, Configs& configs);
-	static bool setRouteConfig(std::ifstream& confFD, std::string line, Server& server);
+	static bool setLocationConfig(std::ifstream& confFD, std::string line, Server& server);
 };

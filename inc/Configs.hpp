@@ -3,7 +3,7 @@
 #include <string>
 #include <map>
 
-struct Route{
+struct Location{
 	std::string					path;
 	std::vector<std::string>	methods;
     std::string                 root;
@@ -15,7 +15,7 @@ struct Server{
 	std::string					serverName; // Stores the name server
 	std::map<int, std::string>	errorPage; // Stores the error pages
 	int							maxRequest; // Stores the maximum requests that the client can do
-	std::vector<Route>			routes; // Stores the routes of the HTML pages
+	std::vector<Location>		locations; // Stores the routes of the HTML pages
 };
 
 struct Configs{
