@@ -1,8 +1,4 @@
 #include "http_tcpServer_linux.hpp"
-#include "http_tcpServerException_linux.hpp"
-#include <iostream>
-#include <ostream>
-#include <system_error>
 
 namespace http {
 
@@ -17,14 +13,16 @@ namespace http {
 	TcpServer::~TcpServer() {
 		close(m_socket);
 		close(m_new_socket);
-		// exit(1); // Exit with a failure code
+		// exit(1); //TODO Exit with a failure code??
 	}
 
 	int TcpServer::startServer() {
-		m_socket = socket(AF_INET, SOCK_STREAM, 0); // Creates a socket
+
+		// 							domain, type, protocol
+		// Creates a server socket (IPv4, TCP, 0);
+		m_socket = socket(AF_INET, SOCK_STREAM, 0);
 		if (m_socket < 0) {
 			throw TcpServerException("Cannot create socket");
-			// exitWithError("Cannot create socket");
 			return 1;
 		}
 
@@ -32,12 +30,14 @@ namespace http {
 		m_socketAddress.sin_family = AF_INET;
 		m_socketAddress.sin_addr.s_addr =
 			INADDR_ANY; // can replace this with a specific IP address if needed
-		m_socketAddress.sin_port = htons(m_port);
+		m_socketAddress.sin_port =
+			htons(m_port); // Converts 16-bit integer in host byte order
 
+		// Associate socket with a specific IP addr and Port number (sockfd,
+		// sockaddr *, addrlen)
 		if (bind(m_socket, (sockaddr *)&m_socketAddress, m_socketAddress_len) <
 			0) {
 			throw TcpServerException("Cannot bind socket to address");
-			// exitWithError("Cannot bind socket to address");
 			return 1;
 		}
 
@@ -78,23 +78,27 @@ namespace http {
 	}
 
 	void TcpServer::readRequest() {
-		char buffer[BUFFER_SIZE] = {0};
+		char requestContent[BUFFER_SIZE] = {0};
 
-		bytesReceived = read(m_new_socket, buffer, BUFFER_SIZE - 1);
+		bytesReceived = read(m_new_socket, requestContent, BUFFER_SIZE - 1);
 		if (bytesReceived < 0) {
 			throw TcpServerException(
 				"Failed to read bytes from client socket connection");
 		}
-		buffer[bytesReceived] = '\0';
+		requestContent[bytesReceived] = '\0';
+		write(1, requestContent, BUFFER_SIZE);
 	}
 
 	void TcpServer::sendResponse() {
-		m_serverMessage = "HTTP/1.1 200 OK\r\n"
-						  "Content-Type: text/plain\r\n"
-						  "Content-Length: 13\r\n"
-						  "Connection: close\r\n"
-						  "\r\n"
-						  "Hello, world!";
+
+		// Need to select which response will be sent
+
+		// m_serverMessage = "HTTP/1.1 200 OK\r\n"
+		// 				  "Content-Type: text/plain\r\n"
+		// 				  "Content-Length: 13\r\n"
+		// 				  "Connection: close\r\n"
+		// 				  "\r\n"
+		// 				  "Hello, world!";
 
 		ssize_t bytesSent = send(m_new_socket, m_serverMessage.c_str(),
 								 m_serverMessage.size(), 0);
@@ -119,6 +123,8 @@ namespace http {
 		try {
 			acceptConnection(m_new_socket);
 			readRequest();
+			std::string requestContent = "login.html";
+			validateRequest(requestContent);
 			sendResponse();
 
 		} catch (const TcpServerException &e) {
@@ -127,11 +133,10 @@ namespace http {
 		}
 		// }
 
+		shutDownServer();
 		// SOCKET client_socket;
 		// m_new_socket = client_socket;
 		// acceptConnection(client_socket);
-
-		close(m_new_socket);
 	}
 
 } // namespace http

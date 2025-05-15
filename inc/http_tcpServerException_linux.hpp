@@ -3,6 +3,7 @@
 #include "http_tcpServer_linux.hpp"
 #include <exception>
 #include <stdexcept>
+#include <unistd.h>
 
 namespace http {
 

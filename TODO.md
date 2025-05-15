@@ -3,14 +3,14 @@
 ## PHASE 1: Project Setup and Research
 
 -   [x] Read and understand project requirements (subject PDF)
--   [ ] Research HTTP/1.1 protocol (methods, headers, status codes)
--   [ ] Study socket programming (bind, listen, accept, recv, send)
+-   [...] Research HTTP/1.1 protocol (methods, headers, status codes)
+-   [...] Study socket programming (bind, listen, accept, recv, send)
 -   [x] Set up Makefile and project folder structure
 -   [x] Initialize Git and .gitignore
 
 ## PHASE 2: Core Structure
 
--   [ ] Implement basic TCP socket server
+-   [x] Implement basic TCP socket server
 -   [ ] Add support for multiple clients using select() or poll()
 -   [ ] Parse incoming HTTP requests (method, path, headers, body)
 -   [ ] Build and send proper HTTP responses

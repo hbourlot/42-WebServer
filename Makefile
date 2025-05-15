@@ -20,13 +20,13 @@ OBJ_DIR         = obj/
 COMPILED_FILES  = 0
 LEN             = 0
 # http_tcpServerException_linux
-C_FUNCTIONS     = http_tcpServer_linux server_linux
+C_FUNCTIONS     = http_tcpServer_linux validateRequest server_linux
 SRC_FILES       = $(addprefix $(SRC_DIR), $(C_FUNCTIONS:=.cpp))
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB             = libHttp_tcpServer_linux.a
 CXX             = c++
 CXXFLAGS        = -std=c++98
-NAME            = webServer
+NAME            = webserv
 TOTAL_FILES     = $(shell echo $$(($(words $(OBJS_SRC)))))
 VALGRIND        = valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
 MSG             = "[ $(COMPILED_FILES)/$(TOTAL_FILES) $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))%% ] $(ORANGE)Compiling [$1]... $(RESET)"
