@@ -10,7 +10,7 @@
 #define SERVER_NAME 3
 #define CLIENT_MAX_BDY 4
 #define ERROR_PAGE 5
-#define ROUTE 6
+#define LOCATION 6
 
 #define METHODS 7
 #define ROOT 8
@@ -37,7 +37,7 @@ std::string	getInfo(std::string& noSpaceLine){
 	return noSpaceLine.substr(i, noSpaceLine.find(';') - i); // '- i' I have to discard the 'i' size
 }
 
-std::string routePath(std::string& line){
+std::string locationPath(std::string& line){
 	int i;
 	
 	for (i = 0; line[i] && line[i] == ' '; i++) //Skip the spaces
@@ -50,14 +50,14 @@ std::string routePath(std::string& line){
 	return line.substr(i,j + 1); // Return the path
 }
 
-void	getMethods(std::string trimedLine, std::vector<std::string>& methods){ // Function to get the route methods
+void	getMethods(std::string trimedLine, std::vector<std::string>& methods){ // Function to get the Location methods
 	while (trimedLine.find(' ') != std::string::npos){ // Loops until has no more spaces
 		trimedLine = trimedLine.substr(0, trimedLine.find(' ')); // Gets the method
 		methods.push_back(trimedLine); // Push the method to the vector
 	}
 }
 
-int		getTypeRoute(std::string& trimedLine){ // Function to check the information to set
+int		getTypeLocation(std::string& trimedLine){ // Function to check the information to set
 	if (trimedLine == "methods")
 		return METHODS;
 	if (trimedLine == "root")
@@ -66,12 +66,12 @@ int		getTypeRoute(std::string& trimedLine){ // Function to check the information
 	return 10;
 }
 
-bool	ReadConfig::setRouteConfig(std::ifstream& confFd, std::string line, Server& server){
+bool	ReadConfig::setLocationConfig(std::ifstream& confFd, std::string line, Server& server){
 	std::string noSpaceLine; // Gets the string without the initial spaces	
-	std::string trimedLine; // Stores the atribute of the route
-	Route route;
+	std::string trimedLine; // Stores the atribute of the Location
+	Location location;
 
-	route.path = routePath(line); // Sets the route path
+	location.path = locationPath(line); // Sets the Location path
 
 	while (std::getline(confFd, line)){
 		noSpaceLine = removeSpace(line);
@@ -80,31 +80,40 @@ bool	ReadConfig::setRouteConfig(std::ifstream& confFd, std::string line, Server&
 		if (trimedLine[0] == '}')
 			break;
 		
-		switch(getTypeRoute(trimedLine)){
+		switch(getTypeLocation(trimedLine)){
 			case METHODS:
-				getMethods(trimedLine, route.methods);
+				getMethods(trimedLine, location.methods);
 				break;
 			case ROOT:
-				route.root = getInfo(noSpaceLine);
+				location.root = getInfo(noSpaceLine);
 				break;
 			default:
 				break;
 
 		}
 	}
-	(void)noSpaceLine;
-	(void)trimedLine;
-	(void)route;
-	(void)confFd;
-	(void)server;
-	server.routes.push_back(route);
+	server.locations.push_back(location);
 	return true;
 }
 
 void 	getErrorPage(std::string noSpaceLine, Server& server){
-	int i = 0;
-	
-	while (server.errorPage.inser) // <------------ FIQUEI AQUI 
+	std::istringstream iss(noSpaceLine);
+    std::string directive;
+    std::string code;
+    std::string path;
+
+    iss >> directive >> code >> path;
+
+	for (int i = 0; code[i]; i++){ // Checks if the code has only numbers
+		if (!isdigit(code[i]))
+			throw std::invalid_argument("Error: Route code is invalid\n");
+	}
+
+    if (!path.empty() && path[path.size() - 1] == ';') // Removes the ';'
+        path.erase(path.size() - 1);
+
+	server.errorPage.insert(std::pair<int, std::string>(std::atoi(code.c_str()), path));
+
 }
 
 int		getTypeServer(std::string& trimedLine){ // Return the type of information to use on switch
@@ -118,8 +127,8 @@ int		getTypeServer(std::string& trimedLine){ // Return the type of information t
 		return CLIENT_MAX_BDY;
 	else if (trimedLine == "error_page")
 		return ERROR_PAGE;
-	else if (trimedLine == "route")
-		return ROUTE;
+	else if (trimedLine == "location")
+		return LOCATION;
 	return 7;
 }
 
@@ -158,8 +167,8 @@ bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Confi
 				getErrorPage(noSpaceLine, server);
 				break;
 			
-			case ROUTE:
-				setRouteConfig(confFd, noSpaceLine.substr(noSpaceLine.find(' ')), server);
+			case LOCATION:
+				setLocationConfig(confFd, noSpaceLine.substr(noSpaceLine.find(' ')), server);
 				break;
 
 			default:
