@@ -50,10 +50,15 @@ std::string locationPath(std::string& line){
 	return line.substr(i,j + 1); // Return the path
 }
 
-void	getMethods(std::string trimedLine, std::vector<std::string>& methods){ // Function to get the Location methods
-	while (trimedLine.find(' ') != std::string::npos){ // Loops until has no more spaces
-		trimedLine = trimedLine.substr(0, trimedLine.find(' ')); // Gets the method
-		methods.push_back(trimedLine); // Push the method to the vector
+void	getMethods(std::string noSpaceLine, std::vector<std::string>& methods){ // Function to get the Location methods
+	std::istringstream iss(noSpaceLine);
+    std::string method;
+	
+	iss >> method; // Skip the method word
+	while (iss >> method){ // Saves the new method
+		if (!method.empty() && method[method.size() - 1] == ';')
+    		method.erase(method.size() - 1);
+		methods.push_back(method); // Send it for the method variable
 	}
 }
 
@@ -82,7 +87,7 @@ bool	ReadConfig::setLocationConfig(std::ifstream& confFd, std::string line, Serv
 		
 		switch(getTypeLocation(trimedLine)){
 			case METHODS:
-				getMethods(trimedLine, location.methods);
+				getMethods(noSpaceLine, location.methods);
 				break;
 			case ROOT:
 				location.root = getInfo(noSpaceLine);

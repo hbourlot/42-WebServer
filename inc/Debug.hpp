@@ -24,6 +24,14 @@ void printConfigs(Configs& config){
 			std::cout << "Code: " << ep_it->first << " | Path: " << ep_it->second << std::endl;
 		}
 
+		for (std::vector<Location>::iterator itl = it->locations.begin(); itl != it->locations.end(); ++itl) {
+			std::cout << "  Location Path: " << itl->path << std::endl;
+			std::cout << "  Root: " << itl->root << std::endl;
+			std::cout << "  Methods: ";
+			for (int i = 0; itl->methods.size() > i; i++)
+				std::cout << itl->methods[i] << " ";
+			std::cout << "\n\n";
+		}
 		// for (std::vector<int, std::string>::iterator it3 = it->errorPage.begin(); it3 != (*it)->errorPage.end(); it++)
 
 		

@@ -6,3 +6,5 @@ CONFIG:
 --> Check if the lines are OK
 --> Check the requirements for configs
 --> Check the parameters for ROUTES
+--> Check the root paths if they exist ???
+--> Double methods and invalid methods
