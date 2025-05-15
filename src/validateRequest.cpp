@@ -8,7 +8,7 @@ namespace http {
 	bool TcpServer::validateRequest(const std::string &requestPath) {
 
 		std::string fullPath = "./content/" + requestPath;
-		std::ifstream htmlFile(fullPath);
+		std::ifstream htmlFile(fullPath.c_str());
 		if (!htmlFile.is_open()) {
 			log("Error: could not open HTML file");
 			log("HTTP/1.1 500 Internal Server Error\r\n"
