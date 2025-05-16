@@ -1,9 +1,6 @@
 #include "ReadConfig.hpp"
-#include <fstream>
+#include "SetLocations.hpp"
 #include <string>
-#include <sstream>
-#include <iostream>
-#include <cstdlib>
 
 #define HOST 1
 #define PORT 2
@@ -11,95 +8,6 @@
 #define CLIENT_MAX_BDY 4
 #define ERROR_PAGE 5
 #define LOCATION 6
-
-#define METHODS 7
-#define ROOT 8
-
-std::string removeSpace(std::string& line){
-	int i = 0;
-
-	for (i = 0; line[i] && line[i] == ' '; i++){ // Runs all spaces and return the string without the first spaces
-		continue;
-	}
-
-	return line.substr(i);
-}
-
-std::string	getInfo(std::string& noSpaceLine){
-	int i;
-
-	for (i = noSpaceLine.find(' '); noSpaceLine[i] == ' '; i++) // This will remove extra spaces after attribute ex: "port      8080"
-		continue;
-
-	if (noSpaceLine.find(';') == std::string::npos) // If don't find the ';' throw an error
-		throw std::invalid_argument("Error: Invalid end of line, missing ';' at the end\n");
-	
-	return noSpaceLine.substr(i, noSpaceLine.find(';') - i); // '- i' I have to discard the 'i' size
-}
-
-std::string locationPath(std::string& line){
-	int i;
-	
-	for (i = 0; line[i] && line[i] == ' '; i++) //Skip the spaces
-		continue;
-	
-	int j;
-	for (j = 0; line[j] && line[j] != ' ' && line[j] != '{'; j++) // Gets the path size
-		continue;
-
-	return line.substr(i,j + 1); // Return the path
-}
-
-void	getMethods(std::string noSpaceLine, std::vector<std::string>& methods){ // Function to get the Location methods
-	std::istringstream iss(noSpaceLine);
-    std::string method;
-	
-	iss >> method; // Skip the method word
-	while (iss >> method){ // Saves the new method
-		if (!method.empty() && method[method.size() - 1] == ';')
-    		method.erase(method.size() - 1);
-		methods.push_back(method); // Send it for the method variable
-	}
-}
-
-int		getTypeLocation(std::string& trimedLine){ // Function to check the information to set
-	if (trimedLine == "methods")
-		return METHODS;
-	if (trimedLine == "root")
-		return ROOT;
-
-	return 10;
-}
-
-bool	ReadConfig::setLocationConfig(std::ifstream& confFd, std::string line, Server& server){
-	std::string noSpaceLine; // Gets the string without the initial spaces	
-	std::string trimedLine; // Stores the atribute of the Location
-	Location location;
-
-	location.path = locationPath(line); // Sets the Location path
-
-	while (std::getline(confFd, line)){
-		noSpaceLine = removeSpace(line);
-		trimedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
-
-		if (trimedLine[0] == '}')
-			break;
-		
-		switch(getTypeLocation(trimedLine)){
-			case METHODS:
-				getMethods(noSpaceLine, location.methods);
-				break;
-			case ROOT:
-				location.root = getInfo(noSpaceLine);
-				break;
-			default:
-				break;
-
-		}
-	}
-	server.locations.push_back(location);
-	return true;
-}
 
 void 	getErrorPage(std::string noSpaceLine, Server& server){
 	std::istringstream iss(noSpaceLine);
@@ -173,7 +81,7 @@ bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Confi
 				break;
 			
 			case LOCATION:
-				setLocationConfig(confFd, noSpaceLine.substr(noSpaceLine.find(' ')), server);
+				SetLocation::setLocationConfig(confFd, noSpaceLine.substr(noSpaceLine.find(' ')), server);
 				break;
 
 			default:
