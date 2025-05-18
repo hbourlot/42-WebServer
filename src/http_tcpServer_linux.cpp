@@ -93,7 +93,6 @@ namespace http {
 				"Failed to read bytes from client socket connection");
 		}
 		buffer[bytesReceived] = '\0';
-		// write(1, buffer, BUFFER_SIZE);
 		std::string resquestContent(buffer);
 		parseRequest(resquestContent);
 	}
@@ -118,27 +117,11 @@ namespace http {
 
 		std::string body;
 		while(std::getline(request_stream, line))
-		{
 			body += line + "\n";
-		}
 		request.body = body;
-		// std::cout << request.method << " " << request.path << " [" << request.protocol << "]\n";
-		// std::cout << "Content-Type: " << request.headers["Content-Type"] << "\n";
-
 	}
 	
-	// std::cout << request.method << std::endl << request.path << std::endl << request.protocol<< std::endl;
 	void TcpServer::sendResponse() {
-
-		// Need to select which response will be sent
-
-		// m_serverMessage = "HTTP/1.1 200 OK\r\n"
-		// 				  "Content-Type: text/plain\r\n"
-		// 				  "Content-Length: 13\r\n"
-		// 				  "Connection: close\r\n"
-		// 				  "\r\n"
-		// 				  "Hello, world!";
-
 		ssize_t bytesSent = send(m_new_socket, m_serverMessage.c_str(),
 								 m_serverMessage.size(), 0);
 		if (bytesSent < 0) {
@@ -158,11 +141,10 @@ namespace http {
 			return;
 		}
 
-		// while (true) {
+		while (true) {
 		try {
 			acceptConnection(m_new_socket);
 			readRequest();
-			// std::string requestContent = "login.html";
 			validateRequest();
 			sendResponse();
 
@@ -170,7 +152,7 @@ namespace http {
 			std::cerr << "Error handling client connection => " << e.what()
 					  << std::endl;
 		}
-		// }
+		}
 
 		shutDownServer();
 		// SOCKET client_socket;
