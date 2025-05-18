@@ -66,7 +66,6 @@ namespace http {
 			bool validateGet();
 			void setResponseError(std::string statusCode, std::string statusMsg);
 			void sendResponse();
-			// bool validateRequest(const std::string &requestPath);
 	};
 
 } // namespace http
