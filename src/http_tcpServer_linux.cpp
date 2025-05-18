@@ -7,7 +7,7 @@ namespace http {
 		  m_incomingMessage(), m_socketAddress(),
 		  m_socketAddress_len(sizeof(m_socketAddress)),
 		  m_serverMessage("") { // Initialize m_serverMessage properly
-		this->startServer();
+			this->startServer();
 	}
 
 	TcpServer::~TcpServer() {
@@ -24,6 +24,13 @@ namespace http {
 		if (m_socket < 0) {
 			throw TcpServerException("Cannot create socket");
 			return 1;
+		}
+		//For inactivate the time wait from OS that block bind again
+		int opt = 1;
+		if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        // perror("setsockopt failed");
+        close(m_socket);
+        exit(EXIT_FAILURE);
 		}
 
 		// Set the socket address struct
@@ -78,17 +85,49 @@ namespace http {
 	}
 
 	void TcpServer::readRequest() {
-		char requestContent[BUFFER_SIZE] = {0};
+		char buffer[BUFFER_SIZE] = {0};
 
-		bytesReceived = read(m_new_socket, requestContent, BUFFER_SIZE - 1);
+		bytesReceived = read(m_new_socket, buffer, BUFFER_SIZE - 1);
 		if (bytesReceived < 0) {
 			throw TcpServerException(
 				"Failed to read bytes from client socket connection");
 		}
-		requestContent[bytesReceived] = '\0';
-		write(1, requestContent, BUFFER_SIZE);
+		buffer[bytesReceived] = '\0';
+		// write(1, buffer, BUFFER_SIZE);
+		std::string resquestContent(buffer);
+		parseRequest(resquestContent);
 	}
 
+	void TcpServer::parseRequest(std::string requestContent){
+		std::istringstream request_stream(requestContent);
+		std::string line;
+		size_t idx;
+		request_stream >> request.method >> request.path >> request.protocol; //
+		while(std::getline(request_stream, line))
+		{
+			idx = line.find(":");
+			if(idx != std::string::npos)
+			{
+				std::string key = line.substr(0,idx);
+				std::string value = line.substr(idx + 1);
+				key.erase(key.find_first_not_of(" \t\r\n")+1);
+				value.erase(0, value.find_first_not_of(" \t\r\n"));
+				request.headers[key] = value;
+			}
+		}
+
+		std::string body;
+		while(std::getline(request_stream, line))
+		{
+			body += line + "\n";
+		}
+		request.body = body;
+		// std::cout << request.method << " " << request.path << " [" << request.protocol << "]\n";
+		// std::cout << "Content-Type: " << request.headers["Content-Type"] << "\n";
+
+	}
+	
+	// std::cout << request.method << std::endl << request.path << std::endl << request.protocol<< std::endl;
 	void TcpServer::sendResponse() {
 
 		// Need to select which response will be sent
@@ -123,8 +162,8 @@ namespace http {
 		try {
 			acceptConnection(m_new_socket);
 			readRequest();
-			std::string requestContent = "login.html";
-			validateRequest(requestContent);
+			// std::string requestContent = "login.html";
+			validateRequest();
 			sendResponse();
 
 		} catch (const TcpServerException &e) {
