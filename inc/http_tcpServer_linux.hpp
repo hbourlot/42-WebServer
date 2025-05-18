@@ -9,6 +9,18 @@
 #include <string>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <map>
+
+
+
+struct httpRequest
+{
+	std::string method;
+	std:: string path;
+	std::string protocol;
+	std::map<std::string, std::string>  headers;
+	std::string body;
+};
 
 namespace {
 
@@ -36,6 +48,7 @@ namespace http {
 
 		private:
 			// MAYBE YOU STRUCT HERE?? 😇
+			httpRequest request;
 			std::string m_ip_address;
 			int m_port, m_socket, m_new_socket, bytesReceived, bytesSend;
 			long m_incomingMessage;
@@ -48,8 +61,12 @@ namespace http {
 			void startListen();
 			void acceptConnection(SOCKET &new_socket);
 			void readRequest();
+			void parseRequest(std::string requestContent);
+			bool validateRequest();
+			bool validateGet();
+			void setResponseError(std::string statusCode, std::string statusMsg);
 			void sendResponse();
-			bool validateRequest(const std::string &requestPath);
+			// bool validateRequest(const std::string &requestPath);
 	};
 
 } // namespace http
