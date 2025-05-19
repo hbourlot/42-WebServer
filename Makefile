@@ -29,7 +29,8 @@ CXXFLAGS        = -std=c++98
 NAME            = webserv
 TOTAL_FILES     = $(shell echo $$(($(words $(OBJS_SRC)))))
 VALGRIND        = valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
-MSG             = "[ $(COMPILED_FILES)/$(TOTAL_FILES) $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))%% ] $(ORANGE)Compiling [$1]... $(RESET)"
+# MSG             = "[ $(COMPILED_FILES)/$(TOTAL_FILES) $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))%% ] $(ORANGE)Compiling [$1]... $(RESET)"
+MSG 			= "$(CYAN) => ($(COMPILED_FILES)/$(TOTAL_FILES) $(PERCENT)%%) 🔧 Compiling [$1]...$(RESET)"
 
 # -- Function to print the compilation message
 define print_compile_msg
@@ -37,7 +38,7 @@ define print_compile_msg
 	$(eval PERCENT = $(shell echo $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))))
 	$(eval LEN = $(shell echo -n $(MSG) | wc -c))
 	@$(PRINT_CMD) "$$(printf '%*s\r' $(LEN) '')"
-	@$(PRINT_CMD) "$(CYAN) => ($(PERCENT)%%) 🔧 Compiling [$1]...$(RESET)"
+	@$(PRINT_CMD) $(MSG)
 	@if [ $(COMPILED_FILES) -ne $(TOTAL_FILES) ]; then \
 		$(PRINT_CMD) "\r" $(CUT) \
 		$(PRINT_CMD) $(UP) $(CUT); \
