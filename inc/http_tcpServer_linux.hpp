@@ -4,22 +4,19 @@
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <iostream>
+#include <map>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <map>
 
-
-
-struct httpRequest
-{
-	std::string method;
-	std:: string path;
-	std::string protocol;
-	std::map<std::string, std::string>  headers;
-	std::string body;
+struct httpRequest {
+		std::string method;
+		std::string path;
+		std::string protocol;
+		std::map<std::string, std::string> headers;
+		std::string body;
 };
 
 namespace {
@@ -42,7 +39,9 @@ namespace http {
 
 	class TcpServer {
 		public:
+			// Default Constructor
 			TcpServer(std::string ip_address, int port);
+			// Default Destructor
 			~TcpServer();
 			void runServer();
 
@@ -61,10 +60,10 @@ namespace http {
 			void startListen();
 			void acceptConnection(SOCKET &new_socket);
 			void readRequest();
-			void parseRequest(std::string requestContent);
 			bool validateRequestMethod();
 			bool validateGet();
-			void setResponseError(std::string statusCode, std::string statusMsg);
+			void setResponseError(std::string statusCode,
+								  std::string statusMsg);
 			void setHtmlResponse(std::ifstream &htmlFile);
 			void sendResponse();
 	};

@@ -7,7 +7,7 @@ namespace http {
 		  m_incomingMessage(), m_socketAddress(),
 		  m_socketAddress_len(sizeof(m_socketAddress)),
 		  m_serverMessage("") { // Initialize m_serverMessage properly
-			this->startServer();
+		this->startServer();
 	}
 
 	TcpServer::~TcpServer() {
@@ -18,19 +18,19 @@ namespace http {
 
 	int TcpServer::startServer() {
 
-		// 							domain, type, protocol
-		// Creates a server socket (IPv4, TCP, 0);
+		// Creates a server socket (IPv4, TCP, 0) (domain, type, protocol);
 		m_socket = socket(AF_INET, SOCK_STREAM, 0);
 		if (m_socket < 0) {
 			throw TcpServerException("Cannot create socket");
 			return 1;
 		}
-		//For inactivate the time wait from OS that block bind again
+		// For inactivate the time wait from OS that block bind again
 		int opt = 1;
-		if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-        // perror("setsockopt failed");
-        close(m_socket);
-        exit(EXIT_FAILURE);
+		if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) <
+			0) {
+			log("setsockopt failed");
+			close(m_socket);
+			exit(EXIT_FAILURE);
 		}
 
 		// Set the socket address struct
@@ -95,18 +95,18 @@ namespace http {
 		}
 
 		while (true) {
-		try {
-			acceptConnection(m_new_socket);
-			readRequest();
-			validateRequestMethod();
-			sendResponse();
+			try {
+				acceptConnection(m_new_socket);
+				readRequest();
+				validateRequestMethod();
+				sendResponse();
 
-		} catch (const TcpServerException &e) {
-			std::cerr << "Error handling client connection => " << e.what()
-					  << std::endl;
+			} catch (const TcpServerException &e) {
+				std::cerr << "Error handling client connection => " << e.what()
+						  << std::endl;
+			}
 		}
-		}
-		
+
 		shutDownServer();
 		// SOCKET client_socket;
 		// m_new_socket = client_socket;
