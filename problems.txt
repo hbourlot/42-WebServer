@@ -8,7 +8,9 @@ CONFIG:
 --> Check the parameters for ROUTES
 --> Check the root paths if they exist ???
 --> Double methods and invalid methods
-
+--> If client attempts to upload a file or send data larger than "clien_max_body_size", than Nginx will return a 413 Request Entity Too Large error
+--> Check for missing information at CGI, for example, no cgi_path, but have cgi_extensions
+--> Duplicate extensions and duplicate paths for the CGI. Example .py .py -- /bin/python /bin/HTML 
 
 NOTES:
 --> We can have more than one index, and the server will serve us the first one

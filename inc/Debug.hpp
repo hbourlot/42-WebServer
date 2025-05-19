@@ -25,11 +25,19 @@ void printConfigs(Configs& config){
 		}
 
 		for (std::vector<Location>::iterator itl = it->locations.begin(); itl != it->locations.end(); ++itl) {
-			std::cout << "  Location Path: " << itl->path << std::endl;
+			std::cout << "  Location Path: " << itl->path << "|" << std::endl;
 			std::cout << "  Root: " << itl->root << std::endl;
+			std::cout << "  Redirection: " << itl->redirection << std::endl;
 			std::cout << "  Methods: ";
 			for (int i = 0; itl->methods.size() > i; i++)
 				std::cout << itl->methods[i] << " ";
+			
+			if (!itl->cgi.empty()){
+				std::cout << "      CGI INFORMATION: " << std::endl;
+				for (std::map<std::string, std::string>::iterator itm = itl->cgi.begin(); itm != itl->cgi.end(); itm++){
+					std::cout << "               Extension: " << itm->first << " | Paths: " << itm->second << std::endl;
+				}
+			}
 			std::cout << "\n\n";
 		}
 		// for (std::vector<int, std::string>::iterator it3 = it->errorPage.begin(); it3 != (*it)->errorPage.end(); it++)
