@@ -35,10 +35,8 @@ namespace http {
 
 		// Set the socket address struct
 		m_socketAddress.sin_family = AF_INET;
-		m_socketAddress.sin_addr.s_addr =
-			INADDR_ANY; // can replace this with a specific IP address if needed
-		m_socketAddress.sin_port =
-			htons(m_port); // Converts 16-bit integer in host byte order
+		m_socketAddress.sin_addr.s_addr = INADDR_ANY; // can replace this with a specific IP address if needed
+		m_socketAddress.sin_port = htons(m_port); // Converts 16-bit integer in host byte order
 
 		// Associate socket with a specific IP addr and Port number (sockfd,
 		// sockaddr *, addrlen)
@@ -79,9 +77,8 @@ namespace http {
 			   << inet_ntoa(m_socketAddress.sin_addr) << "]\n"
 			   << "[PORT: " << ntohs(m_socketAddress.sin_port) << "]\n";
 			throw TcpServerException(ss.str());
-		} else {
+		} else 
 			std::cout << "----- Connection Accepted 🟩" << std::endl;
-		}
 	}
 
 	void TcpServer::runServer() {
