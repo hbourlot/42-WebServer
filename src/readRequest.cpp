@@ -23,19 +23,15 @@ static void parseRequest(httpRequest &request,
 	request.body = body;
 }
 
-namespace http {
+void http::TcpServer::readRequest() {
+	char buffer[BUFFER_SIZE] = {0};
 
-	void TcpServer::readRequest() {
-		char buffer[BUFFER_SIZE] = {0};
-
-		bytesReceived = read(m_new_socket, buffer, BUFFER_SIZE - 1);
-		if (bytesReceived < 0) {
-			throw TcpServerException(
-				"Failed to read bytes from client socket connection");
-		}
-		buffer[bytesReceived] = '\0';
-		std::string requestContent(buffer);
-		parseRequest(request, requestContent);
+	bytesReceived = read(m_new_socket, buffer, BUFFER_SIZE - 1);
+	if (bytesReceived < 0) {
+		throw TcpServerException(
+			"Failed to read bytes from client socket connection");
 	}
-
-} // namespace http
+	buffer[bytesReceived] = '\0';
+	std::string requestContent(buffer);
+	parseRequest(request, requestContent);
+}
