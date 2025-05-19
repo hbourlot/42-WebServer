@@ -9,9 +9,13 @@
 #include <cstdlib>
 
 struct Location{
-	std::string					path;
-	std::vector<std::string>	methods;
-    std::string                 root;
+	std::string							path;
+	std::vector<std::string>			methods;
+    std::string                 		root;
+	std::string							redirection;
+	std::vector<std::string>			cgi_extension;
+	std::vector<std::string>			cgi_path;
+	std::map<std::string, std::string> 	cgi;
 };
 
 struct Server{
