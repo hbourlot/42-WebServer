@@ -6,18 +6,27 @@
 namespace http {
 
 bool TcpServer::validateGet() {
-  std::cout << request.path << std::endl;
   if (request.path == "/")
     request.path = "login.html";
-  std::cout << request.path << std::endl;
+  // std::cout << request.path << std::endl;
   std::string fullPath = "./content/" + request.path;
   std::ifstream htmlFile(fullPath.c_str());
+  std::ifstream errorFile("./content/error_404.html");
   if (!htmlFile.is_open()) {
-    setResponseError("404", "Not Found");
+    if(!errorFile.is_open())
+      setResponseError("404", "Not Found");
+  setHtmlResponse("404","Not Found", errorFile);
     return false; // TODO: throw error would be better
   }
-  setHtmlResponse(htmlFile);
+  setHtmlResponse("200","OK",htmlFile);
   return (true);
+}
+
+bool TcpServer::validatePost()
+{
+  std::cout << request.method << " " << request.path << " " << request.protocol << std::endl;
+  std::cout << request.body << std::endl;
+  return(true);
 }
 
 bool TcpServer::validateRequestMethod() {
@@ -26,7 +35,10 @@ bool TcpServer::validateRequestMethod() {
       return (false);
     }
   } else if (request.method == "POST")
+  {
     std::cout << "Suposed to do something" << std::endl;
+    validatePost();
+  }
   else if (request.method == "DELETE")
     std::cout << "Suposed to do something" << std::endl;
   else {

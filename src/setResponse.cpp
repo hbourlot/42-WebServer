@@ -18,7 +18,25 @@ void TcpServer::setResponseError(std::string statusCode, std::string statusMsg) 
   log(response.str());
 }
 
-void TcpServer::setHtmlResponse(std::ifstream &htmlFile) {
+// void TcpServer::setHtmlResponse(std::ifstream &htmlFile) {
+//   // Read the HTML file into a string
+//   std::ostringstream buffer;
+//   buffer << htmlFile.rdbuf();
+//   std::string fileContent = buffer.str();
+//   htmlFile.close();
+
+//   std::ostringstream response;
+//   response << "HTTP/1.1 200 OK\r\n"
+//            << "Content-type: text/html\r\n"
+//            << "Content-Length: " << fileContent.size() << "\r\n"
+//            << "Connection: close\r\n"
+//            << "\r\n"
+//            << fileContent;
+
+//   m_serverMessage = response.str();
+// }
+
+void TcpServer::setHtmlResponse(std::string statusCode, std::string statusMsg ,std::ifstream &htmlFile) {
   // Read the HTML file into a string
   std::ostringstream buffer;
   buffer << htmlFile.rdbuf();
@@ -26,7 +44,7 @@ void TcpServer::setHtmlResponse(std::ifstream &htmlFile) {
   htmlFile.close();
 
   std::ostringstream response;
-  response << "HTTP/1.1 200 OK\r\n"
+  response << "HTTP/1.1 " << statusCode << " " << statusMsg << "\r\n"
            << "Content-type: text/html\r\n"
            << "Content-Length: " << fileContent.size() << "\r\n"
            << "Connection: close\r\n"

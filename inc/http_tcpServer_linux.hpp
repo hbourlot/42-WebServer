@@ -64,8 +64,11 @@ namespace http {
 			void parseRequest(std::string requestContent);
 			bool validateRequestMethod();
 			bool validateGet();
+			bool validatePost();
+
 			void setResponseError(std::string statusCode, std::string statusMsg);
-			void setHtmlResponse(std::ifstream &htmlFile);
+			// void setHtmlResponse(std::ifstream &htmlFile);
+			void setHtmlResponse(std::string statusCode, std::string statusMsg ,std::ifstream &htmlFile);
 			void sendResponse();
 	};
 
