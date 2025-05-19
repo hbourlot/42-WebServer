@@ -3,13 +3,17 @@
 #include "http_tcpServerException_linux.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
+#include <fcntl.h>
 #include <iostream>
 #include <map>
 #include <ostream>
+#include <poll.h>
 #include <sstream>
 #include <string>
+#include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <vector>
 
 struct httpRequest {
 		std::string method;
@@ -28,6 +32,10 @@ namespace {
 	void exitWithError(const std::string &errorMessage) {
 		log("ERROR: " + errorMessage);
 		exit(1); // Use exit(1) to indicate an error
+	}
+
+	void logDebugger(const std::string &message) {
+		std::cout << "Debugger => " << message << std::endl;
 	}
 
 } // namespace

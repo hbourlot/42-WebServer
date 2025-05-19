@@ -1,4 +1,15 @@
 #include "http_tcpServer_linux.hpp"
+#include <netinet/in.h>
+#include <sys/socket.h>
+
+static void setSocketAddr(sockaddr_in &m_socketAddress, int domain, int s_addr,
+						  int m_port) {
+	m_socketAddress.sin_family = domain;
+	m_socketAddress.sin_addr.s_addr =
+		s_addr; // can replace this with a specific IP address if needed
+	m_socketAddress.sin_port =
+		htons(m_port); // Converts 16-bit integer in host byte order
+}
 
 namespace http {
 
@@ -20,11 +31,7 @@ namespace http {
 		}
 
 		// Set the socket address struct
-		m_socketAddress.sin_family = AF_INET;
-		m_socketAddress.sin_addr.s_addr =
-			INADDR_ANY; // can replace this with a specific IP address if needed
-		m_socketAddress.sin_port =
-			htons(m_port); // Converts 16-bit integer in host byte order
+		setSocketAddr(m_socketAddress, AF_INET, INADDR_ANY, m_port);
 
 		// Associate socket with a specific IP addr and Port number (sockfd,
 		// sockaddr *, addrlen)
