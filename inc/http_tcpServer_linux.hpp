@@ -62,9 +62,10 @@ namespace http {
 			void acceptConnection(SOCKET &new_socket);
 			void readRequest();
 			void parseRequest(std::string requestContent);
-			bool validateRequest();
+			bool validateRequestMethod();
 			bool validateGet();
 			void setResponseError(std::string statusCode, std::string statusMsg);
+			void setHtmlResponse(std::ifstream &htmlFile);
 			void sendResponse();
 	};
 
