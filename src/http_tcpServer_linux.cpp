@@ -84,10 +84,6 @@ namespace http {
 		}
 	}
 
-
-	
-
-
 	void TcpServer::runServer() {
 
 		try {
@@ -110,7 +106,7 @@ namespace http {
 					  << std::endl;
 		}
 		}
-
+		
 		shutDownServer();
 		// SOCKET client_socket;
 		// m_new_socket = client_socket;
