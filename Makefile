@@ -82,7 +82,7 @@ $(NAME): $(LIB) $(HEADERS)
 
 $(LIB): $(OBJS_SRC)
 	@ar rcs $@ $(OBJS_SRC)
-	@echo "$(CYAN)library '$(YELLOW)$(LIB)$(CYAN)' created successfully!$(RESET)"
+	@echo "$(CYAN) library '$(YELLOW)$(LIB)$(CYAN)' created successfully!$(RESET)"
 
 $(OBJ_DIR)%.o: %.cpp $(HEADERS)
 	@mkdir -p $(dir $@)
