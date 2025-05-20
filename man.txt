@@ -323,3 +323,29 @@ Ficheiro apagado com sucesso.
 
     ⚠️ Em muitos servidores (e no teu webserv), precisas configurar permissões para permitir DELETE.
 
+////////////////////////////////////////////////////////
+
+Configuration file:
+
+--> Choose port and host (host | port)
+--> Server name (serverName)
+-->  The first server for a host:port will be the default for this host:port (meaning it will respond to all requests that do not belong to another server).
+        --> Se houver mais servidores sem server_name a ouvir da mesma port, o nome do server vai ser igual ao primeiro
+
+--> Set up default error pages;
+--> Max body size
+
+
+--> LOCATIONS <--
+
+--> Set accepted methods
+--> Define HTTP redirect
+--> Define a directory or file where the requested file should be located (e.g., if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is /tmp/www/pouic/toto/pouet)
+        --> Set up the root
+--> Enable or disable directory listing.
+        --> Autoindex (on | off)
+--> Set a default file to serve when the request is for a directory.
+        --> Directory in front of the location
+--> Execute CGI based on certain file extension (for example .php).
+        --> cgiExtension and cgiPath;
+
