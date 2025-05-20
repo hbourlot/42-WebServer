@@ -24,19 +24,19 @@ bool TcpServer::validateGet() {
 
 bool TcpServer::validatePost()
 {
-  std::cout << request.method << " " << request.path << " " << request.protocol << std::endl;
-  std::cout << request.body << std::endl;
+  if(request.path == "/login")
+    std::cout << request.body << std::endl;
+    
   return(true);
 }
 
 bool TcpServer::validateRequestMethod() {
   if (request.method == "GET") {
-    if (validateGet() == false) {
+    if (validateGet() == false)
       return (false);
-    }
   } else if (request.method == "POST")
   {
-    std::cout << "Suposed to do something" << std::endl;
+    // std::cout << "Suposed to do something" << std::endl;
     validatePost();
   }
   else if (request.method == "DELETE")
