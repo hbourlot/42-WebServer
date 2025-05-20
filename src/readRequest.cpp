@@ -5,8 +5,13 @@ static void parseRequest(httpRequest &request,
 	std::istringstream request_stream(requestContent);
 	std::string line;
 	size_t idx;
-	request_stream >> request.method >> request.path >> request.protocol; //
+  std::getline(request_stream, line);
+	std::istringstream first_line(line);
+  
+	first_line >> request.method >> request.path >> request.protocol;
 	while (std::getline(request_stream, line)) {
+    if (line == "\r" || line == "" || line == "\n") 
+			break;
 		idx = line.find(":");
 		if (idx != std::string::npos) {
 			std::string key = line.substr(0, idx);
@@ -35,3 +40,4 @@ void http::TcpServer::readRequest() {
 	std::string requestContent(buffer);
 	parseRequest(request, requestContent);
 }
+
