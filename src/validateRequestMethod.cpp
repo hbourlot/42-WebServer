@@ -47,5 +47,4 @@ bool TcpServer::validateRequestMethod() {
   }
   return true;
 }
-
-} // namespace http
+}
