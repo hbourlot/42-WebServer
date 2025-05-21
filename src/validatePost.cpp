@@ -45,7 +45,6 @@ bool TcpServer::validateForm()
       return(false);
     }
   else if(request.headers["Content-Type"] == "application/json"){
-
     std::cout << "json form" << std::endl;
     std::ifstream errorFile("./content/error_401.html");
     if(setHtmlResponse("401", "Unauthorized", errorFile) == false)
