@@ -11,15 +11,9 @@ bool TcpServer::validateGet() {
   // std::cout << request.path << std::endl;
   std::string fullPath = "./content/" + request.path;
   std::ifstream htmlFile(fullPath.c_str());
-  std::ifstream errorFile("./content/error_404.html");
-  if (!htmlFile.is_open()) {
-    if (!errorFile.is_open())
-      setResponseError("404", "Not Found");
-    setHtmlResponse("404", "Not Found", errorFile);
+  if(setHtmlResponse("200", "OK", htmlFile) == false)
     return false; // TODO: throw error would be better
-  }
-  setHtmlResponse("200", "OK", htmlFile);
-  return (true);
+  return(true);
 }
 
 bool TcpServer::validateRequestMethod() {
@@ -27,7 +21,6 @@ bool TcpServer::validateRequestMethod() {
     if (validateGet() == false)
       return (false);
   } else if (request.method == "POST") {
-    // std::cout << "Suposed to do something" << std::endl;
     validatePost();
   } else if (request.method == "DELETE")
     std::cout << "Suposed to do something" << std::endl;
