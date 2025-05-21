@@ -5,7 +5,7 @@ PARSING PROBLEMS
 CONFIG:
 
 --> ERROR PAGE: check the first parameter if it is only numbers and check the path ✅
---> Check if the lines are OK ❌
+--> Check if the lines are OK ✅
 --> Check the requirements for configs ❌
 --> Check the parameters for ROUTES ✅
 --> Check the root paths if they exist ??? ❌
