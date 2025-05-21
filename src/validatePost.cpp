@@ -20,31 +20,47 @@ static std::map<std::string, std::string> parseForm(const std::string &body) {
   return (form);
 }
 
+bool TcpServer::formurldeconded()
+{
+  std::map<std::string, std::string> form = parseForm(request.body);
+  if (form["username"] == "admin" && form["password"] == "1234\n") {
+    std::ifstream htmlFile("./content/success.html");
+    if(setHtmlResponse("200", "OK", htmlFile) == false)
+      return(false);
+  } else {
+    std::ifstream errorFile("./content/error_401.html");
+    if(setHtmlResponse("401", "Unauthorized", errorFile) == false)
+      return false;
+  }
+  return(true);
+}
+
+bool TcpServer::validateForm()
+{
+  std::cout << request.headers["Content-Type"] << std::endl; 
+  if (request.headers["Content-Type"] ==
+    "application/x-www-form-urlencoded")
+    {
+      if(formurldeconded()== false)
+      return(false);
+    }
+  else if(request.headers["Content-Type"] == "application/json"){
+
+    std::cout << "json form" << std::endl;
+    std::ifstream errorFile("./content/error_401.html");
+    if(setHtmlResponse("401", "Unauthorized", errorFile) == false)
+    return(false); 
+  }
+  return(true);
+}
+
 bool TcpServer::validatePost() {
   if (request.path == "/login") {
-    if (request.headers["Content-Type"] ==
-        "application/x-www-form-urlencoded") {
-      std::map<std::string, std::string> form = parseForm(request.body);
-      if (form["username"] == "admin" && form["password"] == "1234\n") {
-        std::ifstream htmlFile("./content/success.html");
-        if (!htmlFile.is_open()) {
-          setResponseError("404", "Not Found");
-          return false;
-        }
-        setHtmlResponse("200", "OK", htmlFile);
-        return true;
-      } else {
-        std::ifstream errorFile("./content/error_401.html");
-        if (!errorFile.is_open()) {
-          setResponseError("401", "Unauthorized");
-          return false;
-        }
-        setHtmlResponse("401", "Unauthorized", errorFile);
-        return false;
-      }
-    }
+    std::cout << request.body << std::endl;
+    if(validateForm()== false)
+      return(false);
+    return(true);
   }
-
   setResponseError("404", "Not Found");
   return false;
 }

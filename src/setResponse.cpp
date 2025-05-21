@@ -19,7 +19,17 @@ namespace http {
 		log(response.str());
 	}
 
-void TcpServer::setHtmlResponse(std::string statusCode, std::string statusMsg ,std::ifstream &htmlFile) {
+bool TcpServer::setHtmlResponse(std::string statusCode, std::string statusMsg ,std::ifstream &htmlFile) {
+  
+  if(!htmlFile.is_open())
+  {
+    std::ifstream errorFile("./content/error_404.html");
+    if (!errorFile.is_open())
+      setResponseError("404", "Not Found");
+     else 
+    setHtmlResponse("404", "Not Found", errorFile);
+    return(false);
+  }
   // Read the HTML file into a string
   std::ostringstream buffer;
   buffer << htmlFile.rdbuf();
@@ -38,5 +48,6 @@ void TcpServer::setHtmlResponse(std::string statusCode, std::string statusMsg ,s
 
   std::string log_str = "HTTP/1.1 " + statusCode + " " + statusMsg + "\r\n";
   log(log_str);
+  return(true);
 	}
 } // namespace http
