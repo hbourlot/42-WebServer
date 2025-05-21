@@ -20,7 +20,10 @@ OBJ_DIR         = obj/
 # -- Variables
 COMPILED_FILES  = 0
 LEN             = 0
-C_FUNCTIONS     = http_tcpServer_linux validateRequestMethod validatePost readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer server_linux
+C_FUNCTIONS     = 	http_tcpServer_linux validateRequestMethod validatePost		\
+ 					readRequest sendResponse setResponse startServer startListen \
+					shutDownServer acceptConnection runServer server_linux \
+					lib/ft_strtrim
 SRC_FILES       = $(addprefix $(SRC_DIR), $(C_FUNCTIONS:=.cpp))
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB             = libHttp_tcpServer_linux.a

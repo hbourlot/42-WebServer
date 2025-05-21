@@ -35,7 +35,7 @@ void TcpServer::setHtmlResponse(std::string statusCode, std::string statusMsg ,s
   
   m_serverMessage = response.str();
   
- //Log string
+
   std::string log_str = "HTTP/1.1 " + statusCode + " " + statusMsg + "\r\n";
   log(log_str);
 	}
