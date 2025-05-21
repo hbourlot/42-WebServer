@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>Login Page</title>
+		<style>
+			body {
+				font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+				background: #eef1f5;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 100vh;
+				margin: 0;
+			}
+			.login-box {
+				background: #fff;
+				padding: 2rem;
+				border-radius: 12px;
+				box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+				width: 100%;
+				max-width: 360px;
+			}
+			.login-box h2 {
+				margin-bottom: 1.5rem;
+				text-align: center;
+				color: #333;
+			}
+			.login-box input[type="text"],
+			.login-box input[type="password"] {
+				width: 100%;
+				padding: 0.75rem;
+				margin-bottom: 1rem;
+				border: 1px solid #ccc;
+				border-radius: 8px;
+			}
+			.login-box .options {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				font-size: 0.9rem;
+			}
+			.login-box .options label {
+				display: flex;
+				align-items: center;
+				gap: 5px;
+			}
+			.login-box .options a {
+				color: #007bff;
+				text-decoration: none;
+			}
+			.login-box .options a:hover {
+				text-decoration: underline;
+			}
+			.login-box button {
+				width: 100%;
+				padding: 0.75rem;
+				background: #007bff;
+				color: #fff;
+				border: none;
+				border-radius: 8px;
+				font-size: 1rem;
+				margin-top: 1rem;
+				cursor: pointer;
+			}
+			.login-box button:hover {
+				background: #0056b3;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="login-box">
+			<h2>Login</h2>
+			<form
+				action="/login"
+				method="POST"
+			>
+				<input
+					type="text"
+					name="username"
+					placeholder="Username"
+					required
+				/>
+				<input
+					type="password"
+					name="password"
+					placeholder="Password"
+					required
+				/>
+
+				<div class="options">
+					<label
+						><input
+							type="checkbox"
+							name="remember"
+						/>
+						Remember me</label
+					>
+					<a href="recoverPassword.html">Forgot password?</a>
+				</div>
+
+				<button type="submit">Log In</button>
+			</form>
+		</div>
+	</body>
+</html>
