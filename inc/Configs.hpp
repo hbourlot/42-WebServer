@@ -16,6 +16,7 @@ struct Location{
 	std::vector<std::string>			cgi_extension;
 	std::vector<std::string>			cgi_path;
 	std::map<std::string, std::string> 	cgi;
+	bool								upload;
 };
 
 struct Server{
