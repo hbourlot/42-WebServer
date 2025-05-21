@@ -52,10 +52,34 @@
 	</head>
 	<body>
 		<div class="error-box">
-			<h1>500</h1>
-            <h2>Internal Server Error</h2>
+			<h1 id="statusCode">500</h1>
+            <h2 id="statusMessage">Internal Server Error</h2>
             <p>Something went wrong on our end. Please try again later.</p>
 			<a href="/">Go Back Home</a>
 		</div>
 	</body>
+
+	<script>
+
+			try {
+				const response = await fetch("/errorDefault", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(data)
+				});
+
+				const result = await response.statusText;
+				console.log("Server Response:", result);
+				if(result === "Unauthorized")
+					document.getElementById("statusCode").innerHTML = "HELLO";
+					// window.location.href = "/error_401.html";
+				else
+					window.location.href = "/success.html";
+			} catch (error) {
+				console.error("Error:", error);
+			}
+	</script>
+
 </html>

@@ -222,7 +222,7 @@
 
 					const result = await response.statusText;
 					console.log("Server Response:", result);
-					if(result == "Unauthorized")
+					if(result === "Unauthorized")
 						window.location.href = "/error_401.html";
 					else
 						window.location.href = "/success.html";
