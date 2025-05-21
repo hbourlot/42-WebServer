@@ -22,13 +22,7 @@ bool TcpServer::validateGet() {
   return (true);
 }
 
-bool TcpServer::validatePost()
-{
-  if(request.path == "/login")
-    std::cout << request.body << std::endl;
-    
-  return(true);
-}
+
 
 bool TcpServer::validateRequestMethod() {
   if (request.method == "GET") {
