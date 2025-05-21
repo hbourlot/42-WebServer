@@ -57,7 +57,8 @@ namespace http {
 			// MAYBE YOU STRUCT HERE?? 😇
 			httpRequest request;
 			std::string m_ip_address;
-			int m_port, m_socket, m_new_socket, bytesReceived, bytesSend;
+			int m_port, bytesReceived, bytesSend;
+			SOCKET m_socket, m_acceptSocket;
 			long m_incomingMessage;
 			struct sockaddr_in m_socketAddress;
 			unsigned int m_socketAddress_len;
@@ -66,8 +67,8 @@ namespace http {
 			int startServer();
 			void shutDownServer();
 			void startListen();
-			void acceptConnection(SOCKET &new_socket);
-			void readRequest();
+			int acceptConnection(std::vector<pollfd> &fds);
+			void readRequest(int fd, std::vector<pollfd> fds, int i);
 			bool validateRequestMethod();
 			bool validateGet();
 			void setResponseError(std::string statusCode,
