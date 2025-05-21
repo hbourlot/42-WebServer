@@ -5,6 +5,9 @@
 #define REDIRECT 9
 #define CGI_EXTENSION 10
 #define CGI_PATH 11
+#define UPLOAD_ENABLE 12
+#define UPLOAD_STORE 13
+#define AUTOINDEX 14
 
 std::string locationPath(const std::string& line) {
     size_t start = line.find_first_not_of(' '); // Skips all the spaces
@@ -46,7 +49,12 @@ int		getTypeLocation(std::string& trimedLine){ // Function to check the informat
 		return CGI_EXTENSION;
 	if (trimedLine == "cgi_path")
 		return CGI_PATH;
-
+	if (trimedLine == "upload_enable")
+		return UPLOAD_ENABLE;
+	if (trimedLine == "upload_store")
+		return UPLOAD_STORE;
+	if (trimedLine == "autoindex")
+		return AUTOINDEX;
 	return 100;
 }
 
@@ -117,7 +125,22 @@ bool	SetLocation::setLocationConfig(std::ifstream& confFd, std::string line, Ser
 				break;
 			case CGI_PATH:
 				if (getCgi(noSpaceLine, location, CGI_PATH) == 1)
-					buildCgi(location);
+					buildCgi(location); // If we already have the full information (PATH + EXTENSION), we build the map cgi
+				break;
+			case UPLOAD_ENABLE:
+				if (getInfo(noSpaceLine) == "on") // Change the permission to upload files
+					location.uploadEnable = true;
+				else
+					location.uploadEnable = false;
+				break;
+			case UPLOAD_STORE:
+				location.uploadStore = getInfo(noSpaceLine);
+				break;
+			case AUTOINDEX:
+				if (getInfo(noSpaceLine) == "on") // Change the permission to upload files
+					location.autoIndex = true;
+				else
+					location.autoIndex = false;
 				break;
 			default:
 				break;
