@@ -52,9 +52,13 @@ bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Confi
 	
 	server.maxRequest = 10; // Set the max value by default
 	while (std::getline(confFd, line)){ // Finish the server config block
-		noSpaceLine = removeSpace(line);
+		noSpaceLine = removeSpace(line); // Removes the first spaces
+		
+		if (!CheckConf::checkLineFinished(noSpaceLine))
+			throw std::invalid_argument("Error: Extra words after End of Line\n");
+			
 		trimedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
-
+		
 		if (trimedLine[0] == '}') // Finish the server info
 			break;
 

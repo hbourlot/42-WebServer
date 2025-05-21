@@ -20,7 +20,7 @@ OBJ_DIR         = obj/
 # -- Variables
 COMPILED_FILES  = 0
 LEN             = 0
-C_FUNCTIONS     = CheckConfName ReadConfig ConfigUtils SetLocations main
+C_FUNCTIONS     = CheckConf ReadConfig ConfigUtils SetLocations main
 SRC_FILES       = $(addprefix $(SRC_DIR), $(C_FUNCTIONS:=.cpp))
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB             = libHttp_tcpServer_linux.a

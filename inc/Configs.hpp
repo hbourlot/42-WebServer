@@ -1,5 +1,6 @@
 #pragma once
 #include "ConfigUtils.hpp"
+#include "CheckConf.hpp"
 #include <vector>
 #include <string>
 #include <map>
