@@ -13,27 +13,23 @@ bool TcpServer::validateGet() {
   std::ifstream htmlFile(fullPath.c_str());
   std::ifstream errorFile("./content/error_404.html");
   if (!htmlFile.is_open()) {
-    if(!errorFile.is_open())
+    if (!errorFile.is_open())
       setResponseError("404", "Not Found");
-  setHtmlResponse("404","Not Found", errorFile);
+    setHtmlResponse("404", "Not Found", errorFile);
     return false; // TODO: throw error would be better
   }
-  setHtmlResponse("200","OK",htmlFile);
+  setHtmlResponse("200", "OK", htmlFile);
   return (true);
 }
-
-
 
 bool TcpServer::validateRequestMethod() {
   if (request.method == "GET") {
     if (validateGet() == false)
       return (false);
-  } else if (request.method == "POST")
-  {
+  } else if (request.method == "POST") {
     // std::cout << "Suposed to do something" << std::endl;
     validatePost();
-  }
-  else if (request.method == "DELETE")
+  } else if (request.method == "DELETE")
     std::cout << "Suposed to do something" << std::endl;
   else {
     setResponseError("405", "Method Not Allowed");
@@ -41,4 +37,4 @@ bool TcpServer::validateRequestMethod() {
   }
   return true;
 }
-}
+} // namespace http
