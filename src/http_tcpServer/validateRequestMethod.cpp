@@ -1,7 +1,6 @@
 #include "http_tcpServer_linux.hpp"
 #include <fstream>
 #include <ostream>
-#include <sstream>
 
 bool http::TcpServer::validateGet() {
 	if (request.path == "/")

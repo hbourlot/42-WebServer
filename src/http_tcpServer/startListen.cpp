@@ -3,7 +3,9 @@
 void http::TcpServer::startListen() {
 	int listen_fd;
 
-	listen_fd = listen(m_socket, 20);
+	// TODO: Need to implement a properly valid max number of padding \
+	// TODO: connections
+	listen_fd = listen(m_socket, 2);
 
 	if (listen_fd < 0) {
 		throw TcpServerException("Socket Listen failed");

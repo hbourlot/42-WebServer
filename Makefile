@@ -14,14 +14,15 @@ PRINT_CMD       = printf
 INCLUDE         = inc/
 HEADERS         = $(shell find $(INCLUDE) -name "*.hpp")
 SRC_DIR         = src/
+HTTP_DIR		= http_tcpServer/
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
 
 # -- Variables
 COMPILED_FILES  = 0
 LEN             = 0
-C_FUNCTIONS     = http_tcpServer_linux validateRequestMethod readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer server_linux
-SRC_FILES       = $(addprefix $(SRC_DIR), $(C_FUNCTIONS:=.cpp))
+HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer main
+SRC_FILES       = $(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp))
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB             = libHttp_tcpServer_linux.a
 CXX             = c++
