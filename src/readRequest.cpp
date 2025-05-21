@@ -1,4 +1,5 @@
 #include "http_tcpServer_linux.hpp"
+// #include "webserv.hpp"
 
 static void parseRequest(httpRequest &request,
 						 const std::string &requestContent) {
@@ -10,14 +11,14 @@ static void parseRequest(httpRequest &request,
   
 	first_line >> request.method >> request.path >> request.protocol;
 	while (std::getline(request_stream, line)) {
-    if (line == "\r" || line == "" || line == "\n") 
+    if (line == "\r" || line == "") 
 			break;
 		idx = line.find(":");
 		if (idx != std::string::npos) {
 			std::string key = line.substr(0, idx);
 			std::string value = line.substr(idx + 1);
-			key.erase(key.find_first_not_of(" \t\r\n") + 1);
-			value.erase(0, value.find_first_not_of(" \t\r\n"));
+			key = ft_strtrim(key);
+			value = ft_strtrim(value);
 			request.headers[key] = value;
 		}
 	}
@@ -29,14 +30,15 @@ static void parseRequest(httpRequest &request,
 }
 
 void http::TcpServer::readRequest() {
-	char buffer[BUFFER_SIZE] = {0};
+	char buffer[BUFFER_SIZE+1] = {0};
 
-	bytesReceived = read(m_new_socket, buffer, BUFFER_SIZE - 1);
+	bytesReceived = read(m_new_socket, buffer, BUFFER_SIZE);
 	if (bytesReceived < 0) {
 		throw TcpServerException(
 			"Failed to read bytes from client socket connection");
 	}
 	buffer[bytesReceived] = '\0';
+	// write(1,buffer, BUFFER_SIZE);
 	std::string requestContent(buffer);
 	parseRequest(request, requestContent);
 }

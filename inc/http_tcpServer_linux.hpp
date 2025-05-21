@@ -77,4 +77,7 @@ namespace http {
 			void sendResponse();
 	};
 
+	
 } // namespace http
+
+std::string ft_strtrim(const std::string &str);
