@@ -1,0 +1,77 @@
+-   Using TPC (Transmission Control Protocol - the most common protocol for HTTP) to implement HTTP server.
+    -   Server will use TCP/IP socket registered to an IP address on the computer.
+    -   Server will use a specific port through which the socket will listen for incoming network connections.
+        -   Network connections that come into server will be stored on a Queue of network threads.
+            -   When Queue is Full, incoming network requests will start to fall through.
+    -   Server will process each network thread synchronously.
+    -   The network connection will e used to create a temporary socket through which the server READS data \
+        \ from the Client and SENDS data to the client
+    
+
+
+    1 - Creating socket
+
+        int socket(int domain, int type, int protocol);
+            returns SOCKET type (unsigned integer)
+
+            * domain : Specifies the communication domain. It represents the protocol family the socket will belong to.
+                        - For TCP/IP socket (IPv4 internet protocols define by AF_INET domain).
+
+            * type : Describes the type of communication structure the socket will allow for this protocol family.
+                        - (e.g. SOCK_STREAM - to allow for reliable, full-duplex byte streams)
+
+            * protocol : The particular protocol the socket will use from the given family of protocols that \
+                            \ support the chosen type of communication. 
+                        - For the AF_INET family, there's only one protocol that supports SOCK_STREAM (parameter 0);
+
+
+        unsigned m_socket = socket(AF_INET, SOCK_STREAM, 0);
+        if (socket < 0) {
+            exit...
+        }
+
+
+// STRUCTURES AND FUNCTIONS
+
+// struct sockaddr_in {
+//     short            sin_family;   // e.g. AF_INET (socket_family)
+//     unsigned short   sin_port;     // e.g. htons(8080) -> There are a few usually a couple of IP addresses \ 
+                                                            \ available per network interface for your machine(usually one or two) \
+                                                            \ 0.0.0.0 is a default IP address that lets the operating system choose anyone \
+                                                            \ it wants. sin_addr holds the IP address, in a network byte order, as unsigned long \
+                                                            \ (e.g. inet_addr() function converts the IP address from a char * to an unsigned long)
+//     struct in_addr   sin_addr;     // see struct in_addr, below
+//     char             sin_zero[8];  // zero this if you want to -> (has no "real" utility in the sockaddr_in structure) It's a buffer used \
+                                                                    \ to adjust the size of the sockaddr_in in cases where you need to cast it \
+                                                                    \ to a sockaddr type (sockaddr type is larger than the sockaddr_in type, so \
+                                                                    \ the sin_zero make up the difference when need to be interchanged)
+// };
+
+// struct in_addr {
+//     unsigned long s_addr;
+// };     
+
+bind() used to tie a socket address to a given socket;
+    int bind(int sock, const struct sockaddr *addr, socklen_t addrlen);
+        * sock -> The socket.
+        * *addr -> socket address.
+        * addrlen -> length of the socket address object.
+
+listen() listen for incoming connections on socket address
+    int listen(int sockfd, int backlog);
+        * sockfd -> The socket.
+        * backlog -> The maximum number of connection threads we want to be able to hold at once.
+    
+int accept(
+    int sockfd, 
+    struct sockaddr *restrict addr, 
+    socklen_t *restrict addrlen
+); used to process each connection thread in the queue created by listen() \
+    \ It does this by creating a new socket with a connection thread, which \
+    \ can be used to receive and send data between the client and the server.
+    * sockfd -> The socket.
+    * *addr -> A pointer to the socket address
+    * *addrlen -> A pointer to the length of the address object passed prior.
+
+
+

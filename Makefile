@@ -14,14 +14,20 @@ PRINT_CMD       = printf
 INCLUDE         = inc/
 HEADERS         = $(shell find $(INCLUDE) -name "*.hpp")
 SRC_DIR         = src/
+HTTP_DIR		= http_tcpServer/
+FILE_DIR		= fileConfig/
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
 
 # -- Variables
 COMPILED_FILES  = 0
 LEN             = 0
-C_FUNCTIONS     = CheckConfName ReadConfig ConfigUtils SetLocations main
-SRC_FILES       = $(addprefix $(SRC_DIR), $(C_FUNCTIONS:=.cpp))
+FILE_FUNC		= CheckConfName ReadConfig ConfigUtils SetLocations
+HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
+SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR), main.cpp) 
+
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB             = libHttp_tcpServer_linux.a
 CXX             = c++
@@ -29,7 +35,8 @@ CXXFLAGS        = -std=c++98
 NAME            = webserv
 TOTAL_FILES     = $(shell echo $$(($(words $(OBJS_SRC)))))
 VALGRIND        = valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
-MSG             = "[ $(COMPILED_FILES)/$(TOTAL_FILES) $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))%% ] $(ORANGE)Compiling [$1]... $(RESET)"
+# MSG             = "[ $(COMPILED_FILES)/$(TOTAL_FILES) $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))%% ] $(ORANGE)Compiling [$1]... $(RESET)"
+MSG 			= "$(CYAN) => ($(COMPILED_FILES)/$(TOTAL_FILES) $(PERCENT)%%) 🔧 Compiling [$1]...$(RESET)"
 
 # -- Function to print the compilation message
 define print_compile_msg
@@ -37,7 +44,7 @@ define print_compile_msg
 	$(eval PERCENT = $(shell echo $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))))
 	$(eval LEN = $(shell echo -n $(MSG) | wc -c))
 	@$(PRINT_CMD) "$$(printf '%*s\r' $(LEN) '')"
-	@$(PRINT_CMD) "$(CYAN) => ($(PERCENT)%%) 🔧 Compiling [$1]...$(RESET)"
+	@$(PRINT_CMD) $(MSG)
 	@if [ $(COMPILED_FILES) -ne $(TOTAL_FILES) ]; then \
 		$(PRINT_CMD) "\r" $(CUT) \
 		$(PRINT_CMD) $(UP) $(CUT); \
@@ -82,7 +89,7 @@ $(NAME): $(LIB) $(HEADERS)
 
 $(LIB): $(OBJS_SRC)
 	@ar rcs $@ $(OBJS_SRC)
-	@echo "$(CYAN)library '$(YELLOW)$(LIB)$(CYAN)' created successfully!$(RESET)"
+	@echo "$(CYAN) library '$(YELLOW)$(LIB)$(CYAN)' created successfully!$(RESET)"
 
 $(OBJ_DIR)%.o: %.cpp $(HEADERS)
 	@mkdir -p $(dir $@)
@@ -104,12 +111,16 @@ bonus: all
 # Shortcuts
 r:
 	@make -s
-	@./$(NAME) ./map/ex1.cub
+	@./$(NAME) ./conf_files/good/valid.conf
 
 v:
 	@make -s
-	@$(VALGRIND) ./$(NAME) ./map/ex1.cub
+	@$(VALGRIND) ./conf_files/good/valid.conf
 
 fc: fclean
 
 c: clean
+
+# $(OBJ_DIR)main.o:	main.cpp $(HEADERS)
+# 					$(call print_compile_msg,$<)
+# 					@$(CXX) -c $< $(CXXFLAGS) -I./$(INCLUDE) -o $@
