@@ -31,13 +31,17 @@ void printConfigs(Configs& config){
 			std::cout << "  Methods: ";
 			for (int i = 0; itl->methods.size() > i; i++)
 				std::cout << itl->methods[i] << " ";
-			
+			std::cout << "\n";
 			if (!itl->cgi.empty()){
 				std::cout << "      CGI INFORMATION: " << std::endl;
 				for (std::map<std::string, std::string>::iterator itm = itl->cgi.begin(); itm != itl->cgi.end(); itm++){
 					std::cout << "               Extension: " << itm->first << " | Paths: " << itm->second << std::endl;
 				}
 			}
+
+			std::cout << "  Upload_Enable: " << itl->uploadEnable << std::endl;
+			std::cout << "  Upload_Store: " << itl->uploadStore << std::endl;
+			std::cout << "  Autoindex: " << itl->autoIndex << std::endl;
 			std::cout << "\n\n";
 		}
 		// for (std::vector<int, std::string>::iterator it3 = it->errorPage.begin(); it3 != (*it)->errorPage.end(); it++)
