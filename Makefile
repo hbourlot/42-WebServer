@@ -23,12 +23,12 @@ LEN             = 0
 C_FUNCTIONS     = 	http_tcpServer_linux validateRequestMethod validatePost		\
  					readRequest sendResponse setResponse startServer startListen \
 					shutDownServer acceptConnection runServer server_linux \
-					lib/ft_strtrim
+					lib/ft_strtrim proto_backend/forms proto_backend/jsonforms
 SRC_FILES       = $(addprefix $(SRC_DIR), $(C_FUNCTIONS:=.cpp))
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB             = libHttp_tcpServer_linux.a
 CXX             = c++
-CXXFLAGS        = -std=c++98
+CXXFLAGS        = -std=c++98 -g
 NAME            = webserv
 TOTAL_FILES     = $(shell echo $$(($(words $(OBJS_SRC)))))
 VALGRIND        = valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes

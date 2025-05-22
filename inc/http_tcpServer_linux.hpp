@@ -14,6 +14,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
+#include <fstream>
+#include <ostream>
+#include <sstream>
 
 struct httpRequest {
 		std::string method;
@@ -21,6 +24,13 @@ struct httpRequest {
 		std::string protocol;
 		std::map<std::string, std::string> headers;
 		std::string body;
+};
+
+struct protoBackend {
+	std::string statusCode;
+	std::string statusMessage;
+	 std::string htmlFilePath;
+	// std::ifstream *htmlfile;
 };
 
 namespace {
@@ -73,8 +83,6 @@ namespace http {
 			bool validatePost();
 			void setResponseError(std::string statusCode, std::string statusMsg);
 			// void setHtmlResponse(std::ifstream &htmlFile);
-			bool validateForm();
-			bool formurldeconded();
 			bool setHtmlResponse(std::string statusCode, std::string statusMsg ,std::ifstream &htmlFile);
 			void sendResponse();
 	};
@@ -83,3 +91,6 @@ namespace http {
 } // namespace http
 
 std::string ft_strtrim(const std::string &str);
+protoBackend validateForm(httpRequest request);
+
+std::map<std::string, std::string> jsonForm(std::string body);
