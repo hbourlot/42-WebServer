@@ -1,4 +1,4 @@
-#include "SetLocations.hpp"
+#include "Config/SetLocations.hpp"
 
 #define METHODS 7
 #define ROOT 8

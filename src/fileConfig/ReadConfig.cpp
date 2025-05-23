@@ -1,5 +1,5 @@
-#include "ReadConfig.hpp"
-#include "SetLocations.hpp"
+#include "Config/ReadConfig.hpp"
+#include "Config/SetLocations.hpp"
 #include <string>
 
 #define HOST 1
