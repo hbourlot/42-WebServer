@@ -1,4 +1,4 @@
-#include "CheckConf.hpp"
+#include "Config/CheckConf.hpp"
 #include <iostream>
 #include <fstream>
 
