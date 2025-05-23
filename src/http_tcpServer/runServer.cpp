@@ -30,7 +30,7 @@ void http::TcpServer::runServer() {
 			int ret = poll(fds.data(), fds.size(), timeOut);
 
 			if (ret < 0) {
-				std::cerr << "poll() failed" << std::endl;
+				std::cerr << "poll() failed" << std::endl; // Kill the program?
 			} else if (ret == 0) {
 				std::cerr << "poll() timeOut. Closing Server." << std::endl;
 				shutDownServer();
