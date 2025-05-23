@@ -14,13 +14,17 @@ static void setSocketAddr(sockaddr_in &m_socketAddress, int domain, int s_addr,
 namespace http {
 
 	int TcpServer::startServer() {
-
+		
 		// Creates a server socket (IPv4, TCP, 0) (domain, type, protocol);
 		m_socket = socket(AF_INET, SOCK_STREAM, 0);
 		if (m_socket < 0) {
 			throw TcpServerException("Cannot create socket");
 			return 1;
 		}
+
+		fcntl(m_socket, F_SETFL,
+				  fcntl(m_socket, F_GETFL, 0) | O_NONBLOCK);
+
 		// For inactivate the time wait from OS that block bind again
 		int opt = 1;
 		if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) <
