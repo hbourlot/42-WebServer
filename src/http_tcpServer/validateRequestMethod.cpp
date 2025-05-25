@@ -5,10 +5,10 @@
 bool http::TcpServer::validateGet() {
 	if (request.path == "/")
 		request.path = "login.html";
-	logDebugger(request.path);
 	std::string fullPath = "./content/" + request.path;
 	std::ifstream htmlFile(fullPath.c_str());
 	if (!htmlFile.is_open()) {
+		std::cout << "FULL PATH: " << fullPath.c_str() << std::endl;
 		setResponseError("404", "Not Found");
 		return false; // TODO: throw error would be better
 	}
