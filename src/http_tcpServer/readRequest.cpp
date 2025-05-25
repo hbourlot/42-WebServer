@@ -1,5 +1,6 @@
 #include "http_tcpServer_linux.hpp"
 // #include "webserv.hpp"
+#include <sys/poll.h>
 
 static void parseRequest(httpRequest &request,
 						 const std::string &requestContent) {
@@ -29,17 +30,25 @@ static void parseRequest(httpRequest &request,
 	request.body = body;
 }
 
-void http::TcpServer::readRequest() {
-	char buffer[BUFFER_SIZE+1] = {0};
+void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
+	char buffer[BUFFER_SIZE + 1] = {0};
 
-	bytesReceived = read(m_new_socket, buffer, BUFFER_SIZE);
+	bytesReceived = read(fds[i].fd, buffer, BUFFER_SIZE);
 	if (bytesReceived < 0) {
-		throw TcpServerException(
-			"Failed to read bytes from client socket connection");
-	}
+		std::cerr << "Error: read()\n";
+		close(fds[i].fd);
+		fds.erase(fds.begin() + i);
+		return;
+		// throw TcpServerException(
+		// 	"Failed to read bytes from client socket connection");
+	} else if (bytesReceived == 0)
+		return;
 	buffer[bytesReceived] = '\0';
-	// write(1,buffer, BUFFER_SIZE);
+	write(2, buffer, BUFFER_SIZE);
 	std::string requestContent(buffer);
 	parseRequest(request, requestContent);
+
+	// Set event POLLOUT
+	fds[i].events |= POLLOUT;
 }
 

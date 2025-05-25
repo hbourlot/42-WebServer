@@ -12,7 +12,7 @@ namespace http {
 		response << "HTTP/1.1 " << statusCode << " " << statusMsg << "\r\n"
 				 << "Content-Type: text/plain\r\n"
 				 << "Content-Length: " << body.length() << "\r\n"
-				 << "Connection: Close\r\n"
+				 << "Connection: close\r\n"
 				 << "\r\n"
 				 << body;
 		m_serverMessage = response.str();
