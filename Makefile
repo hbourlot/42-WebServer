@@ -24,21 +24,19 @@ OBJ_DIR         = obj/
 # -- Variables
 COMPILED_FILES  = 0
 LEN             = 0
-# C_FUNCTIONS     = 	http_tcpServer_linux validateRequestMethod validatePost		\
-#  					readRequest sendResponse setResponse startServer startListen \
-# 					shutDownServer acceptConnection runServer server_linux \
-# 					lib/ft_strtrim proto_backend/forms proto_backend/jsonforms
-# SRC_FILES       = $(addprefix $(SRC_DIR), $(C_FUNCTIONS:=.cpp))
+
+
 FILE_FUNC		= CheckConfName ReadConfig ConfigUtils SetLocations
 BACK_FUNC		= forms
 LIB_FUNC		= ft_strtrim
-# HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod validatePost readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
-HTTP_FUNC	    = acceptConnection http_tcpServer_linux main readRequest runServer sendResponse setResponse shutDownServer startListen startServer validatePost validateRequestMethod
-# SRC_FILES     = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) 
-SRC_FILES       = 	$(addprefix $(SRC_DIR), $(HTTP_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(BACK_DIR), $(BACK_FUNC:=.cpp)) \
+FILE_FUNC		= CheckConfName ReadConfig ConfigUtils SetLocations
+HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod validatePost readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
+
+SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(LIB_DIR), $(LIB_FUNC:=.cpp)) \
-					# $(addprefix $(SRC_DIR), main.cpp) 
+					$(addprefix $(SRC_DIR)$(BACK_DIR), $(BACK_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR), main.cpp) 
 
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB             = libHttp_tcpServer_linux.a
@@ -127,7 +125,7 @@ r:
 
 v:
 	@make -s
-	@$(VALGRIND) ./conf_files/good/valid.conf
+	@$(VALGRIND) ./$(NAME) conf_files/good/valid.conf
 
 fc: fclean
 

@@ -1,0 +1,353 @@
+🧠 Erros e mensagens de erro
+
+    strerror(int errnum): Retorna uma string legível representando o erro (errno) passado.
+
+    gai_strerror(int errcode): Retorna uma string explicando um código de erro retornado por funções como getaddrinfo.
+
+    errno: Variável global que armazena o código de erro da última chamada de sistema com falha.
+
+🔌 Sockets e rede
+
+Essas funções são usadas para comunicação em rede:
+🧱 Criação e configuração de sockets
+
+    socket(int domain, int type, int protocol): Cria um socket.
+
+    socketpair(int domain, int type, int protocol, int sv[2]): Cria um par de sockets conectados (para IPC local).
+
+    bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen): Associa um socket a um endereço (porta e IP).
+
+    listen(int sockfd, int backlog): Coloca o socket em modo de escuta (servidor).
+
+    accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen): Aceita conexões de entrada.
+
+    connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen): Conecta um socket a um endereço remoto.
+
+    setsockopt(...): Configura opções de socket (ex: SO_REUSEADDR).
+
+    getsockname(...): Obtém o endereço do socket local.
+
+🌐 Envio e recebimento de dados
+
+    send(int sockfd, const void *buf, size_t len, int flags): Envia dados pelo socket.
+
+    recv(int sockfd, void *buf, size_t len, int flags): Recebe dados.
+
+📡 Conversão de endereços
+
+    htons(uint16_t): Host to network short (16 bits).
+
+    htonl(uint32_t): Host to network long (32 bits).
+
+    ntohs(uint16_t): Network to host short.
+
+    ntohl(uint32_t): Network to host long.
+
+📖 Resolução de nomes
+
+    getaddrinfo(...): Resolve nomes de host e serviços em endereços de socket (IPv4/IPv6).
+
+    freeaddrinfo(...): Libera a memória alocada por getaddrinfo.
+
+    getprotobyname(const char *name): Obtém informações sobre protocolos (ex: "tcp").
+
+📊 Multiplexação de I/O
+
+Usadas para monitorar múltiplos descritores de arquivos/sockets ao mesmo tempo.
+
+    select(...): Monitora múltiplos FDs para leitura, escrita ou erro (usa fd_set).
+
+    poll(...): Similar ao select, mas usa um array de estruturas pollfd.
+
+    epoll (Linux only):
+
+        epoll_create(int size): Cria uma instância epoll.
+
+        epoll_ctl(int epfd, int op, int fd, struct epoll_event *event): Controla o conjunto monitorado.
+
+        epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout): Espera eventos.
+
+    kqueue (BSD/macOS):
+
+        kqueue(): Cria uma nova fila de eventos.
+
+        kevent(...): Adiciona, remove ou espera eventos em um kqueue.
+
+📁 Sistema de arquivos e diretórios
+
+Funções para manipular arquivos e diretórios.
+
+    chdir(const char *path): Muda o diretório atual do processo.
+
+    stat(const char *path, struct stat *buf): Obtém informações sobre um arquivo.
+
+    access(const char *pathname, int mode): Verifica permissões de acesso.
+
+    open(const char *pathname, int flags): Abre (ou cria) um arquivo.
+
+    opendir(const char *name): Abre um diretório para leitura.
+
+    readdir(DIR *dirp): Lê a próxima entrada de diretório.
+
+    closedir(DIR *dirp): Fecha um diretório.
+
+    🧭 COMO ABORDAR ESTE PROJETO — EM ETAPAS
+✅ 1. Entenda o objetivo final
+
+Você está criando um servidor web completo em C++98, que:
+
+    Serve arquivos estáticos
+
+    Responde a requisições HTTP (GET, POST, DELETE)
+
+    Usa sockets TCP
+
+    Usa apenas 1 poll() (ou epoll/kqueue) para lidar com múltiplos clientes
+
+    Roda CGI (como PHP ou Python)
+
+    Lê configurações tipo nginx.conf
+
+    Deve ser resiliente, não bloquear, e manter-se disponível
+
+📚 2. Materiais que você precisa estudar (por tema)
+🔌 Redes com Sockets (Sockets API)
+
+    socket(), bind(), listen(), accept(), recv(), send(), connect()
+
+    IP e portas
+
+    TCP vs UDP (use TCP)
+
+    getaddrinfo()
+
+⚙️ Multiplexação I/O não-bloqueante
+
+    fcntl() com O_NONBLOCK
+
+    poll() (fundamental)
+
+    Como monitorar leitura e escrita com poll()
+
+    Como evitar race conditions e CPU usage alto (poll + lógica de estado)
+
+📜 Parsing de HTTP
+
+    Estrutura de uma requisição HTTP (linha de status, headers, body)
+
+    Respostas HTTP e seus códigos
+
+    Como detectar fim da requisição (Content-Length, chunked, etc.)
+
+    Métodos HTTP: GET, POST, DELETE
+
+🏗️ Estrutura de Servidor
+
+    Aceitar múltiplos clientes com um só loop (poll)
+
+    Organizar os clientes ativos (ex: um std::map<fd, Client> com o estado de cada cliente)
+
+    Separação de responsabilidades: parsing, roteamento, resposta, etc.
+
+🗂️ Leitura de Arquivos e Diretórios
+
+    open(), read(), write(), stat(), opendir(), readdir(), chdir()
+
+    Segurança: evitar acesso fora do diretório root
+
+⚙️ Execução de CGI
+
+    fork() (permitido somente para CGI)
+
+    execve() para rodar scripts
+
+    Comunicação com o CGI via pipes
+
+    Passar variáveis de ambiente como CONTENT_LENGTH, REQUEST_METHOD, PATH_INFO
+
+🛠️ Parsing de arquivo de configuração
+
+    Inspiração no nginx.conf
+
+    Implementar parser de arquivo customizado (sem regex)
+
+    Trabalhar com estrutura hierárquica: servers, locations, diretivas
+
+🛡️ Resiliência & Segurança
+
+    Lidar com desconexões
+
+    Timeout de conexões
+
+    Body size limit
+
+    Impedir traversal (../../../etc/passwd)
+
+    Manter o servidor sempre disponível
+
+🧠 3. Plano de ação prático
+📌 Etapa 1: Servidor TCP básico
+
+    Criar um socket
+
+    Torná-lo non-blocking
+
+    Usar poll() para aceitar conexões e receber dados
+
+    Logar as requisições
+
+📌 Etapa 2: Responder com arquivos
+
+    Analisar método GET
+
+    Servir arquivos de disco (html, css, imagens)
+
+    Testar no navegador
+
+📌 Etapa 3: Parsing HTTP completo
+
+    Lidar com cabeçalhos
+
+    Lidar com Content-Length e chunked encoding
+
+    Responder com os status corretos
+
+📌 Etapa 4: POST e upload
+
+    Interpretar body corretamente
+
+    Salvar arquivos no sistema de arquivos
+
+📌 Etapa 5: DELETE e rota
+
+    Lógica para deletar arquivos se permitido
+
+📌 Etapa 6: Parsing do arquivo de configuração
+
+    Criar mini-parser tipo nginx
+
+    Gerar estrutura de objetos: Server, Route, etc.
+
+📌 Etapa 7: CGI
+
+    Detectar extensões (.php, .py)
+
+    Usar fork() + execve() + pipe
+
+    Passar variáveis de ambiente e argumentos
+
+📌 Etapa 8: Polimento final
+
+    Páginas de erro
+
+    Upload com limites
+
+    Várias portas e servidores virtuais
+
+    Testes de carga com ferramentas como ab, curl, ou scripts em Python
+
+🧰 Ferramentas de apoio
+
+    telnet ou netcat: para testar manualmente
+
+    curl: para testar métodos HTTP e upload
+
+    Navegador: para testar comportamento real
+
+    Ferramentas como valgrind: para detectar vazamentos
+
+🧗 Dica final
+
+Esse projeto não é só para escrever um servidor — ele ensina como funciona a internet por dentro. Aprenda os conceitos, faça testes pequenos por etapa, use muitos logs, e valide sempre com comportamento do nginx.
+
+Se quiser, posso te ajudar a montar uma estrutura de arquivos e classes para o servidor e o parser de config, ou criar pequenos exercícios para estudar cada parte.
+
+🔍 1. GET — Obter dados
+
+    Objetivo: Pedir dados ao servidor (ex: uma página HTML, uma imagem, um ficheiro).
+
+    Não envia corpo no pedido.
+
+    Não altera nada no servidor.
+
+🧪 Exemplo:
+
+GET /index.html HTTP/1.1
+Host: localhost:8080
+
+Resposta:
+
+HTTP/1.1 200 OK
+Content-Type: text/html
+
+<html>...</html>
+
+📝 2. POST — Enviar dados
+
+    Objetivo: Enviar dados do cliente para o servidor (formulários, uploads, etc.)
+
+    O corpo do pedido contém os dados (ex: um ficheiro, JSON, texto).
+
+    Pode criar ou modificar recursos no servidor.
+
+🧪 Exemplo (upload de ficheiro):
+
+POST /upload HTTP/1.1
+Host: localhost:8080
+Content-Type: text/plain
+Content-Length: 17
+
+Olá, ficheiro novo!
+
+Resposta:
+
+HTTP/1.1 201 Created
+
+❌ 3. DELETE — Apagar recurso
+
+    Objetivo: Pedir ao servidor para apagar um ficheiro ou recurso.
+
+    Pode ter ou não corpo, mas normalmente só indica o que apagar na URL.
+
+🧪 Exemplo:
+
+DELETE /files/teste.txt HTTP/1.1
+Host: localhost:8080
+
+Resposta:
+
+HTTP/1.1 200 OK
+Content-Type: text/plain
+
+Ficheiro apagado com sucesso.
+
+    ⚠️ Em muitos servidores (e no teu webserv), precisas configurar permissões para permitir DELETE.
+
+////////////////////////////////////////////////////////
+
+Configuration file:
+
+--> Choose port and host (host | port)
+--> Server name (serverName)
+-->  The first server for a host:port will be the default for this host:port (meaning it will respond to all requests that do not belong to another server).
+        --> Se houver mais servidores sem server_name a ouvir da mesma port, o nome do server vai ser igual ao primeiro
+
+--> Set up default error pages;
+--> Max body size
+
+
+--> LOCATIONS <--
+
+--> Set accepted methods
+--> Define HTTP redirect
+--> Define a directory or file where the requested file should be located (e.g., if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is /tmp/www/pouic/toto/pouet)
+        --> Set up the root
+--> Enable or disable directory listing.
+        --> Autoindex (on | off)
+--> Set a default file to serve when the request is for a directory.
+        --> Directory in front of the location
+--> Execute CGI based on certain file extension (for example .php).
+        --> cgiExtension and cgiPath;
+--> Make it work with POST and GET (Jorge)
+
+

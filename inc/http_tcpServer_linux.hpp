@@ -1,5 +1,8 @@
 #pragma once
 
+#include "CheckConfName.hpp"
+#include "ReadConfig.hpp"
+
 #include "http_tcpServerException_linux.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
@@ -52,7 +55,7 @@ namespace {
 
 namespace http {
 
-	typedef int SOCKET;
+	typedef int HTTP_SOCKET;
 	const int BUFFER_SIZE = 30720;
 
 	class TcpServer {
@@ -67,7 +70,8 @@ namespace http {
 			// MAYBE YOU STRUCT HERE?? 😇
 			httpRequest request;
 			std::string m_ip_address;
-			int m_port, m_socket, m_new_socket, bytesReceived, bytesSend;
+			int m_port, bytesReceived, bytesSend;
+			HTTP_SOCKET m_serverSocket, m_acceptSocket;
 			long m_incomingMessage;
 			struct sockaddr_in m_socketAddress;
 			unsigned int m_socketAddress_len;
@@ -76,15 +80,19 @@ namespace http {
 			int startServer();
 			void shutDownServer();
 			void startListen();
-			void acceptConnection(SOCKET &new_socket);
-			void readRequest();
+			void acceptConnection(std::vector<pollfd> &fds);
+			void readRequest(std::vector<pollfd> &fds, int i);
 			bool validateRequestMethod();
 			bool validateGet();
 			bool validatePost();
-			void setResponseError(std::string statusCode, std::string statusMsg);
+			// void setResponseError(std::string statusCode, std::string statusMsg);
 			// void setHtmlResponse(std::ifstream &htmlFile);
 			bool setHtmlResponse(std::string statusCode, std::string statusMsg ,std::ifstream &htmlFile);
-			void sendResponse();
+			// void sendResponse();
+			void setResponseError(std::string statusCode,
+								  std::string statusMsg);
+			void setHtmlResponse(std::ifstream &htmlFile);
+			int sendResponse(pollfd socket);
 	};
 
 	
