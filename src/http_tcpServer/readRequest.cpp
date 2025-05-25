@@ -24,18 +24,22 @@ static void parseRequest(httpRequest &request,
 	request.body = body;
 }
 
-void http::TcpServer::readRequest(int fd, std::vector<pollfd> fds, int i) {
+void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
 	char buffer[BUFFER_SIZE] = {0};
 
-	bytesReceived = read(fd, buffer, BUFFER_SIZE - 1);
+	bytesReceived = read(fds[i].fd, buffer, BUFFER_SIZE - 1);
 	if (bytesReceived < 0) {
-		close(fd);
+		std::cerr << "Error: read()\n";
+		close(fds[i].fd);
 		fds.erase(fds.begin() + i);
 		// throw TcpServerException(
 		// 	"Failed to read bytes from client socket connection");
 	}
-	write(2, buffer, BUFFER_SIZE);
 	buffer[bytesReceived] = '\0';
+	write(2, buffer, BUFFER_SIZE);
 	std::string requestContent(buffer);
 	parseRequest(request, requestContent);
+
+	// Set event POLLOUT
+	fds[i].events |= POLLOUT;
 }

@@ -2,29 +2,14 @@
 #include <sys/poll.h>
 #include <vector>
 
-// void http::TcpServer::acceptConnection() {
-// 	m_acceptSocket =
-// 		accept(m_socket, (sockaddr *)&m_socketAddress, &m_socketAddress_len);
-// 	if (m_acceptSocket < 0) {
-// 		std::ostringstream ss;
-// 		ss << "Server failed to accept incoming connection from =>\n"
-// 			  "[ADDRESS: "
-// 		   << inet_ntoa(m_socketAddress.sin_addr) << "]\n"
-// 		   << "[PORT: " << ntohs(m_socketAddress.sin_port) << "]\n";
-// 		throw TcpServerException(ss.str());
-// 	} else {
-// 		std::cout << "----- Connection Accepted 🟩" << std::endl;
-// 	}
-// }
-
-int http::TcpServer::acceptConnection(std::vector<pollfd> &fds) {
+void http::TcpServer::acceptConnection(std::vector<pollfd> &fds) {
 
 	struct pollfd client_pollfd;
 
 	// Checks the if theres readable data available (event)
-	if (fds[0].revents & POLLIN) {
+	while (fds[0].revents & POLLIN) {
 
-		m_acceptSocket = accept(m_socket, nullptr, nullptr);
+		m_acceptSocket = accept(m_serverSocket, nullptr, nullptr);
 		if (m_acceptSocket < 0) {
 
 			std::ostringstream ss;
@@ -33,7 +18,8 @@ int http::TcpServer::acceptConnection(std::vector<pollfd> &fds) {
 				  "[ADDRESS: "
 			   << inet_ntoa(m_socketAddress.sin_addr) << "]\n"
 			   << "[PORT: " << ntohs(m_socketAddress.sin_port) << "]\n";
-			throw TcpServerException(ss.str());
+			std::cerr << ss;
+			return;
 		} else {
 
 			// Set client socket to non-blocking
@@ -44,11 +30,8 @@ int http::TcpServer::acceptConnection(std::vector<pollfd> &fds) {
 			client_pollfd.events = POLLIN;
 			client_pollfd.revents = 0;
 
-			fds.push_back(client_pollfd); // Monitor for reading
-
-			std::cout << "----- Connection Accepted 🟩" << std::endl;
-			return 1;
+			fds.push_back(client_pollfd);
+			std::cout << "----- Connection Accepted 🟩\n";
 		}
 	}
-	return 0;
 }
