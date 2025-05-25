@@ -9,7 +9,7 @@ void http::TcpServer::acceptConnection(std::vector<pollfd> &fds) {
 	// Checks the if theres readable data available (event)
 	while (fds[0].revents & POLLIN) {
 
-		m_acceptSocket = accept(m_socket, NULL, NULL);
+		m_acceptSocket = accept(m_serverSocket, NULL, NULL);
 		if (m_acceptSocket < 0) {
 
 			std::ostringstream ss;
