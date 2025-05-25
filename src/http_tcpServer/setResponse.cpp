@@ -5,30 +5,40 @@
 
 namespace http {
 
-	void TcpServer::setResponseError(std::string statusCode,
-									 std::string statusMsg) {
-		std::string body = statusMsg + " (" + statusCode + ")";
-		std::ostringstream response;
-		response << "HTTP/1.1 " << statusCode << " " << statusMsg << "\r\n"
-				 << "Content-Type: text/plain\r\n"
-				 << "Content-Length: " << body.length() << "\r\n"
-				 << "Connection: close\r\n"
-				 << "\r\n"
-				 << body;
-		m_serverMessage = response.str();
-		log(response.str());
-	}
+void TcpServer::setResponseError(std::string statusCode,
+                                 std::string statusMsg) {
+  std::string body = statusMsg + " (" + statusCode + ")";
+  std::ostringstream response;
+  response
+      << "HTTP/1.1 " << statusCode << " " << statusMsg << "\r\n"
+      << "Content-Type: text/plain\r\n"
+      << "Content-Length: " << body.length() << "\r\n"
+      << "Connection: close\r\n" // Should be keep-alive because its http 1.1
+      << "\r\n"
+      << body;
+  m_serverMessage = response.str();
+  log(response.str());
+}
 
-bool TcpServer::setHtmlResponse(std::string statusCode, std::string statusMsg ,std::ifstream &htmlFile) {
-  
-  if(!htmlFile.is_open())
-  {
+// ! Para adicionar conforme venha no request
+// if (parsed.headers["Connection"] == "close") {
+//     response << "Connection: close\r\n";
+//     keepAlive = false;
+// } else {
+//     response << "Connection: keep-alive\r\n";
+//     keepAlive = true;
+// }
+
+bool TcpServer::setHtmlResponse(std::string statusCode, std::string statusMsg,
+                                std::ifstream &htmlFile) {
+
+  if (!htmlFile.is_open()) {
     std::ifstream errorFile("./content/error_404.html");
     if (!errorFile.is_open())
       setResponseError("404", "Not Found");
-     else 
-    setHtmlResponse("404", "Not Found", errorFile);
-    return(false);
+    else
+      setHtmlResponse("404", "Not Found", errorFile);
+    return (false);
   }
   // Read the HTML file into a string
   std::ostringstream buffer;
@@ -36,18 +46,18 @@ bool TcpServer::setHtmlResponse(std::string statusCode, std::string statusMsg ,s
   std::string fileContent = buffer.str();
   htmlFile.close();
   std::ostringstream response;
-  response << "HTTP/1.1 " << statusCode << " " << statusMsg << "\r\n"
-  << "Content-type: text/html\r\n"
-  << "Content-Length: " << fileContent.size() << "\r\n"
-  << "Connection: close\r\n"
-  << "\r\n"
-  << fileContent;
-  
+  response
+      << "HTTP/1.1 " << statusCode << " " << statusMsg << "\r\n"
+      << "Content-type: text/html\r\n"
+      << "Content-Length: " << fileContent.size() << "\r\n"
+      << "Connection: close\r\n" // Should be keep-alive because its http 1.1
+      << "\r\n"
+      << fileContent;
+
   m_serverMessage = response.str();
-  
 
   std::string log_str = "HTTP/1.1 " + statusCode + " " + statusMsg + "\r\n";
   log(log_str);
-  return(true);
-	}
+  return (true);
+}
 } // namespace http

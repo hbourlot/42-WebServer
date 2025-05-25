@@ -15,6 +15,8 @@ bool TcpServer::validateGet() {
   return(true);
 }
 
+
+
 bool TcpServer::validateRequestMethod() {
   if (request.method == "GET") {
     if (validateGet() == false)
