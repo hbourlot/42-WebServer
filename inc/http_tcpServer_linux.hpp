@@ -45,7 +45,7 @@ namespace {
 
 namespace http {
 
-	typedef int SOCKET;
+	typedef int HTTP_SOCKET;
 	const int BUFFER_SIZE = 30720;
 
 	class TcpServer {
@@ -61,7 +61,7 @@ namespace http {
 			httpRequest request;
 			std::string m_ip_address;
 			int m_port, bytesReceived, bytesSend;
-			SOCKET m_socket, m_acceptSocket;
+			HTTP_SOCKET m_serverSocket, m_acceptSocket;
 			long m_incomingMessage;
 			struct sockaddr_in m_socketAddress;
 			unsigned int m_socketAddress_len;
@@ -70,14 +70,14 @@ namespace http {
 			int startServer();
 			void shutDownServer();
 			void startListen();
-			int acceptConnection(std::vector<pollfd> &fds);
-			void readRequest(int fd, std::vector<pollfd> fds, int i);
+			void acceptConnection(std::vector<pollfd> &fds);
+			void readRequest(std::vector<pollfd> &fds, int i);
 			bool validateRequestMethod();
 			bool validateGet();
 			void setResponseError(std::string statusCode,
 								  std::string statusMsg);
 			void setHtmlResponse(std::ifstream &htmlFile);
-			void sendResponse();
+			void sendResponse(pollfd socket);
 	};
 
 } // namespace http
