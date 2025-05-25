@@ -32,9 +32,11 @@ void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
 		std::cerr << "Error: read()\n";
 		close(fds[i].fd);
 		fds.erase(fds.begin() + i);
+		return;
 		// throw TcpServerException(
 		// 	"Failed to read bytes from client socket connection");
-	}
+	} else if (bytesReceived == 0)
+		return;
 	buffer[bytesReceived] = '\0';
 	write(2, buffer, BUFFER_SIZE);
 	std::string requestContent(buffer);

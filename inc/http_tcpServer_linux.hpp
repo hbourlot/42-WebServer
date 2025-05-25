@@ -77,7 +77,7 @@ namespace http {
 			void setResponseError(std::string statusCode,
 								  std::string statusMsg);
 			void setHtmlResponse(std::ifstream &htmlFile);
-			void sendResponse(pollfd socket);
+			int sendResponse(pollfd socket);
 	};
 
 } // namespace http
