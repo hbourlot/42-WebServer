@@ -115,7 +115,7 @@ r:
 
 v:
 	@make -s
-	@$(VALGRIND) ./conf_files/good/valid.conf
+	@$(VALGRIND) ./$(NAME) conf_files/good/valid.conf
 
 fc: fclean
 
