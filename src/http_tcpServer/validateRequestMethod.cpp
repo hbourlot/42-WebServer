@@ -25,6 +25,8 @@ bool TcpServer::validateRequestMethod() {
   } else if (request.method == "DELETE")
     std::cout << "Suposed to do something" << std::endl;
   else {
+    std::cerr << "\033[0;31m" <<  request.method << "\033[0m" <<  std::endl;
+
     setResponseError("405", "Method Not Allowed");
     return false;
   }
