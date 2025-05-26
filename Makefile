@@ -33,7 +33,7 @@ LIB_FUNC		= ft_strtrim utils
 # HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod validatePost upload readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
 
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
+HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod validatePost upload readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(LIB_DIR), $(LIB_FUNC:=.cpp)) \
