@@ -6,7 +6,7 @@
 
 void http::TcpServer::runServer() {
 
-	int timeOut = 3 * 3 * 1000;
+	int timeOut = 10 * 10 * 1000;
 
 	startServer();
 	try {
@@ -23,13 +23,13 @@ void http::TcpServer::runServer() {
 	listen_fd.events = POLLIN; // any readable data available
 	listen_fd.revents = 0;
 	fds.push_back(listen_fd);
-
 	try {
 		while (true) {
 			//
 			// poll() waits for events on multiple file descriptors (like
 			// sockets), enabling non-blocking I/O in servers.
-			int ret = poll(fds.data(), fds.size(), timeOut);
+			int ret = poll(fds.data(), fds.size(), timeOut); // ??
+			std::cout << "Entrou no while true do runServer" << std::endl;
 
 			if (ret < 0) {
 				std::cerr << "poll() failed" << std::endl;
@@ -44,11 +44,13 @@ void http::TcpServer::runServer() {
 			for (size_t i = 1; i < fds.size(); ++i) {
 				int fd = fds[i].fd;
 
+				std::cout << "Entrou no loop do runServer" << std::endl;
 				if (fds[i].revents & POLLIN) {
 					readRequest(fds, i);
 				}
 				if (fds[i].revents & POLLOUT) {
 					bool shouldClose;
+					std::cout << "Entrou no if do runServer" << std::endl;
 
 					validateRequestMethod();
 					shouldClose = sendResponse(fds[i]);

@@ -4,6 +4,7 @@
 
 static void setSocketAddr(sockaddr_in &m_socketAddress, int domain, int s_addr,
 						  int m_port) {
+	std::cout << "Entrou no set Socket Addr" << std::endl;
 	m_socketAddress.sin_family = domain;
 	m_socketAddress.sin_addr.s_addr =
 		s_addr; // can replace this with a specific IP address if needed
@@ -35,6 +36,7 @@ namespace http {
 			exit(EXIT_FAILURE);
 		}
 
+		std::cout << "Entrou no start Server" << std::endl;
 		// Set the socket address struct
 		setSocketAddr(m_socketAddress, AF_INET, INADDR_ANY, m_port);
 

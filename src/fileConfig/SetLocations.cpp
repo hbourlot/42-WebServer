@@ -9,6 +9,12 @@
 #define UPLOAD_STORE 13
 #define AUTOINDEX 14
 
+Location::Location(){
+	uploadEnable = false;
+	autoIndex = false;
+	// String are automatically initialized;
+}
+
 std::string locationPath(const std::string& line) {
     size_t start = line.find_first_not_of(' '); // Skips all the spaces
     if (start == std::string::npos)
@@ -153,4 +159,20 @@ bool	SetLocation::setLocationConfig(std::ifstream& confFd, std::string line, Ser
 	}
 	server.locations.push_back(location);
 	return true;
+}
+
+
+void	SetLocation::setDefaultLocation(Location& location){
+	if (location.path.empty())
+		throw std::invalid_argument("Error: Missing path in one or more locations ❌\n");
+
+	if (location.methods.empty()){
+		std::cout << "No methods, so we will set the GET method ✅" << std::endl;
+		location.methods.push_back("GET");
+	}	
+
+	if (location.root.empty()){
+		std::cout << "No root defined. Setting /var/www + path ✅" << std::endl;
+		location.root = "/var/www" + location.path;
+	}
 }

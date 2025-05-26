@@ -10,6 +10,8 @@
 #include <cstdlib>
 
 struct Location{
+	Location();
+
 	std::string							path; // location --> /upload <--
 	std::vector<std::string>			methods; // method POST GET DELETE
     std::string                 		root; 
@@ -23,6 +25,8 @@ struct Location{
 };
 
 struct Server{
+	Server();
+
 	std::string					host; // Stores the host IP
 	int							port; // Stores the port to listen
 	std::string					serverName; // Stores the name server

@@ -9,6 +9,11 @@
 #define ERROR_PAGE 5
 #define LOCATION 6
 
+Server::Server(){
+	port = 0;
+	maxRequest = 0;
+}
+
 void 	getErrorPage(std::string noSpaceLine, Server& server){
 	std::istringstream iss(noSpaceLine);
     std::string directive;
@@ -50,6 +55,7 @@ bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Confi
 	std::string trimedLine; // Stores the atribute of the server
 	Server server; // Variable to save all the information
 	
+	server.port = 0;
 	server.maxRequest = 10; // Set the max value by default
 	while (std::getline(confFd, line)){ // Finish the server config block
 		noSpaceLine = removeSpace(line); // Removes the first spaces
@@ -94,6 +100,7 @@ bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Confi
 		noSpaceLine = removeSpace(line);
 		trimedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
 	}
+	ReadConfig::setDefaultServer(server);
 	configs.servers.push_back(server); // Send the information for the main config
 	return (true);
 }
@@ -113,3 +120,30 @@ bool    ReadConfig::setConfigs(char* conf, Configs& configs){
     confFd.close();
 	return (true);
 };
+
+void	ReadConfig::setDefaultServer(Server& server){
+	if (server.host.empty()){
+		std::cout << "Setting default host 127.0.0.1 ✅" << std::cout;
+		server.host = "127.0.0.1";
+	}
+	
+	if (server.port == 0){
+		std::cout << "Server port 0 -- Setting to 8080 ✅" << std::endl;
+		server.port = 8080;
+	}
+
+	if (server.serverName.empty()){
+		std::cout << "Setting the Server Name to 'Default' ✅" << std::endl;
+		server.serverName = "Default";
+	}
+
+	if (server.errorPage.empty()){
+		std::cout << "Setting default error page information ✅" << std::endl;
+		server.errorPage.insert(std::pair<int, std::string> (404, "../../content/defaultError.html"));
+	}
+	
+	if (server.maxRequest == 0){
+		std::cout << "Settig Max request to 10M ✅" << std::endl;
+		server.maxRequest = 10;
+	}
+}
