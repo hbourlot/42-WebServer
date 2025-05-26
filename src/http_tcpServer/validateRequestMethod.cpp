@@ -26,6 +26,7 @@ bool http::TcpServer::validateRequestMethod() {
 	else if (request.method == "DELETE")
 		std::cout << "Supposed to do something" << std::endl;
 	else {
+		std::cout << "SET ERROR TRUE\n\n";
 		setResponseError("405", "Method Not Allowed");
 		return false;
 	}

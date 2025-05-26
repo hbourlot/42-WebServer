@@ -36,7 +36,7 @@ void http::TcpServer::acceptConnection(std::vector<pollfd> &fds) {
 			client_pollfd.revents = 0;
 
 			fds.push_back(client_pollfd);
-			std::cout << "----- Connection Accepted 🟩\n";
+			std::cout << "----- Connection Accepted 🟩\n\n";
 		}
 	}
 }
