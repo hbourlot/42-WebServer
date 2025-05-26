@@ -63,12 +63,11 @@
 <body>
 	<div class="container">
 		<h2>Login Successful!</h2>
-		<p>Welcome! You can upload an image or a GIF below.</p>
+		<p>Welcome! You can upload any type of file below.</p>
 		<form action="/upload" method="POST" enctype="multipart/form-data">
-			<input type="file" name="media" accept="image/*,image/gif" required />
+			<input type="file" name="media" required />
 			<button type="submit">Upload File</button>
 		</form>
 	</div>
 </body>
-
 </html>

@@ -5,19 +5,25 @@
 
 namespace http {
 
-void TcpServer::setResponseError(std::string statusCode,
-                                 std::string statusMsg) {
-  std::string body = statusMsg + " (" + statusCode + ")";
+void TcpServer::setResponse(std::string statusCode, std::string statusMsg,
+                            std::string contentType, std::string body) {
+  //   std::string body = statusMsg + " (" + statusCode + ")";
   std::ostringstream response;
   response
       << "HTTP/1.1 " << statusCode << " " << statusMsg << "\r\n"
-      << "Content-Type: text/plain\r\n"
+      << "Content-Type: " << contentType << "\r\n"
       << "Content-Length: " << body.length() << "\r\n"
       << "Connection: close\r\n" // Should be keep-alive because its http 1.1
       << "\r\n"
       << body;
   m_serverMessage = response.str();
   log(response.str());
+}
+
+void TcpServer::setResponseError(std::string statusCode,
+                                 std::string statusMsg) {
+  std::string body = statusMsg + " (" + statusCode + ")";
+  setResponse(statusCode, statusMsg, "text/plain", body);
 }
 
 // ! Para adicionar conforme venha no request

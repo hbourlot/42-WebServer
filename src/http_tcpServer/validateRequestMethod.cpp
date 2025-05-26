@@ -10,14 +10,13 @@ bool TcpServer::validateGet() {
   // std::cout << request.path << std::endl;
   std::string fullPath = "./content/" + request.path;
   std::ifstream htmlFile(fullPath.c_str());
-  if(setHtmlResponse("200", "OK", htmlFile) == false)
+  if (setHtmlResponse("200", "OK", htmlFile) == false)
     return false; // TODO: throw error would be better
-  return(true);
+  return (true);
 }
 
-
-
 bool TcpServer::validateRequestMethod() {
+  std::cerr << request.method << std::endl;
   if (request.method == "GET") {
     if (validateGet() == false)
       return (false);
