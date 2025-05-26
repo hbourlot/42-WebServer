@@ -22,11 +22,13 @@ static void parseRequest(httpRequest &request,
       request.headers[key] = value;
     }
   }
-
+  // std::cout << requestContent << std::endl;
   std::string body;
   while (std::getline(request_stream, line))
     body += line + "\n";
   request.body = body;
+  // request.body = request_stream.str();
+  //  std::cerr << "\033[0;31m" <<  request.body << "\033[0m" <<  std::endl;
 }
 
 void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
@@ -45,7 +47,10 @@ void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
 	}
 	buffer[bytesReceived] = '\0';
 	write(2, buffer, BUFFER_SIZE);
-	std::string requestContent(buffer);
+	std::string requestContent("");
+  for(int i=0; i < bytesReceived; i++)
+   requestContent += buffer[i]; 
+  // std::cout << requestContent << std::endl;
 	parseRequest(request, requestContent);
 
   // Set event POLLOUT
