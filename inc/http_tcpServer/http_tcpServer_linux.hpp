@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CheckConfName.hpp"
-#include "ReadConfig.hpp"
+#include "Config/CheckConf.hpp"
+#include "Config/ReadConfig.hpp"
 
 #include "http_tcpServerException_linux.hpp"
 #include <arpa/inet.h>
@@ -54,13 +54,13 @@ namespace http {
 typedef int HTTP_SOCKET;
 const int BUFFER_SIZE = 30720;
 
-class TcpServer {
-public:
-  // Default Constructor
-  TcpServer(std::string ip_address, int port);
-  // Default Destructor
-  ~TcpServer();
-  void runServer();
+	class TcpServer {
+		public:
+			// Default Constructor
+			TcpServer(Configs configuration);
+			// Default Destructor
+			~TcpServer();
+			void runServer();
 
 private:
   // MAYBE YOU STRUCT HERE?? 😇

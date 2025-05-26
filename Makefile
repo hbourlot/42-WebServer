@@ -26,12 +26,14 @@ COMPILED_FILES  = 0
 LEN             = 0
 
 
-FILE_FUNC		= CheckConfName ReadConfig ConfigUtils SetLocations
+# FILE_FUNC		= CheckConfName ReadConfig ConfigUtils SetLocations
 BACK_FUNC		= forms
 LIB_FUNC		= ft_strtrim utils
-FILE_FUNC		= CheckConfName ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod validatePost upload readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
+# FILE_FUNC		= CheckConfName ReadConfig ConfigUtils SetLocations
+# HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod validatePost upload readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
 
+FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
+HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(LIB_DIR), $(LIB_FUNC:=.cpp)) \
@@ -121,11 +123,11 @@ bonus: all
 # Shortcuts
 r:
 	@make -s
-	@./$(NAME) ./conf_files/good/valid.conf
+	@./$(NAME) ./conf_files/good/chat.conf
 
 v:
 	@make -s
-	@$(VALGRIND) ./$(NAME) conf_files/good/valid.conf
+	@$(VALGRIND) ./$(NAME) ./conf_files/good/chat.conf
 
 fc: fclean
 

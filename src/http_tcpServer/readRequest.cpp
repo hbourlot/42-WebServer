@@ -1,5 +1,4 @@
-#include "http_tcpServer_linux.hpp"
-// #include "webserv.hpp"
+#include "http_tcpServer/http_tcpServer_linux.hpp"
 #include <sys/poll.h>
 
 static void parseRequest(httpRequest &request,
@@ -31,22 +30,23 @@ static void parseRequest(httpRequest &request,
 }
 
 void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
-  char buffer[BUFFER_SIZE + 1] = {0};
+	char buffer[BUFFER_SIZE + 1] = {0};
 
-  bytesReceived = read(fds[i].fd, buffer, BUFFER_SIZE);
-  if (bytesReceived < 0) {
-    std::cerr << "Error: read()\n";
-    close(fds[i].fd);
-    fds.erase(fds.begin() + i);
-    return;
-    // throw TcpServerException(
-    // 	"Failed to read bytes from client socket connection");
-  } else if (bytesReceived == 0)
-    return;
-  buffer[bytesReceived] = '\0';
-  write(2, buffer, BUFFER_SIZE);
-  std::string requestContent(buffer);
-  parseRequest(request, requestContent);
+	bytesReceived = read(fds[i].fd, buffer, BUFFER_SIZE);
+	if (bytesReceived < 0) {
+		std::cerr << "Error: read()\n";
+		close(fds[i].fd);
+		fds.erase(fds.begin() + i);
+		return;
+		// throw TcpServerException(
+		// 	"Failed to read bytes from client socket connection");
+	} else if (bytesReceived == 0) {
+		return;
+	}
+	buffer[bytesReceived] = '\0';
+	write(2, buffer, BUFFER_SIZE);
+	std::string requestContent(buffer);
+	parseRequest(request, requestContent);
 
   // Set event POLLOUT
   fds[i].events |= POLLOUT;
