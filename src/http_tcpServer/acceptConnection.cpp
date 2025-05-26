@@ -1,4 +1,4 @@
-#include "http_tcpServer_linux.hpp"
+#include "http_tcpServer/http_tcpServer_linux.hpp"
 #include <sys/poll.h>
 #include <vector>
 
@@ -18,7 +18,7 @@ void http::TcpServer::acceptConnection(std::vector<pollfd> &fds) {
 				  "[ADDRESS: "
 			   << inet_ntoa(m_socketAddress.sin_addr) << "]\n"
 			   << "[PORT: " << ntohs(m_socketAddress.sin_port) << "]\n";
-			std::cerr << ss;
+			std::cerr << ss.str();
 			return;
 		} else {
 

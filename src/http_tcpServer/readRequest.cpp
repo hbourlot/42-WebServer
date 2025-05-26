@@ -1,4 +1,4 @@
-#include "http_tcpServer_linux.hpp"
+#include "http_tcpServer/http_tcpServer_linux.hpp"
 #include <sys/poll.h>
 
 static void parseRequest(httpRequest &request,
@@ -34,6 +34,8 @@ void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
 		fds.erase(fds.begin() + i);
 		// throw TcpServerException(
 		// 	"Failed to read bytes from client socket connection");
+	} else if (bytesReceived == 0) {
+		return;
 	}
 	buffer[bytesReceived] = '\0';
 	write(2, buffer, BUFFER_SIZE);

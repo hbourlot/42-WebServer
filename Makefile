@@ -22,7 +22,7 @@ OBJ_DIR         = obj/
 # -- Variables
 COMPILED_FILES  = 0
 LEN             = 0
-FILE_FUNC		= CheckConfName ReadConfig ConfigUtils SetLocations
+FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
 HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
@@ -111,11 +111,11 @@ bonus: all
 # Shortcuts
 r:
 	@make -s
-	@./$(NAME) ./conf_files/good/valid.conf
+	@./$(NAME) ./conf_files/good/chat.conf
 
 v:
 	@make -s
-	@$(VALGRIND) ./conf_files/good/valid.conf
+	@$(VALGRIND) ./$(NAME) ./conf_files/good/chat.conf
 
 fc: fclean
 

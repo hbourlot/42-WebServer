@@ -1,4 +1,4 @@
-#include "SetLocations.hpp"
+#include "Config/SetLocations.hpp"
 
 #define METHODS 7
 #define ROOT 8
@@ -104,6 +104,10 @@ bool	SetLocation::setLocationConfig(std::ifstream& confFd, std::string line, Ser
 
 	while (std::getline(confFd, line)){
 		noSpaceLine = removeSpace(line);
+
+		if (!CheckConf::checkLineFinished(noSpaceLine)) // Checks if have more information after the limitter
+			throw std::invalid_argument("Error: Extra words after End of Line\n");
+
 		trimedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
 
 		if (trimedLine[0] == '}')

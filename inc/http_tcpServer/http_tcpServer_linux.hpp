@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CheckConfName.hpp"
-#include "ReadConfig.hpp"
+#include "Config/CheckConf.hpp"
+#include "Config/ReadConfig.hpp"
 
 #include "http_tcpServerException_linux.hpp"
 #include <arpa/inet.h>
@@ -51,7 +51,7 @@ namespace http {
 	class TcpServer {
 		public:
 			// Default Constructor
-			TcpServer(std::string ip_address, int port);
+			TcpServer(Configs configuration);
 			// Default Destructor
 			~TcpServer();
 			void runServer();
