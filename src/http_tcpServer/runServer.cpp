@@ -41,7 +41,7 @@ void http::TcpServer::runServer() {
 			if (acceptConnection(fds)) {
 				for (size_t i = 1; i < fds.size(); ++i) {
 					int fd = fds[i].fd;
-
+					
 					if (fds[i].revents & POLLIN) {
 
 						readRequest(fd, fds, i);
