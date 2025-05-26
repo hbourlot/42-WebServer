@@ -1,6 +1,5 @@
-#include "http_tcpServerException_linux.hpp"
-#include "http_tcpServer_linux.hpp"
-#include <cerrno>
+#include "http_tcpServer/http_tcpServerException_linux.hpp"
+#include "http_tcpServer/http_tcpServer_linux.hpp"
 #include <iostream>
 #include <sys/poll.h>
 #include <vector>
@@ -8,7 +7,6 @@
 void http::TcpServer::runServer() {
 
 	int timeOut = 3 * 3 * 1000;
-	// int timeOut = -1;
 
 	startServer();
 	try {

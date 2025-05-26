@@ -1,4 +1,4 @@
-#include "ConfigUtils.hpp"
+#include "Config/ConfigUtils.hpp"
 
 std::string removeSpace(std::string& line){
 	int i = 0;
