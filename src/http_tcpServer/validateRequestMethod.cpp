@@ -5,8 +5,10 @@
 namespace http {
 
 bool TcpServer::validateGet() {
+  // if (request.path == "/")
+  //   request.path = "login.html";
   if (request.path == "/")
-    request.path = "login.html";
+    request.path = "success.html";
   // std::cout << request.path << std::endl;
   std::string fullPath = "./content/" + request.path;
   std::ifstream htmlFile(fullPath.c_str());

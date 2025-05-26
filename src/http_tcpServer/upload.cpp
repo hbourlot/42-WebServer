@@ -37,10 +37,10 @@ bool splitHeadersAndContent(const std::string &filePart, std::string &headers,
   size_t headerEnd = filePart.find("\r\n\r\n");
   if (headerEnd == std::string::npos)
     return (false);
-    // std::cerr << "\033[0;31m" <<  filePart << "\033[0m" <<  std::endl;
-
-  headers = filePart.substr(0, headerEnd);
-  content = filePart.substr(headerEnd + 4);
+    
+    headers = filePart.substr(0, headerEnd);
+    content = filePart.substr(headerEnd);
+    // std::cerr << "\033[0;31m" <<  content << "\033[0m" <<  std::endl;
   return (true);
 }
 
@@ -61,10 +61,20 @@ static std::string extractFilename(const std::string &headers) {
 static bool saveFile(const std::string &filename, const std::string &content) {
   std::string savePath = "./content/upload/" + filename;
 
+  // std::ifstream newfile(savePath.c_str(), std::ios::binary);
   std::ofstream newfile(savePath.c_str(), std::ios::binary);
   if (!newfile.is_open())
+  {
+    std::cout << "HEre newfile close" << std::endl;
     return (false);
+  }
 
+  // newfile.seekp(0,std::ios::end);
+  // size_t lenght = newfile.tellp();
+  // newfile.seekp(0,std::ios::beg);
+  // newfile.seekg(0,std::ios::end);
+  // size_t lenght = newfile.tellg();
+  // newfile.seekg(0,std::ios::beg);
   newfile << content;
   newfile.close();
   return (true);
@@ -72,7 +82,8 @@ static bool saveFile(const std::string &filename, const std::string &content) {
 
 bool TcpServer::parseMultipart() {
   //   printHttpHeaders(request);
-  std::cout << request.body << std::endl;
+  // std::cout << request.body << std::endl;
+   
 
   std::string boundary = extractBoundary(request);
   if (boundary.empty()) {
@@ -100,7 +111,9 @@ bool TcpServer::parseMultipart() {
   }
 
   if (!saveFile(filename, content)) {
-    setResponseError("500", "Internal Server Error: File not saved");
+    // setResponseError("500", "Internal Server Error: File not saved");
+    std::ifstream htmlFile("./content/error_500.html");
+    setHtmlResponse("500", "Internal Server Error: File not saved",htmlFile);
     return (false);
   }
   std::string msg = "File '" + filename + "' received";
