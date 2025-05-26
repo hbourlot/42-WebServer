@@ -44,7 +44,7 @@ void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
   } else if (bytesReceived == 0)
     return;
   buffer[bytesReceived] = '\0';
-  // write(2, buffer, BUFFER_SIZE);
+  write(2, buffer, BUFFER_SIZE);
   std::string requestContent(buffer);
   parseRequest(request, requestContent);
 

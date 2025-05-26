@@ -37,6 +37,7 @@ bool splitHeadersAndContent(const std::string &filePart, std::string &headers,
   size_t headerEnd = filePart.find("\r\n\r\n");
   if (headerEnd == std::string::npos)
     return (false);
+    // std::cerr << "\033[0;31m" <<  filePart << "\033[0m" <<  std::endl;
 
   headers = filePart.substr(0, headerEnd);
   content = filePart.substr(headerEnd + 4);
@@ -58,7 +59,7 @@ static std::string extractFilename(const std::string &headers) {
 }
 
 static bool saveFile(const std::string &filename, const std::string &content) {
-  std::string savePath = "./content/upload" + filename;
+  std::string savePath = "./content/upload/" + filename;
 
   std::ofstream newfile(savePath.c_str(), std::ios::binary);
   if (!newfile.is_open())
@@ -75,7 +76,7 @@ bool TcpServer::parseMultipart() {
 
   std::string boundary = extractBoundary(request);
   if (boundary.empty()) {
-    setResponseError("400", "Bad Request: Nou boundary");
+    setResponseError("400", "Bad Request: No boundary");
     return (false);
   }
 
@@ -87,7 +88,7 @@ bool TcpServer::parseMultipart() {
 
   std::string headers;
   std::string content;
-  if (splitHeadersAndContent(filePart, headers, content)) {
+  if (!splitHeadersAndContent(filePart, headers, content)) {
     setResponseError("400", "Bad Request: Malformed multipart body");
     return (false);
   }
@@ -98,7 +99,7 @@ bool TcpServer::parseMultipart() {
     return (false);
   }
 
-  if (saveFile(filename, content)) {
+  if (!saveFile(filename, content)) {
     setResponseError("500", "Internal Server Error: File not saved");
     return (false);
   }
