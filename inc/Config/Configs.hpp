@@ -1,5 +1,6 @@
 #pragma once
 #include "ConfigUtils.hpp"
+#include "CheckConf.hpp"
 #include <vector>
 #include <string>
 #include <map>
@@ -9,10 +10,10 @@
 #include <cstdlib>
 
 struct Location{
-	std::string							path;
-	std::vector<std::string>			methods;
-    std::string                 		root;
-	std::string							redirection;
+	std::string							path; // location --> /upload <--
+	std::vector<std::string>			methods; // method POST GET DELETE
+    std::string                 		root; 
+	std::string							redirection; // http://example.com;
 	std::vector<std::string>			cgi_extension;
 	std::vector<std::string>			cgi_path;
 	std::map<std::string, std::string> 	cgi;
