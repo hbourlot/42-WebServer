@@ -25,9 +25,9 @@ static void parseRequest(httpRequest &request,
 }
 
 void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
-	char buffer[BUFFER_SIZE] = {0};
+	char buffer[BUFFER_SIZE + 1] = {0};
 
-	bytesReceived = read(fds[i].fd, buffer, BUFFER_SIZE - 1);
+	bytesReceived = read(fds[i].fd, buffer, BUFFER_SIZE);
 	if (bytesReceived < 0) {
 		std::cerr << "Error: read()\n";
 		close(fds[i].fd);
