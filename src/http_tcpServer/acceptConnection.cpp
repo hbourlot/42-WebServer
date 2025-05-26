@@ -1,5 +1,6 @@
 #include "http_tcpServer/http_tcpServer_linux.hpp"
 #include <sys/poll.h>
+#include <sys/socket.h>
 #include <vector>
 
 void http::TcpServer::acceptConnection(std::vector<pollfd> &fds) {
@@ -8,10 +9,14 @@ void http::TcpServer::acceptConnection(std::vector<pollfd> &fds) {
 
 	// Checks the if theres readable data available (event)
 	while (fds[0].revents & POLLIN) {
-
-		m_acceptSocket = accept(m_serverSocket, NULL, NULL);
+		m_acceptSocket =
+			accept(m_serverSocket, (struct sockaddr *)&m_socketAddress,
+				   &m_socketAddress_len);
 		if (m_acceptSocket < 0) {
-
+			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+				// Means no more connections to accept
+				break;
+			}
 			std::ostringstream ss;
 
 			ss << "Server failed to accept incoming connection from =>\n"

@@ -48,9 +48,20 @@ void http::TcpServer::runServer() {
 					readRequest(fds, i);
 				}
 				if (fds[i].revents & POLLOUT) {
+					bool shouldClose;
+
 					validateRequestMethod();
-					sendResponse(fds[i]);
+					shouldClose = sendResponse(fds[i]);
 					fds[i].events &= ~POLLOUT;
+					if (shouldClose) {
+						close(fds[i].fd);
+						fds.erase(fds.begin() + i);
+						continue;
+					}
+					request.headers.clear();
+					request.method.clear();
+					request.body.clear();
+					m_serverMessage.clear();
 				}
 			}
 		}
