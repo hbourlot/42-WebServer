@@ -19,7 +19,7 @@ namespace http {
 		m_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 		if (m_serverSocket < 0) {
 			throw TcpServerException("Cannot create socket");
-			return 1;
+			return -1;
 		}
 
 		// Set listening socket to non-blocking mode
@@ -43,7 +43,7 @@ namespace http {
 		if (bind(m_serverSocket, (sockaddr *)&m_socketAddress,
 				 m_socketAddress_len) < 0) {
 			throw TcpServerException("Cannot bind socket to address");
-			return 1;
+			return -1;
 		}
 
 		return 0;

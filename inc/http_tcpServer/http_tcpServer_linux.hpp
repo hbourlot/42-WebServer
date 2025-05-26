@@ -54,7 +54,8 @@ namespace http {
 			TcpServer(Configs configuration);
 			// Default Destructor
 			~TcpServer();
-			void runServer();
+			int runServer();
+			void runLoop(std::vector<pollfd> &fds, int timeOut);
 
 		private:
 			// MAYBE YOU STRUCT HERE?? 😇
@@ -68,7 +69,7 @@ namespace http {
 			std::string m_serverMessage;
 
 			int startServer();
-			void shutDownServer();
+			void shutDownServer(std::vector<pollfd> &fds);
 			void startListen();
 			void acceptConnection(std::vector<pollfd> &fds);
 			void readRequest(std::vector<pollfd> &fds, int i);

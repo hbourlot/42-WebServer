@@ -11,7 +11,7 @@ namespace http {
 
 		public:
 			explicit TcpServerException(const std::string &message)
-				: std::runtime_error(message) {
+				: std::runtime_error(message + "\n") {
 			}
 	};
 
