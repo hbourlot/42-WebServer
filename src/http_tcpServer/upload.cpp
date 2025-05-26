@@ -32,14 +32,14 @@ static std::string extractFilePart(httpRequest &request,
   return (body.substr(start, end - start));
 }
 
-bool splitHeadersAndContent(const std::string &filePart, std::string &headers,
+static bool splitHeadersAndContent(const std::string &filePart, std::string &headers,
                             std::string &content) {
   size_t headerEnd = filePart.find("\r\n\r\n");
   if (headerEnd == std::string::npos)
     return (false);
     
     headers = filePart.substr(0, headerEnd);
-    content = filePart.substr(headerEnd);
+    content = filePart.substr(headerEnd+4);
     // std::cerr << "\033[0;31m" <<  content << "\033[0m" <<  std::endl;
   return (true);
 }
@@ -69,22 +69,14 @@ static bool saveFile(const std::string &filename, const std::string &content) {
     return (false);
   }
 
-  // newfile.seekp(0,std::ios::end);
-  // size_t lenght = newfile.tellp();
-  // newfile.seekp(0,std::ios::beg);
-  // newfile.seekg(0,std::ios::end);
-  // size_t lenght = newfile.tellg();
-  // newfile.seekg(0,std::ios::beg);
   newfile << content;
   newfile.close();
   return (true);
 }
 
 bool TcpServer::parseMultipart() {
-  //   printHttpHeaders(request);
-  // std::cout << request.body << std::endl;
-   
 
+   
   std::string boundary = extractBoundary(request);
   if (boundary.empty()) {
     setResponseError("400", "Bad Request: No boundary");
