@@ -2,9 +2,10 @@
 
 namespace http {
 
-	void TcpServer::shutDownServer() {
-		close(m_serverSocket);
-		close(m_acceptSocket);
-		// exit(0); // Exit with failure code??
+	void TcpServer::shutDownServer(std::vector<pollfd> &fds) {
+		for (int i = 0; i < fds.size(); ++i) {
+			close(fds[i].fd);
+			fds.erase(fds.begin() + i);
+		}
 	}
 } // namespace http

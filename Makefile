@@ -23,7 +23,7 @@ OBJ_DIR         = obj/
 COMPILED_FILES  = 0
 LEN             = 0
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
+HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer runLoop
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR), main.cpp) 
@@ -37,19 +37,6 @@ TOTAL_FILES     = $(shell echo $$(($(words $(OBJS_SRC)))))
 VALGRIND        = valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
 # MSG             = "[ $(COMPILED_FILES)/$(TOTAL_FILES) $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))%% ] $(ORANGE)Compiling [$1]... $(RESET)"
 MSG 			= "$(CYAN) => ($(COMPILED_FILES)/$(TOTAL_FILES) $(PERCENT)%%) 🔧 Compiling [$1]...$(RESET)"
-
-# -- Function to print the compilation message
-define print_compile_msg
-	$(eval COMPILED_FILES = $(shell echo $$(($(COMPILED_FILES) + 1))))
-	$(eval PERCENT = $(shell echo $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))))
-	$(eval LEN = $(shell echo -n $(MSG) | wc -c))
-	@$(PRINT_CMD) "$$(printf '%*s\r' $(LEN) '')"
-	@$(PRINT_CMD) $(MSG)
-	@if [ $(COMPILED_FILES) -ne $(TOTAL_FILES) ]; then \
-		$(PRINT_CMD) "\r" $(CUT) \
-		$(PRINT_CMD) $(UP) $(CUT); \
-	fi
-endef
 
 # -- Cleaning functions
 define clean_func
@@ -93,8 +80,11 @@ $(LIB): $(OBJS_SRC)
 
 $(OBJ_DIR)%.o: %.cpp $(HEADERS)
 	@mkdir -p $(dir $@)
-	$(call print_compile_msg,$<)
+	$(eval COMPILED_FILES = $(shell echo $$(($(COMPILED_FILES) + 1))))
+	$(eval PERCENT = $(shell echo $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))))
+	@echo "$(CYAN) => ($(COMPILED_FILES)/$(TOTAL_FILES) $(PERCENT)%) Compiling [$<]...$(RESET)"
 	@$(CXX) $(CXXFLAGS) -c $< -I./$(INCLUDE) -o $@
+	@printf ${UP}${CUT}
 
 clean:
 	$(call clean_func)
@@ -120,7 +110,3 @@ v:
 fc: fclean
 
 c: clean
-
-# $(OBJ_DIR)main.o:	main.cpp $(HEADERS)
-# 					$(call print_compile_msg,$<)
-# 					@$(CXX) -c $< $(CXXFLAGS) -I./$(INCLUDE) -o $@
