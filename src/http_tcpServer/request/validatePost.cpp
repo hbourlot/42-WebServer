@@ -5,11 +5,11 @@ namespace http {
 bool TcpServer::validatePost() {
 
   if (request.path == "/login") {
-    protoBackend result = validateForm(request);
+    httpResponse result = validateForm(request);
 
     if (!result.htmlFilePath.empty()) {
-      std::ifstream htmlFile(result.htmlFilePath.c_str());
-      setHtmlResponse(result.statusCode, result.statusMessage, htmlFile);
+      setHtmlResponse(result.statusCode, result.statusMessage,
+                      result.htmlFilePath);
     } else
       setResponseError(result.statusCode, result.statusMessage);
   } else if (request.path == "/upload") {

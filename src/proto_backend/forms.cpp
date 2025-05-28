@@ -1,8 +1,8 @@
 #include "http_tcpServer/http_tcpServerException_linux.hpp"
 
-protoBackend set_s_protoBackend(std::string statusCode, std::string statusMsg,
+httpResponse set_s_protoBackend(std::string statusCode, std::string statusMsg,
                                 std::string htmlFilePath) {
-  protoBackend result;
+  httpResponse result;
   result.statusCode = statusCode;
   result.statusMessage = statusMsg;
   result.htmlFilePath = htmlFilePath;
@@ -26,8 +26,8 @@ static std::map<std::string, std::string> parseForm(const std::string &body) {
   return (form);
 }
 
-static protoBackend formurldeconded(httpRequest request) {
-  protoBackend result;
+static httpResponse formurldeconded(httpRequest request) {
+  httpResponse result;
   std::map<std::string, std::string> form = parseForm(request.body);
   if (form["username"] == "admin" && form["password"] == "1234") {
     // std::string htmlFilePath("./content/success.html");
@@ -39,8 +39,8 @@ static protoBackend formurldeconded(httpRequest request) {
   return (result);
 }
 
-protoBackend validateForm(httpRequest request) {
-  protoBackend result;
+httpResponse validateForm(httpRequest request) {
+  httpResponse result;
   std::cout << request.headers["Content-Type"] << std::endl;
   if (request.headers["Content-Type"] == "application/x-www-form-urlencoded")
     result = formurldeconded(request);

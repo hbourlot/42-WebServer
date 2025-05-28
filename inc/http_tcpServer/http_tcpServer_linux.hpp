@@ -19,6 +19,10 @@
 #include <unistd.h>
 #include <vector>
 
+#define DFL_404 "content/defaults/error_404.html"
+#define DFL_405 "content/defaults/error_405.html"
+#define DFL_500 "content/defaults/error_500.html"
+
 struct httpRequest {
   std::string method;
   std::string path;
@@ -27,11 +31,10 @@ struct httpRequest {
   std::string body;
 };
 
-struct protoBackend {
+struct httpResponse {
   std::string statusCode;
   std::string statusMessage;
   std::string htmlFilePath;
-  // std::ifstream *htmlfile;
 };
 
 namespace {
@@ -54,17 +57,18 @@ namespace http {
 typedef int HTTP_SOCKET;
 const int BUFFER_SIZE = 30720;
 
-	class TcpServer {
-		public:
-			// Default Constructor
-			TcpServer(Configs configuration);
-			// Default Destructor
-			~TcpServer();
-			void runServer();
+class TcpServer {
+public:
+  // Default Constructor
+  TcpServer(Configs configuration);
+  // Default Destructor
+  ~TcpServer();
+  void runServer();
 
 private:
   // MAYBE YOU STRUCT HERE?? 😇
   httpRequest request;
+  Server infos; // For keep infos inside
   std::string m_ip_address;
   int m_port, bytesReceived, bytesSend;
   HTTP_SOCKET m_serverSocket, m_acceptSocket;
@@ -78,13 +82,18 @@ private:
   void startListen();
   void acceptConnection(std::vector<pollfd> &fds);
   void readRequest(std::vector<pollfd> &fds, int i);
-  bool validateRequestMethod();
-  bool validateGet();
+  bool validateRequest();
+  //   bool validateRequestMethod();
+  //   bool validateRequestMethod(Location &location);
+  //   bool validateGet();
+  bool validateGet(const Location *location);
   bool validatePost();
   int sendResponse(pollfd socket);
   void setResponseError(std::string statusCode, std::string statusMsg);
+  //   bool setHtmlResponse(std::string statusCode, std::string statusMsg,
+  //                        std::ifstream &htmlFile);
   bool setHtmlResponse(std::string statusCode, std::string statusMsg,
-                       std::ifstream &htmlFile);
+                       const std::string &htmlFilePath);
   bool parseMultipart();
   //   void setResponse(std::string statusCode, std::string statusMsg,
   //                    std::string body);
@@ -96,6 +105,6 @@ private:
 //*Lib
 std::string ft_strtrim(const std::string &str);
 //*prot_backend forms
-protoBackend validateForm(httpRequest request);
+httpResponse validateForm(httpRequest request);
 //* utils
 void printHttpHeaders(const httpRequest &request);

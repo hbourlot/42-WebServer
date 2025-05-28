@@ -15,9 +15,10 @@ INCLUDE         = inc/
 HEADERS         = $(shell find $(INCLUDE) -name "*.hpp")
 SRC_DIR         = src/
 HTTP_DIR		= http_tcpServer/
-BACK_DIR		= proto_backend/
-LIB_DIR			= lib/
 FILE_DIR		= fileConfig/
+BACK_DIR		= proto_backend/
+UTILS_DIR		= utils/
+REQUEST_DIR		= request/
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
 
@@ -26,17 +27,16 @@ COMPILED_FILES  = 0
 LEN             = 0
 
 
-# FILE_FUNC		= CheckConfName ReadConfig ConfigUtils SetLocations
 BACK_FUNC		= forms
-LIB_FUNC		= ft_strtrim utils
-# FILE_FUNC		= CheckConfName ReadConfig ConfigUtils SetLocations
-# HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod validatePost upload readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
-
+UTILS_FUNC		= ft_strtrim utils
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod validatePost upload readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
+HTTP_FUNC	    = http_tcpServer_linux sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
+REQUEST_FUNC	= validateRequestMethod validatePost upload readRequest
+
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(LIB_DIR), $(LIB_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(HTTP_DIR)$(REQUEST_DIR), $(REQUEST_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(BACK_DIR), $(BACK_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR), main.cpp) 
 

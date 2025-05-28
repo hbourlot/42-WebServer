@@ -36,15 +36,15 @@ void TcpServer::setResponseError(std::string statusCode,
 // }
 
 bool TcpServer::setHtmlResponse(std::string statusCode, std::string statusMsg,
-                                std::ifstream &htmlFile) {
+                                const std::string &htmlFilePath) {
 
+  std::ifstream htmlFile(htmlFilePath.c_str());
   if (!htmlFile.is_open()) {
-    std::ifstream errorFile("./content/error_404.html");
-    if (!errorFile.is_open())
-      setResponseError("404", "Not Found");
-    else
-      setHtmlResponse("404", "Not Found", errorFile);
-    return (false);
+    if (htmlFilePath == DFL_404) {
+      setResponse("404", "Not Found", "text/plain", "404 Not Found");
+      return false;
+    }
+    return setHtmlResponse("404", "Not Found", DFL_404);
   }
   // Read the HTML file into a string
   std::ostringstream buffer;
