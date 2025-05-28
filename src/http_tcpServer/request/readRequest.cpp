@@ -22,36 +22,32 @@ static void parseRequest(httpRequest &request,
       request.headers[key] = value;
     }
   }
-  // std::cout << requestContent << std::endl;
   std::string body;
   while (std::getline(request_stream, line))
     body += line + "\n";
   request.body = body;
-  // request.body = request_stream.str();
-  //  std::cerr << "\033[0;31m" <<  request.body << "\033[0m" <<  std::endl;
 }
 
 void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
-	char buffer[BUFFER_SIZE + 1] = {0};
+  char buffer[BUFFER_SIZE + 1] = {0};
 
-	bytesReceived = read(fds[i].fd, buffer, BUFFER_SIZE);
-	if (bytesReceived < 0) {
-		std::cerr << "Error: read()\n";
-		close(fds[i].fd);
-		fds.erase(fds.begin() + i);
-		return;
-		// throw TcpServerException(
-		// 	"Failed to read bytes from client socket connection");
-	} else if (bytesReceived == 0) {
-		return;
-	}
-	buffer[bytesReceived] = '\0';
-	write(2, buffer, BUFFER_SIZE);
-	std::string requestContent("");
-  for(int i=0; i < bytesReceived; i++)
-   requestContent += buffer[i]; 
-  // std::cout << requestContent << std::endl;
-	parseRequest(request, requestContent);
+  bytesReceived = read(fds[i].fd, buffer, BUFFER_SIZE);
+  if (bytesReceived < 0) {
+    std::cerr << "Error: read()\n";
+    close(fds[i].fd);
+    fds.erase(fds.begin() + i);
+    return;
+    // throw TcpServerException(
+    // 	"Failed to read bytes from client socket connection");
+  } else if (bytesReceived == 0)
+    return;
+  buffer[bytesReceived] = '\0';
+  //   write(2, buffer, BUFFER_SIZE);
+  //   std::string requestContent("");
+  //   for (int i = 0; i < bytesReceived; i++)
+  //     requestContent += buffer[i];
+  std::string requestContent(buffer, bytesReceived); // !Maybe work
+  parseRequest(request, requestContent);
 
   // Set event POLLOUT
   fds[i].events |= POLLOUT;

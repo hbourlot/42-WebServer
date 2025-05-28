@@ -29,6 +29,7 @@ struct Server{
 	std::map<int, std::string>	errorPage; // Stores the error pages
 	int							maxRequest; // Stores the maximum requests that the client can do
 	std::vector<Location>		locations; // Stores the routes of the HTML pages
+	// std::map<std::string (path),Location>		locations; //! Alternative way???
 };
 
 struct Configs{

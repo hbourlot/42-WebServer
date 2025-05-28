@@ -50,7 +50,8 @@ void http::TcpServer::runServer() {
 				if (fds[i].revents & POLLOUT) {
 					bool shouldClose;
 
-					validateRequestMethod();
+					// validateRequestMethod();
+					validateRequest();
 					shouldClose = sendResponse(fds[i]);
 					fds[i].events &= ~POLLOUT;
 					if (shouldClose) {
