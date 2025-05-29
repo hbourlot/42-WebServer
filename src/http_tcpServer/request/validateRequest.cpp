@@ -56,7 +56,7 @@ bool TcpServer::validateRequest() {
   if (request.method == "GET")
     return (validateGet(matchedLocation));
   else if (request.method == "POST")
-    return (validatePost());
+    return (validatePost(matchedLocation));
   else if (request.method == "DELETE") {
     // Here still mising implement the part of Method Delete
   }

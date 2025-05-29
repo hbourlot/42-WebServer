@@ -2,7 +2,7 @@
 
 namespace http {
 
-bool TcpServer::validatePost() {
+bool TcpServer::validatePost(const Location *location) {
 
   if (request.path == "/login") {
     httpResponse result = validateForm(request);
@@ -13,7 +13,7 @@ bool TcpServer::validatePost() {
     } else
       setResponseError(result.statusCode, result.statusMessage);
   } else if (request.path == "/upload") {
-    parseMultipart();
+    parseMultipart(location);
   }
   return false;
 }
