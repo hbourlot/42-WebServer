@@ -89,7 +89,7 @@ bool TcpServer::parseMultipart(const Location *location) {
   std::string filePart = extractFilePart(request, boundary);
 
   if (filePart.empty()) {
-    setResponseError("400", "Bad Request: No boundary");
+    setResponseError("400", "Bad Request: No boundary filePart");
     return (false);
   }
 
