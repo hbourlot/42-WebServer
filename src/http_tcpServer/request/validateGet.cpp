@@ -4,42 +4,62 @@ namespace http {
 static bool isDirectory(const std::string &filePath) {
   struct stat s;
   if (stat(filePath.c_str(), &s) != 0)
-  return (false);
+    return (false);
   return (S_ISDIR(s.st_mode));
 }
 
-static std::string autoindex(std::string &dirPath, const Location *location, httpRequest &request)
-{
-    std::string autoindex= "<htlm>\n<body>\n<h1>Index of " + request.path + "</h1>\n";
-    DIR *directory;
-    directory=opendir(dirPath.c_str());
-    struct dirent* dirent;
-    dirent = readdir(directory);
-    while(dirent != NULL)
-    {
-        std::string d_name(dirent->d_name);
-        if(d_name.compare(".")){
-          if(d_name.compare(".."))
-          autoindex += "<p><a href=" + location->path +"/"+ d_name+ ">" +d_name + "</a></p>\n";
-          else
-          autoindex += "<p><a href=./.. >" +d_name + "</a></p>\n"; // !Still failing in case of /files/css/ href=./.. Need search!!!
-        }
-        dirent = readdir(directory);
+static std::string getParentPath(const std::string &path) {
+  std::string parent = path;
+
+  if (!parent.empty() && parent[parent.length() - 1] == '/')
+    parent.erase(parent.length() - 1);
+
+  size_t prevfolder = parent.find_last_of('/');
+  if (prevfolder != std::string::npos)
+    return (parent.substr(0, prevfolder));
+
+  return ("/");
+}
+
+static std::string autoindex(std::string &dirPath, const Location *location,
+                             httpRequest &request) {
+  std::string autoindex =
+      "<html>\n<body>\n<h1>Index of " + request.path + "</h1>\n";
+  DIR *directory;
+
+  directory = opendir(dirPath.c_str());
+  if (!directory)
+    return "<html><body><h1>Unable to open directory</h1></body></html>";
+
+  struct dirent *dirent;
+  dirent = readdir(directory);
+
+  while (dirent != NULL) {
+    std::string d_name(dirent->d_name);
+    if (d_name.compare(".")) {
+
+      if (d_name.compare(".."))
+
+        autoindex += "<p><a href=" + location->path + "/" + d_name + ">" +
+                     d_name + "</a></p>\n";
+      else {
+
+        std::string parentPath = getParentPath(request.path);
+        autoindex += "<p><a href=" + parentPath + ">" + d_name + "</a></p>\n";
+      }
     }
-    autoindex = autoindex + "</body>\n</html>";
-    closedir(directory);
-    return(autoindex);
+    dirent = readdir(directory);
+  }
+  autoindex = autoindex + "</body>\n</html>";
+  closedir(directory);
+  return (autoindex);
 }
 
 static std::string getFilePath(std::string &path, const Location *location) {
 
   std::string relativePath = path.substr(location->path.length());
-  std::string filePath = "." + location->root + "/" + relativePath;
+  std::string filePath = location->root + "/" + relativePath;
 
-  // !Just test . for now
-  // std::cout << "path " << path << std::endl;
-  // std::cout << "relativepath " << relativePath << std::endl;
-  // std::cout << "filepath " << filePath << std::endl;
   return (filePath);
 }
 
@@ -68,7 +88,7 @@ bool TcpServer::validateGet(const Location *location) {
 
       std::string body = autoindex(filePath, location, request);
       setResponse("200", "OK", "text/html", body);
-      return(true);
+      return (true);
     }
   }
 
