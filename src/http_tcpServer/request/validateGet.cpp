@@ -21,10 +21,15 @@ static std::string getParentPath(const std::string &path) {
   return ("/");
 }
 
+static std::string joinPath(const std::string &base, const std::string &sub) {
+  if (!base.empty() && base[base.length() - 1] == '/')
+    return (base + sub);
+  return (base + "/" + sub);
+}
+
 static std::string autoindex(std::string &dirPath, const Location *location,
                              httpRequest &request) {
-  std::string autoindex =
-      "<html>\n<body>\n<h1>Index of " + request.path + "</h1>\n";
+  std::string autoindex = "<html>\n<body>\n<h1>Index of " + request.path + "</h1>\n";
   DIR *directory;
 
   directory = opendir(dirPath.c_str());
@@ -40,7 +45,7 @@ static std::string autoindex(std::string &dirPath, const Location *location,
 
       if (d_name.compare(".."))
 
-        autoindex += "<p><a href=" + location->path + "/" + d_name + ">" +
+        autoindex += "<p><a href=" + joinPath(request.path, d_name) + ">" +
                      d_name + "</a></p>\n";
       else {
 
@@ -61,6 +66,29 @@ static std::string getFilePath(std::string &path, const Location *location) {
   std::string filePath = location->root + "/" + relativePath;
 
   return (filePath);
+}
+
+static std::string getContentType(const std::string &path) {
+  size_t dot = path.find_last_of('.');
+  if (dot == std::string::npos)
+    return "application/octet-stream"; // binario genérico
+
+  std::string ext = path.substr(dot + 1);
+  if (ext == "html" || ext == "htm")
+    return "text/html";
+  if (ext == "css")
+    return "text/css";
+  if (ext == "png")
+    return "image/png";
+  if (ext == "jpg" || ext == "jpeg")
+    return "image/jpeg";
+  if (ext == "gif")
+    return "image/gif";
+  if (ext == "txt")
+    return "text/plain";
+  if (ext == "pdf")
+    return "application/pdf";
+  return "application/octet-stream";
 }
 
 bool TcpServer::validateGet(const Location *location) {
@@ -92,15 +120,21 @@ bool TcpServer::validateGet(const Location *location) {
     }
   }
 
-  std::ifstream file(filePath.c_str());
+  std::ifstream file(filePath.c_str(), std::ios::binary);
 
   if (!file.is_open()) {
 
     setHtmlResponse("404", "Not Found", infos.errorPage[404]);
     return (false);
   }
+
+  std::stringstream body;
+  body << file.rdbuf();
   file.close();
-  setHtmlResponse("200", "OK", filePath);
+  setResponse("200", "OK", getContentType(filePath), body.str());
+
+  //   setHtmlResponse("200", "OK", filePath);
+  //   setResponse("200", "OK", "/text/plain", "OK");
   return (true);
 }
 } // namespace http
