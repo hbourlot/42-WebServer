@@ -13,6 +13,7 @@ struct Location{
 	std::string							path; // location --> /upload <--
 	std::vector<std::string>			methods; // method POST GET DELETE
     std::string                 		root; 
+    std::string                 		index; 
 	std::string							redirection; // http://example.com;
 	std::vector<std::string>			cgi_extension;
 	std::vector<std::string>			cgi_path;
