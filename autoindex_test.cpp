@@ -19,6 +19,7 @@ int main() {
         autoindex += "<a href=" + d_name+ ">" +d_name + "</a>\n";
         dirent = readdir(directory);
     }
+    autoindex = "<htlm>\n<body>\n" + autoindex + "</body>\n</html>";
     std::cout << autoindex << std::endl;
     closedir(directory);
     // std::ofstream autoindexfile("./var/www/html/autoindex.html");
