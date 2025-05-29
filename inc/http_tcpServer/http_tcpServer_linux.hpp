@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <fstream>
 #include <iostream>
 #include <map>

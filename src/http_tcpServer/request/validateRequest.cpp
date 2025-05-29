@@ -4,23 +4,23 @@
 
 namespace http {
 
-bool TcpServer::validateGet(const Location *location) {
+const Location *getMatchLocation(const std::string &path,
+                                 const std::vector<Location> &locations) {
 
-  // std::string fullPath = "." + location->root + "/" + "index.html"
-  std::string indexPath = "." + location->root + "/" /* + location->index */;
-  // !Just test . for now
-  std::ifstream indexFile(indexPath.c_str());
+  const Location *matchedLocation = NULL;
+  size_t matchLength = 0;
 
-  if (!indexFile.is_open()) {
-    if (!location->autoIndex) {
-      setHtmlResponse("404", "Not Found", infos.errorPage[404]);
-      return (false);
+  for (size_t i = 0; i < locations.size(); ++i) {
+
+    const std::string &locPath = locations[i].path;
+
+    if (path.compare(0, locPath.size(), locPath) == 0 &&
+        locPath.size() > matchLength) {
+      matchedLocation = &locations[i];
+      matchLength = locPath.size();
     }
-    // !Here implement if autoindex its enabled
   }
-  indexFile.close();
-  setHtmlResponse("200", "OK", indexPath);
-  return (true);
+  return (matchedLocation);
 }
 
 static bool validateRequestMethod(httpRequest request,
@@ -40,13 +40,8 @@ static bool validateRequestMethod(httpRequest request,
 
 bool TcpServer::validateRequest() {
 
-  const Location *matchedLocation = NULL;
-  for (size_t i = 0; i < infos.locations.size(); ++i) {
-    if (request.path == infos.locations[i].path) {
-      matchedLocation = &infos.locations[i];
-      break;
-    }
-  }
+  const Location *matchedLocation =
+      getMatchLocation(request.path, infos.locations);
 
   if (!matchedLocation) {
     setHtmlResponse("404", "Not Found", infos.errorPage[404]);
