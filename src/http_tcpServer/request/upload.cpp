@@ -11,19 +11,18 @@ static std::string extractBoundary(httpRequest &request) {
     return ("");
   }
   std::string boundary = "--" + contentType.substr(pos + boundaryPrefix.size());
-  //   std::cout << boundary << std::endl;
   return (boundary);
 }
 
 static std::string extractFilePart(httpRequest &request,
                                    const std::string &boundary) {
-                                    
+
   std::string body = request.body;
   size_t start = body.find(boundary);
-  
+
   if (start == std::string::npos)
     return ("");
-  
+
   start += boundary.length() + 2; // To skip the begin boundary and the /r/n
   size_t end = body.find(boundary, start);
 
@@ -37,18 +36,18 @@ static bool splitHeadersAndContent(const std::string &filePart,
                                    std::string &headers, std::string &content) {
 
   size_t headerEnd = filePart.find("\r\n\r\n");
-  
+
   if (headerEnd == std::string::npos)
     return (false);
 
   headers = filePart.substr(0, headerEnd);
   content = filePart.substr(headerEnd + 4);
-  
+
   return (true);
 }
 
 static std::string extractFilename(const std::string &headers) {
-  
+
   std::string token = "filename=\"";
   size_t start = headers.find(token);
 
@@ -57,19 +56,20 @@ static std::string extractFilename(const std::string &headers) {
 
   start += token.length();
   size_t end = headers.find("\"", start);
-  
+
   if (end == std::string::npos)
     return ("");
 
   return (headers.substr(start, end - start));
 }
 
-static bool saveFile(const std::string &filename, const std::string &content, const Location *location) {
-  //!For test .
-  std::string savePath = "./" + location->root + '/' + filename;
+static bool saveFile(const std::string &filename, const std::string &content,
+                     const Location *location) {
+
+  std::string savePath = location->root + '/' + filename;
 
   std::ofstream newfile(savePath.c_str(), std::ios::binary);
-  if(!newfile.is_open())
+  if (!newfile.is_open())
     return (false);
 
   newfile << content;
@@ -77,7 +77,7 @@ static bool saveFile(const std::string &filename, const std::string &content, co
   return (true);
 }
 
-bool TcpServer::parseMultipart(const Location * location) {
+bool TcpServer::parseMultipart(const Location *location) {
 
   std::string boundary = extractBoundary(request);
 
