@@ -14,7 +14,7 @@
 -   [ ] Add support for multiple clients using select() or poll()
 -   [ ] Parse incoming HTTP requests (method, path, headers, body)
 -   [ ] Build and send proper HTTP responses
--   [ ] Handle status codes (200, 404, 500, etc.)
+-   [x] Handle status codes (200, 404, 500, etc.)
 
 ## PHASE 3: Configuration and Routing
 
@@ -25,8 +25,8 @@
 
 ## PHASE 4: Method Handling
 
--   [ ] Handle GET requests (serve static files)
--   [ ] Handle POST requests (receive and store body content)
+-   [x] Handle GET requests (serve static files)
+-   [x] Handle POST requests (receive and store body content)
 -   [ ] Handle DELETE requests (remove allowed files)
 -   [ ] Support Content-Type and Content-Length headers
 -   [ ] Implement CGI support (execute scripts, return output)

@@ -89,14 +89,14 @@ private:
   //   bool validateRequestMethod(Location &location);
   //   bool validateGet();
   bool validateGet(const Location *location);
-  bool validatePost();
+  bool validatePost(const Location *location);
   int sendResponse(pollfd socket);
   void setResponseError(std::string statusCode, std::string statusMsg);
   //   bool setHtmlResponse(std::string statusCode, std::string statusMsg,
   //                        std::ifstream &htmlFile);
   bool setHtmlResponse(std::string statusCode, std::string statusMsg,
                        const std::string &htmlFilePath);
-  bool parseMultipart();
+  bool parseMultipart(const Location *location);
   //   void setResponse(std::string statusCode, std::string statusMsg,
   //                    std::string body);
   void setResponse(std::string statusCode, std::string statusMsg,
