@@ -17,7 +17,7 @@ void TcpServer::setResponse(std::string statusCode, std::string statusMsg,
       << "\r\n"
       << body;
   m_serverMessage = response.str();
-  log(response.str());
+  // log(response.str());
 }
 
 void TcpServer::setResponseError(std::string statusCode,

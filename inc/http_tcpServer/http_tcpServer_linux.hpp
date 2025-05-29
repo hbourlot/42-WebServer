@@ -19,6 +19,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
+#include <dirent.h>
 
 #define DFL_404 "content/defaults/error_404.html"
 #define DFL_405 "content/defaults/error_405.html"
