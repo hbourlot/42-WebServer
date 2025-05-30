@@ -1,9 +1,10 @@
-#include "http_tcpServer/http_tcpServer_linux.hpp"
+#include "http_tcpServer/Http_tcpServer_linux.hpp"
 
 namespace http {
 
 	TcpServer::TcpServer(Configs configuration)
-		: m_ip_address(configuration.servers[0].host), m_port(configuration.servers[0].port), m_serverSocket(),
+		: m_ip_address(configuration.servers[0].host),
+		  m_port(configuration.servers[0].port), m_serverSocket(),
 		  m_acceptSocket(), m_incomingMessage(), m_socketAddress(),
 		  m_socketAddress_len(sizeof(m_socketAddress)),
 		  m_serverMessage("") { // Initialize m_serverMessage properly

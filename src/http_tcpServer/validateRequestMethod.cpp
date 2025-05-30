@@ -1,4 +1,4 @@
-#include "http_tcpServer/http_tcpServer_linux.hpp"
+#include "http_tcpServer/Http_tcpServer_linux.hpp"
 #include <fstream>
 #include <ostream>
 
@@ -22,9 +22,9 @@ bool http::TcpServer::validateRequestMethod() {
 			return (false);
 		}
 	} else if (request.method == "POST")
-		std::cout << "Supposed to do something" << std::endl;
+		std::cout << "\nSupposed to do something" << std::endl;
 	else if (request.method == "DELETE")
-		std::cout << "Supposed to do something" << std::endl;
+		std::cout << "\nSupposed to do something" << std::endl;
 	else {
 		std::cout << "SET ERROR TRUE\n\n";
 		setResponseError("405", "Method Not Allowed");
