@@ -1,4 +1,4 @@
-#include "http_tcpServer/http_tcpServer_linux.hpp"
+#include "http_tcpServer/Http_tcpServer_linux.hpp"
 
 int http::TcpServer::sendResponse(pollfd socket) {
 	ssize_t bytesSent = send(socket.fd, m_serverMessage.c_str(),

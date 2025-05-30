@@ -3,7 +3,7 @@
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
 
-#include "http_tcpServerException_linux.hpp"
+#include "CgiHandler.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <fcntl.h>
@@ -54,11 +54,20 @@ namespace http {
 			TcpServer(Configs configuration);
 			// Default Destructor
 			~TcpServer();
+
+			// Main execution method
 			int runServer();
-			void runLoop(std::vector<pollfd> &fds, int timeOut);
+
+			// Exception class for TcpServer
+			class TcpServerException : public std::runtime_error {
+				public:
+					explicit TcpServerException(const std::string &message)
+						: std::runtime_error(message) {
+					}
+			};
 
 		private:
-			// MAYBE YOU STRUCT HERE?? 😇
+			// Server data
 			httpRequest request;
 			std::string m_ip_address;
 			int m_port, bytesReceived, bytesSend;
@@ -68,6 +77,7 @@ namespace http {
 			unsigned int m_socketAddress_len;
 			std::string m_serverMessage;
 
+			// Private methods
 			int startServer();
 			void shutDownServer(std::vector<pollfd> &fds);
 			void startListen();
@@ -79,6 +89,7 @@ namespace http {
 								  std::string statusMsg);
 			void setHtmlResponse(std::ifstream &htmlFile);
 			int sendResponse(pollfd socket);
+			void runLoop(std::vector<pollfd> &fds, int timeOut);
 	};
 
 } // namespace http

@@ -1,4 +1,4 @@
-#include "http_tcpServer/http_tcpServer_linux.hpp"
+#include "http_tcpServer/Http_tcpServer_linux.hpp"
 #include <sys/poll.h>
 #include <vector>
 
@@ -23,18 +23,15 @@ void http::TcpServer::runLoop(std::vector<pollfd> &fds, int timeOut) {
 			acceptConnection(fds);
 			for (size_t i = 1; i < fds.size(); ++i) {
 				int fd = fds[i].fd;
-				std::cout << "INSIDE FOR LOOP\n";
 				if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {
 					close(fds[i].fd);
 					fds.erase(fds.begin() + i);
 					--i;
-					std::cout << "EXIT POLLHUP...'\n";
 					exit(0);
 					continue;
 				}
 
 				if (fds[i].revents & POLLIN) {
-					std::cout << "POLLIN\n";
 					readRequest(fds, i);
 				}
 				if (fds[i].revents & POLLOUT) {
@@ -44,7 +41,6 @@ void http::TcpServer::runLoop(std::vector<pollfd> &fds, int timeOut) {
 					shouldClose = sendResponse(fds[i]);
 
 					if (shouldClose) {
-						std::cout << "SHOULD CLOSE\n";
 						exit(0);
 					}
 					fds[i].events &= ~POLLOUT;
