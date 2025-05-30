@@ -1,6 +1,7 @@
 #include "http_tcpServer/http_tcpServer_linux.hpp"
 
 namespace http {
+
 static bool isDirectory(const std::string &filePath) {
   struct stat s;
   if (stat(filePath.c_str(), &s) != 0)
@@ -15,8 +16,8 @@ static std::string getParentPath(const std::string &path) {
     parent.erase(parent.length() - 1);
 
   size_t prevfolder = parent.find_last_of('/');
-  if (prevfolder != std::string::npos)
-    return (parent.substr(0, prevfolder));
+  if (prevfolder != std::string::npos && prevfolder != 0)
+  return (parent.substr(0, prevfolder));
 
   return ("/");
 }
