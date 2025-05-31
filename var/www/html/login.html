@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Login Page</title>
+	<style>
+		body {
+			font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+			background: #eef1f5;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+			margin: 0;
+		}
+
+		.login-box {
+			background: #fff;
+			padding: 2rem;
+			border-radius: 12px;
+			box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+			width: 100%;
+			max-width: 360px;
+		}
+
+		.login-box h2 {
+			margin-bottom: 1.5rem;
+			text-align: center;
+			color: #333;
+		}
+
+		.login-box input[type="text"],
+		.login-box input[type="password"] {
+			width: 100%;
+			padding: 0.75rem;
+			margin-bottom: 1rem;
+			border: 1px solid #ccc;
+			border-radius: 8px;
+		}
+
+		.login-box .options {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			font-size: 0.9rem;
+		}
+
+		.login-box .options label {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
+
+		.login-box .options a {
+			color: #007bff;
+			text-decoration: none;
+		}
+
+		.login-box .options a:hover {
+			text-decoration: underline;
+		}
+
+		.login-box button {
+			width: 100%;
+			padding: 0.75rem;
+			background: #007bff;
+			color: #fff;
+			border: none;
+			border-radius: 8px;
+			font-size: 1rem;
+			margin-top: 1rem;
+			cursor: pointer;
+		}
+
+		.login-box button:hover {
+			background: #0056b3;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="login-box">
+		<h2>Login</h2>
+		<form id="loginForm" method="POST" action="/login">
+			<input type="text" name="username" placeholder="Username" required />
+			<input type="password" name="password" placeholder="Password" required />
+
+			<div class="options">
+				<label>
+					<input type="checkbox" name="remember" /> Remember me
+				</label>
+				<a href="recoverPassword.html">Forgot password?</a>
+			</div>
+
+			<button type="submit">Log In</button>
+		</form>
+	</div>
+
+	<!-- <script>
+        document.getElementById("loginForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            // Use URLSearchParams to easily convert FormData to x-www-form-urlencoded
+            const formData = new FormData(e.target);
+            const urlEncodedData = new URLSearchParams(formData).toString();
+
+            try {
+                const response = await fetch("/login", {
+                    method: "POST",
+                    headers: {
+                        // Crucial change: send as URL-encoded
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: urlEncodedData // Send the URL-encoded string
+                });
+
+                // Server will respond with an HTTP status code (e.g., 200 for success, 401 for unauthorized)
+                if (response.status === 401) { // Check the status code directly
+                    window.location.href = "/error_401.html";
+                } else if (response.ok) { // response.ok is true for 2xx status codes
+                    window.location.href = "/success.html";
+                } else {
+                    // Handle other potential errors (e.g., 500 server error)
+                    console.error("Login failed with status:", response.status);
+                    window.location.href = "/generic_error.html"; // Or show a message on the page
+                }
+            } catch (error) {
+                console.error("Network or Fetch Error:", error);
+                window.location.href = "/network_error.html"; // Redirect for client-side errors
+            }
+        });
+    </script>  -->
+</body>
+
+</html>
+
+<!--
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Login Page</title>
+		<style>
+			body {
+				font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+				background: #eef1f5;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 100vh;
+				margin: 0;
+			}
+			.login-box {
+				background: #fff;
+				padding: 2rem;
+				border-radius: 12px;
+				box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+				width: 100%;
+				max-width: 360px;
+			}
+			.login-box h2 {
+				margin-bottom: 1.5rem;
+				text-align: center;
+				color: #333;
+			}
+			.login-box input[type="text"],
+			.login-box input[type="password"] {
+				width: 100%;
+				padding: 0.75rem;
+				margin-bottom: 1rem;
+				border: 1px solid #ccc;
+				border-radius: 8px;
+			}
+			.login-box .options {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				font-size: 0.9rem;
+			}
+			.login-box .options label {
+				display: flex;
+				align-items: center;
+				gap: 5px;
+			}
+			.login-box .options a {
+				color: #007bff;
+				text-decoration: none;
+			}
+			.login-box .options a:hover {
+				text-decoration: underline;
+			}
+			.login-box button {
+				width: 100%;
+				padding: 0.75rem;
+				background: #007bff;
+				color: #fff;
+				border: none;
+				border-radius: 8px;
+				font-size: 1rem;
+				margin-top: 1rem;
+				cursor: pointer;
+			}
+			.login-box button:hover {
+				background: #0056b3;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="login-box">
+			<h2>Login</h2>
+			<form id="loginForm">
+				<input type="text" name="username" placeholder="Username" required />
+				<input type="password" name="password" placeholder="Password" required />
+
+				<div class="options">
+					<label>
+						<input type="checkbox" name="remember" /> Remember me
+					</label>
+					<a href="recoverPassword.html">Forgot password?</a>
+				</div>
+
+				<button type="submit">Log In</button>
+			</form>
+		</div>
+
+		<script>
+			document.getElementById("loginForm").addEventListener("submit", async function (e) {
+				e.preventDefault();
+
+				const formData = new FormData(e.target);
+				const data = {
+					username: formData.get("username"),
+					password: formData.get("password"),
+					remember: formData.get("remember") === "on"
+				};
+
+				try {
+					const response = await fetch("/login", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify(data)
+					});
+
+					const result = await response.statusText;
+					console.log("Server Response:", result);
+					if(result == "Unauthorized")
+						window.location.href = "/error_401.html";
+					else
+						window.location.href = "/success.html";
+				} catch (error) {
+					console.error("Error:", error);
+				}
+			});
+		</script>
+	</body>
+</html> 
+-->
