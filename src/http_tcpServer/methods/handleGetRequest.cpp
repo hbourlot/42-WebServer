@@ -17,7 +17,7 @@ static std::string getParentPath(const std::string &path) {
 
   size_t prevfolder = parent.find_last_of('/');
   if (prevfolder != std::string::npos && prevfolder != 0)
-  return (parent.substr(0, prevfolder));
+    return (parent.substr(0, prevfolder));
 
   return ("/");
 }
@@ -28,9 +28,11 @@ static std::string joinPath(const std::string &base, const std::string &sub) {
   return (base + "/" + sub);
 }
 
-static std::string autoindex(std::string &dirPath, const Location *location,
-                             httpRequest &request) {
-  std::string autoindex = "<html>\n<body>\n<h1>Index of " + request.path + "</h1>\n";
+static std::string generateAutoIndexPage(std::string &dirPath,
+                                         const Location *location,
+                                         httpRequest &request) {
+  std::string autoindex =
+      "<html>\n<body>\n<h1>Index of " + request.path + "</h1>\n";
   DIR *directory;
 
   directory = opendir(dirPath.c_str());
@@ -92,7 +94,7 @@ static std::string getContentType(const std::string &path) {
   return "application/octet-stream";
 }
 
-bool TcpServer::validateGet(const Location *location) {
+bool TcpServer::handleGetRequest(const Location *location) {
 
   std::string filePath = getFilePath(request.path, location);
 
@@ -115,7 +117,7 @@ bool TcpServer::validateGet(const Location *location) {
       return (false);
     } else {
 
-      std::string body = autoindex(filePath, location, request);
+      std::string body = generateAutoIndexPage(filePath, location, request);
       setResponse("200", "OK", "text/html", body);
       return (true);
     }

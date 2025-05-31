@@ -1,7 +1,17 @@
 #include "http_tcpServer/http_tcpServerException_linux.hpp"
 
-httpResponse set_s_protoBackend(std::string statusCode, std::string statusMsg,
-                                std::string htmlFilePath) {
+httpResponse makeRedirectResponse(const std::string &location) {
+  httpResponse res;
+  res.statusCode = "302";
+  res.statusMessage = "Found";
+  res.htmlFilePath = "";
+  res.headers["Location"] = location;
+  return res;
+}
+
+httpResponse makeHttpResponse(const std::string statusCode,
+                              const std::string statusMsg,
+                              const std::string htmlFilePath = "") {
   httpResponse result;
   result.statusCode = statusCode;
   result.statusMessage = statusMsg;
@@ -29,13 +39,10 @@ static std::map<std::string, std::string> parseForm(const std::string &body) {
 static httpResponse formurldeconded(httpRequest request) {
   httpResponse result;
   std::map<std::string, std::string> form = parseForm(request.body);
-  if (form["username"] == "admin" && form["password"] == "1234") {
-    // std::string htmlFilePath("./content/success.html");
-    result = set_s_protoBackend("200", "OK", "");
-  } else {
-    // std::string errorFilePath("./content/error_401.html");
-    result = set_s_protoBackend("401", "Unauthorized", "");
-  }
+  if (form["username"] == "admin" && form["password"] == "1234")
+    return makeRedirectResponse("/dashboard.html");
+  else
+    return (makeHttpResponse("401", "Unauthorized"));
   return (result);
 }
 
@@ -46,7 +53,7 @@ httpResponse validateForm(httpRequest request) {
     result = formurldeconded(request);
   else if (request.headers["Content-Type"] == "application/json") {
     std::cout << "json form not valids for now" << std::endl;
-    result = set_s_protoBackend("401", "Unauthorized", "");
+    result = makeHttpResponse("401", "Unauthorized", "");
   }
   return (result);
 }

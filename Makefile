@@ -14,11 +14,15 @@ PRINT_CMD       = printf
 INCLUDE         = inc/
 HEADERS         = $(shell find $(INCLUDE) -name "*.hpp")
 SRC_DIR         = src/
-HTTP_DIR		= http_tcpServer/
 FILE_DIR		= fileConfig/
-BACK_DIR		= proto_backend/
+AUTH_DIR		= auth/
 UTILS_DIR		= utils/
-REQUEST_DIR		= request/
+
+HTTP_DIR		= http_tcpServer/
+REQUEST_DIR		= $(HTTP_DIR)request/
+RESPONSE_DIR	= $(HTTP_DIR)response/
+METHODS_DIR		= $(HTTP_DIR)methods/
+
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
 
@@ -27,17 +31,21 @@ COMPILED_FILES  = 0
 LEN             = 0
 
 
-BACK_FUNC		= forms
+AUTH_FUNC		= loginHandler
 UTILS_FUNC		= ft_strtrim utils
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
-REQUEST_FUNC	= validateRequest validateGet validatePost upload readRequest
+HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer
+REQUEST_FUNC	= validateRequest readRequest
+RESPONSE_FUNC 	= sendResponse setResponse
+METHODS_FUNC 	= handleGetRequest handlePostRequest uploadHandler
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(HTTP_DIR)$(REQUEST_DIR), $(REQUEST_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(REQUEST_DIR), $(REQUEST_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(RESPONSE_DIR), $(RESPONSE_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(METHODS_DIR), $(METHODS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(BACK_DIR), $(BACK_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR), main.cpp) 
 
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
