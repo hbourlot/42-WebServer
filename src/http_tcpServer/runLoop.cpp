@@ -37,7 +37,7 @@ void http::TcpServer::runLoop(std::vector<pollfd> &fds, int timeOut) {
 				if (fds[i].revents & POLLOUT) {
 
 					bool shouldClose;
-					validateRequestMethod();
+					validateRequest();
 					shouldClose = sendResponse(fds[i]);
 
 					if (shouldClose) {
