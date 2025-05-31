@@ -43,9 +43,6 @@ void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
     return;
   buffer[bytesReceived] = '\0';
   //   write(2, buffer, BUFFER_SIZE);
-  //   std::string requestContent("");
-  //   for (int i = 0; i < bytesReceived; i++)
-  //     requestContent += buffer[i];
   std::string requestContent(buffer, bytesReceived); // !Maybe work
   parseRequest(request, requestContent);
 
