@@ -2,7 +2,7 @@
 
 namespace http {
 
-bool TcpServer::validatePost(const Location *location) {
+bool TcpServer::handlePostRequest(const Location *location) {
 
   if (request.path == "/login") {
     httpResponse result = validateForm(request);
@@ -13,9 +13,17 @@ bool TcpServer::validatePost(const Location *location) {
     } else
       setResponseError(result.statusCode, result.statusMessage);
   } else if (request.path == "/upload") {
+    if (!location->uploadEnable) {
+      setResponseError("403", "Upload Not Allowed");
+      return (false);
+    }
     parseMultipart(location);
+  } else {
+
+    setHtmlResponse("404", "Not Found", infos.errorPage[404]);
+    return (false);
   }
-  return false;
+  return true;
 }
 
 } // namespace http

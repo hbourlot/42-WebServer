@@ -6,8 +6,8 @@
 #include "http_tcpServerException_linux.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
+#include <dirent.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -17,9 +17,9 @@
 #include <string>
 #include <sys/poll.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <vector>
-#include <dirent.h>
 
 #define DFL_404 "content/defaults/error_404.html"
 #define DFL_405 "content/defaults/error_405.html"
@@ -37,6 +37,7 @@ struct httpResponse {
   std::string statusCode;
   std::string statusMessage;
   std::string htmlFilePath;
+  std::map<std::string, std::string> headers;
 };
 
 namespace {
@@ -88,8 +89,8 @@ private:
   //   bool validateRequestMethod();
   //   bool validateRequestMethod(Location &location);
   //   bool validateGet();
-  bool validateGet(const Location *location);
-  bool validatePost(const Location *location);
+  bool handleGetRequest(const Location *location);
+  bool handlePostRequest(const Location *location);
   int sendResponse(pollfd socket);
   void setResponseError(std::string statusCode, std::string statusMsg);
   //   bool setHtmlResponse(std::string statusCode, std::string statusMsg,
