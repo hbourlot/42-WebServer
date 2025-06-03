@@ -1,9 +1,8 @@
 #pragma once
 
+#include "CGI/CgiHandler.hpp"
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
-
-#include "CgiHandler.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <dirent.h>
@@ -111,6 +110,9 @@ namespace http {
 							 std::string contentType, std::string body);
 	};
 
+	std::string getLocationFieldAsString(const std::vector<Location> &locations,
+										 const std::string &field);
+
 } // namespace http
 //*Lib
 std::string ft_strtrim(const std::string &str);
@@ -118,3 +120,4 @@ std::string ft_strtrim(const std::string &str);
 httpResponse validateForm(httpRequest request);
 //* utils
 void printHttpHeaders(const httpRequest &request);
+std::vector<std::string> split(const std::string &s, char delimiter);
