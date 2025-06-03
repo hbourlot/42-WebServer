@@ -1,6 +1,9 @@
+#include "CGI/CgiHandler.hpp"
+#include "Config/Configs.hpp"
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 #include <fstream>
 #include <ostream>
+#include <vector>
 
 namespace http {
 
@@ -38,6 +41,9 @@ namespace http {
 		return false;
 	}
 
+	// static bool handleCgiMethod(httpRequest request) {
+	// }
+
 	bool TcpServer::validateRequest() {
 
 		const Location *matchedLocation =
@@ -52,16 +58,30 @@ namespace http {
 			setHtmlResponse("405", "Method Not Allowed", DFL_405);
 			return (false);
 		}
-		// !!! HERE
 
-		std::cout << "REQUESTTTT => " << request.path << std::endl;
-		if (request.method == "GET")
-			return (handleGetRequest(matchedLocation));
-		else if (request.method == "POST")
-			return (handlePostRequest(matchedLocation));
-		else if (request.method == "DELETE") {
-			// Here still mising implement the part of Method Delete
+		// !!! HERE
+		if (HTTP::CgiHandler::isCgiRequest(request)) {
+			int i = 0;
+			std::string ext =
+				getLocationFieldAsString(infos.locations, "cgi_extension");
+			std::vector<std::string> ext_splitted = split(ext, ' ');
+
+			// Maybe verify all cgi_extensions instead of just once by once
+			while (HTTP::CgiHandler::isValidCgiExtension(ext_splitted[i]))
+				i++;
+			if (i == ext.size())
+			// handleCgiRequest
 		}
-		return (true);
 	}
+	std::cout << "HELLO RIGHTTTTT\n";
+
+	if (request.method == "GET")
+		return (handleGetRequest(matchedLocation));
+	else if (request.method == "POST")
+		return (handlePostRequest(matchedLocation));
+	else if (request.method == "DELETE") {
+		// Here still missing implement the part of Method Delete
+	}
+	return (true);
+}
 } // namespace http

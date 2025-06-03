@@ -1,14 +1,25 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <stdexcept>
 #include <string>
 
+struct httpRequest;
+struct Location;
+
 namespace HTTP {
+
+	enum ValidCgi {
+		PY,
+	};
 
 	class CgiHandler {
 
 		private:
+			// Valid CGI
+			static const std::set<std::string> validCgiExtensions;
+
 			// Configuration
 			std::string m_scriptPath;
 			std::string m_scriptName;
@@ -38,6 +49,16 @@ namespace HTTP {
 			// Default Constructor
 			CgiHandler(const std::string &scriptPath);
 			~CgiHandler();
+
+			// Valid CGI
+			static bool isValidCgiExtension(const std::string &ext);
+			static std::set<std::string> createValidCgiExtensions() {
+				std::set<std::string> s;
+				s.insert(".py");
+				s.insert(".cgi");
+				return s;
+			}
+			static bool isCgiRequest(httpRequest request);
 
 			// Setters
 			void setMethod(const std::string &method);

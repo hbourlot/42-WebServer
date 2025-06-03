@@ -22,6 +22,7 @@ HTTP_DIR		= http_tcpServer/
 REQUEST_DIR		= $(HTTP_DIR)request/
 RESPONSE_DIR	= $(HTTP_DIR)response/
 METHODS_DIR		= $(HTTP_DIR)methods/
+CGI_DIR			= $(HTTP_DIR)CgiHandler/
 
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
@@ -32,7 +33,8 @@ LEN             = 0
 
 
 AUTH_FUNC		= loginHandler
-UTILS_FUNC		= ft_strtrim utils
+CGI_FUNC		= isCgiRequest isValidCgiExtension
+UTILS_FUNC		= ft_strtrim utils split getLocationFieldAsString
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
 HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop
 REQUEST_FUNC	= validateRequest readRequest
@@ -46,6 +48,7 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(METHODS_DIR), $(METHODS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(CGI_DIR), $(CGI_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR), main.cpp) 
 
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
