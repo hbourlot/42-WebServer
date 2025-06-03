@@ -95,6 +95,8 @@ private:
   bool validateRequest();
   bool handleGetRequest(const Location *location);
   bool handlePostRequest(const Location *location);
+  bool handleDeleteRequest(const Location *location);
+  
   int sendResponse(pollfd socket);
   void setResponseError(std::string statusCode, std::string statusMsg);
 
@@ -113,3 +115,7 @@ std::string ft_strtrim(const std::string &str);
 httpResponse validateForm(httpRequest request);
 //* utils
 void printHttpHeaders(const httpRequest &request);
+
+bool isDirectory(const std::string &filePath);
+std::string getFilePath(std::string &path, const Location *location);
+std::string joinPath(const std::string &base, const std::string &sub);

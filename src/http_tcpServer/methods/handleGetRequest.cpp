@@ -2,13 +2,6 @@
 
 namespace http {
 
-static bool isDirectory(const std::string &filePath) {
-  struct stat s;
-  if (stat(filePath.c_str(), &s) != 0)
-    return (false);
-  return (S_ISDIR(s.st_mode));
-}
-
 static std::string getParentPath(const std::string &path) {
   std::string parent = path;
 
@@ -20,12 +13,6 @@ static std::string getParentPath(const std::string &path) {
     return (parent.substr(0, prevfolder));
 
   return ("/");
-}
-
-static std::string joinPath(const std::string &base, const std::string &sub) {
-  if (!base.empty() && base[base.length() - 1] == '/')
-    return (base + sub);
-  return (base + "/" + sub);
 }
 
 static std::string generateAutoIndexPage(std::string &dirPath,
@@ -63,13 +50,7 @@ static std::string generateAutoIndexPage(std::string &dirPath,
   return (autoindex);
 }
 
-static std::string getFilePath(std::string &path, const Location *location) {
 
-  std::string relativePath = path.substr(location->path.length());
-  std::string filePath = location->root + "/" + relativePath;
-
-  return (filePath);
-}
 
 static std::string getContentType(const std::string &path) {
   size_t dot = path.find_last_of('.');
@@ -95,8 +76,9 @@ static std::string getContentType(const std::string &path) {
 }
 
 bool TcpServer::handleGetRequest(const Location *location) {
-
+  std::cout << request.path << std::endl;
   std::string filePath = getFilePath(request.path, location);
+  std::cout << filePath << std::endl;
 
   if (isDirectory(filePath)) {
     if (!location->index.empty()) {
