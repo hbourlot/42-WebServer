@@ -30,22 +30,26 @@ static void parseRequest(httpRequest &request,
 
 void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
   char buffer[BUFFER_SIZE + 1] = {0};
-
-  bytesReceived = read(fds[i].fd, buffer, BUFFER_SIZE);
+  std::string requestContent;
+  while((bytesReceived = read(fds[i].fd, buffer, BUFFER_SIZE))>0)
+  requestContent.append(buffer,bytesReceived);
+  
   if (bytesReceived < 0) {
-    std::cerr << "Error: read()\n";
-    close(fds[i].fd);
-    fds.erase(fds.begin() + i);
-    return;
+    if(errno != EAGAIN && errno != EWOULDBLOCK)
+    {
+
+      std::cerr << "Error: read()\n";
+      close(fds[i].fd);
+      fds.erase(fds.begin() + i);
+      return;
+    }
+  }
     // throw TcpServerException(
     // 	"Failed to read bytes from client socket connection");
-  } else if (bytesReceived == 0)
-    return;
-  buffer[bytesReceived] = '\0';
-  //   write(2, buffer, BUFFER_SIZE);
-  std::string requestContent(buffer, bytesReceived); // !Maybe work
-  parseRequest(request, requestContent);
-
-  // Set event POLLOUT
-  fds[i].events |= POLLOUT;
+  if(!requestContent.empty())
+  {
+    parseRequest(request, requestContent); 
+    // Set event POLLOUT
+    fds[i].events |= POLLOUT;
+  }
 }
