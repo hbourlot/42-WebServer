@@ -66,7 +66,7 @@ static std::string extractFilename(const std::string &headers) {
 static bool saveFile(const std::string &filename, const std::string &content,
                      const Location *location) {
 
-  std::string savePath = location->root + '/' + filename;
+  std::string savePath = location->uploadStore + '/' + filename;
 
   std::ofstream newfile(savePath.c_str(), std::ios::binary);
   if (!newfile.is_open())

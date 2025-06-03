@@ -12,14 +12,14 @@ bool TcpServer::handlePostRequest(const Location *location) {
                       result.htmlFilePath);
     } else
       setResponseError(result.statusCode, result.statusMessage);
-  } else if (request.path == "/upload") {
-    if (!location->uploadEnable) {
+  } else if (location->uploadEnable) {
+    parseMultipart(location);
+  } else if (!location->uploadEnable) {
+     {
       setResponseError("403", "Upload Not Allowed");
       return (false);
     }
-    parseMultipart(location);
   } else {
-
     setHtmlResponse("404", "Not Found", infos.errorPage[404]);
     return (false);
   }
