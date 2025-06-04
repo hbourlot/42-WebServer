@@ -1,9 +1,8 @@
 #pragma once
 
+#include "CGI/CgiHandler.hpp"
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
-
-#include "CgiHandler.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <dirent.h>
@@ -26,87 +25,94 @@
 #define DFL_500 "content/defaults/error_500.html"
 
 struct httpRequest {
-  std::string method;
-  std::string path;
-  std::string protocol;
-  std::map<std::string, std::string> headers;
-  std::string body;
+		std::string method;
+		std::string path;
+		std::string protocol;
+		std::map<std::string, std::string> headers;
+		std::string body;
 };
 
 struct httpResponse {
-  std::string statusCode;
-  std::string statusMessage;
-  std::string htmlFilePath;
-  std::map<std::string, std::string> headers;
+		std::string statusCode;
+		std::string statusMessage;
+		std::string htmlFilePath;
+		std::map<std::string, std::string> headers;
 };
 
 namespace {
 
-void log(const std::string &message) { std::cout << message << std::endl; }
+	void log(const std::string &message) {
+		std::cout << message << std::endl;
+	}
 
-void exitWithError(const std::string &errorMessage) {
-  log("ERROR: " + errorMessage);
-  exit(1); // Use exit(1) to indicate an error
-}
+	void exitWithError(const std::string &errorMessage) {
+		log("ERROR: " + errorMessage);
+		exit(1); // Use exit(1) to indicate an error
+	}
 
-void logDebugger(const std::string &message) {
-  std::cout << "Debugger => " << message << std::endl;
-}
+	void logDebugger(const std::string &message) {
+		std::cout << "Debugger => " << message << std::endl;
+	}
 
 } // namespace
 
 namespace http {
 
-typedef int HTTP_SOCKET;
-const int BUFFER_SIZE = 30720;
+	typedef int HTTP_SOCKET;
+	const int BUFFER_SIZE = 30720;
 
-class TcpServer {
-public:
-  // Default Constructor
-  TcpServer(Configs configuration);
-  // Default Destructor
-  ~TcpServer();
-  int runServer();
+	class TcpServer {
+		public:
+			// Default Constructor
+			TcpServer(Configs configuration);
+			// Default Destructor
+			~TcpServer();
 
-  class TcpServerException : public std::runtime_error {
-  public:
-    explicit TcpServerException(const std::string &message)
-        : std::runtime_error(message) {}
-  };
+			// Main member
+			int runServer();
 
-private:
-  // MAYBE YOU STRUCT HERE?? 😇
-  httpRequest request;
-  Server infos; // For keep infos inside
-  std::string m_ip_address;
-  int m_port, bytesReceived, bytesSend;
-  HTTP_SOCKET m_serverSocket, m_acceptSocket;
-  long m_incomingMessage;
-  struct sockaddr_in m_socketAddress;
-  unsigned int m_socketAddress_len;
-  std::string m_serverMessage;
+			class TcpServerException : public std::runtime_error {
+				public:
+					explicit TcpServerException(const std::string &message)
+						: std::runtime_error(message) {
+					}
+			};
 
-  int startServer();
-  void runLoop(std::vector<pollfd> &fds, int timeOut);
-  void shutDownServer(std::vector<pollfd> &fds);
-  void startListen();
-  void acceptConnection(std::vector<pollfd> &fds);
-  void readRequest(std::vector<pollfd> &fds, int i);
-  bool validateRequest();
-  bool handleGetRequest(const Location *location);
-  bool handlePostRequest(const Location *location);
-  bool handleDeleteRequest(const Location *location);
-  
-  int sendResponse(pollfd socket);
-  void setResponseError(std::string statusCode, std::string statusMsg);
+		private:
+			httpRequest request;
+			Server infos; // For keep infos inside
+			std::string m_ip_address;
+			int m_port, bytesReceived, bytesSend;
+			HTTP_SOCKET m_serverSocket, m_acceptSocket;
+			long m_incomingMessage;
+			struct sockaddr_in m_socketAddress;
+			unsigned int m_socketAddress_len;
+			std::string m_serverMessage;
 
-  bool setHtmlResponse(std::string statusCode, std::string statusMsg,
-                       const std::string &htmlFilePath);
-  bool parseMultipart(const Location *location);
+			int startServer();
+			void runLoop(std::vector<pollfd> &fds, int timeOut);
+			void shutDownServer(std::vector<pollfd> &fds);
+			void startListen();
+			void acceptConnection(std::vector<pollfd> &fds);
+			void readRequest(std::vector<pollfd> &fds, int i);
+			bool validateRequest();
+			bool handleGetRequest(const Location *location);
+			bool handlePostRequest(const Location *location);
+			bool handleDeleteRequest(const Location *location);
+			int sendResponse(pollfd socket);
+			void setResponseError(std::string statusCode,
+								  std::string statusMsg);
 
-  void setResponse(std::string statusCode, std::string statusMsg,
-                   std::string contentType, std::string body);
-};
+			bool setHtmlResponse(std::string statusCode, std::string statusMsg,
+								 const std::string &htmlFilePath);
+			bool parseMultipart(const Location *location);
+
+			void setResponse(std::string statusCode, std::string statusMsg,
+							 std::string contentType, std::string body);
+	};
+
+	std::string getLocationFieldAsString(const std::vector<Location> &locations,
+										 const std::string &field);
 
 } // namespace http
 //*Lib
@@ -119,3 +125,4 @@ void printHttpHeaders(const httpRequest &request);
 bool isDirectory(const std::string &filePath);
 std::string getFilePath(std::string &path, const Location *location);
 std::string joinPath(const std::string &base, const std::string &sub);
+std::vector<std::string> split(const std::string &s, char delimiter);
