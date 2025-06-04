@@ -50,8 +50,6 @@ static std::string generateAutoIndexPage(std::string &dirPath,
   return (autoindex);
 }
 
-
-
 static std::string getContentType(const std::string &path) {
   size_t dot = path.find_last_of('.');
   if (dot == std::string::npos)
@@ -76,10 +74,14 @@ static std::string getContentType(const std::string &path) {
 }
 
 bool TcpServer::handleGetRequest(const Location *location) {
-  std::cout << request.path << std::endl;
-  std::string filePath = getFilePath(request.path, location);
-  std::cout << filePath << std::endl;
 
+  if(!location->cgi_path.empty())
+  {
+    std::cout << "HERE" <<std::endl;
+  }
+
+  std::string filePath = getFilePath(request.path, location);
+  std::cout << "filePath "<< filePath << std::endl;
   if (isDirectory(filePath)) {
     if (!location->index.empty()) {
 
