@@ -60,22 +60,22 @@ namespace http {
 		}
 
 		// !!! HERE
-		if (CgiHandler::isCgiRequest(request)) {
-			int i = 0;
-			std::string ext =
-				getLocationFieldAsString(infos.locations, "cgi_extension");
-			std::vector<std::string> ext_splitted = split(ext, ' ');
+		// if (CgiHandler::isCgiRequest(request)) {
+		// 	int i = 0;
+		// 	std::string ext =
+		// 		getLocationFieldAsString(infos.locations, "cgi_extension");
+		// 	std::vector<std::string> ext_splitted = split(ext, ' ');
 
-			// Maybe verify all cgi_extensions instead of just once by once
-			while (CgiHandler::isValidCgiExtension(ext_splitted[i]))
-				i++;
-			if (i == ext.size()){
-				// handleCgiRequest
-			}
-		}
+		// 	// Maybe verify all cgi_extensions instead of just once by once
+		// 	while (CgiHandler::isValidCgiExtension(ext_splitted[i]))
+		// 		i++;
+		// 	if (i == ext.size()){
+		// 		// handleCgiRequest
+		// 	}
+		// }
 
-	std::cout << "HELLO RIGHTTTTT\n";
-
+	// std::cout << "HELLO RIGHTTTTT\n";
+		// std::cout << matchedLocation->path << "                         "<< matchedLocation->cgi_path[0] <<std::endl;
 	if (request.method == "GET")
 		return (handleGetRequest(matchedLocation));
 	else if (request.method == "POST")
