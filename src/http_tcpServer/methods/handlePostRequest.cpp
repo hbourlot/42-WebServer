@@ -5,7 +5,7 @@ namespace http
 
 	bool TcpServer::handlePostRequest(const Location *location)
 	{
-				if (!location->cgi_path.empty())
+		if (!location->cgi_path.empty())
 		{
 			std::cout << "HERE CGI POST" << std::endl;
 		}

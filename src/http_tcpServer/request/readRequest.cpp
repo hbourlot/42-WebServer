@@ -1,8 +1,6 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 #include <sys/poll.h>
 
-
-
 void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i)
 {
 	char buffer[BUFFER_SIZE + 1] = {0};
