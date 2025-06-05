@@ -24,14 +24,14 @@ namespace http
 		}
 		else if (location->uploadEnable)
 		{
+			std::cout << request.headers["Content-Type"] << std::endl;
+			// if
 			parseMultipart(location);
 		}
 		else if (!location->uploadEnable)
 		{
-			{
-				setResponseError("403", "Upload Not Allowed");
-				return (false);
-			}
+			setResponseError("403", "Upload Not Allowed");
+			return (false);
 		}
 		else
 		{
