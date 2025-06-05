@@ -6,48 +6,68 @@
 
 std::string
 http::getLocationFieldAsString(const std::vector<Location> &locations,
-							   const std::string &field) {
+                               const std::string &field)
+{
 	std::ostringstream oss;
 	bool first = true;
-	for (size_t i = 0; i < locations.size(); ++i) {
-		if (field == "path") {
+	for (size_t i = 0; i < locations.size(); ++i)
+	{
+		if (field == "path")
+		{
 			if (!first)
 				oss << " ";
 			oss << locations[i].path;
-		} else if (field == "root") {
+		}
+		else if (field == "root")
+		{
 			if (!first)
 				oss << " ";
 			oss << locations[i].root;
-		} else if (field == "index") {
+		}
+		else if (field == "index")
+		{
 			if (!first)
 				oss << " ";
 			oss << locations[i].index;
-		} else if (field == "redirection") {
+		}
+		else if (field == "redirection")
+		{
 			if (!first)
 				oss << " ";
 			oss << locations[i].redirection;
-		} else if (field == "uploadStore") {
+		}
+		else if (field == "uploadStore")
+		{
 			if (!first)
 				oss << " ";
 			oss << locations[i].uploadStore;
-		} else if (field == "methods") {
-			for (size_t j = 0; j < locations[i].methods.size(); ++j) {
+		}
+		else if (field == "methods")
+		{
+			for (size_t j = 0; j < locations[i].methods.size(); ++j)
+			{
 				if (!first)
 					oss << " ";
 				oss << locations[i].methods[j];
 				first = false;
 			}
 			continue;
-		} else if (field == "cgi_extension") {
-			for (size_t j = 0; j < locations[i].cgi_extension.size(); ++j) {
+		}
+		else if (field == "cgi_extension")
+		{
+			for (size_t j = 0; j < locations[i].cgi_extension.size(); ++j)
+			{
 				if (!first)
 					oss << " ";
 				oss << locations[i].cgi_extension[j];
 				first = false;
 			}
 			continue;
-		} else if (field == "cgi_path") {
-			for (size_t j = 0; j < locations[i].cgi_path.size(); ++j) {
+		}
+		else if (field == "cgi_path")
+		{
+			for (size_t j = 0; j < locations[i].cgi_path.size(); ++j)
+			{
 				if (!first)
 					oss << " ";
 				oss << locations[i].cgi_path[j];
