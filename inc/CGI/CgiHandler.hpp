@@ -60,6 +60,7 @@ namespace http {
 				return s;
 			}
 			static bool isCgiRequest(httpRequest request);
+			bool parseCgi(httpRequest request);
 
 			// Setters
 			void setMethod(const std::string &method);

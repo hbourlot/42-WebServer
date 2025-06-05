@@ -15,8 +15,8 @@
 #include <sstream>
 #include <string>
 #include <sys/poll.h>
-#include <sys/stat.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <vector>
 
@@ -30,6 +30,7 @@ struct httpRequest {
 		std::string protocol;
 		std::map<std::string, std::string> headers;
 		std::string body;
+		std::string query;
 };
 
 struct httpResponse {

@@ -7,8 +7,9 @@
 
 namespace http {
 
-	const Location *getMatchLocation(const std::string &path,
-									 const std::vector<Location> &locations) {
+	static const Location *
+	getMatchLocation(const std::string &path,
+					 const std::vector<Location> &locations) {
 
 		const Location *matchedLocation = NULL;
 		size_t matchLength = 0;
@@ -60,6 +61,8 @@ namespace http {
 		}
 
 		// !!! HERE
+
+		std::cout << "->" + matchedLocation->cgi_extension[0] << std::endl;
 		// if (CgiHandler::isCgiRequest(request)) {
 		// 	int i = 0;
 		// 	std::string ext =
@@ -74,16 +77,17 @@ namespace http {
 		// 	}
 		// }
 
-	// std::cout << "HELLO RIGHTTTTT\n";
-		// std::cout << matchedLocation->path << "                         "<< matchedLocation->cgi_path[0] <<std::endl;
-	if (request.method == "GET")
-		return (handleGetRequest(matchedLocation));
-	else if (request.method == "POST")
-		return (handlePostRequest(matchedLocation));
-	else if (request.method == "DELETE") {
-		// Here still missing implement the part of Method Delete
+		// std::cout << "HELLO RIGHT\n";
+		// std::cout << matchedLocation->path << "                         "<<
+		// matchedLocation->cgi_path[0] <<std::endl;
+		if (request.method == "GET")
+			return (handleGetRequest(matchedLocation));
+		else if (request.method == "POST")
+			return (handlePostRequest(matchedLocation));
+		else if (request.method == "DELETE") {
+			// Here still missing implement the part of Method Delete
+		}
+		return (true);
 	}
-	return (true);
-}
 
 } // namespace http
