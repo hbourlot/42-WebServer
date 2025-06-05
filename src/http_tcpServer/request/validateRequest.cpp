@@ -36,9 +36,7 @@ namespace http
 
 		if (request.method != "GET" && request.method != "POST" &&
 		    request.method != "DELETE")
-		{
 			return false;
-		}
 
 		for (size_t i = 0; i < location->methods.size(); ++i)
 		{
