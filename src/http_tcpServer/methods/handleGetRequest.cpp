@@ -88,11 +88,7 @@ namespace http
 
 		if (!location->cgi_path.empty())
 		{
-			std::cout << "HERE" << std::endl;
-			// size_t pos =
-			// request.path.find_last_of('?',location->path.length()+1);
-			std::cout << request.path.substr(location->path.length() + 1)
-			          << std::endl;
+			std::cout << "HERE CGI GET" << std::endl;
 		}
 
 		std::string filePath = getFilePath(request.path, location);
