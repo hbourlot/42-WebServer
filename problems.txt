@@ -14,6 +14,8 @@ CONFIG:
 --> Check for missing information at CGI, for example, no cgi_path, but have cgi_extensions ❌
 --> Duplicate extensions and duplicate paths for the CGI. Example .py .py -- /bin/python /bin/HTML ❌
 --> We can't set more than one path to upload files ❌
+--> SEG FAULT: ./webserv conf_files/good/chat ❌
+--> When we have 2 extensions and only 1 path but finished with " ", for example cgi_path ../../python ; <-- Conider 2 paths cause of the space ❌
 
 NOTES:
 --> We can have more than one index, and the server will serve us the first one ❌

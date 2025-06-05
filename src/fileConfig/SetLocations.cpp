@@ -23,7 +23,7 @@ std::string locationPath(const std::string& line) {
     size_t end = line.find_first_of(" {", start); // Will find the ' {'
     if (end == std::string::npos)
         end = line.length();
-
+	
     return line.substr(start, end - start);
 }
 
@@ -97,7 +97,8 @@ int		getCgi(std::string noSpaceLine, Location& location, int cgiInfo){
 		else
 			location.cgi_path.push_back(info); // Send it for the cgi_path variable
 	}
-
+	
+	std::cout << "CGI path: " << info << "|" << std::endl;
 	return ready; // If 0, not enough information | If 1, ready to build the map
 }
 
@@ -107,6 +108,8 @@ bool	SetLocation::setLocationConfig(std::ifstream& confFd, std::string line, Ser
 	Location location;
 
 	location.path = locationPath(line); // Sets the Location path
+
+	int atIndexFlag = 0; // Setup a flag for autoIndex, to check for CGI
 
 	while (std::getline(confFd, line)){
 		noSpaceLine = removeSpace(line);
@@ -119,6 +122,7 @@ bool	SetLocation::setLocationConfig(std::ifstream& confFd, std::string line, Ser
 		if (trimedLine[0] == '}')
 			break;
 		
+
 		switch(getTypeLocation(trimedLine)){
 			case METHODS:
 				getMethods(noSpaceLine, location.methods);
@@ -130,10 +134,12 @@ bool	SetLocation::setLocationConfig(std::ifstream& confFd, std::string line, Ser
 				location.redirection = getInfo(noSpaceLine);
 				break;
 			case CGI_EXTENSION:
+				location.name = "cgi"; // Used to check on AUTOINDEX
 				if (getCgi(noSpaceLine, location, CGI_EXTENSION) == 1)
 					buildCgi(location); // -> Missing function
 				break;
 			case CGI_PATH:
+				location.name = "cgi"; // Used to check on AUTOINDEX
 				if (getCgi(noSpaceLine, location, CGI_PATH) == 1)
 					buildCgi(location); // If we already have the full information (PATH + EXTENSION), we build the map cgi
 				break;
@@ -147,6 +153,8 @@ bool	SetLocation::setLocationConfig(std::ifstream& confFd, std::string line, Ser
 				location.uploadStore = getInfo(noSpaceLine);
 				break;
 			case AUTOINDEX:
+				atIndexFlag = 1; // This will activate a flag, to see if it have any autoIndex inside the location, can't have inside CGI;
+				
 				if (getInfo(noSpaceLine) == "on") // Change the permission to upload files
 					location.autoIndex = true;
 				else
@@ -157,6 +165,9 @@ bool	SetLocation::setLocationConfig(std::ifstream& confFd, std::string line, Ser
 
 		}
 	}
+
+	if (location.name == "cgi" && atIndexFlag == 1) // Checks if exists a autoindex inside a CGI location
+		throw std::invalid_argument("ERROR: Can't have autoindex inside a CGI location\n");
 	server.locations.push_back(location);
 	return true;
 }

@@ -11,7 +11,7 @@
 
 struct Location{
 	Location();
-
+	std::string							name;
 	std::string							path; // location --> /upload <--
 	std::vector<std::string>			methods; // method POST GET DELETE
     std::string                 		root; 

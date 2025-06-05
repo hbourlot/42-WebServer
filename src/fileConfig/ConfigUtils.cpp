@@ -21,3 +21,16 @@ std::string	getInfo(std::string& noSpaceLine){
 	
 	return noSpaceLine.substr(i, noSpaceLine.find(';') - i); // '- i' I have to discard the 'i' size
 }
+
+Location&   findPath(Server server, std::string path){
+	std::vector<Location>::iterator itb = server.locations.begin();
+	std::vector<Location>::iterator ite = server.locations.end();
+
+	while (itb != ite){
+		if (path == itb->path){
+			return *itb;
+		}
+		itb++;
+	}
+	return *ite;
+}

@@ -7,7 +7,6 @@ void http::TcpServer::startListen() {
 	// TODO: connections
 	listen_fd = listen(m_serverSocket, 2);
 
-	std::cout << "Entrou no start Listen" << std::endl;
 	if (listen_fd < 0) {
 		throw TcpServerException("Socket Listen failed");
 	}

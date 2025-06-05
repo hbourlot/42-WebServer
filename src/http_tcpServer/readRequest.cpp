@@ -6,12 +6,10 @@ static void parseRequest(httpRequest &request,
 	std::istringstream request_stream(requestContent);
 	std::string line;
 	size_t idx;
-	std::cout << "Entrou no parseRequest" << std::endl;
 
 	request_stream >> request.method >> request.path >> request.protocol; //
 	while (std::getline(request_stream, line)) {
 		idx = line.find(":");
-		std::cout << "Entrou no while loop do readRequest" << std::endl;
 
 		if (idx != std::string::npos) {
 			std::string key = line.substr(0, idx);
@@ -24,8 +22,6 @@ static void parseRequest(httpRequest &request,
 
 	std::string body;
 	while (std::getline(request_stream, line)){
-		std::cout << "Entrou no segundo loop do parseRequest" << std::endl;
-
 		body += line + "\n";
 	}
 	request.body = body;
@@ -35,7 +31,6 @@ void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
 	char buffer[BUFFER_SIZE + 1] = {0};
 
 	bytesReceived = read(fds[i].fd, buffer, BUFFER_SIZE);
-	std::cout << "Entrou no readRequest" << std::endl;
 	if (bytesReceived < 0) {
 		std::cerr << "Error: read()\n";
 		close(fds[i].fd);
