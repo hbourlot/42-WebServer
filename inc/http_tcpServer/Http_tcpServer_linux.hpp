@@ -31,6 +31,7 @@ struct httpRequest
 	std::string protocol;
 	std::map<std::string, std::string> headers;
 	std::string body;
+	std::vector<std::string> queries;
 };
 
 struct httpResponse
@@ -122,6 +123,10 @@ namespace http
 	                                     const std::string &field);
 
 } // namespace http
+
+//*request 
+void parseRequest(httpRequest &request,
+                         const std::string &requestContent);
 //*Lib
 std::string ft_strtrim(const std::string &str);
 //*prot_backend forms
