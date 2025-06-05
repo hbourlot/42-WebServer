@@ -8,6 +8,7 @@
 #define UPLOAD_ENABLE 12
 #define UPLOAD_STORE 13
 #define AUTOINDEX 14
+#define INDEX 15
 
 Location::Location(){
 	uploadEnable = false;
@@ -61,6 +62,8 @@ int		getTypeLocation(std::string& trimedLine){ // Function to check the informat
 		return UPLOAD_STORE;
 	if (trimedLine == "autoindex")
 		return AUTOINDEX;
+	if (trimedLine == "index")
+		return INDEX;
 	return 100;
 }
 
@@ -160,6 +163,10 @@ bool	SetLocation::setLocationConfig(std::ifstream& confFd, std::string line, Ser
 				else
 					location.autoIndex = false;
 				break;
+			case INDEX:
+				location.index = getInfo(noSpaceLine);
+				break;
+
 			default:
 				break;
 
