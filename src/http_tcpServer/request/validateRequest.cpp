@@ -90,7 +90,7 @@ namespace http
 		else if (request.method == "POST")
 			return (handlePostRequest(matchedLocation));
 		else if (request.method == "DELETE")
-			return(handleDeleteRequest(matchedLocation));
+			return (handleDeleteRequest(matchedLocation));
 		return (true);
 	}
 
