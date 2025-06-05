@@ -4,6 +4,10 @@ namespace http
 {
 	bool TcpServer::handleDeleteRequest(const Location *location)
 	{
+				if (!location->cgi_path.empty())
+		{
+			std::cout << "HERE CGI DELETE" << std::endl;
+		}
 		std::string filePath = getFilePath(request.path, location);
 
 		std::cout << filePath << std::endl;
