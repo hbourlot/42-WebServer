@@ -52,6 +52,7 @@ namespace http
 
 	  private:
 		httpRequest request;
+		httpResponse response;
 		Server infos; // For keep infos inside
 		std::string m_ip_address;
 		int m_port, bytesReceived, bytesSend;
@@ -72,6 +73,7 @@ namespace http
 		bool handlePostRequest(const Location *location);
 		bool handleDeleteRequest(const Location *location);
 		int sendResponse(pollfd socket);
+		void setResponse();
 		void setResponseError(std::string statusCode, std::string statusMsg);
 		bool setHtmlResponse(std::string statusCode, std::string statusMsg,
 		                     const std::string &htmlFilePath);

@@ -5,7 +5,7 @@ httpResponse makeRedirectResponse(const std::string &location)
 {
 	httpResponse res;
 	res.statusCode = "302";
-	res.statusMessage = "Found";
+	res.statusMsg = "Found";
 	res.body = "";
 	res.headers["Location"] = location;
 	return res;
@@ -17,7 +17,7 @@ httpResponse makeHttpResponse(const std::string statusCode,
 {
 	httpResponse result;
 	result.statusCode = statusCode;
-	result.statusMessage = statusMsg;
+	result.statusMsg = statusMsg;
 	result.body = htmlFilePath;
 	return (result);
 }
