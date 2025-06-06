@@ -1,16 +1,13 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
-namespace http
-{
+namespace http {
 
-	static std::string extractBoundary(httpRequest &request)
-	{
+	static std::string extractBoundary(httpRequest &request) {
 
 		std::string contentType = request.headers["Content-Type"];
 		std::string boundaryPrefix = "boundary=";
 
 		size_t pos = contentType.find(boundaryPrefix);
-		if (pos == std::string::npos)
-		{
+		if (pos == std::string::npos) {
 			return ("");
 		}
 		std::string boundary =
@@ -19,8 +16,7 @@ namespace http
 	}
 
 	static std::string extractFilePart(httpRequest &request,
-	                                   const std::string &boundary)
-	{
+	                                   const std::string &boundary) {
 
 		std::string body = request.body;
 		size_t start = body.find(boundary);
@@ -40,8 +36,7 @@ namespace http
 
 	static bool splitHeadersAndContent(const std::string &filePart,
 	                                   std::string &headers,
-	                                   std::string &content)
-	{
+	                                   std::string &content) {
 
 		size_t headerEnd = filePart.find("\r\n\r\n");
 
@@ -54,8 +49,7 @@ namespace http
 		return (true);
 	}
 
-	static std::string extractFilename(const std::string &headers)
-	{
+	static std::string extractFilename(const std::string &headers) {
 
 		std::string token = "filename=\"";
 		size_t start = headers.find(token);
@@ -73,10 +67,10 @@ namespace http
 	}
 
 	static bool saveFile(const std::string &filename,
-	                     const std::string &content, const Location *location)
-	{
+	                     const std::string &content, const Location *location) {
 
 		std::string savePath = location->uploadStore + '/' + filename;
+		std::cout << "PRINT => " << savePath << std::endl;
 
 		std::ofstream newfile(savePath.c_str(), std::ios::binary);
 		if (!newfile.is_open())
@@ -87,21 +81,18 @@ namespace http
 		return (true);
 	}
 
-	bool TcpServer::parseMultipart(const Location *location)
-	{
+	bool TcpServer::parseMultipart(const Location *location) {
 
 		std::string boundary = extractBoundary(request);
 
-		if (boundary.empty())
-		{
+		if (boundary.empty()) {
 			setResponseError("400", "Bad Request: No boundary");
 			return (false);
 		}
 
 		std::string filePart = extractFilePart(request, boundary);
 
-		if (filePart.empty())
-		{
+		if (filePart.empty()) {
 			setResponseError("400", "Bad Request: No boundary filePart");
 			return (false);
 		}
@@ -109,22 +100,19 @@ namespace http
 		std::string headers;
 		std::string content;
 
-		if (!splitHeadersAndContent(filePart, headers, content))
-		{
+		if (!splitHeadersAndContent(filePart, headers, content)) {
 			setResponseError("400", "Bad Request: Malformed multipart body");
 			return (false);
 		}
 
 		std::string filename = extractFilename(headers);
 
-		if (filename.empty())
-		{
+		if (filename.empty()) {
 			setResponseError("400", "Bad Request: Filename not found");
 			return (false);
 		}
 
-		if (!saveFile(filename, content, location))
-		{
+		if (!saveFile(filename, content, location)) {
 			// setResponseError("500", "Internal Server Error: File not saved");
 			setHtmlResponse("500", "Internal Server Error: File not saved",
 			                DFL_500);
