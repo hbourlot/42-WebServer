@@ -1,8 +1,13 @@
+#include "CGI/CgiHandler.hpp"
+#include "Config/Configs.hpp"
+#include "Config/Debug.hpp"
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
-namespace http {
+namespace http
+{
 
-	static std::string getParentPath(const std::string &path) {
+	static std::string getParentPath(const std::string &path)
+	{
 		std::string parent = path;
 
 		if (!parent.empty() && parent[parent.length() - 1] == '/')
@@ -16,34 +21,38 @@ namespace http {
 	}
 
 	static std::string generateAutoIndexPage(std::string &dirPath,
-											 const Location *location,
-											 httpRequest &request) {
+	                                         const Location *location,
+	                                         httpRequest &request)
+	{
 		std::string autoindex =
-			"<html>\n<body>\n<h1>Index of " + request.path + "</h1>\n";
+		    "<html>\n<body>\n<h1>Index of " + request.path + "</h1>\n";
 		DIR *directory;
 
 		directory = opendir(dirPath.c_str());
 		if (!directory)
 			return "<html><body><h1>Unable to open "
-				   "directory</h1></body></html>";
+			       "directory</h1></body></html>";
 
 		struct dirent *dirent;
 		dirent = readdir(directory);
 
-		while (dirent != NULL) {
+		while (dirent != NULL)
+		{
 			std::string d_name(dirent->d_name);
-			if (d_name.compare(".")) {
+			if (d_name.compare("."))
+			{
 
 				if (d_name.compare(".."))
 
 					autoindex +=
-						"<p><a href=" + joinPath(request.path, d_name) + ">" +
-						d_name + "</a></p>\n";
-				else {
+					    "<p><a href=" + joinPath(request.path, d_name) + ">" +
+					    d_name + "</a></p>\n";
+				else
+				{
 
 					std::string parentPath = getParentPath(request.path);
 					autoindex += "<p><a href=" + parentPath + ">" + d_name +
-								 "</a></p>\n";
+					             "</a></p>\n";
 				}
 			}
 			dirent = readdir(directory);
@@ -53,7 +62,8 @@ namespace http {
 		return (autoindex);
 	}
 
-	static std::string getContentType(const std::string &path) {
+	static std::string getContentType(const std::string &path)
+	{
 		size_t dot = path.find_last_of('.');
 		if (dot == std::string::npos)
 			return "application/octet-stream"; // binario genérico
@@ -76,39 +86,49 @@ namespace http {
 		return "application/octet-stream";
 	}
 
-	bool TcpServer::handleGetRequest(const Location *location) {
+	bool TcpServer::handleGetRequest(const Location *location,
+	                                 httpRequest &request)
+	{
 
-		if (!location->cgi_path.empty()) {
-			std::cout << "HERE" << std::endl;
-			// size_t pos =
-			// request.path.find_last_of('?',location->path.length()+1);
-			std::cout << request.path.substr(location->path.length() + 1)
-					  << std::endl;
+		debugLocation(*location);
+		if (CgiHandler::parseCgi(*location, request))
+		{
+			addCgi(*location, request);
+			return true;
 		}
+		// if (!location->cgi_path.empty())
+		// {
+		// }
 
 		std::string filePath = getFilePath(request.path, location);
 		std::cout << "filePath " << filePath << std::endl;
-		if (isDirectory(filePath)) {
-			if (!location->index.empty()) {
+		if (isDirectory(filePath))
+		{
+			if (!location->index.empty())
+			{
 
 				std::string indexPath = filePath + location->index;
 				std::ifstream indexFile(indexPath.c_str());
 
-				if (indexFile.is_open()) {
+				if (indexFile.is_open())
+				{
 					setHtmlResponse("200", "OK", indexPath);
 					indexFile.close();
 					return (true);
 				}
 			}
 
-			if (!location->autoIndex) {
+			if (!location->autoIndex)
+			{
 
 				setHtmlResponse("404", "Not Found", infos.errorPage[404]);
 				return (false);
-			} else {
+			}
+			else
+			{
 
 				std::string body =
-					generateAutoIndexPage(filePath, location, request);
+				    generateAutoIndexPage(filePath, location, request);
 				setResponse("200", "OK", "text/html", body);
 				return (true);
 			}
@@ -116,7 +136,8 @@ namespace http {
 
 		std::ifstream file(filePath.c_str(), std::ios::binary);
 
-		if (!file.is_open()) {
+		if (!file.is_open())
+		{
 
 			setHtmlResponse("404", "Not Found", infos.errorPage[404]);
 			return (false);

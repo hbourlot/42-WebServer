@@ -1,3 +1,3 @@
 #include "CGI/CgiHandler.hpp"
 
-HTTP::CgiHandler handleCgiRequest()
+// HTTP::CgiHandler handleCgiRequest()

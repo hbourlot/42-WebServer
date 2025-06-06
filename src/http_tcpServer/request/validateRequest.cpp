@@ -5,21 +5,25 @@
 #include <ostream>
 #include <vector>
 
-namespace http {
+namespace http
+{
 
 	static const Location *
 	getMatchLocation(const std::string &path,
-					 const std::vector<Location> &locations) {
+	                 const std::vector<Location> &locations)
+	{
 
 		const Location *matchedLocation = NULL;
 		size_t matchLength = 0;
 
-		for (size_t i = 0; i < locations.size(); ++i) {
+		for (size_t i = 0; i < locations.size(); ++i)
+		{
 
 			const std::string &locPath = locations[i].path;
 
 			if (path.compare(0, locPath.size(), locPath) == 0 &&
-				locPath.size() > matchLength) {
+			    locPath.size() > matchLength)
+			{
 				matchedLocation = &locations[i];
 				matchLength = locPath.size();
 			}
@@ -28,14 +32,15 @@ namespace http {
 	}
 
 	static bool validateRequestMethod(httpRequest request,
-									  const Location *location) {
+	                                  const Location *location)
+	{
 
 		if (request.method != "GET" && request.method != "POST" &&
-			request.method != "DELETE") {
+		    request.method != "DELETE")
 			return false;
-		}
 
-		for (size_t i = 0; i < location->methods.size(); ++i) {
+		for (size_t i = 0; i < location->methods.size(); ++i)
+		{
 			if (request.method == location->methods[i])
 				return true;
 		}
@@ -45,24 +50,27 @@ namespace http {
 	// static bool handleCgiMethod(httpRequest request) {
 	// }
 
-	bool TcpServer::validateRequest() {
+	bool TcpServer::validateRequest()
+	{
 
 		const Location *matchedLocation =
-			getMatchLocation(request.path, infos.locations);
+		    getMatchLocation(request.path, infos.locations);
 
-		if (!matchedLocation) {
+		if (!matchedLocation)
+		{
 			setHtmlResponse("404", "Not Found", infos.errorPage[404]);
 			return false;
 		}
 		//! Treat before the /redirect-me
-		if (validateRequestMethod(request, matchedLocation) == false) {
+		if (validateRequestMethod(request, matchedLocation) == false)
+		{
 			setHtmlResponse("405", "Method Not Allowed", DFL_405);
 			return (false);
 		}
 
 		// !!! HERE
 
-		std::cout << "->" + matchedLocation->cgi_extension[0] << std::endl;
+		// std::cout << "LALA\n";
 		// if (CgiHandler::isCgiRequest(request)) {
 		// 	int i = 0;
 		// 	std::string ext =
@@ -77,16 +85,12 @@ namespace http {
 		// 	}
 		// }
 
-		// std::cout << "HELLO RIGHT\n";
-		// std::cout << matchedLocation->path << "                         "<<
-		// matchedLocation->cgi_path[0] <<std::endl;
 		if (request.method == "GET")
-			return (handleGetRequest(matchedLocation));
+			return (handleGetRequest(matchedLocation, request));
 		else if (request.method == "POST")
 			return (handlePostRequest(matchedLocation));
-		else if (request.method == "DELETE") {
-			// Here still missing implement the part of Method Delete
-		}
+		else if (request.method == "DELETE")
+			return (handleDeleteRequest(matchedLocation));
 		return (true);
 	}
 
