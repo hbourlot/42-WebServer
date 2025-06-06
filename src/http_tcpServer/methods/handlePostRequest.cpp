@@ -14,13 +14,13 @@ namespace http
 		{
 			httpResponse result = validateForm(request);
 
-			if (!result.htmlFilePath.empty())
+			if (!result.body.empty())
 			{
-				setHtmlResponse(result.statusCode, result.statusMessage,
-				                result.htmlFilePath);
+				setHtmlResponse(result.statusCode, result.statusMsg,
+				                result.body);
 			}
 			else
-				setResponseError(result.statusCode, result.statusMessage);
+				setResponseError(result.statusCode, result.statusMsg);
 		}
 		else if (location->uploadEnable)
 		{

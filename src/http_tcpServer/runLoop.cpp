@@ -6,6 +6,7 @@ void http::TcpServer::runLoop(std::vector<pollfd> &fds, int timeOut) {
 
 	try {
 		while (true) {
+
 			// poll() waits for events on multiple file descriptors (like
 			// sockets), enabling non-blocking I/O in servers.
 			int ret = poll(fds.data(), fds.size(), timeOut);
@@ -27,7 +28,8 @@ void http::TcpServer::runLoop(std::vector<pollfd> &fds, int timeOut) {
 					close(fds[i].fd);
 					fds.erase(fds.begin() + i);
 					--i;
-					exit(0);
+					std::cout << "MATANDO AQUI!!!!!!!!!!!!!!!!!!!!!!\n";
+					// exit(0);
 					continue;
 				}
 
@@ -59,6 +61,6 @@ void http::TcpServer::runLoop(std::vector<pollfd> &fds, int timeOut) {
 		}
 	} catch (const TcpServerException &e) {
 		std::cerr << "Error handling client connection => " << e.what()
-				  << std::endl;
+		          << std::endl;
 	}
 }

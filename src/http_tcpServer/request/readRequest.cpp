@@ -22,7 +22,8 @@ void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i)
 	}
 
 	// std::cout << "ON HERE\n";
-	std::cout << buffer << std::endl;
+	if (buffer[0])
+		std::cout << buffer << std::endl;
 	// write(STDOUT_FILENO, buffer, bytesReceived);
 	// throw TcpServerException(
 	// 	"Failed to read bytes from client socket connection");
