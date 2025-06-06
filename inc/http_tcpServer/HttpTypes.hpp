@@ -17,7 +17,7 @@ struct httpRequest
 struct httpResponse
 {
 	std::string statusCode;
-	std::string statusMessage;
+	std::string statusMsg;
 	std::string body;
 	std::map<std::string, std::string> headers;
 

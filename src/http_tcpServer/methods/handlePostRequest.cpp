@@ -16,11 +16,11 @@ namespace http
 
 			if (!result.body.empty())
 			{
-				setHtmlResponse(result.statusCode, result.statusMessage,
+				setHtmlResponse(result.statusCode, result.statusMsg,
 				                result.body);
 			}
 			else
-				setResponseError(result.statusCode, result.statusMessage);
+				setResponseError(result.statusCode, result.statusMsg);
 		}
 		else if (location->uploadEnable)
 		{
