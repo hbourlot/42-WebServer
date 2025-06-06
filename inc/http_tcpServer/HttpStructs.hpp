@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <vector>
 
+struct Location;
+
 struct httpRequest {
 	std::string method;
 	std::string path;

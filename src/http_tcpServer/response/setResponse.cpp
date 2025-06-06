@@ -12,8 +12,8 @@ namespace http {
 		response << "HTTP/1.1 " << statusCode << " " << statusMsg << "\r\n"
 		         << "Content-Type: " << contentType << "\r\n"
 		         << "Content-Length: " << body.length() << "\r\n"
-		         << "Connection: keep-alive\r\n" // Should be keep-alive because
-		                                         // its http 1.1
+		         << "Connection: close\r\n" // Should be keep-alive because its
+		                                    // http 1.1
 		         << "\r\n"
 		         << body;
 		m_serverMessage = response.str();
@@ -56,8 +56,8 @@ namespace http {
 		response << "HTTP/1.1 " << statusCode << " " << statusMsg << "\r\n"
 		         << "Content-type: text/html\r\n"
 		         << "Content-Length: " << fileContent.size() << "\r\n"
-		         << "Connection: keep-alive\r\n" // Should be keep-alive because
-		                                         // its http 1.1
+		         << "Connection: close\r\n" // Should be keep-alive because its
+		                                    // http 1.1
 		         << "\r\n"
 		         << fileContent;
 
