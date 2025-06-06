@@ -21,6 +21,9 @@ struct httpResponse
 	std::string body;
 	std::map<std::string, std::string> headers;
 
-	void setDefaultHeaders();
+	void setDefaultHeaders(httpRequest &request);
+	void setResponse(std::string statusCode, std::string statusMsg, std::string contentType, std::string body);
+	void setResponseError(std::string statusCode, std::string statusMsg);
+	void setHtmlResponse(std::string statusCode, std::string statusMsg,const std::string &htmlFilePath);
 	void setSuccess();
 };
