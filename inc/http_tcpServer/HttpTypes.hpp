@@ -1,5 +1,4 @@
 #pragma once
-// #include <map>
 #include <string>
 #include <vector>
 
@@ -7,17 +6,19 @@ struct httpRequest
 {
 	std::string method;
 	std::string path;
-	std::string protocol;
+	std::string httpVersion;
 	std::map<std::string, std::string> headers;
 	std::string body;
-	std::vector<std::string> queries;
+	std::vector<std::string> rawQueries;
+	std::map<std::string, std::string> queryParams;
+	// ! map queryParams maybe for an future use on CGI
 };
 
 struct httpResponse
 {
 	std::string statusCode;
 	std::string statusMessage;
-	std::string htmlFilePath;
+	std::string body;
 	std::map<std::string, std::string> headers;
 
 	void setDefaultHeaders();

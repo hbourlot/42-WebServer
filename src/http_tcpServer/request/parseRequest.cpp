@@ -6,7 +6,7 @@ static void parseRequestQueries(httpRequest &request)
 	idx = request.path.find("?");
 	if (idx == std::string::npos)
 		return;
-	request.queries = split(request.path.substr(idx + 1), '&');
+	request.rawQueries = split(request.path.substr(idx + 1), '&');
 	// for(int i =0; i < request.queries.size(); ++i)
 	// 	std::cout << "request.queries[i] " << request.queries[i] << std::endl;
 	request.path = request.path.substr(0, idx);
@@ -41,7 +41,7 @@ void parseRequest(httpRequest &request, const std::string &requestContent)
 	std::getline(request_stream, line);
 	std::istringstream first_line(line);
 
-	first_line >> request.method >> request.path >> request.protocol;
+	first_line >> request.method >> request.path >> request.httpVersion;
 	parseRequestQueries(request);
 
 	parseRequestHeaders(request, request_stream, line);
