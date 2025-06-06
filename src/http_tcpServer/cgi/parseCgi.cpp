@@ -1,5 +1,4 @@
-#include "CGI/CgiHandler.hpp"
-#include "Config/Configs.hpp"
+#include "http_tcpServer/Http_tcpServer_linux.hpp"
 // #include "http_tcpServer/Http_tcpServer_Linux.hpp"
 
 // --- START DEBUG
@@ -32,20 +31,35 @@
 // 	bool autoIndex;
 // };
 
-// bool http::CgiHandler::parseCgi(httpRequest request)
-bool http::CgiHandler::parseCgi(Location loc, httpRequest &request)
-{
+// if (CgiHandler::isCgiRequest(request)) {
+// 	int i = 0;
+// 	std::string ext =
+// 		getLocationFieldAsString(infos.locations, "cgi_extension");
+// 	std::vector<std::string> ext_splitted = split(ext, ' ');
+
+// 	// Maybe verify all cgi_extensions instead of just once by once
+// 	while (CgiHandler::isValidCgiExtension(ext_splitted[i]))
+// 		i++;
+// 	if (i == ext.size()){
+// 		// handleCgiRequest
+// 	}
+// }
+
+bool http::TcpServer::parseCgi(const Location loc) {
 
 	// if (loc.methods.empty() || m_scriptName.empty())
 	// {
 	// return false;
 	// }
 
-	// m_method = "GET"; // !! ???	loc.methods[0];
-	// m_queryString = request.queries;
-	// m_requestBody = request.body;
-	// m_contentLength = request.body.length();
-	// m_contentType = request.headers["Content-Type"];
+	struct Cgi foo;
 
+	foo.method = request.method;
+	foo.queryString = request.rawQueries;
+	foo.requestBody = request.body;
+	foo.contentLength = request.body.length();
+	foo.contentType = request.headers["Content-Type"];
+
+	this->m_cgi.push_back(foo);
 	return true;
 };

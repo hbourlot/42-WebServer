@@ -1,11 +1,6 @@
 #pragma once
-#include "./Configs.hpp"
+#include "Configs.hpp"
 #include <iostream>
-#include <map>
-#include <vector>
-
-// struct Configs;
-// struct Server;
 
 void printConfigs(Configs &config)
 {

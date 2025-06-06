@@ -1,4 +1,3 @@
-#include "CGI/CgiHandler.hpp"
 #include "Config/Configs.hpp"
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
