@@ -33,11 +33,11 @@ LEN             = 0
 
 
 AUTH_FUNC		= loginHandler
-CGI_FUNC		= isCgiRequest isValidCgiExtension
+CGI_FUNC		= CgiHandler isCgiRequest isValidCgiExtension parseCgi
 UTILS_FUNC		= ft_strtrim utils split getLocationFieldAsString
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop
-REQUEST_FUNC	= validateRequest readRequest
+HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop addCgi
+REQUEST_FUNC	= readRequest parseRequest validateRequest
 RESPONSE_FUNC 	= sendResponse setResponse
 METHODS_FUNC 	= handleGetRequest handlePostRequest uploadHandler handleDeleteRequest utils
 

@@ -1,16 +1,23 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
-int http::TcpServer::sendResponse(pollfd socket) {
+int http::TcpServer::sendResponse(pollfd socket)
+{
 	ssize_t bytesSent = send(socket.fd, m_serverMessage.c_str(),
-							 m_serverMessage.size(), MSG_NOSIGNAL);
-	if (bytesSent < 0) {
-		if (errno == EPIPE) {
+	                         m_serverMessage.size(), MSG_NOSIGNAL);
+	if (bytesSent < 0)
+	{
+		if (errno == EPIPE)
+		{
 			log("Client disconnected before response");
-		} else {
+		}
+		else
+		{
 			log("Error sending response to client");
 		}
 		return 1;
-	} else {
+	}
+	else
+	{
 		log("----- Server Response sent to client -----\n\n");
 	}
 	return 0;
