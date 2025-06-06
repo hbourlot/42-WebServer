@@ -1,332 +1,408 @@
 [
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/fileConfig/CheckConf.o",
-      "src/fileConfig/CheckConf.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/fileConfig/CheckConf.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/fileConfig/CheckConf.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/fileConfig/ReadConfig.o",
-      "src/fileConfig/ReadConfig.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/fileConfig/ReadConfig.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/fileConfig/ReadConfig.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/fileConfig/ConfigUtils.o",
-      "src/fileConfig/ConfigUtils.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/fileConfig/ConfigUtils.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/fileConfig/ConfigUtils.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/fileConfig/SetLocations.o",
-      "src/fileConfig/SetLocations.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/fileConfig/SetLocations.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/fileConfig/SetLocations.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/http_tcpServer_linux.o",
-      "src/http_tcpServer/http_tcpServer_linux.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/http_tcpServer_linux.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/http_tcpServer_linux.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/startServer.o",
-      "src/http_tcpServer/startServer.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/startServer.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/startServer.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/startListen.o",
-      "src/http_tcpServer/startListen.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/startListen.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/startListen.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/shutDownServer.o",
-      "src/http_tcpServer/shutDownServer.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/shutDownServer.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/shutDownServer.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/acceptConnection.o",
-      "src/http_tcpServer/acceptConnection.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/acceptConnection.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/acceptConnection.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/runServer.o",
-      "src/http_tcpServer/runServer.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/runServer.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/runServer.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/runLoop.o",
-      "src/http_tcpServer/runLoop.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/runLoop.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/runLoop.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/request/validateRequest.o",
-      "src/http_tcpServer/request/validateRequest.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/request/validateRequest.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/request/validateRequest.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/request/readRequest.o",
-      "src/http_tcpServer/request/readRequest.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/request/readRequest.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/request/readRequest.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/response/sendResponse.o",
-      "src/http_tcpServer/response/sendResponse.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/response/sendResponse.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/response/sendResponse.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/response/setResponse.o",
-      "src/http_tcpServer/response/setResponse.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/response/setResponse.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/response/setResponse.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/methods/handleGetRequest.o",
-      "src/http_tcpServer/methods/handleGetRequest.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/methods/handleGetRequest.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/methods/handleGetRequest.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/methods/handlePostRequest.o",
-      "src/http_tcpServer/methods/handlePostRequest.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/methods/handlePostRequest.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/methods/handlePostRequest.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/http_tcpServer/methods/uploadHandler.o",
-      "src/http_tcpServer/methods/uploadHandler.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/http_tcpServer/methods/uploadHandler.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/http_tcpServer/methods/uploadHandler.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/utils/ft_strtrim.o",
-      "src/utils/ft_strtrim.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/utils/ft_strtrim.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/utils/ft_strtrim.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/utils/utils.o",
-      "src/utils/utils.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/utils/utils.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/utils/utils.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/utils/getLocationFieldAsString.o",
-      "src/utils/getLocationFieldAsString.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/utils/getLocationFieldAsString.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/utils/getLocationFieldAsString.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/c++",
-      "-std=c++98",
-      "-g",
-      "-c",
-      "-I./inc/",
-      "-o",
-      "obj/src/utils/split.o",
-      "src/utils/split.cpp"
-    ],
-    "directory": "/Users/hugobourlot/Projects/42-WebServer",
-    "file": "/Users/hugobourlot/Projects/42-WebServer/src/utils/split.cpp",
-    "output": "/Users/hugobourlot/Projects/42-WebServer/obj/src/utils/split.o"
-  }
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/fileConfig/CheckConf.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/fileConfig/CheckConf.o"
+  ],
+  "file": "src/fileConfig/CheckConf.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/fileConfig/ReadConfig.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/fileConfig/ReadConfig.o"
+  ],
+  "file": "src/fileConfig/ReadConfig.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/fileConfig/ConfigUtils.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/fileConfig/ConfigUtils.o"
+  ],
+  "file": "src/fileConfig/ConfigUtils.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/fileConfig/SetLocations.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/fileConfig/SetLocations.o"
+  ],
+  "file": "src/fileConfig/SetLocations.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/http_tcpServer_linux.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/http_tcpServer_linux.o"
+  ],
+  "file": "src/http_tcpServer/http_tcpServer_linux.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/startServer.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/startServer.o"
+  ],
+  "file": "src/http_tcpServer/startServer.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/startListen.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/startListen.o"
+  ],
+  "file": "src/http_tcpServer/startListen.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/shutDownServer.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/shutDownServer.o"
+  ],
+  "file": "src/http_tcpServer/shutDownServer.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/acceptConnection.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/acceptConnection.o"
+  ],
+  "file": "src/http_tcpServer/acceptConnection.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/runServer.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/runServer.o"
+  ],
+  "file": "src/http_tcpServer/runServer.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/runLoop.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/runLoop.o"
+  ],
+  "file": "src/http_tcpServer/runLoop.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/request/readRequest.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/request/readRequest.o"
+  ],
+  "file": "src/http_tcpServer/request/readRequest.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/request/parseRequest.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/request/parseRequest.o"
+  ],
+  "file": "src/http_tcpServer/request/parseRequest.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/request/validateRequest.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/request/validateRequest.o"
+  ],
+  "file": "src/http_tcpServer/request/validateRequest.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/response/sendResponse.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/response/sendResponse.o"
+  ],
+  "file": "src/http_tcpServer/response/sendResponse.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/response/setResponse.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/response/setResponse.o"
+  ],
+  "file": "src/http_tcpServer/response/setResponse.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/methods/handleGetRequest.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/methods/handleGetRequest.o"
+  ],
+  "file": "src/http_tcpServer/methods/handleGetRequest.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/methods/handlePostRequest.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/methods/handlePostRequest.o"
+  ],
+  "file": "src/http_tcpServer/methods/handlePostRequest.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/methods/uploadHandler.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/methods/uploadHandler.o"
+  ],
+  "file": "src/http_tcpServer/methods/uploadHandler.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/methods/handleDeleteRequest.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/methods/handleDeleteRequest.o"
+  ],
+  "file": "src/http_tcpServer/methods/handleDeleteRequest.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/methods/utils.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/methods/utils.o"
+  ],
+  "file": "src/http_tcpServer/methods/utils.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/utils/ft_strtrim.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/utils/ft_strtrim.o"
+  ],
+  "file": "src/utils/ft_strtrim.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/utils/utils.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/utils/utils.o"
+  ],
+  "file": "src/utils/utils.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/utils/split.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/utils/split.o"
+  ],
+  "file": "src/utils/split.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/utils/getLocationFieldAsString.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/utils/getLocationFieldAsString.o"
+  ],
+  "file": "src/utils/getLocationFieldAsString.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/auth/loginHandler.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/auth/loginHandler.o"
+  ],
+  "file": "src/auth/loginHandler.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/CgiHandler/isCgiRequest.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/CgiHandler/isCgiRequest.o"
+  ],
+  "file": "src/http_tcpServer/CgiHandler/isCgiRequest.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/http_tcpServer/CgiHandler/isValidCgiExtension.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/http_tcpServer/CgiHandler/isValidCgiExtension.o"
+  ],
+  "file": "src/http_tcpServer/CgiHandler/isValidCgiExtension.cpp"
+ },
+ {
+  "directory": "/home/joralves/Desktop/42-WebServer",
+  "arguments": [
+   "c++",
+   "-std=c++98",
+   "-g",
+   "-c",
+   "src/main.cpp",
+   "-I./inc/",
+   "-o",
+   "obj/src/main.o"
+  ],
+  "file": "src/main.cpp"
+ }
 ]
