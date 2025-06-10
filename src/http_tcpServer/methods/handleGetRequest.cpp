@@ -2,6 +2,13 @@
 
 namespace http
 {
+	// void TcpServer::setResponseError(const std::string &statusCode,
+	//                                  const std::string &statusMsg)
+	// {
+	// 	response.setResponseError(statusCode, statusMsg);
+	// 	setResponse(); // <- opcional: si querés que se construya el mensaje
+	// 	               // completo de inmediato
+	// }
 
 	static std::string getParentPath(const std::string &path)
 	{

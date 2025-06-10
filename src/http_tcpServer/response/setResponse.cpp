@@ -95,6 +95,7 @@ namespace http
 			else
 			{
 				response.setResponseError(statusCode, statusMsg);
+				response.setDefaultHeaders(request);
 				setResponse();
 			}
 			return;
@@ -104,6 +105,7 @@ namespace http
 		response.statusMsg = statusMsg;
 		response.body = content;
 		response.addHeader("Content-Type", getContentType(filePath));
+		response.setDefaultHeaders(request);
 		setResponse();
 	}
 
