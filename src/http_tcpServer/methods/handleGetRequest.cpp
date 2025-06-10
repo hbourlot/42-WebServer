@@ -59,88 +59,51 @@ namespace http
 		return (autoindex);
 	}
 
-	static std::string getContentType(const std::string &path)
-	{
-		size_t dot = path.find_last_of('.');
-		if (dot == std::string::npos)
-			return "application/octet-stream"; // binario genérico
-
-		std::string ext = path.substr(dot + 1);
-		if (ext == "html" || ext == "htm")
-			return "text/html";
-		if (ext == "css")
-			return "text/css";
-		if (ext == "png")
-			return "image/png";
-		if (ext == "jpg" || ext == "jpeg")
-			return "image/jpeg";
-		if (ext == "gif")
-			return "image/gif";
-		if (ext == "txt")
-			return "text/plain";
-		if (ext == "pdf")
-			return "application/pdf";
-		return "application/octet-stream";
-	}
-
 	bool TcpServer::handleGetRequest(const Location *location)
 	{
-
-		if (!location->cgi_path.empty())
-		{
-			std::cout << "HERE CGI GET" << std::endl;
-		}
+		// if (!location->cgi_path.empty())
+		// {
+		// 	std::cout << "HERE CGI GET" << std::endl;
+		// 	return true;
+		// }
 
 		std::string filePath = getFilePath(request.path, location);
-		std::cout << "filePath " << filePath << std::endl;
+
 		if (isDirectory(filePath))
 		{
 			if (!location->index.empty())
 			{
-
 				std::string indexPath = filePath + location->index;
-				std::ifstream indexFile(indexPath.c_str());
-
-				if (indexFile.is_open())
+				if (std::ifstream(indexPath.c_str()).is_open())
 				{
-					setHtmlResponse("200", "OK", indexPath);
-					indexFile.close();
-					return (true);
+					setFileResponse("200", "OK", indexPath);
+					return true;
 				}
 			}
 
 			if (!location->autoIndex)
 			{
-
-				setHtmlResponse("404", "Not Found", infos.errorPage[404]);
-				return (false);
+				setFileResponse("404", "Not Found", infos.errorPage[404], true);
+				return false;
 			}
-			else
-			{
 
-				std::string body =
-				    generateAutoIndexPage(filePath, location, request);
-				setResponse("200", "OK", "text/html", body);
-				return (true);
-			}
+			std::string body =
+			    generateAutoIndexPage(filePath, location, request);
+			response.statusCode = "200";
+			response.statusMsg = "OK";
+			response.body = body;
+			response.addHeader("Content-Type", "text/html");
+			return true;
 		}
 
-		std::ifstream file(filePath.c_str(), std::ios::binary);
-
-		if (!file.is_open())
+		if (!std::ifstream(filePath.c_str()).is_open())
 		{
-
-			setHtmlResponse("404", "Not Found", infos.errorPage[404]);
-			return (false);
+			setFileResponse("404", "Not Found", infos.errorPage[404], true);
+			return false;
 		}
 
-		std::stringstream body;
-		body << file.rdbuf();
-		file.close();
-		setResponse("200", "OK", getContentType(filePath), body.str());
-
-		//   setHtmlResponse("200", "OK", filePath);
-		//   setResponse("200", "OK", "/text/plain", "OK");
-		return (true);
+		setFileResponse("200", "OK", filePath);
+		return true;
 	}
+
 } // namespace http

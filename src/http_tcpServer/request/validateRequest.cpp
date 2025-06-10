@@ -7,7 +7,9 @@
 
 namespace http
 {
-	static const Location *getMatchLocation(const std::string &path, const std::vector<Location> &locations)
+	static const Location *
+	getMatchLocation(const std::string &path,
+	                 const std::vector<Location> &locations)
 	{
 
 		const Location *matchedLocation = NULL;
@@ -18,7 +20,8 @@ namespace http
 
 			const std::string &locPath = locations[i].path;
 
-			if (path.compare(0, locPath.size(), locPath) == 0 && locPath.size() > matchLength)
+			if (path.compare(0, locPath.size(), locPath) == 0 &&
+			    locPath.size() > matchLength)
 			{
 				matchedLocation = &locations[i];
 				matchLength = locPath.size();
@@ -27,10 +30,12 @@ namespace http
 		return (matchedLocation);
 	}
 
-	static bool validateRequestMethod(const httpRequest &request, const Location *location)
+	static bool validateRequestMethod(const httpRequest &request,
+	                                  const Location *location)
 	{
 
-		if (request.method != "GET" && request.method != "POST" && request.method != "DELETE")
+		if (request.method != "GET" && request.method != "POST" &&
+		    request.method != "DELETE")
 			return false;
 
 		for (size_t i = 0; i < location->methods.size(); ++i)
@@ -49,20 +54,20 @@ namespace http
 
 		if (!matchedLocation)
 		{
-			setHtmlResponse("404", "Not Found", infos.errorPage[404]);
+			setFileResponse("404", "Not Found", infos.errorPage[404]);
 			return false;
 		}
 
-		if(!matchedLocation->redirection.empty())
+		if (!matchedLocation->redirection.empty())
 		{
 			//! Treat before the /redirect-me
-			std::cout << "Handle redirection "<<std::endl;
+			std::cout << "Handle redirection " << std::endl;
 			//* redirection 301
 		}
 
 		if (!validateRequestMethod(request, matchedLocation))
 		{
-			setHtmlResponse("405", "Method Not Allowed", DFL_405);
+			setFileResponse("405", "Method Not Allowed", DFL_405);
 			return (false);
 		}
 
@@ -72,7 +77,7 @@ namespace http
 		// 	std::string ext =
 		// 		getLocationFieldAsString(infos.locations, "cgi_extension");
 		// 	std::vector<std::string> ext_splitted = split(ext, ' ');
-// 
+		//
 		// 	// Maybe verify all cgi_extensions instead of just once by once
 		// 	while (CgiHandler::isValidCgiExtension(ext_splitted[i]))
 		// 		i++;
@@ -85,9 +90,9 @@ namespace http
 		if (request.method == "GET")
 			return (handleGetRequest(matchedLocation));
 		else if (request.method == "POST")
-			return (handlePostRequest(matchedLocation));
+			return (/* handlePostRequest(matchedLocation), */ true);
 		else if (request.method == "DELETE")
-			return (handleDeleteRequest(matchedLocation));
+			return (/* handleDeleteRequest(matchedLocation), */ true);
 		return (true);
 	}
 

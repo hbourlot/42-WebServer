@@ -23,3 +23,27 @@ std::string joinPath(const std::string &base, const std::string &sub)
 		return (base + sub);
 	return (base + "/" + sub);
 }
+
+std::string getContentType(const std::string &path)
+{
+	size_t dot = path.find_last_of('.');
+	if (dot == std::string::npos)
+		return "application/octet-stream"; // binario genérico
+
+	std::string ext = path.substr(dot + 1);
+	if (ext == "html" || ext == "htm")
+		return "text/html";
+	if (ext == "css")
+		return "text/css";
+	if (ext == "png")
+		return "image/png";
+	if (ext == "jpg" || ext == "jpeg")
+		return "image/jpeg";
+	if (ext == "gif")
+		return "image/gif";
+	if (ext == "txt")
+		return "text/plain";
+	if (ext == "pdf")
+		return "application/pdf";
+	return "application/octet-stream";
+}
