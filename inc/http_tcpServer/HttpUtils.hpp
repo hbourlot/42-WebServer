@@ -11,3 +11,5 @@ bool isDirectory(const std::string &filePath);
 std::string getFilePath(std::string &path, const Location *location);
 std::string joinPath(const std::string &base, const std::string &sub);
 std::vector<std::string> split(const std::string &s, char delimiter);
+
+std::string getContentType(const std::string &path);

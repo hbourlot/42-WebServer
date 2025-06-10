@@ -74,12 +74,13 @@ namespace http
 		bool handleDeleteRequest(const Location *location);
 		int sendResponse(pollfd socket);
 		void setResponse();
-		void setResponseError(std::string statusCode, std::string statusMsg);
-		bool setHtmlResponse(std::string statusCode, std::string statusMsg,
-		                     const std::string &htmlFilePath);
+		// void setResponseError(std::string statusCode, std::string statusMsg);
+		void setFileResponse(std::string statusCode, std::string statusMsg,
+		                     const std::string &htmlFilePath,
+		                     bool isError = false);
 		bool parseMultipart(const Location *location);
-		void setResponse(std::string statusCode, std::string statusMsg,
-		                 std::string contentType, std::string body);
+		// void setResponse(std::string statusCode, std::string statusMsg,
+		//                  std::string contentType, std::string body);
 	};
 
 	std::string getLocationFieldAsString(const std::vector<Location> &locations,

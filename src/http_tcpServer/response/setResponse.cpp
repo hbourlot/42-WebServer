@@ -1,138 +1,110 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
-#include <fstream>
-#include <ostream>
-#include <sstream>
 #include <ctime>
+#include <fstream>
+#include <sstream>
+
+static std::string readFileContent(const std::string &filePath)
+{
+	std::ifstream file(filePath.c_str());
+	if (!file.is_open())
+		return "";
+
+	std::ostringstream buffer;
+	buffer << file.rdbuf();
+	file.close();
+	return buffer.str();
+}
+
+static std::string buildResponse(const httpResponse &response)
+{
+	std::ostringstream responseString;
+	responseString << "HTTP/1.1 " << response.statusCode << " "
+	               << response.statusMsg << "\r\n";
+
+	std::map<std::string, std::string>::const_iterator it;
+	for (it = response.headers.begin(); it != response.headers.end(); ++it)
+		responseString << it->first << ": " << it->second << "\r\n";
+
+	responseString << "\r\n";
+	responseString << response.body;
+
+	return responseString.str();
+}
+
+static std::string dateString()
+{
+	time_t timestamp;
+	time(&timestamp);
+	std::string date = ctime(&timestamp);
+	if (!date.empty() && date[date.length() - 1] == '\n')
+		date.erase(date.length() - 1);
+	return (date);
+}
+
+void httpResponse::addHeader(std::string key, std::string value)
+{
+	this->headers[key] = value;
+}
+
+void httpResponse::setDefaultHeaders(httpRequest &request)
+{
+	addHeader("Date", dateString());
+
+	std::ostringstream oss;
+	oss << body.size();
+	addHeader("Content-Length", oss.str());
+
+	std::map<std::string, std::string>::const_iterator it =
+	    request.headers.find("Connection");
+	addHeader("Connection",
+	          (it != request.headers.end()) ? it->second : "close");
+}
+
+void httpResponse::setResponseError(std::string statusCode,
+                                    std::string statusMsg)
+{
+	this->statusCode = statusCode;
+	this->statusMsg = statusMsg;
+
+	addHeader("Content-Type", "text/plain");
+
+	this->body = statusMsg + " (" + statusCode + ")";
+}
 
 namespace http
 {
-	static std::string buildHttpResponse(const httpResponse &response)
-	{
-		std::ostringstream responseString;
-		responseString << "HTTP/1.1 " << response.statusCode << " "
-		               << response.statusMsg << "\r\n";
-
-		std::map <std::string, std::string>::const_iterator it;
-		for(it = response.headers.begin(); it != response.headers.end(); ++it)
-			responseString << it->first << ": " << it->second << "\r\n";
-
-		responseString << "\r\n";
-		responseString << response.body;
-
-		return responseString.str();
-	}
 
 	void TcpServer::setResponse()
 	{
-		m_serverMessage = buildHttpResponse(response);
+		log(m_serverMessage);
+		std::cout << "Here" << std::endl;
+		m_serverMessage = buildResponse(response);
+		std::cout << m_serverMessage << std::endl;
 	}
 
-	// void TcpServer::setResponse(std::string statusCode, std::string
-	// statusMsg,
-	//                             std::string contentType, std::string body)
-	// {
-	// 	//   std::string body = statusMsg + " (" + statusCode + ")";
-	// 	std::ostringstream response;
-	// 	response << "HTTP/1.1 " << statusCode << " " << statusMsg << "\r\n"
-	// 	         << "Content-Type: " << contentType << "\r\n"
-	// 	         << "Content-Length: " << body.length() << "\r\n"
-	// 	         << "Connection: close\r\n" // Should be keep-alive because its
-	// 	                                    // http 1.1
-	// 	         << "\r\n"
-	// 	         << body;
-	// 	m_serverMessage = response.str();
-	// 	// log(response.str());
-	// }
-
-	void httpResponse::setResponseError(std::string statusCode, std::string statusMsg)
-	{
-		this->statusCode = statusCode;
-		this->statusMsg = statusMsg;
-
-		this->headers["Content-Type"] = "/text/plain";
-
-		std::string body = statusMsg + " (" + statusCode + ")";
-		this->body = body;
-	}
-
-	// // ! Para adicionar conforme venha no request
-	// // if (parsed.headers["Connection"] == "close") {
-	// //     response << "Connection: close\r\n";
-	// //     keepAlive = false;
-	// // } else {
-	// //     response << "Connection: keep-alive\r\n";
-	// //     keepAlive = true;
-	// // }
-
-	void httpResponse::setDefaultHeaders(httpRequest &request)
-	{
-		time_t timestamp;
-		time(&timestamp);
-
-		headers["Date"] = ctime(&timestamp);
-		headers["Content-Lenght"] = body.size();
-		headers["Connection"] = request.headers["Connection"];
-		
-	}
-
-	void  httpResponse::setHtmlResponse(std::string statusCode,
+	void TcpServer::setFileResponse(std::string statusCode,
 	                                std::string statusMsg,
-	                                const std::string &htmlFilePath)
+	                                const std::string &filePath, bool isError)
 	{
-		std::ifstream htmlFile(htmlFilePath.c_str());
-		if (!htmlFile.is_open())
+
+		std::string content = readFileContent(filePath);
+		if (content.empty())
 		{
-			if(statusCode == "200")
-				setResponseError("404", "Not Found");
+			if (!isError)
+				setFileResponse("404", "Not Found", infos.errorPage[404], true);
 			else
-				setResponseError(statusCode, statusMsg);
+			{
+				response.setResponseError(statusCode, statusMsg);
+				setResponse();
+			}
 			return;
 		}
 
-		// Read the HTML file into a string
-		std::ostringstream buffer;
-		buffer << htmlFile.rdbuf();
-		htmlFile.close();
-
-		this->statusCode =statusCode;
-		this->statusMsg =statusMsg;
-		this->body =  buffer.str();
+		response.statusCode = statusCode;
+		response.statusMsg = statusMsg;
+		response.body = content;
+		response.addHeader("Content-Type", getContentType(filePath));
+		setResponse();
 	}
 
-	// void  httpResponse::setHtmlResponse(std::string statusCode,
-	//                                 std::string statusMsg,
-	//                                 const std::string &htmlFilePath)
-	// {
-
-	// 	std::ifstream htmlFile(htmlFilePath.c_str());
-	// 	if (!htmlFile.is_open())
-	// 	{
-	// 		if (htmlFilePath == DFL_404)
-	// 		{
-	// 			setResponse("404", "Not Found", "text/plain", "404 Not Found");
-	// 			// return false;
-	// 		}
-	// 		return setHtmlResponse("404", "Not Found", DFL_404);
-	// 	}
-	// 	// Read the HTML file into a string
-	// 	std::ostringstream buffer;
-	// 	buffer << htmlFile.rdbuf();
-	// 	std::string fileContent = buffer.str();
-	// 	htmlFile.close();
-	// 	std::ostringstream response;
-	// 	response << "HTTP/1.1 " << statusCode << " " << statusMsg << "\r\n"
-	// 	         << "Content-type: text/html\r\n"
-	// 	         << "Content-Length: " << fileContent.size() << "\r\n"
-	// 	         << "Connection: close\r\n" // Should be keep-alive because its
-	// 	                                    // http 1.1
-	// 	         << "\r\n"
-	// 	         << fileContent;
-
-	// 	m_serverMessage = response.str();
-
-	// 	std::string log_str =
-	// 	    "HTTP/1.1 " + statusCode + " " + statusMsg + "\r\n";
-	// 	log(log_str);
-	// 	// return (true);
-	// }
 } // namespace http

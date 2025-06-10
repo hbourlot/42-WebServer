@@ -16,11 +16,11 @@ namespace http
 
 			if (!result.body.empty())
 			{
-				setHtmlResponse(result.statusCode, result.statusMsg,
-				                result.body);
+				// setFileResponse(result.statusCode, result.statusMsg,
+				                // result.body);
 			}
-			else
-				setResponseError(result.statusCode, result.statusMsg);
+			// else
+				// setResponseError(result.statusCode, result.statusMsg);
 		}
 		else if (location->uploadEnable)
 		{
@@ -30,12 +30,12 @@ namespace http
 		}
 		else if (!location->uploadEnable)
 		{
-			setResponseError("403", "Upload Not Allowed");
+			// setResponseError("403", "Upload Not Allowed");
 			return (false);
 		}
 		else
 		{
-			setHtmlResponse("404", "Not Found", infos.errorPage[404]);
+			// setFileResponse("404", "Not Found", infos.errorPage[404]);
 			return (false);
 		}
 		return true;
