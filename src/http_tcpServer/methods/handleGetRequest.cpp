@@ -81,7 +81,6 @@ namespace http {
 	bool TcpServer::handleGetRequest(const Location *location) {
 
 		std::string filePath = getFilePath(request.path, location);
-		std::cout << "filePath " << filePath << std::endl;
 		if (isDirectory(filePath)) {
 			if (!location->index.empty()) {
 
@@ -103,7 +102,7 @@ namespace http {
 
 				std::string body =
 				    generateAutoIndexPage(filePath, location, request);
-				setResponse("200", "OK", "text/html", body);
+				setResponse("200", "OK", "text/html", body, body.length());
 				return (true);
 			}
 		}
@@ -116,16 +115,20 @@ namespace http {
 			return (false);
 		}
 
-		debugLocation(*location);
+		std::cout << "PATH =>>>>> " << request.path << std::endl;
+		// debugLocation(*location);
 		// CGI Validation
-		// if (parseCgi(*location))
-		// {
-		// 	return true;
-		// }
+		if (parseCgi(*location, filePath)) {
+			// setResponse("200", "OK", getContentType(filePath), body.str())
+			// return true;
+			// maybe here create my CGI
+		}
+
 		std::stringstream body;
 		body << file.rdbuf();
 		file.close();
-		setResponse("200", "OK", getContentType(filePath), body.str());
+		setResponse("200", "OK", getContentType(filePath), body.str(),
+		            body.str().length());
 
 		//   setHtmlResponse("200", "OK", filePath);
 		//   setResponse("200", "OK", "/text/plain", "OK");

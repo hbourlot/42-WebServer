@@ -120,7 +120,7 @@ namespace http {
 		}
 		std::string msg = "File '" + filename + "' received";
 
-		setResponse("200", "OK", "text/plain", msg);
+		setResponse("200", "OK", "text/plain", msg, msg.length());
 
 		return (true);
 	}

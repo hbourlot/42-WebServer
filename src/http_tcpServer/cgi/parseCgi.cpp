@@ -45,7 +45,7 @@
 // 	}
 // }
 
-bool http::TcpServer::parseCgi(const Location loc) {
+bool http::TcpServer::parseCgi(const Location loc, std::string &filePath) {
 
 	// if (loc.methods.empty() || m_scriptName.empty())
 	// {
@@ -54,12 +54,15 @@ bool http::TcpServer::parseCgi(const Location loc) {
 
 	struct Cgi foo;
 
+	// foo.scriptPath = loc.path + request.method;
+	foo.scriptPath = filePath; // !
 	foo.method = request.method;
 	foo.queryString = request.rawQueries;
 	foo.requestBody = request.body;
 	foo.contentLength = request.body.length();
 	foo.contentType = request.headers["Content-Type"];
 
+	std::cout << "scriptPath => " << foo.scriptPath << std::endl;
 	this->m_cgi.push_back(foo);
 	return true;
 };

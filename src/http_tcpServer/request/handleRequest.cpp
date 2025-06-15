@@ -43,7 +43,7 @@ namespace http {
 	// static bool handleCgiMethod(httpRequest request) {
 	// }
 
-	bool TcpServer::validateRequest() {
+	bool TcpServer::handleRequest() {
 
 		const Location *matchedLocation =
 		    getMatchLocation(request.path, infos.locations);
@@ -57,8 +57,6 @@ namespace http {
 			setHtmlResponse("405", "Method Not Allowed", DFL_405);
 			return (false);
 		}
-
-		// !!! HERE
 
 		if (request.method == "GET")
 			return (handleGetRequest(matchedLocation));

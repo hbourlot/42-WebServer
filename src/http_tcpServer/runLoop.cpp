@@ -1,6 +1,22 @@
+#include "http_tcpServer/HttpStructs.hpp"
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include <cstddef>
 #include <sys/poll.h>
+#include <unistd.h>
 #include <vector>
+
+// Remove and close all pollfd's with HUP, ERR, or NVAL events
+static void removeDeadConnections(std::vector<pollfd> &fds) {
+
+	for (size_t i = 1; i < fds.size(); ++i) {
+		if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {
+			close(fds[i].fd);
+			fds.erase(fds.begin() + i);
+			--i;
+			std::cout << "OVER HERE\n";
+		}
+	}
+}
 
 void http::TcpServer::runLoop(std::vector<pollfd> &fds, int timeOut) {
 
@@ -22,42 +38,8 @@ void http::TcpServer::runLoop(std::vector<pollfd> &fds, int timeOut) {
 
 			// Checking for new connections
 			acceptConnection(fds);
-			for (size_t i = 1; i < fds.size(); ++i) {
-				int fd = fds[i].fd;
-				if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {
-					close(fds[i].fd);
-					fds.erase(fds.begin() + i);
-					--i;
-					std::cout << "MATANDO AQUI!!!!!!!!!!!!!!!!!!!!!!\n";
-					// exit(0);
-					continue;
-				}
-
-				if (fds[i].revents & POLLIN) {
-					readRequest(fds, i);
-				}
-				if (fds[i].revents & POLLOUT) {
-
-					bool shouldClose;
-					validateRequest();
-					shouldClose = sendResponse(fds[i]);
-
-					if (shouldClose) {
-						exit(0);
-					}
-					fds[i].events &= ~POLLOUT;
-					if (shouldClose) {
-						close(fds[i].fd);
-						fds.erase(fds.begin() + i);
-						--i;
-						continue;
-					}
-					request.headers.clear();
-					request.method.clear();
-					request.body.clear();
-					m_serverMessage.clear();
-				}
-			}
+			removeDeadConnections(fds);
+			processClientEvents(fds);
 		}
 	} catch (const TcpServerException &e) {
 		std::cerr << "Error handling client connection => " << e.what()
