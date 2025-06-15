@@ -36,9 +36,9 @@ AUTH_FUNC		= loginHandler
 CGI_FUNC		= isValidCgiExtension parseCgi
 UTILS_FUNC		= ft_strtrim utils split getLocationFieldAsString
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop
-REQUEST_FUNC	= readRequest parseRequest validateRequest
-RESPONSE_FUNC 	= sendResponse setResponse
+HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop clearResponse processClientEvents
+REQUEST_FUNC	= readRequest parseRequest handleRequest
+RESPONSE_FUNC 	= sendResponse setResponse setResponseError setHtmlResponse
 METHODS_FUNC 	= handleGetRequest handlePostRequest uploadHandler handleDeleteRequest utils
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \

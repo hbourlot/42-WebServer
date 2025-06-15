@@ -1,0 +1,89 @@
+#include "Config/Configs.hpp"
+#include "http_tcpServer/Http_tcpServer_linux.hpp"
+
+void handleCgiParentProcess(Cgi &object) {
+
+	if (object.inputPipe[0] != -1)
+		close(object.inputPipe[0]);
+	if (object.outputPipe[1] != -1)
+		close(object.outputPipe[1]);
+
+	char buffer[http::BUFFER_SIZE + 1] = {0};
+	std::string requestContent;
+	int bytesReceived = 0;
+	while ((bytesReceived =
+	            read(object.outputPipe[0], buffer, http::BUFFER_SIZE)) > 0) {
+		requestContent.append(buffer, bytesReceived);
+	}
+	if (bytesReceived < 0) {
+		if (errno != EAGAIN && errno != EWOULDBLOCK) {
+			std::cerr << "Error: read()\n";
+			//! ... handle error properly
+			return;
+		}
+	}
+
+	// setResponse
+}
+
+static void doDup(int (&inputPipe)[2], int (&outputPipe)[2]) {
+	dup2(inputPipe[0], STDIN_FILENO);
+	dup2(outputPipe[1], STDOUT_FILENO);
+
+	close(inputPipe[1]);
+	close(inputPipe[0]);
+	close(outputPipe[0]);
+	close(outputPipe[1]);
+}
+
+static void prepareChildProcess(std::vector<char *> &argv,
+                                std::vector<char *> &envp, std::string &file,
+                                Cgi &object) {
+
+	argv.push_back(const_cast<char *>(file.c_str()));
+	argv.push_back(nullptr);
+
+	// Prepare envp - set QUERY_STRING
+	for (size_t i = 0; i < object.queryString.size(); ++i) {
+		envp.push_back(const_cast<char *>(object.queryString[i].c_str()));
+	}
+	envp.push_back(nullptr);
+}
+
+namespace http {
+
+	void executeCgi(Cgi &object) {
+
+		if (pipe(object.inputPipe) == ERROR ||
+		    pipe(object.outputPipe) == ERROR) {
+			// ! Handle error
+			// send error message to the client.
+			return;
+		}
+		object.pid = fork();
+		if (object.pid < 0) {
+			// Handle error here
+			// Send error response to the client.
+			return;
+		} else if (object.pid == 0) {
+			std::vector<char *> argv;
+			std::vector<char *> envp;
+			std::string filePath =
+			    "/Users/hugobourlot/Projects/42-WebServer/var/"
+			    "www/cgi-bin/hello.py";
+
+			// Child process
+			doDup(object.inputPipe, object.outputPipe);
+
+			prepareChildProcess(argv, envp, filePath, object);
+
+			execve(const_cast<const char *>(filePath.c_str()), argv.data(),
+			       envp.data());
+			// If execve fails
+			_exit(1);
+		} else {
+			handleCgiParentProcess(object);
+		}
+	}
+
+} // namespace http

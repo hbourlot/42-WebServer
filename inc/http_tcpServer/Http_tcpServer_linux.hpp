@@ -25,6 +25,12 @@
 #define DFL_405 "content/defaults/error_405.html"
 #define DFL_500 "content/defaults/error_500.html"
 
+#ifndef nullptr
+#define nullptr NULL
+#endif
+
+#define ERROR -1
+
 namespace http {
 
 	typedef int HTTP_SOCKET;
@@ -66,7 +72,7 @@ namespace http {
 		void startListen();
 		void acceptConnection(std::vector<pollfd> &fds);
 		void readRequest(std::vector<pollfd> &fds, int i);
-		bool validateRequest();
+		bool handleRequest();
 		bool handleGetRequest(const Location *location);
 		bool handlePostRequest(const Location *location);
 		bool handleDeleteRequest(const Location *location);
@@ -77,7 +83,9 @@ namespace http {
 		                     const std::string &htmlFilePath);
 		bool parseMultipart(const Location *location);
 		void setResponse(std::string statusCode, std::string statusMsg,
-		                 std::string contentType, std::string body);
+		                 std::string contentType, std::string body, int len);
+		void clearResponse(httpRequest &request, std::string &serverMessage);
+		void processClientEvents(std::vector<pollfd> &fds);
 
 		// CGI
 		static const std::set<std::string> validCgiExtensions;
@@ -90,7 +98,7 @@ namespace http {
 			s.insert(".cgi");
 			return s;
 		}
-		bool parseCgi(const Location loc);
+		bool parseCgi(const Location loc, std::string &filePath);
 	};
 
 	std::string getLocationFieldAsString(const std::vector<Location> &locations,
