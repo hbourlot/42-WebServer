@@ -41,10 +41,10 @@ UTILS_FUNC		= ft_strtrim utils split getLocationFieldAsString
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
 HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop clearResponse processClientEvents
 REQUEST_FUNC	= readRequest parseRequest handleRequest
-RESPONSE_FUNC 	= sendResponse setResponse setResponseError setHtmlResponse
+RESPONSE_FUNC 	= sendResponse 
 METHODS_FUNC 	= handleGetRequest handlePostRequest uploadHandler handleDeleteRequest utils
 GET_FUNC		= autoindex
-SET_FUNC		= 
+SET_FUNC		= setResponse setResponseError setFileResponse setBodyResponse setResponseAux
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \

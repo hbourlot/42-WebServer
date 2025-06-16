@@ -2,7 +2,6 @@
 
 namespace http
 {
-
 	void TcpServer::setFileResponse(std::string statusCode,
 	                                std::string statusMsg,
 	                                const std::string &filePath, bool isError)
