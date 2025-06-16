@@ -136,12 +136,12 @@ namespace http
 		if (!saveFile(filename, content, location))
 		{
 			setFileResponse("500", "Internal Server Error: File not saved",
-			                DFL_500);
+			                DFL_500, true);
 			return (false);
 		}
 		std::string msg = "File '" + filename + "' received";
 
-		setBodyResponse("200", "OK", "text/plain", msg);
+		setBodyResponse("200", "OK", msg);
 
 		return (true);
 	}
