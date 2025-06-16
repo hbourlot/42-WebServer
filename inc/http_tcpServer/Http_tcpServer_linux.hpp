@@ -1,10 +1,16 @@
 #pragma once
 
+
+#include <cstdint>
+#include <ctime>
+#include <fstream>
+#include <sstream>
+
 #include "CGI/CgiHandler.hpp"
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
 #include "HttpLogs.hpp"
-#include "HttpTypes.hpp"
+#include "HttpStruct.hpp"
 #include "HttpUtils.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
@@ -69,18 +75,23 @@ namespace http
 		void acceptConnection(std::vector<pollfd> &fds);
 		void readRequest(std::vector<pollfd> &fds, int i);
 		bool validateRequest();
-		bool handleGetRequest(const Location *location);
-		bool handlePostRequest(const Location *location);
-		bool handleDeleteRequest(const Location *location);
+		bool handleGetRequest(const Location &location);
+		bool handlePostRequest(const Location &location);
+		bool handleDeleteRequest(const Location &location);
 		int sendResponse(pollfd socket);
+
 		void setResponse();
-		// void setResponseError(std::string statusCode, std::string statusMsg);
+		void setBodyResponse(const std::string &statusCode,
+		                     const std::string &statusMsg,
+		                     const std::string &body,
+		                     const std::string &contentType = "text/plain");
 		void setFileResponse(std::string statusCode, std::string statusMsg,
 		                     const std::string &htmlFilePath,
 		                     bool isError = false);
-		bool parseMultipart(const Location *location);
-		// void setResponse(std::string statusCode, std::string statusMsg,
-		//                  std::string contentType, std::string body);
+
+		bool parseMultipart(const Location &location);
+		bool handleDirectoryListing(const std::string &filePath,
+		                            const Location &location);
 	};
 
 	std::string getLocationFieldAsString(const std::vector<Location> &locations,
