@@ -3,32 +3,32 @@
 namespace http
 {
 
-	bool TcpServer::handlePostRequest(const Location *location)
+	bool TcpServer::handlePostRequest(const Location &location)
 	{
-		if (!location->cgi_path.empty())
+		if (!location.cgi_path.empty())
 		{
 			std::cout << "HERE CGI POST" << std::endl;
 		}
 
-		if (request.path == "/login")
-		{
-			httpResponse result = validateForm(request);
+		// if (request.path == "/login")
+		// {
+		// 	httpResponse result = validateForm(request);
 
-			if (!result.body.empty())
-			{
-				// setFileResponse(result.statusCode, result.statusMsg,
-				                // result.body);
-			}
-			// else
-				// setResponseError(result.statusCode, result.statusMsg);
-		}
-		else if (location->uploadEnable)
+		// 	if (!result.body.empty())
+		// 	{
+		// 		// setFileResponse(result.statusCode, result.statusMsg,
+		// 		// result.body);
+		// 	}
+		// 	// else
+		// 	// setResponseError(result.statusCode, result.statusMsg);
+		// }
+		else if (location.uploadEnable)
 		{
 			std::cout << request.headers["Content-Type"] << std::endl;
 			// if
 			parseMultipart(location);
 		}
-		else if (!location->uploadEnable)
+		else if (!location.uploadEnable)
 		{
 			// setResponseError("403", "Upload Not Allowed");
 			return (false);

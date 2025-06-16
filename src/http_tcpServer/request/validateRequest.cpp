@@ -31,16 +31,16 @@ namespace http
 	}
 
 	static bool validateRequestMethod(const httpRequest &request,
-	                                  const Location *location)
+	                                  const Location &location)
 	{
 
 		if (request.method != "GET" && request.method != "POST" &&
 		    request.method != "DELETE")
 			return false;
 
-		for (size_t i = 0; i < location->methods.size(); ++i)
+		for (size_t i = 0; i < location.methods.size(); ++i)
 		{
-			if (request.method == location->methods[i])
+			if (request.method == location.methods[i])
 				return true;
 		}
 		return false;
@@ -49,16 +49,18 @@ namespace http
 	bool TcpServer::validateRequest()
 	{
 
-		const Location *matchedLocation =
+		const Location *matchedLocationPtr =
 		    getMatchLocation(request.path, infos.locations);
 
-		if (!matchedLocation)
+		if (!matchedLocationPtr)
 		{
 			setFileResponse("404", "Not Found", infos.errorPage[404]);
 			return false;
 		}
 
-		if (!matchedLocation->redirection.empty())
+		const Location &matchedLocation = *matchedLocationPtr;
+
+		if (!matchedLocation.redirection.empty())
 		{
 			//! Treat before the /redirect-me
 			std::cout << "Handle redirection " << std::endl;
@@ -71,28 +73,12 @@ namespace http
 			return (false);
 		}
 
-		// !!! HERE
-		// if (CgiHandler::isCgiRequest(request)) {
-		// 	int i = 0;
-		// 	std::string ext =
-		// 		getLocationFieldAsString(infos.locations, "cgi_extension");
-		// 	std::vector<std::string> ext_splitted = split(ext, ' ');
-		//
-		// 	// Maybe verify all cgi_extensions instead of just once by once
-		// 	while (CgiHandler::isValidCgiExtension(ext_splitted[i]))
-		// 		i++;
-		// 	if (i == ext.size()){
-		// 		// handleCgiRequest
-		// 	}
-		// }
-		// std::cout << "HELLO RIGHTTTTT\n";
-
 		if (request.method == "GET")
 			return (handleGetRequest(matchedLocation));
 		else if (request.method == "POST")
-			return (/* handlePostRequest(matchedLocation), */ true);
+			return (handlePostRequest(matchedLocation));
 		else if (request.method == "DELETE")
-			return (/* handleDeleteRequest(matchedLocation), */ true);
+			return (handleDeleteRequest(matchedLocation));
 		return (true);
 	}
 

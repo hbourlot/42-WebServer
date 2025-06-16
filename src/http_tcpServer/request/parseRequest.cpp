@@ -7,8 +7,6 @@ static void parseRequestQueries(httpRequest &request)
 	if (idx == std::string::npos)
 		return;
 	request.rawQueries = split(request.path.substr(idx + 1), '&');
-	// for(int i =0; i < request.queries.size(); ++i)
-	// 	std::cout << "request.queries[i] " << request.queries[i] << std::endl;
 	request.path = request.path.substr(0, idx);
 }
 

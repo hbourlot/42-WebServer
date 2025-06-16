@@ -9,3 +9,4 @@ void printHttpHeaders(const httpRequest &request)
 		std::cout << it->first << ": " << it->second << "\n";
 	}
 }
+

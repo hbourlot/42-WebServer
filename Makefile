@@ -21,8 +21,10 @@ UTILS_DIR		= utils/
 HTTP_DIR		= http_tcpServer/
 REQUEST_DIR		= $(HTTP_DIR)request/
 RESPONSE_DIR	= $(HTTP_DIR)response/
+SET_DIR			= $(RESPONSE_DIR)set/
 METHODS_DIR		= $(HTTP_DIR)methods/
 CGI_DIR			= $(HTTP_DIR)CgiHandler/
+GET_DIR			= $(METHODS_DIR)Get/
 
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
@@ -40,12 +42,16 @@ HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acce
 REQUEST_FUNC	= readRequest parseRequest validateRequest
 RESPONSE_FUNC 	= sendResponse setResponse
 METHODS_FUNC 	= handleGetRequest handlePostRequest uploadHandler handleDeleteRequest utils
+GET_FUNC		= autoindex
+SET_FUNC		= 
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(REQUEST_DIR), $(REQUEST_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(RESPONSE_DIR), $(RESPONSE_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(SET_DIR), $(SET_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(METHODS_DIR), $(METHODS_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(GET_DIR), $(GET_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CGI_DIR), $(CGI_FUNC:=.cpp)) \
