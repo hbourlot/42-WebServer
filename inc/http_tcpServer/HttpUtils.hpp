@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HttpStruct.hpp"
+#include "HttpStructs.hpp"
 
 void parseRequest(httpRequest &request, const std::string &requestContent);
 std::string ft_strtrim(const std::string &str);
