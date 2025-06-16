@@ -31,29 +31,25 @@
 
 #define ERROR -1
 
-namespace http
-{
+namespace http {
 
 	typedef int HTTP_SOCKET;
 	const int BUFFER_SIZE = 30720;
 
-	class TcpServer
-	{
+	class TcpServer {
 	  public:
 		// Default Constructor
-		TcpServer(Configs configuration);
+		TcpServer(Configs configuration, char *envp[]);
 		// Default Destructor
 		~TcpServer();
 
 		// Main member
 		int runServer();
 
-		class TcpServerException : public std::runtime_error
-		{
+		class TcpServerException : public std::runtime_error {
 		  public:
 			explicit TcpServerException(const std::string &message)
-			    : std::runtime_error(message)
-			{
+			    : std::runtime_error(message) {
 			}
 		};
 
@@ -69,6 +65,7 @@ namespace http
 		unsigned int m_socketAddress_len;
 		std::string m_serverMessage;
 		std::vector<Cgi> m_cgi;
+		char **_envp;
 
 		int startServer();
 		void runLoop(std::vector<pollfd> &fds, int timeOut);
