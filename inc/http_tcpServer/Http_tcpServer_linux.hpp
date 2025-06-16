@@ -31,12 +31,14 @@
 
 #define ERROR -1
 
-namespace http {
+namespace http
+{
 
 	typedef int HTTP_SOCKET;
 	const int BUFFER_SIZE = 30720;
 
-	class TcpServer {
+	class TcpServer
+	{
 	  public:
 		// Default Constructor
 		TcpServer(Configs configuration, char *envp[]);
@@ -46,19 +48,21 @@ namespace http {
 		// Main member
 		int runServer();
 
-		class TcpServerException : public std::runtime_error {
+		class TcpServerException : public std::runtime_error
+		{
 		  public:
 			explicit TcpServerException(const std::string &message)
-			    : std::runtime_error(message) {
+			    : std::runtime_error(message)
+			{
 			}
 		};
 
 	  private:
-		httpRequest request;
-		httpResponse response;
-		Server infos; // For keep infos inside
+		httpRequest _request;
+		httpResponse _response;
+		Server _infos;
 		std::string m_ip_address;
-		int m_port, bytesReceived, bytesSend;
+		int m_port, _bytesReceived, _bytesSend;
 		HTTP_SOCKET m_serverSocket, m_acceptSocket;
 		long m_incomingMessage;
 		struct sockaddr_in m_socketAddress;

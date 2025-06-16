@@ -49,11 +49,11 @@ namespace http
 	{
 
 		const Location *matchedLocationPtr =
-		    getMatchLocation(request.path, infos.locations);
+		    getMatchLocation(_request.path, _infos.locations);
 
 		if (!matchedLocationPtr)
 		{
-			setFileResponse("404", "Not Found", infos.errorPage[404]);
+			setFileResponse("404", "Not Found", _infos.errorPage[404]);
 			return false;
 		}
 
@@ -66,17 +66,17 @@ namespace http
 			//* redirection 301
 		}
 
-		if (!validateRequestMethod(request, matchedLocation))
+		if (!validateRequestMethod(_request, matchedLocation))
 		{
 			setFileResponse("405", "Method Not Allowed", DFL_405);
 			return (false);
 		}
 
-		if (request.method == "GET")
+		if (_request.method == "GET")
 			return (handleGetRequest(matchedLocation));
-		else if (request.method == "POST")
+		else if (_request.method == "POST")
 			return (handlePostRequest(matchedLocation));
-		else if (request.method == "DELETE")
+		else if (_request.method == "DELETE")
 			return (handleDeleteRequest(matchedLocation));
 		return (true);
 	}

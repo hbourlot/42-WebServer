@@ -73,11 +73,11 @@ bool http::TcpServer::handleDirectoryListing(const std::string &filePath,
 
 	if (!location.autoIndex)
 	{
-		setFileResponse("404", "Not Found", infos.errorPage[404], true);
+		setFileResponse("404", "Not Found", _infos.errorPage[404], true);
 		return false;
 	}
 
-	std::string body = generateAutoIndexPage(filePath, location, request);
+	std::string body = generateAutoIndexPage(filePath, location, _request);
 
 	setBodyResponse("200", "OK", body, "text/html");
 	return true;

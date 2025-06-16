@@ -42,8 +42,8 @@ FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
 HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop clearResponse processClientEvents
 REQUEST_FUNC	= readRequest parseRequest handleRequest
 RESPONSE_FUNC 	= sendResponse 
-METHODS_FUNC 	= handleGetRequest handlePostRequest uploadHandler handleDeleteRequest utils
-GET_FUNC		= autoindex
+METHODS_FUNC 	= handlePostRequest uploadHandler handleDeleteRequest utils
+GET_FUNC		= autoindex handleGetRequest
 SET_FUNC		= setResponse setResponseError setFileResponse setBodyResponse setResponseAux
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \

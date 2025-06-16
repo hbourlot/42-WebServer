@@ -26,7 +26,7 @@ namespace http
 	{
 		log(m_serverMessage);
 		std::cout << "Here" << std::endl;
-		m_serverMessage = buildResponse(response);
+		m_serverMessage = buildResponse(_response);
 		std::cout << m_serverMessage << std::endl;
 	}
 } // namespace http

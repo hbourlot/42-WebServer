@@ -6,14 +6,14 @@ namespace http
 {
 	bool TcpServer::handleGetRequest(const Location &location)
 	{
-		std::string filePath = getFilePath(request.path, location);
+		std::string filePath = getFilePath(_request.path, location);
 
 		if (isDirectory(filePath))
 			return handleDirectoryListing(filePath, location);
 
 		if (!std::ifstream(filePath.c_str()).is_open())
 		{
-			setFileResponse("404", "Not Found", infos.errorPage[404], true);
+			setFileResponse("404", "Not Found", _infos.errorPage[404], true);
 			return false;
 		}
 
