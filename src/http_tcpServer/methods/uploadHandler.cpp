@@ -1,16 +1,13 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
-namespace http
-{
+namespace http {
 
-	static std::string extractBoundary(httpRequest &request)
-	{
+	static std::string extractBoundary(httpRequest &request) {
 
 		std::string contentType = request.headers["Content-Type"];
 		std::string boundaryPrefix = "boundary=";
 
 		size_t pos = contentType.find(boundaryPrefix);
-		if (pos == std::string::npos)
-		{
+		if (pos == std::string::npos) {
 			return ("");
 		}
 		std::string boundary =
@@ -19,8 +16,7 @@ namespace http
 	}
 
 	static std::string extractFilePart(httpRequest &request,
-	                                   const std::string &boundary)
-	{
+	                                   const std::string &boundary) {
 
 		std::string body = request.body;
 		size_t start = body.find(boundary);
@@ -40,8 +36,7 @@ namespace http
 
 	static bool splitHeadersAndContent(const std::string &filePart,
 	                                   std::string &headers,
-	                                   std::string &content)
-	{
+	                                   std::string &content) {
 
 		size_t headerEnd = filePart.find("\r\n\r\n");
 
@@ -54,8 +49,7 @@ namespace http
 		return (true);
 	}
 
-	static std::string extractFilename(const std::string &headers)
-	{
+	static std::string extractFilename(const std::string &headers) {
 
 		std::string token = "filename=\"";
 		size_t start = headers.find(token);

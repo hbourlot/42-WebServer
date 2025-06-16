@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   runServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbourlot <hbourlot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 13:59:31 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/05/31 15:32:15 by joralves         ###   ########.fr       */
+/*   Updated: 2025/06/06 16:40:14 by hbourlot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int http::TcpServer::runServer() {
 
-	int timeOut = 3 * 6 * 1000;
+	int timeOut = 3 * 60 * 1000;
 
 	if (startServer())
 		return -1;
@@ -22,7 +22,7 @@ int http::TcpServer::runServer() {
 		startListen();
 	} catch (const TcpServerException &e) {
 		std::cerr << "Error while starting to listen => " << e.what()
-				  << std::endl;
+		          << std::endl;
 		close(m_serverSocket);
 		return -1;
 	}

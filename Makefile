@@ -23,8 +23,9 @@ REQUEST_DIR		= $(HTTP_DIR)request/
 RESPONSE_DIR	= $(HTTP_DIR)response/
 SET_DIR			= $(RESPONSE_DIR)set/
 METHODS_DIR		= $(HTTP_DIR)methods/
-CGI_DIR			= $(HTTP_DIR)CgiHandler/
+# CGI_DIR			= $(HTTP_DIR)CgiHandler/
 GET_DIR			= $(METHODS_DIR)Get/
+CGI_DIR			= $(HTTP_DIR)cgi/
 
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
@@ -35,12 +36,12 @@ LEN             = 0
 
 
 AUTH_FUNC		= loginHandler
-CGI_FUNC		= isCgiRequest isValidCgiExtension
+CGI_FUNC		= isValidCgiExtension parseCgi
 UTILS_FUNC		= ft_strtrim utils split getLocationFieldAsString
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop
-REQUEST_FUNC	= readRequest parseRequest validateRequest
-RESPONSE_FUNC 	= sendResponse setResponse
+HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop clearResponse processClientEvents
+REQUEST_FUNC	= readRequest parseRequest handleRequest
+RESPONSE_FUNC 	= sendResponse setResponse setResponseError setHtmlResponse
 METHODS_FUNC 	= handleGetRequest handlePostRequest uploadHandler handleDeleteRequest utils
 GET_FUNC		= autoindex
 SET_FUNC		= 

@@ -68,6 +68,7 @@ namespace http
 		struct sockaddr_in m_socketAddress;
 		unsigned int m_socketAddress_len;
 		std::string m_serverMessage;
+		std::vector<Cgi> m_cgi;
 
 		int startServer();
 		void runLoop(std::vector<pollfd> &fds, int timeOut);
@@ -75,7 +76,7 @@ namespace http
 		void startListen();
 		void acceptConnection(std::vector<pollfd> &fds);
 		void readRequest(std::vector<pollfd> &fds, int i);
-		bool validateRequest();
+		bool handleRequest();
 		bool handleGetRequest(const Location &location);
 		bool handlePostRequest(const Location &location);
 		bool handleDeleteRequest(const Location &location);
@@ -93,6 +94,24 @@ namespace http
 		bool parseMultipart(const Location &location);
 		bool handleDirectoryListing(const std::string &filePath,
 		                            const Location &location);
+		void setResponseError(std::string statusCode, std::string statusMsg);
+		bool parseMultipart(const Location *location);
+
+		void clearResponse(httpRequest &request, std::string &serverMessage);
+		void processClientEvents(std::vector<pollfd> &fds);
+
+		// CGI
+		static const std::set<std::string> validCgiExtensions;
+		static bool isValidCgiExtension(const std::string &ext);
+		static std::set<std::string>
+		createValidCgiExtensions() // ! maybe must be outside
+		{
+			std::set<std::string> s;
+			s.insert(".py");
+			s.insert(".cgi");
+			return s;
+		}
+		bool parseCgi(const Location loc, std::string &filePath);
 	};
 
 	std::string getLocationFieldAsString(const std::vector<Location> &locations,
