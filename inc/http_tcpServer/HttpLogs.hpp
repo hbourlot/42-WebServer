@@ -1,5 +1,5 @@
 #pragma once
-#include "HttpStruct.hpp"
+#include "HttpStructs.hpp"
 
 namespace
 {
