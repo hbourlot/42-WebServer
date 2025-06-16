@@ -11,21 +11,22 @@ namespace http
 		if (content.empty())
 		{
 			if (!isError)
-				setFileResponse("404", "Not Found", infos.errorPage[404], true);
+				setFileResponse("404", "Not Found", _infos.errorPage[404],
+				                true);
 			else
 			{
-				response.setResponseError(statusCode, statusMsg);
-				response.setDefaultHeaders(request);
+				_response.setResponseError(statusCode, statusMsg);
+				_response.setDefaultHeaders(_request);
 				setResponse();
 			}
 			return;
 		}
 
-		response.statusCode = statusCode;
-		response.statusMsg = statusMsg;
-		response.body = content;
-		response.addHeader("Content-Type", getContentType(filePath));
-		response.setDefaultHeaders(request);
+		_response.statusCode = statusCode;
+		_response.statusMsg = statusMsg;
+		_response.body = content;
+		_response.addHeader("Content-Type", getContentType(filePath));
+		_response.setDefaultHeaders(_request);
 		setResponse();
 	}
 } // namespace http

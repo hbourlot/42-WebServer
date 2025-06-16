@@ -5,10 +5,10 @@ void http::TcpServer::setBodyResponse(const std::string &statusCode,
                                       const std::string &body,
                                       const std::string &contentType)
 {
-	response.statusCode = statusCode;
-	response.statusMsg = statusMsg;
-	response.body = body;
-	response.addHeader("Content-Type", contentType);
-	response.setDefaultHeaders(request);
+	_response.statusCode = statusCode;
+	_response.statusMsg = statusMsg;
+	_response.body = body;
+	_response.addHeader("Content-Type", contentType);
+	_response.setDefaultHeaders(_request);
 	setResponse();
 }

@@ -4,7 +4,7 @@ namespace http
 {
 	bool TcpServer::handleDeleteRequest(const Location &location)
 	{
-		std::string filePath = getFilePath(request.path, location);
+		std::string filePath = getFilePath(_request.path, location);
 
 		if (!location.cgi_path.empty())
 		{

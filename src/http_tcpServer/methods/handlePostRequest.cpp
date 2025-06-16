@@ -24,7 +24,7 @@ namespace http
 		// }
 		else if (location.uploadEnable)
 		{
-			std::cout << request.headers["Content-Type"] << std::endl;
+			std::cout << _request.headers["Content-Type"] << std::endl;
 			// if
 			parseMultipart(location);
 		}
