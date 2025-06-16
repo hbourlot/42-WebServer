@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 
-static std::string readFileContent(const std::string &filePath)
+std::string readFileContent(const std::string &filePath)
 {
 	std::ifstream file(filePath.c_str());
 	if (!file.is_open())
@@ -60,17 +60,6 @@ void httpResponse::setDefaultHeaders(httpRequest &request)
 	          (it != request.headers.end()) ? it->second : "close");
 }
 
-void httpResponse::setResponseError(std::string statusCode,
-                                    std::string statusMsg)
-{
-	this->statusCode = statusCode;
-	this->statusMsg = statusMsg;
-
-	addHeader("Content-Type", "text/plain");
-
-	this->body = statusMsg + " (" + statusCode + ")";
-}
-
 namespace http
 {
 
@@ -82,29 +71,14 @@ namespace http
 		std::cout << m_serverMessage << std::endl;
 	}
 
-	void TcpServer::setFileResponse(std::string statusCode,
-	                                std::string statusMsg,
-	                                const std::string &filePath, bool isError)
+	void TcpServer::setBodyResponse(
+	    const std::string &statusCode, const std::string &statusMsg,
+	    const std::string &body, const std::string &contentType)
 	{
-
-		std::string content = readFileContent(filePath);
-		if (content.empty())
-		{
-			if (!isError)
-				setFileResponse("404", "Not Found", infos.errorPage[404], true);
-			else
-			{
-				response.setResponseError(statusCode, statusMsg);
-				response.setDefaultHeaders(request);
-				setResponse();
-			}
-			return;
-		}
-
 		response.statusCode = statusCode;
 		response.statusMsg = statusMsg;
-		response.body = content;
-		response.addHeader("Content-Type", getContentType(filePath));
+		response.body = body;
+		response.addHeader("Content-Type", contentType);
 		response.setDefaultHeaders(request);
 		setResponse();
 	}

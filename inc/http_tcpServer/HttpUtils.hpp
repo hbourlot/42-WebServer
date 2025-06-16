@@ -18,4 +18,6 @@ bool handleDirectoryListing(const std::string &filePath,
                             const Location *location,
                             const httpRequest &request, httpResponse &response);
 
-std::string readFileContent(const std::string &filePath)
+std::string readFileContent(const std::string &filePath);
+std::string joinPath(const std::string &base, const std::string &sub);
+std::vector<std::string> split(const std::string &s, char delimiter);

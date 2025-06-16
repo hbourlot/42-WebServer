@@ -1,3 +1,5 @@
+#include "Config/Configs.hpp"
+#include "Config/Debug.hpp"
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
 namespace http

@@ -23,6 +23,7 @@ static void parseRequestHeaders(httpRequest &request,
 		idx = line.find(":");
 		if (idx != std::string::npos)
 		{
+
 			std::string key = line.substr(0, idx);
 			std::string value = line.substr(idx + 1);
 			key = ft_strtrim(key);

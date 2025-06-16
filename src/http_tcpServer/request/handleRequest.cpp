@@ -1,4 +1,3 @@
-#include "CGI/CgiHandler.hpp"
 #include "Config/Configs.hpp"
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 #include <fstream>
@@ -46,7 +45,7 @@ namespace http
 		return false;
 	}
 
-	bool TcpServer::validateRequest()
+	bool TcpServer::handleRequest()
 	{
 
 		const Location *matchedLocationPtr =
