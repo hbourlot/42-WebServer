@@ -2,30 +2,45 @@
 #include <sys/poll.h>
 #include <unistd.h>
 
-void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i)
+bool http::TcpServer::readRequest(std::vector<pollfd> &fds, int i)
 {
-
+	static std::map<int, std::string> buffers;
+	const size_t CLIENT_MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
 	char buffer[BUFFER_SIZE + 1] = {0};
-	std::string requestContent;
+	int fd = fds[i].fd;
 
-	while ((_bytesReceived = read(fds[i].fd, buffer, BUFFER_SIZE)) > 0)
-		requestContent.append(buffer, _bytesReceived);
-
-	if (_bytesReceived < 0)
+	ssize_t bytesReceived = read(fd, buffer, BUFFER_SIZE);
+	if (bytesReceived <= 0)
 	{
-		if (errno != EAGAIN && errno != EWOULDBLOCK)
+		if (bytesReceived < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
 		{
-
 			std::cerr << "Error: read()\n";
-			close(fds[i].fd);
-			fds.erase(fds.begin() + i);
-			return;
 		}
-	}
-	if (!requestContent.empty())
-	{
-		parseRequest(_request, requestContent, _infos);
-		// Set event POLLOUT
 		fds[i].events |= POLLOUT;
+
+		buffers.erase(fd);
+		return true;
 	}
+
+	buffers[fd].append(buffer, bytesReceived);
+
+	ParseStatus status =
+	    parseRequest(_request, buffers[fd], _infos, CLIENT_MAX_BODY_SIZE);
+
+	if (status == PARSE_INCOMPLETE)
+		return false;
+
+	if (status == PARSE_TOO_LARGE)
+	{
+		_response.setResponseError("413", "Payload Too Large");
+		setResponse();
+		std::cout << _serverMessage << std::endl;
+		fds[i].events |= POLLOUT;
+		buffers.erase(fd);
+		return true;
+	}
+
+	fds[i].events |= POLLOUT;
+	buffers.erase(fd);
+	return false;
 }
