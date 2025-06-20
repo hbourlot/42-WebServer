@@ -17,5 +17,5 @@ void http::TcpServer::clearResponse(httpRequest &request,
 
 	std::cout << "Clear body" << _response.body << std::endl;
 
-	m_serverMessage.clear();
+	_serverMessage.clear();
 }
