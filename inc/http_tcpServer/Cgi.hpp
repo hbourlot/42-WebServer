@@ -55,24 +55,6 @@ namespace http {
 		std::vector<char *> _envp;
 		std::vector<char *> _argv;
 
-		// std::string _method;
-		// std::string _queryString;
-		// std::string _contentType;
-		// std::string _fileName;
-		// std::string _scriptName;
-		// std::string _serverName;
-		// std::string _serverPort;
-		// std::string _serverSoftware;
-		// std::string _serverProtocol;
-		// std::string _getWayInterface;
-		// std::string _remotePort;
-		// std::string _pathInfo;
-		// std::string _pathTranslated;
-		// std::string _httpUserAgent;
-		// std::string _acceptLanguage;
-		// std::string _cookie;
-		// std::string _referer;
-
 		// Response
 		httpResponse _response;
 

@@ -36,9 +36,10 @@ static std::string getPathTranslated(const std::string &root,
                                      const std::string pathInfo) {
 
 	std::string result = root;
-	if (!result.empty() && result.back() == '/' && !pathInfo.empty() &&
-	    pathInfo.front() == '/')
-		result.pop_back();
+	std::string::size_type idx = result.length() - 1;
+	if (!result.empty() && result[idx] == '/' && !pathInfo.empty() &&
+	    pathInfo[0] == '/')
+		result[idx] = '\0';
 	return result + pathInfo;
 }
 
@@ -102,7 +103,7 @@ static void parseRequestHeaders(httpRequest &request,
 }
 
 void parseRequest(httpRequest &request, const std::string &requestContent,
-                  Server &serverInfo) {
+                  const Server &serverInfo) {
 	std::istringstream request_stream(requestContent);
 	std::string line;
 	std::getline(request_stream, line);

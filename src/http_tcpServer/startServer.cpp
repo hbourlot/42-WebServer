@@ -3,12 +3,12 @@
 #include <sys/socket.h>
 
 static void setSocketAddr(sockaddr_in &socketAddress, int domain, int s_addr,
-                          int m_port) {
+                          int _port) {
 	socketAddress.sin_family = domain;
 	socketAddress.sin_addr.s_addr =
 	    s_addr; // can replace this with a specific IP address if needed
 	socketAddress.sin_port =
-	    htons(m_port); // Converts 16-bit integer in host byte order
+	    htons(_port); // Converts 16-bit integer in host byte order
 }
 
 namespace http {
@@ -36,7 +36,7 @@ namespace http {
 		}
 		struct sockaddr_in socketAddress;
 		// Set the socket address struct
-		setSocketAddr(socketAddress, AF_INET, INADDR_ANY, m_port);
+		setSocketAddr(socketAddress, AF_INET, INADDR_ANY, _port);
 
 		// Associate socket with a specific IP addr and Port number (sockfd,
 		// sockaddr *, addrlen)

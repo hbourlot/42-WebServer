@@ -6,7 +6,7 @@
 /*   By: hbourlot <hbourlot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/06/19 21:18:09 by hbourlot         ###   ########.fr       */
+/*   Updated: 2025/06/20 16:27:31 by hbourlot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ struct httpRequest {
 	std::string pathTranslated;
 	std::map<std::string, std::string> headers;
 	std::string body;
-	std::vector<std::string> rawQueries;
 
 	std::string queryString; // test
 	std::string getType(std::string key, std::string value);

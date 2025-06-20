@@ -61,13 +61,13 @@ namespace http {
 		Server _infos;
 		std::string m_ip_address;
 		pollfd _currentClient;
-		int m_port, _bytesReceived, _bytesSend;
+		int _port, _bytesReceived, _bytesSend;
 		HTTP_SOCKET _serverSocket, _acceptSocket;
 		long _incomingMessage;
 		std::vector<sockaddr_in> _socketAddress;
 		unsigned int _socketAddress_len;
 		std::string _serverMessage;
-		std::vector<Cgi> m_cgi;
+		std::vector<Cgi> _cgi;
 
 		int startServer();
 		void runLoop(std::vector<pollfd> &fds, int timeOut);
