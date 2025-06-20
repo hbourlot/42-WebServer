@@ -76,7 +76,8 @@ namespace http {
 
 		void startListen();
 		void acceptConnection(std::vector<pollfd> &fds);
-		void readRequest(std::vector<pollfd> &fds, int i);
+		// void readRequest(std::vector<pollfd> &fds, int i);
+		bool readRequest(std::vector<pollfd> &fds, int i);
 		bool handleRequest(sockaddr_in &clientAddress);
 		bool handleGetRequest(const Location &location,
 		                      sockaddr_in &clientAddress);

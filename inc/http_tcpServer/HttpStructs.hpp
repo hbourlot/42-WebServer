@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpStructs.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbourlot <hbourlot@student.42.fr>          +#+  +:+       +#+        */
+/*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/06/20 16:27:31 by hbourlot         ###   ########.fr       */
+/*   Updated: 2025/06/20 19:36:32 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,12 @@ enum headerKey {
 	SecFetchSite,
 	UpgradeInsecureRequests,
 	UserAgent,
+};
+
+enum ParseStatus{
+	PARSE_INCOMPLETE,
+	PARSE_TOO_LARGE,
+	PARSE_OK,
 };
 
 struct httpRequest {
