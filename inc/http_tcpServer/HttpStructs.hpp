@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HttpStructs.hpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hbourlot <hbourlot@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
+/*   Updated: 2025/06/20 16:27:31 by hbourlot         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #pragma once
 #include <map>
 #include <set>
@@ -7,47 +19,43 @@
 
 struct Location;
 
-struct httpRequest
-{
-	std::string method;
-	std::string path;
-	std::string httpVersion;
-	std::map<std::string, std::string> headers;
-	std::string body;
-	std::vector<std::string> rawQueries;
+// Only interface propose
+enum headerKey {
+	Accept,
+	AcceptEncoding,
+	AcceptLanguage,
+	Connection,
+	ContentType,
+	Cookie,
+	Host,
+	Priority,
+	SecFetchDest,
+	SecFetchMode,
+	SecFetchSite,
+	UpgradeInsecureRequests,
+	UserAgent,
 };
 
-struct httpResponse
-{
+struct httpRequest {
+	std::string method;
+	std::string path;
+	std::string serverProtocol; // For Cgi
+	std::string pathInfo;       // For Cgi
+	std::string pathTranslated;
+	std::map<std::string, std::string> headers;
+	std::string body;
+
+	std::string queryString; // test
+	std::string getType(std::string key, std::string value);
+};
+
+struct httpResponse {
 	std::string statusCode;
 	std::string statusMsg;
 	std::string body;
 	std::map<std::string, std::string> headers;
 
 	void setDefaultHeaders(httpRequest &request);
-	void addHeader(std::string key, std::string value);
+	void addToHeader(std::string key, std::string value);
 	void setResponseError(std::string statusCode, std::string statusMsg);
-};
-
-struct Cgi
-{
-	// Valid CGI
-	static const std::set<std::string> validCgiExtensions;
-
-	// Configuration
-	std::string scriptPath;
-	std::string scriptName;
-	std::map<std::string, std::string> env; // Environment variables
-
-	// Request data
-	std::string method;
-	std::vector<std::string> queryString;
-	std::string requestBody;
-	size_t contentLength;
-	std::string contentType;
-
-	// Pipe handling
-	int inputPipe[2];
-	int outputPipe[2];
-	pid_t pid;
 };

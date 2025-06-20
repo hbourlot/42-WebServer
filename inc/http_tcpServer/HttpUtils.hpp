@@ -1,8 +1,10 @@
 #pragma once
 
+#include "../Config/Configs.hpp"
 #include "HttpStructs.hpp"
 
-void parseRequest(httpRequest &request, const std::string &requestContent);
+void parseRequest(httpRequest &request, const std::string &requestContent,
+                  const Server &serverInfo);
 std::string ft_strtrim(const std::string &str);
 httpResponse validateForm(httpRequest request);
 void printHttpHeaders(const httpRequest &request);

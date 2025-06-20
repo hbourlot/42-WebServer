@@ -12,8 +12,8 @@ int http::TcpServer::sendResponse(pollfd socket) {
 	// 	handleCgiResponse(m_cgi[0]);
 	// else {
 
-	ssize_t bytesSent = send(socket.fd, m_serverMessage.c_str(),
-	                         m_serverMessage.size(), MSG_NOSIGNAL);
+	ssize_t bytesSent = send(socket.fd, _serverMessage.c_str(),
+	                         _serverMessage.size(), MSG_NOSIGNAL);
 	if (bytesSent < 0) {
 		if (errno == EPIPE) {
 			log("Client disconnected before response");
