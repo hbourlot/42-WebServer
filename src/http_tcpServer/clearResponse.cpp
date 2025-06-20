@@ -6,5 +6,5 @@ void http::TcpServer::clearResponse(httpRequest &request,
 	request.headers.clear();
 	request.method.clear();
 	request.body.clear();
-	m_serverMessage.clear();
+	_serverMessage.clear();
 }

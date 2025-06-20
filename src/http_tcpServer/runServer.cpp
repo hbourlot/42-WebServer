@@ -6,7 +6,7 @@
 /*   By: hbourlot <hbourlot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 13:59:31 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/06/06 16:40:14 by hbourlot         ###   ########.fr       */
+/*   Updated: 2025/06/19 20:05:44 by hbourlot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,13 +23,13 @@ int http::TcpServer::runServer() {
 	} catch (const TcpServerException &e) {
 		std::cerr << "Error while starting to listen => " << e.what()
 		          << std::endl;
-		close(m_serverSocket);
+		close(_serverSocket);
 		return -1;
 	}
 
 	std::vector<pollfd> fds;
-	struct pollfd listen_fd;
-	listen_fd.fd = m_serverSocket;
+	pollfd listen_fd;
+	listen_fd.fd = _serverSocket;
 	listen_fd.events = POLLIN; // any readable data available
 	listen_fd.revents = 0;
 	fds.push_back(listen_fd);

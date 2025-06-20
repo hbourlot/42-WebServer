@@ -25,7 +25,7 @@ int main(int argc, char **argv, char **envp) {
 	// 	servers.push_back(server);
 	// }
 
-	TcpServer server(configuration, envp);
+	TcpServer server(configuration);
 
 	server.runServer();
 

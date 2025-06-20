@@ -3,10 +3,10 @@
 #include <fstream>
 #include <sstream>
 
-static std::string buildResponse(const httpResponse &response)
-{
+static std::string buildResponse(const httpResponse &response,
+                                 const httpRequest &request) {
 	std::ostringstream responseString;
-	responseString << "HTTP/1.1 " << response.statusCode << " "
+	responseString << request.serverProtocol + " " << response.statusCode << " "
 	               << response.statusMsg << "\r\n";
 
 	std::map<std::string, std::string>::const_iterator it;
@@ -19,14 +19,11 @@ static std::string buildResponse(const httpResponse &response)
 	return responseString.str();
 }
 
-namespace http
-{
+namespace http {
 
-	void TcpServer::setResponse()
-	{
-		log(m_serverMessage);
-		std::cout << "Here" << std::endl;
-		m_serverMessage = buildResponse(_response);
-		std::cout << m_serverMessage << std::endl;
+	void TcpServer::setResponse() {
+		log(_serverMessage);
+		_serverMessage = buildResponse(_response, _request);
+		std::cout << _serverMessage << std::endl;
 	}
 } // namespace http
