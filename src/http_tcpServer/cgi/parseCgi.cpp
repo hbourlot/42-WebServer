@@ -45,20 +45,21 @@ bool http::TcpServer::parseCgi(const Location loc, std::string &filePath,
 
 	// Cgi cgi(_request, filePath, clientAddress);
 
-	std::cout << "QUeryString => " << _request.queryString << std::endl;
-	std::cout << "filePath => " << filePath << std::endl;
-	std::cout << "_request.path => " << _request.path << std::endl;
-	std::cout << "START\n";
-	for (std::map<std::string, std::string>::const_iterator it =
-	         _request.headers.begin();
-	     it != _request.headers.end(); ++it) {
-		std::cout << it->first << ": ";
-		if (!it->second.empty())
-			std::cout << it->second << std::endl;
-		else
-			std::cout << "NULL" << std::endl;
-	}
-	std::cout << "\n --- END\n\n";
 	// this->m_cgi.push_back(cgi);
 	return true;
 };
+
+// std::cout << "QUeryString => " << _request.queryString << std::endl;
+// std::cout << "filePath => " << filePath << std::endl;
+// std::cout << "_request.path => " << _request.path << std::endl;
+// std::cout << "START\n";
+// for (std::map<std::string, std::string>::const_iterator it =
+// 		 _request.headers.begin();
+// 	 it != _request.headers.end(); ++it) {
+// 	std::cout << it->first << ": ";
+// 	if (!it->second.empty())
+// 		std::cout << it->second << std::endl;
+// 	else
+// 		std::cout << "NULL" << std::endl;
+// }
+// std::cout << "\n --- END\n\n";
