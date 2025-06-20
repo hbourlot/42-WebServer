@@ -1,4 +1,7 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include <map>
+#include <netinet/in.h>
+#include <string>
 // #include "http_tcpServer/Http_tcpServer_Linux.hpp"
 
 // --- START DEBUG
@@ -31,39 +34,31 @@
 // 	bool autoIndex;
 // };
 
-// if (CgiHandler::isCgiRequest(request)) {
-// 	int i = 0;
-// 	std::string ext =
-// 		getLocationFieldAsString(infos.locations, "cgi_extension");
-// 	std::vector<std::string> ext_splitted = split(ext, ' ');
-
-// 	// Maybe verify all cgi_extensions instead of just once by once
-// 	while (CgiHandler::isValidCgiExtension(ext_splitted[i]))
-// 		i++;
-// 	if (i == ext.size()){
-// 		// handleCgiRequest
-// 	}
-// }
-
-bool http::TcpServer::parseCgi(const Location loc, std::string &filePath)
-{
+bool http::TcpServer::parseCgi(const Location loc, std::string &filePath,
+                               sockaddr_in &clientAddress,
+                               httpRequest &request) {
 
 	// if (loc.methods.empty() || m_scriptName.empty())
 	// {
 	// return false;
 	// }
 
-	struct Cgi foo;
+	// Cgi cgi(_request, filePath, clientAddress);
 
-	// foo.scriptPath = loc.path + request.method;
-	foo.scriptPath = filePath; // !
-	foo.method = _request.method;
-	foo.queryString = _request.rawQueries;
-	foo.requestBody = _request.body;
-	foo.contentLength = _request.body.length();
-	foo.contentType = _request.headers["Content-Type"];
-
-	std::cout << "scriptPath => " << foo.scriptPath << std::endl;
-	this->m_cgi.push_back(foo);
+	std::cout << "QUeryString => " << _request.queryString << std::endl;
+	std::cout << "filePath => " << filePath << std::endl;
+	std::cout << "_request.path => " << _request.path << std::endl;
+	std::cout << "START\n";
+	for (std::map<std::string, std::string>::const_iterator it =
+	         _request.headers.begin();
+	     it != _request.headers.end(); ++it) {
+		std::cout << it->first << ": ";
+		if (!it->second.empty())
+			std::cout << it->second << std::endl;
+		else
+			std::cout << "NULL" << std::endl;
+	}
+	std::cout << "\n --- END\n\n";
+	// this->m_cgi.push_back(cgi);
 	return true;
 };

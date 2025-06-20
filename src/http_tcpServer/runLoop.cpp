@@ -1,19 +1,21 @@
 #include "http_tcpServer/HttpStructs.hpp"
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 #include <cstddef>
+#include <netinet/in.h>
 #include <sys/poll.h>
 #include <unistd.h>
 #include <vector>
 
 // Remove and close all pollfd's with HUP, ERR, or NVAL events
-static void removeDeadConnections(std::vector<pollfd> &fds) {
+static void removeDeadConnections(std::vector<pollfd> &fds,
+                                  std::vector<sockaddr_in> &m_socketAddress) {
 
 	for (size_t i = 1; i < fds.size(); ++i) {
 		if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {
 			close(fds[i].fd);
 			fds.erase(fds.begin() + i);
+			m_socketAddress.erase(m_socketAddress.begin() + i);
 			--i;
-			std::cout << "OVER HERE\n";
 		}
 	}
 }
@@ -38,7 +40,7 @@ void http::TcpServer::runLoop(std::vector<pollfd> &fds, int timeOut) {
 
 			// Checking for new connections
 			acceptConnection(fds);
-			removeDeadConnections(fds);
+			removeDeadConnections(fds, _socketAddress);
 			processClientEvents(fds);
 		}
 	} catch (const TcpServerException &e) {

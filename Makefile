@@ -36,7 +36,7 @@ LEN             = 0
 
 
 AUTH_FUNC		= loginHandler
-CGI_FUNC		= isValidCgiExtension parseCgi
+CGI_FUNC		= parseCgi executeCgi Cgi getServerName getServerPort #isValidCgiExtension
 UTILS_FUNC		= ft_strtrim utils split getLocationFieldAsString
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
 HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop clearResponse processClientEvents
