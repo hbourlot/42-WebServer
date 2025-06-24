@@ -44,7 +44,7 @@ REQUEST_FUNC	= readRequest parseRequest handleRequest
 RESPONSE_FUNC 	= sendResponse 
 METHODS_FUNC 	= handlePostRequest uploadHandler handleDeleteRequest utils
 GET_FUNC		= autoindex handleGetRequest
-SET_FUNC		= setResponse setResponseError setFileResponse setBodyResponse setResponseAux
+SET_FUNC		= setResponse setResponseError setFileResponse setBodyResponse setResponseAux setRedirect
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
