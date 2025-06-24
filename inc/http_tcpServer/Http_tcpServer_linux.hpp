@@ -33,12 +33,14 @@
 
 #define ERROR -1
 
-namespace http {
+namespace http
+{
 
 	typedef int HTTP_SOCKET;
 	const int BUFFER_SIZE = 30720;
 
-	class TcpServer {
+	class TcpServer
+	{
 	  public:
 		// Default Constructor
 		TcpServer(Configs configuration);
@@ -48,10 +50,12 @@ namespace http {
 		// Main member
 		int runServer();
 
-		class TcpServerException : public std::runtime_error {
+		class TcpServerException : public std::runtime_error
+		{
 		  public:
 			explicit TcpServerException(const std::string &message)
-			    : std::runtime_error(message) {
+			    : std::runtime_error(message)
+			{
 			}
 		};
 
@@ -78,6 +82,7 @@ namespace http {
 		void acceptConnection(std::vector<pollfd> &fds);
 		// void readRequest(std::vector<pollfd> &fds, int i);
 		bool readRequest(std::vector<pollfd> &fds, int i);
+		void closeClient(std::vector<pollfd> &fds, size_t &i);
 		bool handleRequest(sockaddr_in &clientAddress);
 		bool handleGetRequest(const Location &location,
 		                      sockaddr_in &clientAddress);

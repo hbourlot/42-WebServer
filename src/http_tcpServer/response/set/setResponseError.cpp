@@ -8,4 +8,5 @@ void httpResponse::setResponseError(std::string statusCode,
 	addToHeader("Content-Type", "text/plain");
 
 	this->body = statusMsg + " (" + statusCode + ")";
+	setDefaultHeaders();
 }

@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/06/20 19:36:32 by joralves         ###   ########.fr       */
+/*   Updated: 2025/06/20 23:37:26 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@
 struct Location;
 
 // Only interface propose
-enum headerKey {
+enum headerKey
+{
 	Accept,
 	AcceptEncoding,
 	AcceptLanguage,
@@ -36,13 +37,15 @@ enum headerKey {
 	UserAgent,
 };
 
-enum ParseStatus{
+enum ParseStatus
+{
 	PARSE_INCOMPLETE,
 	PARSE_TOO_LARGE,
 	PARSE_OK,
 };
 
-struct httpRequest {
+struct httpRequest
+{
 	std::string method;
 	std::string path;
 	std::string serverProtocol; // For Cgi
@@ -55,12 +58,14 @@ struct httpRequest {
 	std::string getType(std::string key, std::string value);
 };
 
-struct httpResponse {
+struct httpResponse
+{
 	std::string statusCode;
 	std::string statusMsg;
 	std::string body;
 	std::map<std::string, std::string> headers;
 
+	void setDefaultHeaders();
 	void setDefaultHeaders(httpRequest &request);
 	void addToHeader(std::string key, std::string value);
 	void setResponseError(std::string statusCode, std::string statusMsg);

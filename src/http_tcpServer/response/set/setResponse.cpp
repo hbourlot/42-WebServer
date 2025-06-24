@@ -22,8 +22,8 @@ static std::string buildResponse(const httpResponse &response,
 namespace http {
 
 	void TcpServer::setResponse() {
-		log(_serverMessage);
+		// log(_serverMessage);
 		_serverMessage = buildResponse(_response, _request);
-		std::cout << _serverMessage << std::endl;
+		// std::cout << _serverMessage << std::endl;
 	}
 } // namespace http
