@@ -6,22 +6,27 @@
 #include <unistd.h>
 #include <vector>
 
-int http::TcpServer::sendResponse(pollfd socket) {
+int http::TcpServer::sendResponse(pollfd socket)
+{
 
-	// if (m_cgi.data())
-	// 	handleCgiResponse(m_cgi[0]);
-	// else {
+	std::cout << _serverMessage << std::endl;
 
 	ssize_t bytesSent = send(socket.fd, _serverMessage.c_str(),
 	                         _serverMessage.size(), MSG_NOSIGNAL);
-	if (bytesSent < 0) {
-		if (errno == EPIPE) {
+	if (bytesSent < 0)
+	{
+		if (errno == EPIPE)
+		{
 			log("Client disconnected before response");
-		} else {
+		}
+		else
+		{
 			log("Error sending response to client");
 		}
 		return 1;
-	} else {
+	}
+	else
+	{
 		log("----- Server Response sent to client -----\n\n");
 	}
 	// }
