@@ -4,6 +4,7 @@
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
 #include "HttpLogs.hpp"
+#include "HttpStatus.hpp"
 #include "HttpStructs.hpp"
 #include "HttpUtils.hpp"
 #include <arpa/inet.h>
@@ -90,16 +91,17 @@ namespace http
 		bool handleDeleteRequest(const Location &location);
 		int sendResponse(pollfd socket);
 
+		void prepareResponse(const HttpStatusCode &status,
+		                     const std::string &body,
+		                     const std::string &headerKey = "",
+		                     const std::string &headerValue = "");
 		void setResponse();
-		void setBodyResponse(const std::string &statusCode,
-		                     const std::string &statusMsg,
+		void setBodyResponse(const HttpStatusCode &status,
 		                     const std::string &body,
 		                     const std::string &contentType = "text/plain");
-		void setFileResponse(std::string statusCode, std::string statusMsg,
-		                     const std::string &htmlFilePath,
-		                     bool isError = false);
-		void setRedirect(std::string statusCode, std::string statusMsg,
-		                 std::string redirection);
+		void setFileResponse(const HttpStatusCode &status,
+		                     const std::string &filePath, bool isError = false);
+		void setRedirect(const HttpStatusCode &status, std::string redirection);
 
 		bool parseMultipart(const Location &location);
 		bool handleDirectoryListing(const std::string &filePath,

@@ -15,7 +15,7 @@ bool http::TcpServer::readRequest(std::vector<pollfd> &fds, int i)
 		if (bytesReceived < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
 			std::cerr << "Error: read()\n";
 
-		_response.setResponseError("400", "Bad Request"); // o 408?
+		_response.setResponseError(HTTP_BAD_REQ); // o 408?
 		setResponse();
 		fds[i].events |= POLLOUT;
 		buffers.erase(fd);
@@ -32,7 +32,7 @@ bool http::TcpServer::readRequest(std::vector<pollfd> &fds, int i)
 
 	if (status == PARSE_TOO_LARGE)
 	{
-		_response.setResponseError("413", "Payload Too Large");
+		_response.setResponseError(HTTP_PAYLOAD);
 		setResponse();
 		// std::cout << _serverMessage << std::endl;
 		fds[i].events |= POLLOUT;

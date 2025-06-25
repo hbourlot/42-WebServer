@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/06/20 23:37:26 by joralves         ###   ########.fr       */
+/*   Updated: 2025/06/25 12:49:09 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,12 @@
 #include <string>
 #include <unistd.h>
 #include <vector>
+#include "http_tcpServer/HttpStatus.hpp"
+
+// #define HTTP_200 "200"
+// #define HTTP_301 "301"
+// #define HTTP_404 "404"
+// #define HTTP_500 "500"
 
 struct Location;
 
@@ -68,5 +74,6 @@ struct httpResponse
 	void setDefaultHeaders();
 	void setDefaultHeaders(httpRequest &request);
 	void addToHeader(std::string key, std::string value);
-	void setResponseError(std::string statusCode, std::string statusMsg);
+	// void setResponseError(std::string statusCode);
+	void setResponseError(const HttpStatusCode &status);
 };

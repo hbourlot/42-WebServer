@@ -4,7 +4,8 @@
 #include <sstream>
 
 static std::string buildResponse(const httpResponse &response,
-                                 const httpRequest &request) {
+                                 const httpRequest &request)
+{
 	std::ostringstream responseString;
 	responseString << request.serverProtocol + " " << response.statusCode << " "
 	               << response.statusMsg << "\r\n";
@@ -19,11 +20,26 @@ static std::string buildResponse(const httpResponse &response,
 	return responseString.str();
 }
 
-namespace http {
+namespace http
+{
+	void TcpServer::prepareResponse(const HttpStatusCode &status,
+	                                const std::string &body,
+	                                const std::string &headerKey,
+	                                const std::string &headerValue)
+	{
+		_response.statusCode = status.code;
+		_response.statusMsg = status.message;
+		_response.body = body;
 
-	void TcpServer::setResponse() {
-		// log(_serverMessage);
+		if (!headerKey.empty() && !headerValue.empty())
+			_response.addToHeader(headerKey, headerValue);
+
+		_response.setDefaultHeaders(_request);
+		setResponse();
+	}
+
+	void TcpServer::setResponse()
+	{
 		_serverMessage = buildResponse(_response, _request);
-		// std::cout << _serverMessage << std::endl;
 	}
 } // namespace http
