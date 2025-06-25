@@ -106,8 +106,6 @@ namespace http
 		bool parseMultipart(const Location &location);
 		bool handleDirectoryListing(const std::string &filePath,
 		                            const Location &location);
-		void setResponseError(std::string statusCode, std::string statusMsg);
-		bool parseMultipart(const Location *location);
 
 		void clearResponse(httpRequest &request, std::string &serverMessage);
 		void processClientEvents(std::vector<pollfd> &fds);
