@@ -54,7 +54,7 @@ namespace http
 
 		if (!matchedLocationPtr)
 		{
-			setFileResponse("404", "Not Found", _infos.errorPage[404]);
+			setFileResponse(HTTP_NOT_FOUND, _infos.errorPage[404]);
 			return false;
 		}
 
@@ -62,14 +62,13 @@ namespace http
 
 		if (!matchedLocation.redirection.empty())
 		{
-			setRedirect("301", "Moved Permanently",
-			            matchedLocation.redirection);
+			setRedirect(HTTP_MOVED, matchedLocation.redirection);
 			return (true);
 		}
 
 		if (!validateRequestMethod(_request, matchedLocation))
 		{
-			setFileResponse("405", "Method Not Allowed", DFL_405);
+			setFileResponse(HTTP_FORBID_METHOD, DFL_405);
 			return (false);
 		}
 

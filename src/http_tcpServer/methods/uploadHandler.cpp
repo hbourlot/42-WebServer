@@ -94,7 +94,8 @@ namespace http
 
 		if (boundary.empty())
 		{
-			_response.setResponseError("400", "Bad Request: No boundary");
+			_response.setResponseError(HTTP_BAD_REQ);
+			log("400 Bad Request: No boundary");
 			setResponse();
 
 			return (false);
@@ -104,8 +105,8 @@ namespace http
 
 		if (filePart.empty())
 		{
-			_response.setResponseError("400",
-			                           "Bad Request: No boundary filePart");
+			_response.setResponseError(HTTP_BAD_REQ);
+			log("Bad Request: No boundary filePart");
 			setResponse();
 
 			return (false);
@@ -116,8 +117,8 @@ namespace http
 
 		if (!splitHeadersAndContent(filePart, headers, content))
 		{
-			_response.setResponseError("400",
-			                           "Bad Request: Malformed multipart body");
+			_response.setResponseError(HTTP_BAD_REQ);
+			log("Bad Request: Malformed multipart body");
 			setResponse();
 
 			return (false);
@@ -127,21 +128,21 @@ namespace http
 
 		if (filename.empty())
 		{
-			_response.setResponseError("400",
-			                           "Bad Request: Filename not found");
+			_response.setResponseError(HTTP_BAD_REQ);
+			log("Bad Request: Filename not found");
 			setResponse();
 			return (false);
 		}
 
 		if (!saveFile(filename, content, location))
 		{
-			setFileResponse("500", "Internal Server Error: File not saved",
-			                DFL_500, true);
+			setFileResponse(HTTP_SERVER_ERR, DFL_500, true);
+			log("Internal Server Error: File not saved");
 			return (false);
 		}
 		std::string msg = "File '" + filename + "' received";
 
-		setBodyResponse("200", "OK", msg);
+		setBodyResponse(HTTP_OK, msg);
 
 		return (true);
 	}

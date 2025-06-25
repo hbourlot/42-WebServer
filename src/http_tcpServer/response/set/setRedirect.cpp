@@ -1,11 +1,8 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
-void http::TcpServer::setRedirect(std::string statusCode, std::string statusMsg,
+
+void http::TcpServer::setRedirect(const HttpStatusCode &status,
                                   std::string redirection)
 {
-	_response.statusCode = statusCode;
-	_response.statusMsg = statusMsg;
-	_response.addToHeader("Location", redirection);
-	_response.setDefaultHeaders(_request);
-	setResponse();
+	prepareResponse(status, "", "Location", redirection);
 }

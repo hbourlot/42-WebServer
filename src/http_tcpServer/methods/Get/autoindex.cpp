@@ -67,18 +67,18 @@ bool http::TcpServer::handleDirectoryListing(const std::string &filePath,
 	if (hasIndexFile(filePath, location))
 	{
 		std::string indexPath = joinPath(filePath, location.index);
-		setFileResponse("200", "OK", indexPath);
+		setFileResponse(HTTP_OK, indexPath);
 		return (true);
 	}
 
 	if (!location.autoIndex)
 	{
-		setFileResponse("404", "Not Found", _infos.errorPage[404], true);
+		setFileResponse(HTTP_NOT_FOUND, _infos.errorPage[404], true);
 		return false;
 	}
 
 	std::string body = generateAutoIndexPage(filePath, location, _request);
 
-	setBodyResponse("200", "OK", body, "text/html");
+	setBodyResponse(HTTP_OK, body, "text/html");
 	return true;
 }

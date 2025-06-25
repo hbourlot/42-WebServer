@@ -27,3 +27,5 @@ std::vector<std::string> split(const std::string &s, char delimiter);
 ParseStatus parseRequest(httpRequest &request,
                          const std::string &requestContent,
                          const Server &serverInfo, size_t maxBodySize);
+
+std::string getStatusMessage(const std::string &code);
