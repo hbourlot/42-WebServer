@@ -1,11 +1,8 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
-void httpResponse::setResponseError(std::string statusCode,
-                                    std::string statusMsg) {
-	this->statusCode = statusCode;
-	this->statusMsg = statusMsg;
+void http::TcpServer::setResponseError(const HttpStatusCode &status)
+{
+	std::string body = status.message + " (" + status.code + ")";
 
-	addToHeader("Content-Type", "text/plain");
-
-	this->body = statusMsg + " (" + statusCode + ")";
+	prepareResponse(status, body, "Content-Type", "text/plain");
 }

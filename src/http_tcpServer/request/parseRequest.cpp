@@ -102,29 +102,33 @@ static void parseRequestHeaders(httpRequest &request,
 	}
 }
 
-void parseRequest(httpRequest &request, const std::string &requestContent,
-                  const Server &serverInfo) {
+ParseStatus parseRequest(httpRequest &request,
+                         const std::string &requestContent,
+                         const Server &serverInfo, size_t maxBodySize) {
 	std::istringstream request_stream(requestContent);
 	std::string line;
-	std::getline(request_stream, line);
-	std::istringstream first_line(line);
+	if (!std::getline(request_stream, line))
+		return PARSE_INCOMPLETE;
 
+	std::istringstream first_line(line);
 	first_line >> request.method >> request.path >> request.serverProtocol;
+
 	parseRequestQueries(request);
 	parsePath(request, serverInfo);
-
-	// // ✅ Print debug info
-	// std::cout << "Parsed Request:" << std::endl;
-	// std::cout << "  Method: " << request.method << std::endl;
-	// std::cout << "  Path: " << request.path << std::endl;
-	// std::cout << "  Path Info: " << request.pathInfo << std::endl;
-	// std::cout << "  Path Translated: " << request.pathTranslated <<
-	// std::endl; std::cout << "  Query String: " << request.queryString <<
-	// std::endl; exit(1);
 	parseRequestHeaders(request, request_stream, line);
 
 	std::string body;
 	while (std::getline(request_stream, line))
 		body += line + "\n";
 	request.body = body;
+
+	if (request.headers.count("Content-Length")) {
+		size_t contentLength =
+		    std::strtoul(request.headers["Content-Length"].c_str(), NULL, 10);
+		if (contentLength > maxBodySize)
+			return PARSE_TOO_LARGE;
+		if (request.body.size() < contentLength)
+			return PARSE_INCOMPLETE;
+	}
+	return PARSE_OK;
 }

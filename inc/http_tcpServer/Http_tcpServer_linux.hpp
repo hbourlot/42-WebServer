@@ -4,6 +4,7 @@
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
 #include "HttpLogs.hpp"
+#include "HttpStatus.hpp"
 #include "HttpStructs.hpp"
 #include "HttpUtils.hpp"
 #include <arpa/inet.h>
@@ -36,7 +37,6 @@ class Cgi;
 
 namespace http {
 
-	typedef int SocketFD;
 	const int BUFFER_SIZE = 30720;
 
 	class TcpServer {
@@ -78,7 +78,9 @@ namespace http {
 
 		void startListen();
 		void acceptConnection(std::vector<pollfd> &fds);
-		void readRequest(std::vector<pollfd> &fds, int i);
+		// void readRequest(std::vector<pollfd> &fds, int i);
+		bool readRequest(std::vector<pollfd> &fds, int i);
+		void closeClient(std::vector<pollfd> &fds, size_t &i);
 		bool handleRequest(pollfd &socket, std::vector<pollfd> &fds,
 		                   sockaddr_in &clientAddress);
 		bool handleGetRequest(const Location &location,
@@ -88,20 +90,22 @@ namespace http {
 		bool handleCgiResponse(pollfd &socket);
 		int sendResponse(pollfd &socket);
 
+		void prepareResponse(const HttpStatusCode &status,
+		                     const std::string &body,
+		                     const std::string &headerKey = "",
+		                     const std::string &headerValue = "");
 		void setResponse();
-		void setBodyResponse(const std::string &statusCode,
-		                     const std::string &statusMsg,
+		void setBodyResponse(const HttpStatusCode &status,
 		                     const std::string &body,
 		                     const std::string &contentType = "text/plain");
-		void setFileResponse(std::string statusCode, std::string statusMsg,
-		                     const std::string &htmlFilePath,
-		                     bool isError = false);
+		void setFileResponse(const HttpStatusCode &status,
+		                     const std::string &filePath, bool isError = false);
+		void setRedirect(const HttpStatusCode &status, std::string redirection);
+		void setResponseError(const HttpStatusCode &status);
 
 		bool parseMultipart(const Location &location);
 		bool handleDirectoryListing(const std::string &filePath,
 		                            const Location &location);
-		void setResponseError(std::string statusCode, std::string statusMsg);
-		bool parseMultipart(const Location *location);
 
 		void clearResponse();
 		void processClientEvents(std::vector<pollfd> &fds);

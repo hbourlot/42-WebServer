@@ -1,13 +1,8 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
-void http::TcpServer::setBodyResponse(const std::string &statusCode,
-                                      const std::string &statusMsg,
+void http::TcpServer::setBodyResponse(const HttpStatusCode &status,
                                       const std::string &body,
-                                      const std::string &contentType) {
-	_response.statusCode = statusCode;
-	_response.statusMsg = statusMsg;
-	_response.body = body;
-	_response.addToHeader("Content-Type", contentType);
-	_response.setDefaultHeaders(_request);
-	setResponse();
+                                      const std::string &contentType)
+{
+	prepareResponse(status, body, "Content-Type", contentType);
 }

@@ -2,41 +2,43 @@
 #include <sys/poll.h>
 #include <unistd.h>
 
-void http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
-
-	pollfd *socket;
+bool http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
+	static std::map<int, std::string> buffers;
+	const size_t CLIENT_MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
 	char buffer[BUFFER_SIZE + 1] = {0};
-	std::string requestContent;
+	int fd = fds[i].fd;
 
-	socket = &fds[i];
-	while ((_bytesReceived = read(socket->fd, buffer, BUFFER_SIZE)) > 0)
-		requestContent.append(buffer, _bytesReceived);
-
-	if (_bytesReceived < 0) {
-		if (errno != EAGAIN && errno != EWOULDBLOCK) {
-
+	ssize_t bytesReceived = read(fd, buffer, BUFFER_SIZE);
+	if (bytesReceived <= 0) {
+		if (bytesReceived < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
 			std::cerr << "Error: read()\n";
-			close(socket->fd);
-			fds.erase(fds.begin() + i);
-			return;
-		}
-	}
-	// if (!requestContent.empty()) {
-	// 	if (_socketAddressMap.count(socket->fd)) {
-	// 		parseRequest(_request, requestContent, _serverInfo);
-	// 		handleRequest(*socket, fds, _socketAddressMap[socket->fd]);
 
-	// 		// fds[i].events |= POLLOUT;
-	// 	} else {
-	// 		std::cerr << "[ERROR] FD " << socket->fd
-	// 		          << " not found in _socketAddressMap\n";
-	// 	}
-	// }
-	if (!requestContent.empty()) {
-
-		parseRequest(_request, requestContent, _serverInfo);
-		handleRequest(*socket, fds, _socketAddressMap[socket->fd]);
-		// Set event POLLOUT
-		// fds[i].events |= POLLOUT;
+		setResponseError(HTTP_BAD_REQ); // o 408?
+		// setResponse();
+		fds[i].events |= POLLOUT;
+		buffers.erase(fd);
+		return true;
 	}
+
+	buffers[fd].append(buffer, bytesReceived);
+
+	ParseStatus status =
+	    parseRequest(_request, buffers[fd], _serverInfo, CLIENT_MAX_BODY_SIZE);
+
+	if (status == PARSE_INCOMPLETE)
+		return false;
+
+	if (status == PARSE_TOO_LARGE) {
+		setResponseError(HTTP_PAYLOAD);
+		// setResponse();
+		// std::cout << _serverMessage << std::endl;
+		fds[i].events |= POLLOUT;
+		buffers.erase(fd);
+		// return true;
+		return false;
+	}
+
+	fds[i].events |= POLLOUT;
+	buffers.erase(fd);
+	return false;
 }

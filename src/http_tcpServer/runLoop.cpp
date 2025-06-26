@@ -12,7 +12,7 @@
 // Remove and close all pollfd's with HUP, ERR, or NVAL events
 static void
 removeDeadConnections(std::vector<pollfd> &fds,
-                      std::map<http::SocketFD, sockaddr_in> &socketAddressMap) {
+                      std::map<SocketFD, sockaddr_in> &socketAddressMap) {
 
 	for (size_t i = 1; i < fds.size(); ++i) {
 		if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {

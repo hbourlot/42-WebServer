@@ -20,6 +20,20 @@ static std::string buildResponse(const httpResponse &response,
 }
 
 namespace http {
+	void TcpServer::prepareResponse(const HttpStatusCode &status,
+	                                const std::string &body,
+	                                const std::string &headerKey,
+	                                const std::string &headerValue) {
+		_response.statusCode = status.code;
+		_response.statusMsg = status.message;
+		_response.body = body;
+
+		if (!headerKey.empty() && !headerValue.empty())
+			_response.addToHeader(headerKey, headerValue);
+
+		_response.setDefaultHeaders(_request);
+		setResponse();
+	}
 
 	void TcpServer::setResponse() {
 		_serverMessage = buildResponse(_response, _request);
