@@ -29,10 +29,10 @@ void http::TcpServer::processClientEvents(std::vector<pollfd> &fds)
 		{
 			shouldCloseRead = readRequest(fds, i);
 		}
-		std::cout << "Here " << std::endl;
+		// std::cout << "Here " << std::endl;
 		if (fds[i].revents & POLLOUT)
 		{
-			std::cout << "Here " << __func__ << std::endl;
+			// std::cout << "Here " << __func__ << std::endl;
 
 			handleRequest(*currentAddress);
 			shouldCloseSend = sendResponse(fds[i]);

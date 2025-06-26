@@ -94,9 +94,8 @@ namespace http
 
 		if (boundary.empty())
 		{
-			_response.setResponseError(HTTP_BAD_REQ);
+			setResponseError(HTTP_BAD_REQ);
 			log("400 Bad Request: No boundary");
-			setResponse();
 
 			return (false);
 		}
@@ -105,9 +104,8 @@ namespace http
 
 		if (filePart.empty())
 		{
-			_response.setResponseError(HTTP_BAD_REQ);
+			setResponseError(HTTP_BAD_REQ);
 			log("Bad Request: No boundary filePart");
-			setResponse();
 
 			return (false);
 		}
@@ -117,9 +115,8 @@ namespace http
 
 		if (!splitHeadersAndContent(filePart, headers, content))
 		{
-			_response.setResponseError(HTTP_BAD_REQ);
+			setResponseError(HTTP_BAD_REQ);
 			log("Bad Request: Malformed multipart body");
-			setResponse();
 
 			return (false);
 		}
@@ -128,9 +125,8 @@ namespace http
 
 		if (filename.empty())
 		{
-			_response.setResponseError(HTTP_BAD_REQ);
+			setResponseError(HTTP_BAD_REQ);
 			log("Bad Request: Filename not found");
-			setResponse();
 			return (false);
 		}
 
