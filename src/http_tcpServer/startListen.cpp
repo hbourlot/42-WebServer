@@ -13,7 +13,8 @@ void http::TcpServer::startListen() {
 
 	std::ostringstream ss; // Output string stream for logging
 	ss << "\n*** Listening on ADDRESS: "
-	   << inet_ntoa(_socketAddress[0].sin_addr)
-	   << " PORT: " << ntohs(_socketAddress[0].sin_port) << " ***\n\n";
+	   << inet_ntoa(_socketAddressMap[_serverSocket].sin_addr)
+	   << " PORT: " << ntohs(_socketAddressMap[_serverSocket].sin_port)
+	   << " ***\n\n";
 	log(ss.str());
 }

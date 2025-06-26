@@ -6,11 +6,7 @@
 #include <unistd.h>
 #include <vector>
 
-int http::TcpServer::sendResponse(pollfd socket) {
-
-	// if (m_cgi.data())
-	// 	handleCgiResponse(m_cgi[0]);
-	// else {
+int http::TcpServer::sendResponse(pollfd &socket) {
 
 	ssize_t bytesSent = send(socket.fd, _serverMessage.c_str(),
 	                         _serverMessage.size(), MSG_NOSIGNAL);
@@ -24,7 +20,6 @@ int http::TcpServer::sendResponse(pollfd socket) {
 	} else {
 		log("----- Server Response sent to client -----\n\n");
 	}
-	// }
 
 	return 0;
 }

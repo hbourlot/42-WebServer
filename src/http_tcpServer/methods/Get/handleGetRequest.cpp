@@ -12,12 +12,12 @@ namespace http {
 			return handleDirectoryListing(filePath, location);
 
 		if (!std::ifstream(filePath.c_str()).is_open()) {
-			setFileResponse("404", "Not Found", _infos.errorPage[404], true);
+			setFileResponse("404", "Not Found", _serverInfo.errorPage[404],
+			                true);
 			return false;
 		}
 		// std::string prototypeFilePath = filePath.substr(1);
-		// if (parseCgi(location, prototypeFilePath, clientAddress, request)) {
-		// 	executeCgi(m_cgi[0]);
+		// if (parseCgi(location, prototypeFilePath, clientAddress, _request)) {
 		// 	return true;
 		// }
 

@@ -1,34 +1,55 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 #include <netinet/in.h>
+#include <sys/poll.h>
+
+bool http::TcpServer::handleCgiResponse(pollfd &socket) {
+
+	std::cout << "[DEBUG] FD: " << socket.fd << " | revents: " << socket.revents
+	          << " | events: " << socket.events << std::endl;
+	if ((socket.revents & POLLIN) && _cgiFdMap.count(socket.fd)) {
+		std::cout << "FD ON HANDLE => " << socket.fd << std::endl;
+		Cgi *cgi = _cgiFdMap[socket.fd];
+		cgi->readCgiOutput();
+		// if (cgi->getStatus() == Cgi::FINISHED) {
+		setBodyResponse("200", "OK", cgi->getBody());
+		std::cout << cgi->getBody();
+		sendResponse(socket);
+		_cgiFdMap.erase(socket.fd);
+		// }
+		return true;
+	}
+	// std::cout << "RETURNING FALSE\n";
+	return false;
+}
 
 void http::TcpServer::processClientEvents(std::vector<pollfd> &fds) {
 
-	int fd;
+	SocketFD fd;
 	bool shouldClose;
-	sockaddr_in *currentAddress;
 
 	for (size_t i = 1; i < fds.size(); ++i) {
 
 		fd = fds[i].fd;
-		currentAddress = &_socketAddress[i];
-		if (fds[i].revents & POLLIN)
+
+		if (fds[i].revents & POLLIN) {
 			readRequest(fds, i);
+		}
+		if (handleCgiResponse(fds[i])) {
+			continue;
+		}
 		if (fds[i].revents & POLLOUT) {
-			handleRequest(*currentAddress);
+			std::cout << "POLLOUT REVENTS\n";
 			shouldClose = sendResponse(fds[i]);
-
-			// if (shouldClose)
-			// 	exit(0); // ! Never should close???
-
 			fds[i].events &= ~POLLOUT;
 			if (shouldClose) {
+				if (_socketAddressMap.count(fds[i].fd)) {
+					_socketAddressMap.erase(fds[i].fd);
+				}
 				close(fds[i].fd);
 				fds.erase(fds.begin() + i);
-				_socketAddress.erase(_socketAddress.begin() + 1);
 				--i;
-				// continue;
 			}
-			clearResponse(_request, _serverMessage);
+			clearResponse();
 		}
 	}
 }
