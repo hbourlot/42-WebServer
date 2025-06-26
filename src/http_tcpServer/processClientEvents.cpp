@@ -55,7 +55,7 @@ void http::TcpServer::processClientEvents(std::vector<pollfd> &fds) {
 		if (fds[i].revents & POLLOUT) {
 			// std::cout << "Here " << __func__ << std::endl;
 
-			handleRequest(fds[i], fds, _socketAddressMap[fd]);
+			
 			shouldCloseSend = sendResponse(fds[i]);
 			fds[i].events &= ~POLLOUT;
 			clearResponse();
