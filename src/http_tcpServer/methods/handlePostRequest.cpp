@@ -24,18 +24,19 @@ namespace http
 		// }
 		else if (location.uploadEnable)
 		{
-			std::cout << _request.headers["Content-Type"] << std::endl;
-			// if
+			std::cout << "_request.headers " << _request.headers["Content-Type"]
+			          << std::endl;
+			// if(_request.headers["Content-Type"] == "")
 			parseMultipart(location);
 		}
 		else if (!location.uploadEnable)
 		{
-			// setResponseError("403", "Upload Not Allowed");
+			setResponseError(HTTP_UPLOAD_FORBID);
 			return (false);
 		}
 		else
 		{
-			// setFileResponse("404", "Not Found", infos.errorPage[404]);
+			setFileResponse(HTTP_NOT_FOUND, _infos.errorPage[404], true);
 			return (false);
 		}
 		return true;

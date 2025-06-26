@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/06/25 12:49:09 by joralves         ###   ########.fr       */
+/*   Updated: 2025/06/26 15:32:43 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,5 +75,5 @@ struct httpResponse
 	void setDefaultHeaders(httpRequest &request);
 	void addToHeader(std::string key, std::string value);
 	// void setResponseError(std::string statusCode);
-	void setResponseError(const HttpStatusCode &status);
+	// void setResponseError(const HttpStatusCode &status);
 };

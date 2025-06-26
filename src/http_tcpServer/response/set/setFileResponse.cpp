@@ -12,8 +12,8 @@ namespace http
 				setFileResponse(HTTP_NOT_FOUND, _infos.errorPage[404], true);
 			else
 			{
-				_response.setResponseError(status);
-				setResponse();
+				setResponseError(status);
+				// setResponse();
 			}
 			return;
 		}

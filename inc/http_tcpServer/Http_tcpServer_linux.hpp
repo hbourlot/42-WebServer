@@ -102,6 +102,7 @@ namespace http
 		void setFileResponse(const HttpStatusCode &status,
 		                     const std::string &filePath, bool isError = false);
 		void setRedirect(const HttpStatusCode &status, std::string redirection);
+		void setResponseError(const HttpStatusCode &status);
 
 		bool parseMultipart(const Location &location);
 		bool handleDirectoryListing(const std::string &filePath,
