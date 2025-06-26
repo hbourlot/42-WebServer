@@ -2,6 +2,7 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
 void http::TcpServer::clearResponse() {
+
 	_request.headers.clear();
 	_request.method.clear();
 	_request.body.clear();

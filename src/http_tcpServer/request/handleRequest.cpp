@@ -48,33 +48,32 @@ namespace http {
 		    getMatchLocation(_request.path, _serverInfo.locations);
 
 		if (!matchedLocationPtr) {
-			setFileResponse("404", "Not Found", _serverInfo.errorPage[404]);
+			setFileResponse(HTTP_NOT_FOUND, _serverInfo.errorPage[404]);
 			return false;
 		}
 
 		const Location &matchedLocation = *matchedLocationPtr;
 
 		if (!matchedLocation.redirection.empty()) {
-			//! Treat before the /redirect-me
-			std::cout << "Handle redirection " << std::endl;
-			//* redirection 301
+			setRedirect(HTTP_MOVED, matchedLocation.redirection);
+			return (true);
 		}
 
 		if (!validateRequestMethod(_request, matchedLocation)) {
-			setFileResponse("405", "Method Not Allowed", DFL_405);
+			setFileResponse(HTTP_FORBID_METHOD, DFL_405);
 			return (false);
 		}
 
 		// * Handler CGI
-		std::string filePath = getFilePath(_request.path, matchedLocation);
-		std::string prototypeFilePath = filePath.substr(1);
-		if (parseCgi(matchedLocation, prototypeFilePath, clientAddress,
-		             _request)) {
-			_cgi[0].executeCgi(fds);
-			_cgi[0].markAsRunning();
-			_cgiFdMap[_cgi[0].getPollFd()] = &_cgi[0];
-			return true;
-		}
+		// std::string filePath = getFilePath(_request.path, matchedLocation);
+		// std::string prototypeFilePath = filePath.substr(1);
+		// if (parseCgi(matchedLocation, prototypeFilePath, clientAddress,
+		//              _request)) {
+		// 	_cgi[0].executeCgi(fds);
+		// 	_cgi[0].markAsRunning();
+		// 	_cgiFdMap[_cgi[0].getPollFd()] = &_cgi[0];
+		// 	return true;
+		// }
 
 		// Set event POLLOUT only if it's not CGI
 		socket.events |= POLLOUT;
