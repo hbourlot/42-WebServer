@@ -5,68 +5,62 @@
 #include <netinet/in.h>
 #include <sstream>
 #include <string>
+#include <sys/poll.h>
+#include <vector>
 
-static void buildArgv(std::vector<char *> &object, const char *filePath) {
-
-	object.push_back(const_cast<char *>(filePath));
-	object.push_back(nullptr);
+std::string http::Cgi::getFilePath() const {
+	return this->_filePath;
 }
 
-static void buildEnvp(std::vector<char *> &envp,
-                      const std::map<std::string, std::string> &cgiVars) {
-	std::vector<std::string> envStrings;
-	for (std::map<std::string, std::string>::const_iterator it =
-	         cgiVars.begin();
-	     it != cgiVars.end(); ++it) {
-		envStrings.push_back(it->first + "=" + it->second);
-	}
-	for (size_t i = 0; i < envStrings.size(); ++i) {
-		envp.push_back(const_cast<char *>(envStrings[i].c_str()));
-	}
-	envp.push_back(NULL);
+httpRequest http::Cgi::getCgiRequest() const {
+	return _request;
 }
 
-// _method(), _queryString(), _contentType(), _fileName(),
-//       _scriptName(), _serverName(), _serverPort(), _serverSoftware(),
-//       _serverProtocol(), _getWayInterface(), _remotePort(), _pathInfo(),
-//       _pathTranslated(), _httpUserAgent(), _acceptLanguage(), _cookie(),
-//       _referer(), _filePath(), _envp(), _argv()
+httpResponse http::Cgi::getCgiResponse() const {
+	return _response;
+}
 
-http::Cgi::Cgi(httpRequest &request, std::string &filePath,
-               sockaddr_in &clientAddress)
-    : _request(request), _filePath(filePath.c_str()),
-      _clientAddress(clientAddress) {
+int http::Cgi::getPollFd() const {
+	return _outputPipe[0];
+}
+
+http::Cgi::CgiStatus http::Cgi::getStatus() const {
+	return _status;
+}
+
+std::string http::Cgi::getBody() const {
+	return _body;
+}
+
+void http::Cgi::registerPollFd(std::vector<pollfd> &fds) const {
+	pollfd pfd;
+
+	pfd.fd = _outputPipe[0];
+	pfd.events = POLLIN;
+	pfd.revents = 0;
+	fds.push_back(pfd);
+}
+
+void http::Cgi::markAsRunning() {
+	this->_status = RUNNING;
+}
+
+http::Cgi::Cgi(const httpRequest &request, std::string &filePath,
+               const sockaddr_in &clientAddress, const Server &serverInfo)
+    : _request(request), _filePath(filePath), _clientAddress(clientAddress),
+      _serverInfo(serverInfo), _envp(), _argv(), _envStrings(), _body(),
+      _inputPipe(), _outputPipe(), _clientFD() {
 
 	// Cgi::createValidCgiExtensions();
 
-	std::map<std::string, std::string> cgiVars;
-
 	// execve
-	this->_filePath = const_cast<const char *>(filePath.c_str());
-	buildArgv(this->_argv, _filePath);
-	// buildEnvp(_envp, const std::map<std::string, std::string> &cgiVars)
+	buildEnvStrings();
+	_status = NOT_STARTED;
 }
 
-// ENVP
-
-// method,
-// queryString,
-// contentType,
-// fileName,
-// scriptName,
-// serverName,
-// serverPort,
-// serverProtocol,
-// serverSoftware,
-// getWayInterface,
-// remotePort,
-// pathTranslated,
-// httpUserAgent,
-// acceptLanguage,
-// cookie,
-// referer,
-
-// END
-
 http::Cgi::~Cgi() {
+	close(_inputPipe[0]);
+	close(_inputPipe[1]);
+	close(_outputPipe[0]);
+	close(_outputPipe[1]);
 }

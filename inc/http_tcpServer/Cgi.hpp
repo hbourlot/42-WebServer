@@ -1,38 +1,28 @@
 #pragma once
+#include "Config/Configs.hpp"
 #include "HttpStructs.hpp"
+#include "Http_tcpServer_linux.hpp"
 #include <map>
 #include <netinet/in.h>
 #include <string>
+#include <sys/poll.h>
 #include <vector>
-
-enum Info {
-	infoMethod = 1,
-	infoQueryString,
-	infoContentType,
-	infoFileName,
-	infoScriptName,
-	infoServerName,
-	infoServerPort,
-	infoServerProtocol,
-	infoServerSoftware,
-	infoGetWayInterface,
-	infoRemotePort,
-	infoPathInfo,
-	infoPathTranslated,
-	infoHttpUserAgent,
-	infoAcceptLanguage,
-	infoCookie,
-	infoReferer,
-	infoHeader
-};
 
 namespace http {
 	class Cgi {
 
 	  public:
-		Cgi(httpRequest &request, std::string &filePath,
-		    sockaddr_in &clientAddress);
+		Cgi(const httpRequest &request, std::string &filePath,
+		    const sockaddr_in &clientAddress, const Server &serverInfo);
 		~Cgi();
+
+		enum CgiStatus {
+			STILL_RUNNING,
+			NOT_STARTED,
+			RUNNING,
+			FINISHED,
+			ERROR = -1
+		};
 
 		// // CGI
 		static const std::set<std::string> validCgiExtensions;
@@ -46,28 +36,42 @@ namespace http {
 			return s;
 		}
 
-	  private:
-		httpRequest _request;
-		const char *_filePath;
-		sockaddr_in _clientAddress;
+		void executeCgi(std::vector<pollfd> &fds);
+		httpResponse getCgiResponse() const;
+		httpRequest getCgiRequest() const;
+		std::string getFilePath() const;
+		std::string getBody() const;
+		CgiStatus getStatus() const;
+		std::vector<std::string> getArgv() const;
+		int getPollFd() const;
+		void registerPollFd(std::vector<pollfd> &fds) const;
+		void markAsRunning();
+		void readCgiOutput();
 
-		std::map<std::string, std::string> _cgiVars;
+	  private:
+		CgiStatus _status;
+		SocketFD _clientFD;
+		httpRequest _request;
+		httpResponse _response;
+		Server _serverInfo;
+		std::string _filePath;
+		sockaddr_in _clientAddress;
+		int _bytesReceived;
+		std::string _body;
+
 		std::vector<char *> _envp;
 		std::vector<char *> _argv;
-
-		// Response
-		httpResponse _response;
+		std::vector<std::string> _envStrings;
 
 		// Pipe handling
+		int _pipefd[2];
 		int _inputPipe[2];
 		int _outputPipe[2];
 		pid_t _pid;
 
-		void buildCgiVars();
-		std::string
-		getServerName(std::map<std::string, std::string> &headers) const;
-		std::string
-		getServerPort(std::map<std::string, std::string> &headers) const;
+		void buildEnvStrings();
+		void doDup();
+		void handleChildProcess();
 	};
 
 }; // namespace http

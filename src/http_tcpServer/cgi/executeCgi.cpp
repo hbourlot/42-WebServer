@@ -1,98 +1,135 @@
 #include "Config/Configs.hpp"
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include <ios>
 #include <iostream>
+#include <sys/wait.h>
 #include <unistd.h>
+#include <vector>
 
-// void handleCgiParentProcess(Cgi &object) {
+void printEnvStrings(std::vector<std::string> &_envStrings) {
+	std::cerr << "ENVSTRINGS:" << std::endl;
+	for (size_t i = 0; i < _envStrings.size(); ++i) {
+		std::cerr << "  [" << i << "]: " << _envStrings[i] << std::endl;
+	}
+	std::cerr << "END ENVSTRINGS" << std::endl;
+}
 
-// if (object.inputPipe[0] != -1)
-// 	close(object.inputPipe[0]);
-// if (object.outputPipe[1] != -1)
-// 	close(object.outputPipe[1]);
+void debugCgiExec(const char *filePath, char *const argv[],
+                  char *const envp[]) {
+	std::cerr << "CGI EXEC DEBUG" << std::endl;
+	std::cerr << "File path: " << (filePath ? filePath : "NULL") << std::endl;
 
-// char buffer[http::BUFFER_SIZE + 1] = {0};
-// std::string requestContent;
-// int bytesReceived = 0;
+	std::cerr << "ARGV:" << std::endl;
+	for (int i = 0; argv && argv[i]; ++i) {
+		std::cerr << "  argv[" << i << "]: " << argv[i] << std::endl;
+	}
 
-// while ((bytesReceived =
-//             read(object.outputPipe[0], buffer, http::BUFFER_SIZE)) > 0) {
-// 	requestContent.append(buffer, bytesReceived);
-// }
+	std::cerr << "ENVP:" << std::endl;
+	for (int i = 0; envp && envp[i]; ++i) {
+		std::cerr << "  envp[" << i << "]: " << envp[i] << std::endl;
+	}
+	std::cerr << "END DEBUG" << std::endl;
+}
 
-// if (bytesReceived < 0) {
-// 	if (errno != EAGAIN && errno != EWOULDBLOCK) {
-// 		std::cerr << "Error: read()\n";
-// 		//! ... handle error properly
-// 		return;
-// 	}
-// }
+void http::Cgi::readCgiOutput() {
 
-// setResponse
-// }
+	char buffer[http::BUFFER_SIZE + 1] = {0};
 
-static void doDup(int (&inputPipe)[2], int (&outputPipe)[2]) {
-	dup2(inputPipe[0], STDIN_FILENO);
-	dup2(outputPipe[1], STDOUT_FILENO);
+	// std::cerr << "HEREEEEEE\n";
+	while ((_bytesReceived =
+	            read(this->_outputPipe[0], buffer, http::BUFFER_SIZE)) > 0) {
+		_body.append(buffer, _bytesReceived);
+	}
+	if ((_bytesReceived = read(_outputPipe[0], buffer, http::BUFFER_SIZE)) >
+	    0) {
+		std::cerr << "[DEBUG] CGI output received: " << _bytesReceived
+		          << " bytes\n";
+	}
+	// std::cerr << "HEREEEEEE123\n";
+	// std::cerr << "read() returned: " << _bytesReceived << "\n";
+	// std::cerr << "errno: " << errno << "\n";
+	// perror("read");
 
-	close(inputPipe[1]);
-	close(inputPipe[0]);
-	close(outputPipe[0]);
-	close(outputPipe[1]);
+	// if (_bytesReceived == 0) {
+	// 	_status = FINISHED;
+
+	// int status;
+	// waitpid(_pid, &status, WNOHANG);
+	// close(_pipefd[0]);
+	// return;
+
+	if (_bytesReceived < 0) {
+		if (errno != EAGAIN && errno != EWOULDBLOCK) {
+			std::cerr << "Error: read()))))\n";
+			//! ... handle error properly
+			return;
+		}
+	}
+
+	// if (!_body.empty()) {
+	// 	parseRequest(_request, _body, _serverInfo);
+	// }
+}
+
+void http::Cgi::handleChildProcess() {
+	//* Child process
+	doDup();
+
+	this->_filePath = "." + this->_filePath;
+
+	// build argv
+	std::vector<char *> argv;
+	argv.push_back(const_cast<char *>(_filePath.c_str()));
+	argv.push_back(NULL);
+
+	// build envp
+	std::vector<char *> envp;
+	this->_envp.clear();
+
+	for (size_t i = 0; i < _envStrings.size(); ++i) {
+		this->_envp.push_back(const_cast<char *>(_envStrings[i].c_str()));
+	}
+	this->_envp.push_back(NULL);
+
+	// debugCgiExec(this->getFilePath().c_str(), argv.data(), envp.data());
+	execve(this->getFilePath().c_str(), argv.data(), envp.data());
+	std::cerr << "EXECUTE WRONG\n ";
+	_exit(1);
 }
 
 namespace http {
 
-	void TcpServer::executeCgi(Cgi &object) {
+	void Cgi::executeCgi(std::vector<pollfd> &fds) {
 
-		// if (pipe(object.inputPipe) == ERROR ||
-		//     pipe(object.outputPipe) == ERROR) {
-		// 	// ! Handle error
-		// 	// send error message to the client.
-		// 	return;
-		// }
-		// object.pid = fork();
-		// if (object.pid < 0) {
-		// 	// Handle error here
-		// 	// Send error response to the client.
-		// 	return;
-		// } else if (object.pid == 0) {
+		if (pipe(this->_inputPipe) < 0 || pipe(this->_outputPipe) < 0) {
+			std::cerr << "Pipe creating failed\n";
+			return;
+		}
+		this->_pid = fork();
+		if (this->_pid < 0) {
+			std::cerr << "Fork failed\n";
+			return;
+		} else if (this->_pid == 0) {
+			handleChildProcess();
+		} else {
 
-		// 	// Child process
-		// 	doDup(object.inputPipe, object.outputPipe);
-		// 	execve(object.filePath, object.argv.data(), object.envp.data());
-		// 	// If execve fails
-		// 	_exit(1);
-		// } else {
+			// int status;
+			// waitpid(_pid, &status, 0);
 
-		// 	// handleCgiParentProcess(object);
+			close(_inputPipe[1]);
+			close(_outputPipe[1]);
 
-		// 	if (object.inputPipe[0] != -1)
-		// 		close(object.inputPipe[0]);
-		// 	if (object.outputPipe[1] != -1)
-		// 		close(object.outputPipe[1]);
+			// char buffer[BUFFER_SIZE] = {0};
+			// ssize_t bytes = read(_outputPipe[0], buffer, BUFFER_SIZE);
 
-		// 	char buffer[http::BUFFER_SIZE + 1] = {0};
-		// 	std::string requestContent;
+			// buffer[bytes] = '\0'; // Safely null-terminate
+			// std::cout << "[BUFFER]: " << buffer << std::endl;
 
-		// 	read(object.outputPipe[0], buffer, BUFFER_SIZE);
-		// 	std::cout << buffer;
-		// 	// while ((_bytesReceived =
-		// 	//             read(object.outputPipe[0], buffer, BUFFER_SIZE)) > 0)
-		// 	//             {
-		// 	// 	requestContent.append(buffer, _bytesReceived);
-		// 	// }
-
-		// 	if (_bytesReceived < 0) {
-		// 		if (errno != EAGAIN && errno != EWOULDBLOCK) {
-
-		// 			std::cerr << "Error: read()\n";
-		// 			//! ... handle error properly
-		// 			return;
-		// 		}
-		// 	}
-		// 	setBodyResponse("200", "OK", buffer);
-		// 	std::cout << m_serverMessage;
-		// }
+			// fcntl(_outputPipe[0], F_SETFL,
+			//       fcntl(_outputPipe[0], F_GETFL, 0) | O_NONBLOCK);
+			fcntl(_outputPipe[0], F_SETFL, O_NONBLOCK);
+			registerPollFd(fds);
+		}
 	}
 
 } // namespace http

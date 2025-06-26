@@ -8,7 +8,7 @@ namespace http {
 		std::string content = readFileContent(filePath);
 		if (content.empty()) {
 			if (!isError)
-				setFileResponse("404", "Not Found", _infos.errorPage[404],
+				setFileResponse("404", "Not Found", _serverInfo.errorPage[404],
 				                true);
 			else {
 				_response.setResponseError(statusCode, statusMsg);

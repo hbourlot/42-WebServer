@@ -33,7 +33,7 @@ static std::string getPathInfo(std::string &requestPath,
 }
 
 static std::string getPathTranslated(const std::string &root,
-                                     const std::string pathInfo) {
+                                     const std::string &pathInfo) {
 
 	std::string result = root;
 	std::string::size_type idx = result.length() - 1;

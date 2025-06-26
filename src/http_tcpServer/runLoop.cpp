@@ -1,20 +1,29 @@
 #include "http_tcpServer/HttpStructs.hpp"
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 #include <cstddef>
+#include <exception>
+#include <map>
 #include <netinet/in.h>
+#include <stdexcept>
 #include <sys/poll.h>
 #include <unistd.h>
 #include <vector>
 
 // Remove and close all pollfd's with HUP, ERR, or NVAL events
-static void removeDeadConnections(std::vector<pollfd> &fds,
-                                  std::vector<sockaddr_in> &m_socketAddress) {
+static void
+removeDeadConnections(std::vector<pollfd> &fds,
+                      std::map<http::SocketFD, sockaddr_in> &socketAddressMap) {
 
 	for (size_t i = 1; i < fds.size(); ++i) {
 		if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {
+			std::cout << "--- Removing CONNECTIONS\n";
+			if (socketAddressMap.count(fds[i].fd)) {
+				std::cout << "  socketAddressMap => " << fds[i].fd << std::endl;
+				socketAddressMap.erase(fds[i].fd);
+			}
+			std::cout << "  Closing FD => " << fds[i].fd << std::endl;
 			close(fds[i].fd);
 			fds.erase(fds.begin() + i);
-			m_socketAddress.erase(m_socketAddress.begin() + i);
 			--i;
 		}
 	}
@@ -40,11 +49,13 @@ void http::TcpServer::runLoop(std::vector<pollfd> &fds, int timeOut) {
 
 			// Checking for new connections
 			acceptConnection(fds);
-			removeDeadConnections(fds, _socketAddress);
+			removeDeadConnections(fds, _socketAddressMap);
 			processClientEvents(fds);
 		}
 	} catch (const TcpServerException &e) {
 		std::cerr << "Error handling client connection => " << e.what()
 		          << std::endl;
+	} catch (const std::exception &e) {
+		std::cerr << "[EXCEPTION] std::exception: " << e.what() << std::endl;
 	}
 }

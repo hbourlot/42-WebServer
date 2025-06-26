@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <netinet/in.h>
 #include <ostream>
 #include <poll.h>
@@ -31,11 +32,11 @@
 #define nullptr NULL
 #endif
 
-#define ERROR -1
+class Cgi;
 
 namespace http {
 
-	typedef int HTTP_SOCKET;
+	typedef int SocketFD;
 	const int BUFFER_SIZE = 30720;
 
 	class TcpServer {
@@ -58,16 +59,17 @@ namespace http {
 	  private:
 		httpRequest _request;
 		httpResponse _response;
-		Server _infos;
+		Server _serverInfo;
 		std::string m_ip_address;
 		pollfd _currentClient;
 		int _port, _bytesReceived, _bytesSend;
-		HTTP_SOCKET _serverSocket, _acceptSocket;
+		SocketFD _serverSocket;
 		long _incomingMessage;
-		std::vector<sockaddr_in> _socketAddress;
+		std::map<SocketFD, sockaddr_in> _socketAddressMap;
 		unsigned int _socketAddress_len;
 		std::string _serverMessage;
 		std::vector<Cgi> _cgi;
+		std::map<int, Cgi *> _cgiFdMap;
 
 		int startServer();
 		void runLoop(std::vector<pollfd> &fds, int timeOut);
@@ -77,12 +79,14 @@ namespace http {
 		void startListen();
 		void acceptConnection(std::vector<pollfd> &fds);
 		void readRequest(std::vector<pollfd> &fds, int i);
-		bool handleRequest(sockaddr_in &clientAddress);
+		bool handleRequest(pollfd &socket, std::vector<pollfd> &fds,
+		                   sockaddr_in &clientAddress);
 		bool handleGetRequest(const Location &location,
 		                      sockaddr_in &clientAddress);
 		bool handlePostRequest(const Location &location);
 		bool handleDeleteRequest(const Location &location);
-		int sendResponse(pollfd socket);
+		bool handleCgiResponse(pollfd &socket);
+		int sendResponse(pollfd &socket);
 
 		void setResponse();
 		void setBodyResponse(const std::string &statusCode,
@@ -99,12 +103,11 @@ namespace http {
 		void setResponseError(std::string statusCode, std::string statusMsg);
 		bool parseMultipart(const Location *location);
 
-		void clearResponse(httpRequest &request, std::string &serverMessage);
+		void clearResponse();
 		void processClientEvents(std::vector<pollfd> &fds);
 
 		bool parseCgi(const Location loc, std::string &filePath,
 		              sockaddr_in &clientAddress, httpRequest &request);
-		void executeCgi(Cgi &object);
 	};
 
 	std::string getLocationFieldAsString(const std::vector<Location> &locations,

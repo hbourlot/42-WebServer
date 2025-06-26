@@ -46,7 +46,7 @@ namespace http {
 			throw TcpServerException("Cannot bind socket to address");
 			return -1;
 		}
-		_socketAddress.push_back(socketAddress);
+		_socketAddressMap[_serverSocket] = socketAddress;
 		return 0;
 	}
 } // namespace http

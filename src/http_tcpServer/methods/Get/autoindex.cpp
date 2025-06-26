@@ -1,7 +1,6 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
-static std::string getParentPath(const std::string &path)
-{
+static std::string getParentPath(const std::string &path) {
 	std::string parent = path;
 
 	if (!parent.empty() && parent[parent.length() - 1] == '/')
@@ -14,8 +13,7 @@ static std::string getParentPath(const std::string &path)
 	return ("/");
 }
 
-static bool hasIndexFile(const std::string &path, const Location &location)
-{
+static bool hasIndexFile(const std::string &path, const Location &location) {
 	if (location.index.empty())
 		return false;
 
@@ -25,8 +23,7 @@ static bool hasIndexFile(const std::string &path, const Location &location)
 
 static std::string generateAutoIndexPage(const std::string &dirPath,
                                          const Location &location,
-                                         httpRequest &request)
-{
+                                         httpRequest &request) {
 	std::string html;
 	html += "<html>\n";
 	html += "  <body>\n";
@@ -39,8 +36,7 @@ static std::string generateAutoIndexPage(const std::string &dirPath,
 
 	struct dirent *entry;
 
-	while ((entry = readdir(directory)) != NULL)
-	{
+	while ((entry = readdir(directory)) != NULL) {
 		std::string d_name(entry->d_name);
 		if (!d_name.compare("."))
 			continue;
@@ -62,18 +58,15 @@ static std::string generateAutoIndexPage(const std::string &dirPath,
 }
 
 bool http::TcpServer::handleDirectoryListing(const std::string &filePath,
-                                             const Location &location)
-{
-	if (hasIndexFile(filePath, location))
-	{
+                                             const Location &location) {
+	if (hasIndexFile(filePath, location)) {
 		std::string indexPath = joinPath(filePath, location.index);
 		setFileResponse("200", "OK", indexPath);
 		return (true);
 	}
 
-	if (!location.autoIndex)
-	{
-		setFileResponse("404", "Not Found", _infos.errorPage[404], true);
+	if (!location.autoIndex) {
+		setFileResponse("404", "Not Found", _serverInfo.errorPage[404], true);
 		return false;
 	}
 
