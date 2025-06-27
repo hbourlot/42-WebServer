@@ -35,24 +35,28 @@
 
 class Cgi;
 
-namespace http {
+namespace http
+{
 
 	const int BUFFER_SIZE = 30720;
 
-	class TcpServer {
+	class TcpServer
+	{
 	  public:
 		// Default Constructor
-		TcpServer(Configs configuration);
+		TcpServer(Server server);
 		// Default Destructor
 		~TcpServer();
 
 		// Main member
 		int runServer();
 
-		class TcpServerException : public std::runtime_error {
+		class TcpServerException : public std::runtime_error
+		{
 		  public:
 			explicit TcpServerException(const std::string &message)
-			    : std::runtime_error(message) {
+			    : std::runtime_error(message)
+			{
 			}
 		};
 

@@ -28,4 +28,8 @@ ParseStatus parseRequest(httpRequest &request,
                          const std::string &requestContent,
                          const Server &serverInfo, size_t maxBodySize);
 
-std::string getStatusMessage(const std::string &code);
+// std::string getStatusMessage(const std::string &code);
+
+
+
+
