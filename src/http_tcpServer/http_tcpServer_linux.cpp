@@ -1,17 +1,18 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
-namespace http {
+namespace http
+{
 
-	TcpServer::TcpServer(Configs configuration)
-	    : _serverInfo(configuration.servers[0]),
-	      m_ip_address(configuration.servers[0].host),
-	      _port(configuration.servers[0].port), _serverSocket(),
-	      _incomingMessage(), _socketAddress_len(sizeof(sockaddr_in)),
-	      _serverMessage("") { // Initialize m_serverMessage properly
-		                       // this->startServer();
+	TcpServer::TcpServer(Server server)
+	    : _serverInfo(server), m_ip_address(server.host),
+	      _port(server.port), _serverSocket(), _incomingMessage(),
+	      _socketAddress_len(sizeof(sockaddr_in)), _serverMessage("")
+	{ // Initialize m_serverMessage properly
+	  // this->startServer();
 	}
 
-	TcpServer::~TcpServer() {
+	TcpServer::~TcpServer()
+	{
 		close(_serverSocket);
 		// close(_acceptSocket);
 		// exit(1); //TODO Exit with a failure code??

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpStructs.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbourlot <hbourlot@student.42.fr>          +#+  +:+       +#+        */
+/*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/06/26 16:48:20 by hbourlot         ###   ########.fr       */
+/*   Updated: 2025/06/27 10:53:03 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ typedef int SocketFD;
 struct Location;
 
 // Only interface propose
-enum headerKey {
+enum headerKey
+{
 	Accept,
 	AcceptEncoding,
 	AcceptLanguage,
@@ -44,13 +45,15 @@ enum headerKey {
 	UserAgent,
 };
 
-enum ParseStatus {
+enum ParseStatus
+{
 	PARSE_INCOMPLETE,
 	PARSE_TOO_LARGE,
 	PARSE_OK,
 };
 
-struct httpRequest {
+struct httpRequest
+{
 	std::string method;
 	std::string path;
 	std::string serverProtocol; // For Cgi
@@ -63,7 +66,8 @@ struct httpRequest {
 	std::string getType(std::string key, std::string value);
 };
 
-struct httpResponse {
+struct httpResponse
+{
 	std::string statusCode;
 	std::string statusMsg;
 	std::string body;
@@ -74,4 +78,22 @@ struct httpResponse {
 	void addToHeader(std::string key, std::string value);
 	// void setResponseError(std::string statusCode);
 	// void setResponseError(const HttpStatusCode &status);
+};
+
+// ! Maybe its better encapsulate al information about the client and its state
+// on a proper struct
+
+struct ClientState
+{
+	httpRequest request;
+	httpResponse response;
+	std::string readBuffer;
+	std::string writeBuffer;
+	bool requestComplete;
+	bool cgiInProgress;
+	int clientFd;
+
+	ClientState() : requestComplete(false), cgiInProgress(false), clientFd(-1)
+	{
+	}
 };
