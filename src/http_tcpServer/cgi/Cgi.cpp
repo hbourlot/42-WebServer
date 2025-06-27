@@ -28,8 +28,8 @@ http::Cgi::CgiStatus http::Cgi::getStatus() const {
 	return _status;
 }
 
-std::string http::Cgi::getBody() const {
-	return _body;
+std::string http::Cgi::getOutputContent() const {
+	return _outputContent;
 }
 
 void http::Cgi::registerPollFd(std::vector<pollfd> &fds) const {
@@ -46,10 +46,11 @@ void http::Cgi::markAsRunning() {
 }
 
 http::Cgi::Cgi(const httpRequest &request, std::string &filePath,
-               const sockaddr_in &clientAddress, const Server &serverInfo)
+               const sockaddr_in &clientAddress, const Server &serverInfo,
+               pollfd &clientSocket)
     : _request(request), _filePath(filePath), _clientAddress(clientAddress),
-      _serverInfo(serverInfo), _envp(), _argv(), _envStrings(), _body(),
-      _inputPipe(), _outputPipe(), _clientFD() {
+      _serverInfo(serverInfo), _clientSocket(clientSocket), _envp(),
+      _outputContent(), _envStrings(), _inputPipe(), _outputPipe() {
 
 	// Cgi::createValidCgiExtensions();
 

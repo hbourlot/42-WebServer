@@ -1,5 +1,7 @@
 #include "Config/Configs.hpp"
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include <cerrno>
+#include <cstring>
 #include <ios>
 #include <iostream>
 #include <sys/wait.h>
@@ -35,40 +37,23 @@ void http::Cgi::readCgiOutput() {
 
 	char buffer[http::BUFFER_SIZE + 1] = {0};
 
-	// std::cerr << "HEREEEEEE\n";
 	while ((_bytesReceived =
 	            read(this->_outputPipe[0], buffer, http::BUFFER_SIZE)) > 0) {
-		_body.append(buffer, _bytesReceived);
+		_outputContent.append(buffer, _bytesReceived);
+		std::memset(buffer, 0, BUFFER_SIZE);
 	}
-	if ((_bytesReceived = read(_outputPipe[0], buffer, http::BUFFER_SIZE)) >
-	    0) {
-		std::cerr << "[DEBUG] CGI output received: " << _bytesReceived
-		          << " bytes\n";
-	}
-	// std::cerr << "HEREEEEEE123\n";
-	// std::cerr << "read() returned: " << _bytesReceived << "\n";
-	// std::cerr << "errno: " << errno << "\n";
-	// perror("read");
-
-	// if (_bytesReceived == 0) {
-	// 	_status = FINISHED;
-
-	// int status;
-	// waitpid(_pid, &status, WNOHANG);
-	// close(_pipefd[0]);
-	// return;
-
-	if (_bytesReceived < 0) {
-		if (errno != EAGAIN && errno != EWOULDBLOCK) {
-			std::cerr << "Error: read()))))\n";
-			//! ... handle error properly
-			return;
+	if (_bytesReceived == 0) {
+		_status = FINISHED;
+		close(_outputPipe[0]);
+	} else if (_bytesReceived < 0) {
+		if (errno == EAGAIN || errno == EWOULDBLOCK) {
+			_status = STILL_RUNNING;
+		} else {
+			std::cerr << "[CGI] read() error: " << strerror(errno) << std::endl;
+			_status = ERROR;
+			close(_outputPipe[0]);
 		}
 	}
-
-	// if (!_body.empty()) {
-	// 	parseRequest(_request, _body, _serverInfo);
-	// }
 }
 
 void http::Cgi::handleChildProcess() {

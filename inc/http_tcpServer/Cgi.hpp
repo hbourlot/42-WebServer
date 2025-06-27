@@ -11,11 +11,12 @@ namespace http {
 
 	  public:
 		Cgi(const httpRequest &request, std::string &filePath,
-		    const sockaddr_in &clientAddress, const Server &serverInfo);
+		    const sockaddr_in &clientAddress, const Server &serverInfo,
+		    pollfd &clientSocket);
 		~Cgi();
 
 		enum CgiStatus {
-			STILL_RUNNING,
+			STILL_RUNNING = 1,
 			NOT_STARTED,
 			RUNNING,
 			FINISHED,
@@ -38,7 +39,7 @@ namespace http {
 		httpResponse getCgiResponse() const;
 		httpRequest getCgiRequest() const;
 		std::string getFilePath() const;
-		std::string getBody() const;
+		std::string getOutputContent() const;
 		CgiStatus getStatus() const;
 		std::vector<std::string> getArgv() const;
 		int getPollFd() const;
@@ -48,21 +49,19 @@ namespace http {
 
 	  private:
 		CgiStatus _status;
-		SocketFD _clientFD;
+		pollfd _clientSocket;
 		httpRequest _request;
+		std::string _outputContent;
 		httpResponse _response;
 		Server _serverInfo;
 		std::string _filePath;
 		sockaddr_in _clientAddress;
 		int _bytesReceived;
-		std::string _body;
 
 		std::vector<char *> _envp;
-		std::vector<char *> _argv;
 		std::vector<std::string> _envStrings;
 
 		// Pipe handling
-		int _pipefd[2];
 		int _inputPipe[2];
 		int _outputPipe[2];
 		pid_t _pid;

@@ -4,15 +4,15 @@
 
 bool http::TcpServer::handleCgiResponse(pollfd &socket) {
 
-	std::cout << "[DEBUG] FD: " << socket.fd << " | revents: " << socket.revents
-	          << " | events: " << socket.events << std::endl;
 	if ((socket.revents & POLLIN) && _cgiFdMap.count(socket.fd)) {
-		std::cout << "FD ON HANDLE => " << socket.fd << std::endl;
 		Cgi *cgi = _cgiFdMap[socket.fd];
-		cgi->readCgiOutput();
+		if (cgi->getStatus() != Cgi::FINISHED ||
+		    cgi->getStatus() != Cgi::ERROR) {
+			cgi->readCgiOutput();
+		}
 		// if (cgi->getStatus() == Cgi::FINISHED) {
-		setBodyResponse(HTTP_OK, cgi->getBody());
-		std::cout << cgi->getBody();
+		setBodyResponse(HTTP_OK, cgi->getOutputContent());
+		std::cout << cgi->getOutputContent();
 		sendResponse(socket);
 		_cgiFdMap.erase(socket.fd);
 		// }
@@ -46,7 +46,7 @@ void http::TcpServer::processClientEvents(std::vector<pollfd> &fds) {
 		fd = fds[i].fd;
 
 		if (fds[i].revents & POLLIN) {
-			shouldCloseRead = readRequest(fds, i);
+			shouldCloseRead = readSocket(fds, i);
 		}
 		// if (handleCgiResponse(fds[i])) {
 		// 	continue;
@@ -55,7 +55,6 @@ void http::TcpServer::processClientEvents(std::vector<pollfd> &fds) {
 		if (fds[i].revents & POLLOUT) {
 			// std::cout << "Here " << __func__ << std::endl;
 
-			handleRequest(fds[i], fds, _socketAddressMap[fd]);
 			shouldCloseSend = sendResponse(fds[i]);
 			fds[i].events &= ~POLLOUT;
 			clearResponse();

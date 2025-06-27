@@ -69,7 +69,7 @@ namespace http {
 		unsigned int _socketAddress_len;
 		std::string _serverMessage;
 		std::vector<Cgi> _cgi;
-		std::map<int, Cgi *> _cgiFdMap;
+		std::map<SocketFD, Cgi *> _cgiFdMap;
 
 		int startServer();
 		void runLoop(std::vector<pollfd> &fds, int timeOut);
@@ -79,7 +79,7 @@ namespace http {
 		void startListen();
 		void acceptConnection(std::vector<pollfd> &fds);
 		// void readRequest(std::vector<pollfd> &fds, int i);
-		bool readRequest(std::vector<pollfd> &fds, int i);
+		bool readSocket(std::vector<pollfd> &fds, int i);
 		void closeClient(std::vector<pollfd> &fds, size_t &i);
 		bool handleRequest(pollfd &socket, std::vector<pollfd> &fds,
 		                   sockaddr_in &clientAddress);
@@ -111,7 +111,8 @@ namespace http {
 		void processClientEvents(std::vector<pollfd> &fds);
 
 		bool parseCgi(const Location loc, std::string &filePath,
-		              sockaddr_in &clientAddress, httpRequest &request);
+		              sockaddr_in &clientAddress, httpRequest &request,
+		              pollfd &clientSocket);
 	};
 
 	std::string getLocationFieldAsString(const std::vector<Location> &locations,

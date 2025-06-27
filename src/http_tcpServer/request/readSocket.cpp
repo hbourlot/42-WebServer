@@ -1,12 +1,31 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include <map>
 #include <sys/poll.h>
 #include <unistd.h>
+#include <vector>
 
-bool http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
+static bool handleCgiSocket(std::map<SocketFD, http::Cgi *> &cgiFdMap,
+                            std::vector<pollfd> &fds, pollfd &currentSocket) {
+
+	http::Cgi *cgi;
+	if (cgiFdMap[currentSocket.fd]) {
+		cgi = cgiFdMap[currentSocket.fd];
+		if (cgi->getStatus() != http::Cgi::FINISHED ||
+		    cgi->getStatus() != http::Cgi::ERROR) {
+			cgi->readCgiOutput();
+		} else {
+		}
+	}
+
+	return true;
+}
+
+bool http::TcpServer::readSocket(std::vector<pollfd> &fds, int i) {
+
 	static std::map<int, std::string> buffers;
 	const size_t CLIENT_MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
 	char buffer[BUFFER_SIZE + 1] = {0};
-	int fd = fds[i].fd;
+	SocketFD fd = fds[i].fd;
 
 	ssize_t bytesReceived = read(fd, buffer, BUFFER_SIZE);
 	if (bytesReceived <= 0) {
@@ -30,13 +49,13 @@ bool http::TcpServer::readRequest(std::vector<pollfd> &fds, int i) {
 
 	if (status == PARSE_TOO_LARGE) {
 		setResponseError(HTTP_PAYLOAD);
-		// setResponse();
-		// std::cout << _serverMessage << std::endl;
 		fds[i].events |= POLLOUT;
 		buffers.erase(fd);
-		// return true;
-		return false;
+		return true;
 	}
+
+	if (status == PARSE_OK)
+		handleRequest(fds[i], fds, _socketAddressMap[fd]);
 
 	fds[i].events |= POLLOUT;
 	buffers.erase(fd);
