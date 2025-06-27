@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/06/27 10:53:03 by joralves         ###   ########.fr       */
+/*   Updated: 2025/06/27 12:12:09 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,6 @@
 #include <string>
 #include <unistd.h>
 #include <vector>
-
-// #define HTTP_200 "200"
-// #define HTTP_301 "301"
-// #define HTTP_404 "404"
-// #define HTTP_500 "500"
 
 typedef int SocketFD;
 
@@ -63,7 +58,7 @@ struct httpRequest
 	std::string body;
 
 	std::string queryString; // test
-	std::string getType(std::string key, std::string value);
+	// std::string getType(std::string key, std::string value);
 };
 
 struct httpResponse
@@ -83,7 +78,7 @@ struct httpResponse
 // ! Maybe its better encapsulate al information about the client and its state
 // on a proper struct
 
-struct ClientState
+struct clientState
 {
 	httpRequest request;
 	httpResponse response;
@@ -93,7 +88,7 @@ struct ClientState
 	bool cgiInProgress;
 	int clientFd;
 
-	ClientState() : requestComplete(false), cgiInProgress(false), clientFd(-1)
+	clientState() : requestComplete(false), cgiInProgress(false), clientFd(-1)
 	{
 	}
 };
