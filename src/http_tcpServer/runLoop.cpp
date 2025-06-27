@@ -2,17 +2,15 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 #include <cstddef>
 #include <exception>
+#include <ios>
 #include <map>
 #include <netinet/in.h>
-#include <stdexcept>
 #include <sys/poll.h>
 #include <unistd.h>
 #include <vector>
 
 // Remove and close all pollfd's with HUP, ERR, or NVAL events
-static void
-removeDeadConnections(std::vector<pollfd> &fds,
-                      std::map<SocketFD, sockaddr_in> &socketAddressMap) {
+static void removeDeadConnections(std::vector<pollfd> &fds, std::map<SocketFD, sockaddr_in> &socketAddressMap) {
 
 	for (size_t i = 1; i < fds.size(); ++i) {
 		if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {
@@ -53,9 +51,8 @@ void http::TcpServer::runLoop(std::vector<pollfd> &fds, int timeOut) {
 			processClientEvents(fds);
 		}
 	} catch (const TcpServerException &e) {
-		std::cerr << "Error handling client connection => " << e.what()
-		          << std::endl;
+		std::cerr << "Error handling client connection => " << e.what() << std::endl;
 	} catch (const std::exception &e) {
 		std::cerr << "[EXCEPTION] std::exception: " << e.what() << std::endl;
-	}
+	};
 }

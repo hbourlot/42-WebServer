@@ -16,8 +16,7 @@ void printEnvStrings(std::vector<std::string> &_envStrings) {
 	std::cerr << "END ENVSTRINGS" << std::endl;
 }
 
-void debugCgiExec(const char *filePath, char *const argv[],
-                  char *const envp[]) {
+void debugCgiExec(const char *filePath, char *const argv[], char *const envp[]) {
 	std::cerr << "CGI EXEC DEBUG" << std::endl;
 	std::cerr << "File path: " << (filePath ? filePath : "NULL") << std::endl;
 
@@ -37,11 +36,18 @@ void http::Cgi::readCgiOutput() {
 
 	char buffer[http::BUFFER_SIZE + 1] = {0};
 
-	while ((_bytesReceived =
-	            read(this->_outputPipe[0], buffer, http::BUFFER_SIZE)) > 0) {
-		_outputContent.append(buffer, _bytesReceived);
-		std::memset(buffer, 0, BUFFER_SIZE);
-	}
+	// close(_inputPipe[1]);
+	// close(_outputPipe[1]);
+	// while ((_bytesReceived = read(this->_outputPipe[0], buffer, http::BUFFER_SIZE)) > 0) {
+	// 	_outputContent.append(buffer, _bytesReceived);
+	// 	std::memset(buffer, 0, BUFFER_SIZE);
+	// }
+	_bytesReceived = read(_outputPipe[0], buffer, BUFFER_SIZE);
+	std::cout << "DASDASDASDAS\n";
+	std::cout << buffer;
+
+	_outputContent.append(buffer);
+
 	if (_bytesReceived == 0) {
 		_status = FINISHED;
 		close(_outputPipe[0]);
@@ -101,6 +107,7 @@ namespace http {
 			// int status;
 			// waitpid(_pid, &status, 0);
 
+			std::cout << "OVER HERE\n";
 			close(_inputPipe[1]);
 			close(_outputPipe[1]);
 
@@ -112,8 +119,8 @@ namespace http {
 
 			// fcntl(_outputPipe[0], F_SETFL,
 			//       fcntl(_outputPipe[0], F_GETFL, 0) | O_NONBLOCK);
-			fcntl(_outputPipe[0], F_SETFL, O_NONBLOCK);
-			registerPollFd(fds);
+			// fcntl(_outputPipe[0], F_SETFL, O_NONBLOCK);
+			// registerPollFd(fds);
 		}
 	}
 

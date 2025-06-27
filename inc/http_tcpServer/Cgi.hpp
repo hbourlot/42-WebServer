@@ -9,66 +9,68 @@
 namespace http {
 	class Cgi {
 
-	  public:
-		Cgi(const httpRequest &request, std::string &filePath,
-		    const sockaddr_in &clientAddress, const Server &serverInfo,
-		    pollfd &clientSocket);
-		~Cgi();
+		public:
+			Cgi(const httpRequest &request, std::string &filePath,
+				const sockaddr_in &clientAddress, const Server &serverInfo,
+				pollfd &clientSocket);
+			~Cgi();
 
-		enum CgiStatus {
-			STILL_RUNNING = 1,
-			NOT_STARTED,
-			RUNNING,
-			FINISHED,
-			ERROR = -1
-		};
+			enum CgiStatus {
+				STILL_RUNNING = 1,
+				NOT_STARTED,
+				RUNNING,
+				FINISHED,
+				ERROR = -1
+			};
 
-		// // CGI
-		static const std::set<std::string> validCgiExtensions;
-		static bool isValidCgiExtension(const std::string &ext);
-		static std::set<std::string>
-		createValidCgiExtensions() // ! maybe must be outside
-		{
-			std::set<std::string> s;
-			s.insert(".py");
-			s.insert(".cgi");
-			return s;
-		}
+			// // CGI
+			static const std::set<std::string> validCgiExtensions;
+			static bool isValidCgiExtension(const std::string &ext);
+			static std::set<std::string>
+			createValidCgiExtensions() // ! maybe must be outside
+			{
+				std::set<std::string> s;
+				s.insert(".py");
+				s.insert(".cgi");
+				return s;
+			}
 
-		void executeCgi(std::vector<pollfd> &fds);
-		httpResponse getCgiResponse() const;
-		httpRequest getCgiRequest() const;
-		std::string getFilePath() const;
-		std::string getOutputContent() const;
-		CgiStatus getStatus() const;
-		std::vector<std::string> getArgv() const;
-		int getPollFd() const;
-		void registerPollFd(std::vector<pollfd> &fds) const;
-		void markAsRunning();
-		void readCgiOutput();
+			void executeCgi(std::vector<pollfd> &fds);
+			void sendResponse();
+			httpResponse getCgiResponse() const;
+			httpRequest getCgiRequest() const;
+			std::string getFilePath() const;
+			std::string getOutputContent() const;
+			SocketFD getClientFd();
+			CgiStatus getStatus() const;
+			std::vector<std::string> getArgv() const;
+			int getPollFd() const;
+			void registerPollFd(std::vector<pollfd> &fds) const;
+			void markAsRunning();
+			void readCgiOutput();
 
-	  private:
-		CgiStatus _status;
-		pollfd _clientSocket;
-		httpRequest _request;
-		std::string _outputContent;
-		httpResponse _response;
-		Server _serverInfo;
-		std::string _filePath;
-		sockaddr_in _clientAddress;
-		int _bytesReceived;
+		private:
+			CgiStatus _status;
+			pollfd &_clientSocket;
+			httpRequest _request;
+			std::string _outputContent;
+			httpResponse _response;
+			Server _serverInfo;
+			std::string _filePath;
+			sockaddr_in _clientAddress;
+			int _bytesReceived;
 
-		std::vector<char *> _envp;
-		std::vector<std::string> _envStrings;
+			std::vector<char *> _envp;
+			std::vector<std::string> _envStrings;
 
-		// Pipe handling
-		int _inputPipe[2];
-		int _outputPipe[2];
-		pid_t _pid;
+			// Pipe handling
+			int _inputPipe[2];
+			int _outputPipe[2];
+			pid_t _pid;
 
-		void buildEnvStrings();
-		void doDup();
-		void handleChildProcess();
+			void buildEnvStrings();
+			void doDup();
+			void handleChildProcess();
 	};
 
 }; // namespace http

@@ -4,26 +4,36 @@
 #include <unistd.h>
 #include <vector>
 
-static bool handleCgiSocket(std::map<SocketFD, http::Cgi *> &cgiFdMap,
-                            std::vector<pollfd> &fds, pollfd &currentSocket) {
+static bool handleCgiSocket(std::map<SocketFD, http::Cgi *> &cgiFdMap, std::vector<pollfd> &fds,
+							pollfd &currentSocket) {
 
 	http::Cgi *cgi;
+	// std::cout << "handleCgiSocket FD => " << currentSocket.fd << std::endl;
 	if (cgiFdMap[currentSocket.fd]) {
+		std::cout << "LAELEELEEEE\n";
+
 		cgi = cgiFdMap[currentSocket.fd];
-		if (cgi->getStatus() != http::Cgi::FINISHED ||
-		    cgi->getStatus() != http::Cgi::ERROR) {
+		if (cgi->getStatus() != http::Cgi::FINISHED || cgi->getStatus() != http::Cgi::ERROR) {
 			cgi->readCgiOutput();
 		} else {
+			currentSocket.events |= POLLOUT;
 		}
+
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
+// enviar no cabecario do header o tamanho que o servidor consegue enviar
+// parcialmente
 bool http::TcpServer::readSocket(std::vector<pollfd> &fds, int i) {
 
+	if (handleCgiSocket(_cgiFdMap, fds, fds[i]))
+		return false;
+
 	static std::map<int, std::string> buffers;
-	const size_t CLIENT_MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
+	const size_t CLIENT_MAX_BODY_SIZE = 10 * 1024 * 1024; //! 10MB
 	char buffer[BUFFER_SIZE + 1] = {0};
 	SocketFD fd = fds[i].fd;
 
@@ -41,8 +51,7 @@ bool http::TcpServer::readSocket(std::vector<pollfd> &fds, int i) {
 
 	buffers[fd].append(buffer, bytesReceived);
 
-	ParseStatus status =
-	    parseRequest(_request, buffers[fd], _serverInfo, CLIENT_MAX_BODY_SIZE);
+	ParseStatus status = parseRequest(_request, buffers[fd], _serverInfo, CLIENT_MAX_BODY_SIZE);
 
 	if (status == PARSE_INCOMPLETE)
 		return false;

@@ -24,6 +24,10 @@ int http::Cgi::getPollFd() const {
 	return _outputPipe[0];
 }
 
+SocketFD http::Cgi::getClientFd() {
+	return _clientSocket.fd;
+};
+
 http::Cgi::CgiStatus http::Cgi::getStatus() const {
 	return _status;
 }
@@ -35,22 +39,22 @@ std::string http::Cgi::getOutputContent() const {
 void http::Cgi::registerPollFd(std::vector<pollfd> &fds) const {
 	pollfd pfd;
 
+	std::cout << "SIZE BEFORE => " << fds.size() << std::endl;
 	pfd.fd = _outputPipe[0];
 	pfd.events = POLLIN;
 	pfd.revents = 0;
 	fds.push_back(pfd);
+	std::cout << "SIZE AFTER => " << fds.size() << std::endl;
 }
 
 void http::Cgi::markAsRunning() {
 	this->_status = RUNNING;
 }
 
-http::Cgi::Cgi(const httpRequest &request, std::string &filePath,
-               const sockaddr_in &clientAddress, const Server &serverInfo,
-               pollfd &clientSocket)
-    : _request(request), _filePath(filePath), _clientAddress(clientAddress),
-      _serverInfo(serverInfo), _clientSocket(clientSocket), _envp(),
-      _outputContent(), _envStrings(), _inputPipe(), _outputPipe() {
+http::Cgi::Cgi(const httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
+			   const Server &serverInfo, pollfd &clientSocket)
+	: _request(request), _filePath(filePath), _clientAddress(clientAddress), _serverInfo(serverInfo),
+	  _clientSocket(clientSocket), _envp(), _outputContent(""), _envStrings(), _inputPipe(), _outputPipe() {
 
 	// Cgi::createValidCgiExtensions();
 

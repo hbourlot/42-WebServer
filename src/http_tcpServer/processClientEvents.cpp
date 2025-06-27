@@ -2,25 +2,25 @@
 #include <netinet/in.h>
 #include <sys/poll.h>
 
-bool http::TcpServer::handleCgiResponse(pollfd &socket) {
+// bool http::TcpServer::handleCgiResponse(pollfd &socket) {
 
-	if ((socket.revents & POLLIN) && _cgiFdMap.count(socket.fd)) {
-		Cgi *cgi = _cgiFdMap[socket.fd];
-		if (cgi->getStatus() != Cgi::FINISHED ||
-		    cgi->getStatus() != Cgi::ERROR) {
-			cgi->readCgiOutput();
-		}
-		// if (cgi->getStatus() == Cgi::FINISHED) {
-		setBodyResponse(HTTP_OK, cgi->getOutputContent());
-		std::cout << cgi->getOutputContent();
-		sendResponse(socket);
-		_cgiFdMap.erase(socket.fd);
-		// }
-		return true;
-	}
-	// std::cout << "RETURNING FALSE\n";
-	return false;
-}
+// 	if ((socket.revents & POLLIN) && _cgiFdMap.count(socket.fd)) {
+// 		Cgi *cgi = _cgiFdMap[socket.fd];
+// 		if (cgi->getStatus() != Cgi::FINISHED ||
+// 			cgi->getStatus() != Cgi::ERROR) {
+// 			cgi->readCgiOutput();
+// 		}
+// 		// if (cgi->getStatus() == Cgi::FINISHED) {
+// 		setBodyResponse(HTTP_OK, cgi->getOutputContent());
+// 		std::cout << cgi->getOutputContent();
+// 		sendResponse(socket);
+// 		_cgiFdMap.erase(socket.fd);
+// 		// }
+// 		return true;
+// 	}
+// 	// std::cout << "RETURNING FALSE\n";
+// 	return false;
+// }
 
 void http::TcpServer::closeClient(std::vector<pollfd> &fds, size_t &i) {
 	int fd = fds[i].fd;
@@ -53,9 +53,26 @@ void http::TcpServer::processClientEvents(std::vector<pollfd> &fds) {
 		// }
 		// std::cout << "Here " << std::endl;
 		if (fds[i].revents & POLLOUT) {
-			// std::cout << "Here " << __func__ << std::endl;
 
-			shouldCloseSend = sendResponse(fds[i]);
+			// Case it's a Cgi FD
+			// if (_cgiFdMap.count(fd) && _cgiFdMap.at(fd)) {
+
+			Cgi *cgi = _cgiFdMap[4];
+			std::cout << cgi->getOutputContent() << std::endl;
+			// SocketFD clientFd = cgi->getClientFd();
+			// std::cout << "OVER HERE123123123123\n";
+
+			// std::cout << "ClientFd => " << clientFd << std::endl;
+			int content = cgi->getStatus();
+			// std::string content = cgi->getOutputContent();
+
+			shouldCloseSend = sendResponse(4, cgi->getOutputContent());
+
+			// } else {
+
+			// shouldCloseSend = sendResponse(fd, _serverMessage);
+			// }
+
 			fds[i].events &= ~POLLOUT;
 			clearResponse();
 		}

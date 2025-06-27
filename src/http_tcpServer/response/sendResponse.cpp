@@ -6,10 +6,12 @@
 #include <unistd.h>
 #include <vector>
 
-int http::TcpServer::sendResponse(pollfd &socket) {
+int http::TcpServer::sendResponse(SocketFD fd, std::string contentToSend) {
 
-	ssize_t bytesSent = send(socket.fd, _serverMessage.c_str(),
-	                         _serverMessage.size(), MSG_NOSIGNAL);
+	std::cout << "OVER HERE\n";
+	ssize_t bytesSent = send(fd, contentToSend.c_str(), contentToSend.size(), MSG_NOSIGNAL);
+	std::cout << "OVER HERE!@#\n";
+
 	if (bytesSent < 0) {
 		if (errno == EPIPE) {
 			log("Client disconnected before response");
@@ -20,6 +22,5 @@ int http::TcpServer::sendResponse(pollfd &socket) {
 	} else {
 		log("----- Server Response sent to client -----\n\n");
 	}
-
 	return 0;
 }
