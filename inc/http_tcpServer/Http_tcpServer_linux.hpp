@@ -63,26 +63,24 @@ namespace http
 	  private:
 		httpRequest _request;
 		httpResponse _response;
+		std::string _serverMessage;
 		Server _serverInfo;
-		std::string m_ip_address;
-		pollfd _currentClient;
-		int _port, _bytesReceived, _bytesSend;
+		std::string _ipAddress;
+		int _port;
 		SocketFD _serverSocket;
-		long _incomingMessage;
 		std::map<SocketFD, sockaddr_in> _socketAddressMap;
 		unsigned int _socketAddress_len;
-		std::string _serverMessage;
 		std::vector<Cgi> _cgi;
 		std::map<int, Cgi *> _cgiFdMap;
 
 		int startServer();
 		void runLoop(std::vector<pollfd> &fds, int timeOut);
 		void shutDownServer(std::vector<pollfd> &fds);
-		void setCurrentClient(std::vector<pollfd> &client);
+
+		// std::map<int, clientState> _clients; // ! Maybe its better
 
 		void startListen();
 		void acceptConnection(std::vector<pollfd> &fds);
-		// void readRequest(std::vector<pollfd> &fds, int i);
 		bool readRequest(std::vector<pollfd> &fds, int i);
 		void closeClient(std::vector<pollfd> &fds, size_t &i);
 		bool handleRequest(pollfd &socket, std::vector<pollfd> &fds,

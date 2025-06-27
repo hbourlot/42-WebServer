@@ -4,9 +4,9 @@ namespace http
 {
 
 	TcpServer::TcpServer(Server server)
-	    : _serverInfo(server), m_ip_address(server.host),
-	      _port(server.port), _serverSocket(), _incomingMessage(),
-	      _socketAddress_len(sizeof(sockaddr_in)), _serverMessage("")
+	    : _serverInfo(server), _ipAddress(server.host), _port(server.port),
+	      _serverSocket(), _socketAddress_len(sizeof(sockaddr_in)),
+	      _serverMessage("")
 	{ // Initialize m_serverMessage properly
 	  // this->startServer();
 	}
