@@ -54,13 +54,15 @@ namespace http
 		class TcpServerException : public std::runtime_error
 		{
 		  public:
-			explicit TcpServerException(const std::string &message)
-			    : std::runtime_error(message)
+			explicit TcpServerException(const std::string &message) : std::runtime_error(message)
 			{
 			}
 		};
 
 	  private:
+		// *Setted inside a server must know the fds it handles, and less passing by parameter
+		std::vector<pollfd> _fds;
+
 		httpRequest _request;
 		httpResponse _response;
 		std::string _serverMessage;
@@ -74,49 +76,40 @@ namespace http
 		std::map<int, Cgi *> _cgiFdMap;
 
 		int startServer();
-		void runLoop(std::vector<pollfd> &fds, int timeOut);
-		void shutDownServer(std::vector<pollfd> &fds);
+		void runLoop(int timeOut);
+		void shutDownServer();
+		void startListen();
+		void acceptConnection();
 
 		// std::map<int, clientState> _clients; // ! Maybe its better
 
-		void startListen();
-		void acceptConnection(std::vector<pollfd> &fds);
 		bool readRequest(std::vector<pollfd> &fds, int i);
 		void closeClient(std::vector<pollfd> &fds, size_t &i);
-		bool handleRequest(pollfd &socket, std::vector<pollfd> &fds,
-		                   sockaddr_in &clientAddress);
-		bool handleGetRequest(const Location &location,
-		                      sockaddr_in &clientAddress);
+		bool handleRequest(pollfd &socket, std::vector<pollfd> &fds, sockaddr_in &clientAddress);
+		bool handleGetRequest(const Location &location, sockaddr_in &clientAddress);
 		bool handlePostRequest(const Location &location);
 		bool handleDeleteRequest(const Location &location);
 		bool handleCgiResponse(pollfd &socket);
 		int sendResponse(pollfd &socket);
 
-		void prepareResponse(const HttpStatusCode &status,
-		                     const std::string &body,
-		                     const std::string &headerKey = "",
+		void prepareResponse(const HttpStatusCode &status, const std::string &body, const std::string &headerKey = "",
 		                     const std::string &headerValue = "");
 		void setResponse();
-		void setBodyResponse(const HttpStatusCode &status,
-		                     const std::string &body,
+		void setBodyResponse(const HttpStatusCode &status, const std::string &body,
 		                     const std::string &contentType = "text/plain");
-		void setFileResponse(const HttpStatusCode &status,
-		                     const std::string &filePath, bool isError = false);
+		void setFileResponse(const HttpStatusCode &status, const std::string &filePath, bool isError = false);
 		void setRedirect(const HttpStatusCode &status, std::string redirection);
 		void setResponseError(const HttpStatusCode &status);
 
 		bool parseMultipart(const Location &location);
-		bool handleDirectoryListing(const std::string &filePath,
-		                            const Location &location);
+		bool handleDirectoryListing(const std::string &filePath, const Location &location);
 
 		void clearResponse();
 		void processClientEvents(std::vector<pollfd> &fds);
 
-		bool parseCgi(const Location loc, std::string &filePath,
-		              sockaddr_in &clientAddress, httpRequest &request);
+		bool parseCgi(const Location loc, std::string &filePath, sockaddr_in &clientAddress, httpRequest &request);
 	};
 
-	std::string getLocationFieldAsString(const std::vector<Location> &locations,
-	                                     const std::string &field);
+	std::string getLocationFieldAsString(const std::vector<Location> &locations, const std::string &field);
 
 } // namespace http
