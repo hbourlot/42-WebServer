@@ -38,7 +38,6 @@ void http::TcpServer::runLoop(int timeOut)
 	{
 		while (true)
 		{
-
 			// poll() waits for events on multiple file descriptors (like
 			// sockets), enabling non-blocking I/O in servers.
 			int ret = poll(_fds.data(), _fds.size(), timeOut);
@@ -56,7 +55,7 @@ void http::TcpServer::runLoop(int timeOut)
 			}
 
 			// Checking for new connections
-			acceptConnection(_fds);
+			acceptConnection();
 			removeDeadConnections(_fds, _socketAddressMap);
 			processClientEvents(_fds);
 		}

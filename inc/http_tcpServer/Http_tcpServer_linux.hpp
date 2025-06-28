@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Cgi.hpp"
+#include "Client/ClientManager.hpp"
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
 #include "HttpLogs.hpp"
@@ -62,14 +63,15 @@ namespace http
 	  private:
 		// *Setted inside a server must know the fds it handles, and less passing by parameter
 		std::vector<pollfd> _fds;
+		Server _serverInfo;
+		SocketFD _serverSocket;
+		ClientManager _clients;
 
 		httpRequest _request;
 		httpResponse _response;
 		std::string _serverMessage;
-		Server _serverInfo;
 		std::string _ipAddress;
 		int _port;
-		SocketFD _serverSocket;
 		std::map<SocketFD, sockaddr_in> _socketAddressMap;
 		unsigned int _socketAddress_len;
 		std::vector<Cgi> _cgi;
