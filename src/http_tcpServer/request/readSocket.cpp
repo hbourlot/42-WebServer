@@ -5,7 +5,7 @@
 #include <vector>
 
 static bool handleCgiSocket(std::map<SocketFD, http::Cgi *> &cgiFdMap, std::vector<pollfd> &fds,
-							pollfd &currentSocket) {
+                            pollfd &currentSocket) {
 
 	http::Cgi *cgi;
 	// std::cout << "handleCgiSocket FD => " << currentSocket.fd << std::endl;
