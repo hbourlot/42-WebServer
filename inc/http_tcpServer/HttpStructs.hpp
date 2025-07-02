@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/06/27 12:12:09 by joralves         ###   ########.fr       */
+/*   Updated: 2025/06/30 01:33:31 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,10 +69,8 @@ struct httpResponse
 	std::map<std::string, std::string> headers;
 
 	void setDefaultHeaders();
-	void setDefaultHeaders(httpRequest &request);
+	void setDefaultHeaders(httpRequest request);
 	void addToHeader(std::string key, std::string value);
-	// void setResponseError(std::string statusCode);
-	// void setResponseError(const HttpStatusCode &status);
 };
 
 // ! Maybe its better encapsulate al information about the client and its state

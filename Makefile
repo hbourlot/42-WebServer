@@ -18,6 +18,7 @@ FILE_DIR		= fileConfig/
 AUTH_DIR		= auth/
 UTILS_DIR		= utils/
 
+CLIENT_DIR 		= client/
 HTTP_DIR		= http_tcpServer/
 REQUEST_DIR		= $(HTTP_DIR)request/
 RESPONSE_DIR	= $(HTTP_DIR)response/
@@ -34,19 +35,20 @@ OBJ_DIR         = obj/
 COMPILED_FILES  = 0
 LEN             = 0
 
-
+CLIENT_FUNC		= client clientManager
 AUTH_FUNC		= loginHandler
 CGI_FUNC		= parseCgi executeCgi Cgi buildEnvStrings doDup #isValidCgiExtension
 UTILS_FUNC		= ft_strtrim utils split getLocationFieldAsString
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop clearResponse processClientEvents
+HTTP_FUNC	    = HttpHandler http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop clearResponse processClientEvents
 REQUEST_FUNC	= readRequest parseRequest handleRequest
-RESPONSE_FUNC 	= sendResponse 
+RESPONSE_FUNC 	= sendResponse ResponseBuilder
 METHODS_FUNC 	= handlePostRequest uploadHandler handleDeleteRequest utils
 GET_FUNC		= autoindex handleGetRequest
 SET_FUNC		= setResponse setResponseError setFileResponse setBodyResponse setResponseAux setRedirect
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CGI_DIR), $(CGI_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(REQUEST_DIR), $(REQUEST_FUNC:=.cpp)) \

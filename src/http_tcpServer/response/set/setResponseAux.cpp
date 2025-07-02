@@ -27,7 +27,7 @@ void httpResponse::addToHeader(std::string key, std::string value)
 	this->headers[key] = value;
 }
 
-void httpResponse::setDefaultHeaders(httpRequest &request)
+void httpResponse::setDefaultHeaders(httpRequest request)
 {
 	addToHeader("Date", dateString());
 
