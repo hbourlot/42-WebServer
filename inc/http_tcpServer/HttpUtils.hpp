@@ -16,20 +16,14 @@ std::vector<std::string> split(const std::string &s, char delimiter);
 
 std::string getContentType(const std::string &path);
 
-bool handleDirectoryListing(const std::string &filePath,
-                            const Location *location,
-                            const httpRequest &request, httpResponse &response);
+void handleDirectoryListing(Client client, Server server, const std::string &filePath, const Location &location);
+
 
 std::string readFileContent(const std::string &filePath);
 std::string joinPath(const std::string &base, const std::string &sub);
 std::vector<std::string> split(const std::string &s, char delimiter);
 
-ParseStatus parseRequest(httpRequest &request,
-                         const std::string &requestContent,
-                         const Server &serverInfo, size_t maxBodySize);
+ParseStatus parseRequest(httpRequest &request, const std::string &requestContent, const Server &serverInfo,
+                         size_t maxBodySize);
 
 // std::string getStatusMessage(const std::string &code);
-
-
-
-

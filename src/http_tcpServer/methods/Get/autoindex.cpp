@@ -1,6 +1,7 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
-static std::string getParentPath(const std::string &path) {
+static std::string getParentPath(const std::string &path)
+{
 	std::string parent = path;
 
 	if (!parent.empty() && parent[parent.length() - 1] == '/')
@@ -13,7 +14,8 @@ static std::string getParentPath(const std::string &path) {
 	return ("/");
 }
 
-static bool hasIndexFile(const std::string &path, const Location &location) {
+static bool hasIndexFile(const std::string &path, const Location &location)
+{
 	if (location.index.empty())
 		return false;
 
@@ -21,9 +23,8 @@ static bool hasIndexFile(const std::string &path, const Location &location) {
 	return (std::ifstream(indexPath.c_str()).is_open());
 }
 
-static std::string generateAutoIndexPage(const std::string &dirPath,
-                                         const Location &location,
-                                         httpRequest &request) {
+static std::string generateAutoIndexPage(const std::string &dirPath, const Location &location, httpRequest &request)
+{
 	std::string html;
 	html += "<html>\n";
 	html += "  <body>\n";
@@ -36,7 +37,8 @@ static std::string generateAutoIndexPage(const std::string &dirPath,
 
 	struct dirent *entry;
 
-	while ((entry = readdir(directory)) != NULL) {
+	while ((entry = readdir(directory)) != NULL)
+	{
 		std::string d_name(entry->d_name);
 		if (!d_name.compare("."))
 			continue;
@@ -57,21 +59,26 @@ static std::string generateAutoIndexPage(const std::string &dirPath,
 	return (html);
 }
 
-bool http::TcpServer::handleDirectoryListing(const std::string &filePath,
-                                             const Location &location) {
-	if (hasIndexFile(filePath, location)) {
+void handleDirectoryListing(Client client, Server server, const std::string &filePath, const Location &location)
+{
+	httpRequest &request = client.getRequest();
+	httpResponse &response = client.getResponse();
+
+	if (hasIndexFile(filePath, location))
+	{
 		std::string indexPath = joinPath(filePath, location.index);
-		setFileResponse(HTTP_OK, indexPath);
-		return (true);
+		response = ResponseBuilder::buildFileResponse(HTTP_OK, indexPath, server);
+		// return (true);
 	}
 
-	if (!location.autoIndex) {
-		setFileResponse(HTTP_NOT_FOUND, _serverInfo.errorPage[404], true);
-		return false;
+	if (!location.autoIndex)
+	{
+		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage[404], server, true);
+		// return false;
 	}
 
-	std::string body = generateAutoIndexPage(filePath, location, _request);
+	std::string body = generateAutoIndexPage(filePath, location, request);
 
-	setBodyResponse(HTTP_OK, body, "text/html");
-	return true;
+	response = ResponseBuilder::buildResponse(HTTP_OK, body, "text/html");
+	// return true;
 }

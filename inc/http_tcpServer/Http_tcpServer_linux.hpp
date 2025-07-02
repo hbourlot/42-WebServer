@@ -8,6 +8,8 @@
 #include "HttpStatus.hpp"
 #include "HttpStructs.hpp"
 #include "HttpUtils.hpp"
+#include "HttpHandler.hpp"
+#include "ResponseBuilder.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <dirent.h>
@@ -65,11 +67,12 @@ namespace http
 		std::vector<pollfd> _fds;
 		Server _serverInfo;
 		SocketFD _serverSocket;
-		ClientManager _clients;
+		std::set<SocketFD> _toBeClosed;
+		ClientManager _clientManager;
 
-		httpRequest _request;
-		httpResponse _response;
-		std::string _serverMessage;
+		// httpRequest _request;
+		// httpResponse _response;
+		// std::string _serverMessage;
 		std::string _ipAddress;
 		int _port;
 		std::map<SocketFD, sockaddr_in> _socketAddressMap;
@@ -82,12 +85,15 @@ namespace http
 		void shutDownServer();
 		void startListen();
 		void acceptConnection();
+		void removeDeadConnections();
+		void processClientEvents();
+		void closeClientConnection(size_t index);
+		bool readRequest(int index);
 
 		// std::map<int, clientState> _clients; // ! Maybe its better
 
-		bool readRequest(std::vector<pollfd> &fds, int i);
 		void closeClient(std::vector<pollfd> &fds, size_t &i);
-		bool handleRequest(pollfd &socket, std::vector<pollfd> &fds, sockaddr_in &clientAddress);
+		bool handleRequest(pollfd &socket, sockaddr_in &clientAddress);
 		bool handleGetRequest(const Location &location, sockaddr_in &clientAddress);
 		bool handlePostRequest(const Location &location);
 		bool handleDeleteRequest(const Location &location);
@@ -107,7 +113,6 @@ namespace http
 		bool handleDirectoryListing(const std::string &filePath, const Location &location);
 
 		void clearResponse();
-		void processClientEvents(std::vector<pollfd> &fds);
 
 		bool parseCgi(const Location loc, std::string &filePath, sockaddr_in &clientAddress, httpRequest &request);
 	};

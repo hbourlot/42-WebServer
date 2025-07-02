@@ -2,15 +2,23 @@
 #include <sys/poll.h>
 #include <unistd.h>
 
-bool http::TcpServer::readRequest(std::vector<pollfd> &fds, int i)
+bool http::TcpServer::readRequest(int index)
 {
-	static std::map<int, std::string> buffers;
 	const size_t CLIENT_MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
 	char buffer[BUFFER_SIZE + 1] = {0};
-	int fd = fds[i].fd;
+	int fd = _fds[index].fd;
 
 	bool shouldPollOut = false;
 	bool finished = false;
+
+	Client *client = _clientManager.getClient(fd);
+	if (!client)
+	{
+		std::cerr << "Error: Client not found for fd " << fd << std::endl;
+		setResponseError(HTTP_BAD_REQ);
+		_fds[index].events |= POLLOUT;
+		return true; // Close connection
+	}
 
 	ssize_t bytesReceived = read(fd, buffer, BUFFER_SIZE);
 	if (bytesReceived <= 0)
@@ -24,20 +32,23 @@ bool http::TcpServer::readRequest(std::vector<pollfd> &fds, int i)
 	}
 	else
 	{
-		buffers[fd].append(buffer, bytesReceived);
+		client->appendToReadBuffer(std::string(buffer, bytesReceived));
 
-		ParseStatus status = parseRequest(_request, buffers[fd], _serverInfo,
-		                                  CLIENT_MAX_BODY_SIZE);
+		ParseStatus status =
+		    parseRequest(client->getRequest(), client->getReadBuffer(), _serverInfo, CLIENT_MAX_BODY_SIZE);
 
-		if (status == PARSE_TOO_LARGE)
+		// if (status == PARSE_TOO_LARGE)
+		// {
+		// 	setResponseError(HTTP_PAYLOAD);
+		// 	shouldPollOut = true;
+		// 	finished = true;
+		// }
+		//! Need more lecture  says that its the max for each request
+
+		if (status == PARSE_OK)
 		{
-			setResponseError(HTTP_PAYLOAD);
-			shouldPollOut = true;
-			finished = true;
-		}
-		else if (status == PARSE_OK)
-		{
-			handleRequest(fds[i], fds, _socketAddressMap[fd]);
+			HttpHandler::handle(*client, _serverInfo);
+			client->clearReadBuffer();
 			shouldPollOut = true;
 			finished = false;
 		}
@@ -46,8 +57,8 @@ bool http::TcpServer::readRequest(std::vector<pollfd> &fds, int i)
 	}
 
 	if (shouldPollOut)
-		fds[i].events |= POLLOUT;
+		_fds[index].events |= POLLOUT;
 
-	buffers.erase(fd);
+	// buffers.erase(fd);
 	return finished;
 }

@@ -46,6 +46,9 @@ void http::TcpServer::acceptConnection()
 
 			_fds.push_back(client_pollfd);
 			_socketAddressMap[acceptSocket] = socketAddress;
+
+			_clientManager.addClient(acceptSocket);
+
 			std::cout << "----- Connection Accepted 🟩\n\n";
 		}
 	}

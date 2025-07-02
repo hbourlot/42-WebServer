@@ -33,6 +33,14 @@ void Client::clearBuffers()
 	_readBuffer.clear();
 	_writeBuffer.clear();
 }
+void Client::clearReadBuffer()
+{
+	_readBuffer.clear();
+}
+void Client::clearWriteBuffer()
+{
+	_writeBuffer.clear();
+}
 
 httpRequest &Client::getRequest()
 {

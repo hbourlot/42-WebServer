@@ -2,11 +2,13 @@
 #include <netinet/in.h>
 #include <sys/poll.h>
 
-bool http::TcpServer::handleCgiResponse(pollfd &socket) {
+bool http::TcpServer::handleCgiResponse(pollfd &socket)
+{
 
-	std::cout << "[DEBUG] FD: " << socket.fd << " | revents: " << socket.revents
-	          << " | events: " << socket.events << std::endl;
-	if ((socket.revents & POLLIN) && _cgiFdMap.count(socket.fd)) {
+	std::cout << "[DEBUG] FD: " << socket.fd << " | revents: " << socket.revents << " | events: " << socket.events
+	          << std::endl;
+	if ((socket.revents & POLLIN) && _cgiFdMap.count(socket.fd))
+	{
 		std::cout << "FD ON HANDLE => " << socket.fd << std::endl;
 		Cgi *cgi = _cgiFdMap[socket.fd];
 		cgi->readCgiOutput();
@@ -22,46 +24,47 @@ bool http::TcpServer::handleCgiResponse(pollfd &socket) {
 	return false;
 }
 
-void http::TcpServer::closeClient(std::vector<pollfd> &fds, size_t &i) {
-	int fd = fds[i].fd;
+void http::TcpServer::closeClientConnection(size_t index)
+{
+	SocketFD fd = _fds[index].fd;
+
+	std::cout << "Closing client FD => " << fd << std::endl;
+
 	close(fd);
-	fds.erase(fds.begin() + i);
-	if (_socketAddressMap.count(fds[i].fd)) {
-		_socketAddressMap.erase(fds[i].fd);
-	}
-	--i;
+	_socketAddressMap.erase(fd);
+	_clientManager.removeClient(fd);
+	_fds.erase(_fds.begin() + index);
 }
 
-void http::TcpServer::processClientEvents(std::vector<pollfd> &fds) {
+void http::TcpServer::processClientEvents()
+{
 
 	SocketFD fd;
 	bool shouldCloseSend;
 	bool shouldCloseRead;
 	sockaddr_in *currentAddress;
 
-	for (size_t i = 1; i < fds.size(); ++i) {
+	for (size_t idx = 1; idx < _fds.size(); ++idx)
+	{
 		shouldCloseSend = false;
 		shouldCloseRead = false;
 
-		fd = fds[i].fd;
+		fd = _fds[idx].fd;
 
-		if (fds[i].revents & POLLIN) {
-			shouldCloseRead = readRequest(fds, i);
+		if (_fds[idx].revents & POLLIN)
+		{
+			shouldCloseRead = readRequest(idx);
 		}
-		// if (handleCgiResponse(fds[i])) {
-		// 	continue;
-		// }
-		// std::cout << "Here " << std::endl;
-		if (fds[i].revents & POLLOUT) {
-			// std::cout << "Here " << __func__ << std::endl;
+		if (_fds[idx].revents & POLLOUT)
+		{
 
-			
-			shouldCloseSend = sendResponse(fds[i]);
-			fds[i].events &= ~POLLOUT;
+			shouldCloseSend = sendResponse(_fds[idx]);
+			_fds[idx].events &= ~POLLOUT;
 			clearResponse();
 		}
-		if (shouldCloseRead || shouldCloseSend) {
-			closeClient(fds, i);
+		if (shouldCloseRead || shouldCloseSend)
+		{
+			closeClientConnection(idx);
 			continue;
 		}
 	}

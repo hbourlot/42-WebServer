@@ -49,3 +49,15 @@ std::map<int, Client *> &ClientManager::getClients()
 {
 	return _clients;
 }
+
+void ClientManager::resetClientState(int fd)
+{
+	if (!hasClient(fd))
+		return;
+	Client *client = _clients[fd];
+	client->clearBuffers();
+	client->resetRequest();
+	client->resetResponse();
+	client->setCgiInProgress(false);
+	client->setRequestComplete(false);
+}

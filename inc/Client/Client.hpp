@@ -20,6 +20,8 @@ class Client
 	void appendToReadBuffer(const std::string &data);
 	void appendToWriteBuffer(const std::string &data);
 	void clearBuffers();
+	void clearReadBuffer();
+	void clearWriteBuffer();
 
 	// request-response structures
 	httpRequest &getRequest();
@@ -33,6 +35,7 @@ class Client
 
 	bool isCgiInProgress() const;
 	void setCgiInProgress(bool value);
+
 
   private:
 	int _fd;

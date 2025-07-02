@@ -15,6 +15,8 @@ class ClientManager
 	bool hasClient(int fd) const;
 	std::map<int, Client *> &getClients();
 
+	void resetClientState(int fd);
+
   private:
 	std::map<int, Client *> _clients;
 };
