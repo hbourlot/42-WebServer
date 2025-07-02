@@ -86,61 +86,61 @@ namespace http
 		newfile.close();
 		return (true);
 	}
+//!PArts to imporve after
+	// bool TcpServer::parseMultipart(const Location &location)
+	// {
 
-	bool TcpServer::parseMultipart(const Location &location)
-	{
+	// 	std::string boundary = extractBoundary(_request);
 
-		std::string boundary = extractBoundary(_request);
+	// 	if (boundary.empty())
+	// 	{
+	// 		setResponseError(HTTP_BAD_REQ);
+	// 		log("400 Bad Request: No boundary");
 
-		if (boundary.empty())
-		{
-			setResponseError(HTTP_BAD_REQ);
-			log("400 Bad Request: No boundary");
+	// 		return (false);
+	// 	}
 
-			return (false);
-		}
+	// 	std::string filePart = extractFilePart(_request, boundary);
 
-		std::string filePart = extractFilePart(_request, boundary);
+	// 	if (filePart.empty())
+	// 	{
+	// 		setResponseError(HTTP_BAD_REQ);
+	// 		log("Bad Request: No boundary filePart");
 
-		if (filePart.empty())
-		{
-			setResponseError(HTTP_BAD_REQ);
-			log("Bad Request: No boundary filePart");
+	// 		return (false);
+	// 	}
 
-			return (false);
-		}
+	// 	std::string headers;
+	// 	std::string content;
 
-		std::string headers;
-		std::string content;
+	// 	if (!splitHeadersAndContent(filePart, headers, content))
+	// 	{
+	// 		setResponseError(HTTP_BAD_REQ);
+	// 		log("Bad Request: Malformed multipart body");
 
-		if (!splitHeadersAndContent(filePart, headers, content))
-		{
-			setResponseError(HTTP_BAD_REQ);
-			log("Bad Request: Malformed multipart body");
+	// 		return (false);
+	// 	}
 
-			return (false);
-		}
+	// 	std::string filename = extractFilename(headers);
 
-		std::string filename = extractFilename(headers);
+	// 	if (filename.empty())
+	// 	{
+	// 		setResponseError(HTTP_BAD_REQ);
+	// 		log("Bad Request: Filename not found");
+	// 		return (false);
+	// 	}
 
-		if (filename.empty())
-		{
-			setResponseError(HTTP_BAD_REQ);
-			log("Bad Request: Filename not found");
-			return (false);
-		}
+	// 	if (!saveFile(filename, content, location))
+	// 	{
+	// 		setFileResponse(HTTP_SERVER_ERR, DFL_500, true);
+	// 		log("Internal Server Error: File not saved");
+	// 		return (false);
+	// 	}
+	// 	std::string msg = "File '" + filename + "' received";
 
-		if (!saveFile(filename, content, location))
-		{
-			setFileResponse(HTTP_SERVER_ERR, DFL_500, true);
-			log("Internal Server Error: File not saved");
-			return (false);
-		}
-		std::string msg = "File '" + filename + "' received";
+	// 	setBodyResponse(HTTP_OK, msg);
 
-		setBodyResponse(HTTP_OK, msg);
-
-		return (true);
-	}
+	// 	return (true);
+	// }
 
 } // namespace http

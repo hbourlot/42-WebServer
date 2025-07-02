@@ -5,8 +5,8 @@ namespace http
 
 	TcpServer::TcpServer(Server server)
 	    : _serverInfo(server), _ipAddress(server.host), _port(server.port),
-	      _serverSocket(), _socketAddress_len(sizeof(sockaddr_in)),
-	      _serverMessage("")
+	      _serverSocket(), _socketAddress_len(sizeof(sockaddr_in))/* ,
+	      _serverMessage("") */
 	{ // Initialize m_serverMessage properly
 	  // this->startServer();
 	}

@@ -41,7 +41,7 @@ bool http::TcpServer::parseCgi(const Location loc, std::string &filePath,
 	// 	return false;
 	// }
 
-	Cgi cgi(_request, filePath, clientAddress, _serverInfo);
+	Cgi cgi(request, filePath, clientAddress, _serverInfo);
 	// Cgi cgi(_request, filePath, clientAddress, _serverInfo);
 
 	this->_cgi.push_back(cgi);

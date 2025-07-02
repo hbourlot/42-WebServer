@@ -15,7 +15,8 @@ bool http::TcpServer::readRequest(int index)
 	if (!client)
 	{
 		std::cerr << "Error: Client not found for fd " << fd << std::endl;
-		setResponseError(HTTP_BAD_REQ);
+		client->getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
+		client->appendToWriteBuffer(ResponseBuilder::buildResponseString(client->getResponse(), client->getRequest()));
 		_fds[index].events |= POLLOUT;
 		return true; // Close connection
 	}
@@ -26,7 +27,8 @@ bool http::TcpServer::readRequest(int index)
 		if (bytesReceived < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
 			std::cerr << "Error: read()\n";
 
-		setResponseError(HTTP_BAD_REQ);
+		client->getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
+		client->appendToWriteBuffer(ResponseBuilder::buildResponseString(client->getResponse(), client->getRequest()));
 		shouldPollOut = true;
 		finished = true;
 	}

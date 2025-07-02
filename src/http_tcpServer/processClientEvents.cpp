@@ -4,6 +4,7 @@
 
 bool http::TcpServer::handleCgiResponse(pollfd &socket)
 {
+	Client *client = _clientManager.getClient(socket.fd);
 
 	std::cout << "[DEBUG] FD: " << socket.fd << " | revents: " << socket.revents << " | events: " << socket.events
 	          << std::endl;
@@ -13,7 +14,11 @@ bool http::TcpServer::handleCgiResponse(pollfd &socket)
 		Cgi *cgi = _cgiFdMap[socket.fd];
 		cgi->readCgiOutput();
 		// if (cgi->getStatus() == Cgi::FINISHED) {
-		setBodyResponse(HTTP_OK, cgi->getBody());
+
+		// setBodyResponse(HTTP_OK, cgi->getBody());
+		client->getResponse() = ResponseBuilder::buildResponse(HTTP_OK, cgi->getBody());
+		client->appendToWriteBuffer(ResponseBuilder::buildResponseString(client->getResponse(), client->getRequest()));
+
 		std::cout << cgi->getBody();
 		sendResponse(socket);
 		_cgiFdMap.erase(socket.fd);
@@ -59,8 +64,9 @@ void http::TcpServer::processClientEvents()
 		{
 
 			shouldCloseSend = sendResponse(_fds[idx]);
-			_fds[idx].events &= ~POLLOUT;
-			clearResponse();
+			if (shouldCloseSend != 2)
+				_fds[idx].events &= ~POLLOUT;
+			// clearResponse();
 		}
 		if (shouldCloseRead || shouldCloseSend)
 		{
