@@ -59,7 +59,7 @@ static std::string generateAutoIndexPage(const std::string &dirPath, const Locat
 	return (html);
 }
 
-void handleDirectoryListing(Client client, Server server, const std::string &filePath, const Location &location)
+void handleDirectoryListing(Client &client, const Server &server, const std::string &filePath, const Location &location)
 {
 	httpRequest &request = client.getRequest();
 	httpResponse &response = client.getResponse();
@@ -68,17 +68,22 @@ void handleDirectoryListing(Client client, Server server, const std::string &fil
 	{
 		std::string indexPath = joinPath(filePath, location.index);
 		response = ResponseBuilder::buildFileResponse(HTTP_OK, indexPath, server);
+		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
+
 		// return (true);
 	}
 
 	if (!location.autoIndex)
 	{
-		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage[404], server, true);
+		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
+		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 		// return false;
 	}
 
 	std::string body = generateAutoIndexPage(filePath, location, request);
 
 	response = ResponseBuilder::buildResponse(HTTP_OK, body, "text/html");
+	client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
+
 	// return true;
 }

@@ -97,7 +97,10 @@ void HttpHandler::handleGet(Client &client, const Server &server, const Location
 	std::string filePath = getFilePath(request.path, location);
 
 	if (isDirectory(filePath))
-		return handleDirectoryListing(client, server, filePath, location);
+	{
+		handleDirectoryListing(client, server, filePath, location);
+		return;
+	}
 
 	if (!std::ifstream(filePath.c_str()).is_open())
 	{
