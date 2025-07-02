@@ -84,8 +84,8 @@ void HttpHandler::handle(Client &client, const Server &server)
 		return (handleGet(client, server, matchedLocation));
 	else if (request.method == "POST")
 		return (handlePost(client, server, matchedLocation));
-	// else if (request.method == "DELETE")
-	// 	return (handleDeleteRequest(matchedLocation));
+	else if (request.method == "DELETE")
+		return (handleDelete(client, server, matchedLocation));
 	// return (true);
 }
 

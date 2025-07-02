@@ -59,5 +59,5 @@ void ClientManager::resetClientState(int fd)
 	client->resetRequest();
 	client->resetResponse();
 	client->setCgiInProgress(false);
-	client->setRequestComplete(false);
+	// client->setRequestComplete(false);
 }
