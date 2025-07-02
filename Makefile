@@ -19,12 +19,12 @@ AUTH_DIR		= auth/
 UTILS_DIR		= utils/
 
 CLIENT_DIR 		= client/
+HTTPHANDLER_DIR = httpHandler/
+RESPONSEBUILDER_DIR = responseBuilder/
 HTTP_DIR		= http_tcpServer/
 REQUEST_DIR		= $(HTTP_DIR)request/
 RESPONSE_DIR	= $(HTTP_DIR)response/
-SET_DIR			= $(RESPONSE_DIR)set/
-METHODS_DIR		= $(HTTP_DIR)methods/
-# CGI_DIR			= $(HTTP_DIR)CgiHandler/
+METHODS_DIR		= $(HTTPHANDLER_DIR)methods/
 GET_DIR			= $(METHODS_DIR)Get/
 CGI_DIR			= $(HTTP_DIR)cgi/
 
@@ -40,12 +40,12 @@ AUTH_FUNC		= loginHandler
 CGI_FUNC		= parseCgi executeCgi Cgi buildEnvStrings doDup #isValidCgiExtension
 UTILS_FUNC		= ft_strtrim utils split getLocationFieldAsString
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = HttpHandler http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop clearResponse processClientEvents
-REQUEST_FUNC	= readRequest parseRequest handleRequest
-RESPONSE_FUNC 	= sendResponse ResponseBuilder
-METHODS_FUNC 	= handlePostRequest uploadHandler handleDeleteRequest utils
-GET_FUNC		= autoindex handleGetRequest
-SET_FUNC		= setResponse setResponseError setFileResponse setBodyResponse setResponseAux setRedirect
+HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop processClientEvents
+REQUEST_FUNC	= readRequest parseRequest 
+HTTPHANDLER_FUNC = HttpHandler
+RESPONSEBUILDER_FUNC = ResponseBuilder setResponseAux sendResponse
+METHODS_FUNC 	= handlePostRequest uploadHandler handleDeleteRequest
+GET_FUNC		= autoindex handleGetRequest 
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
@@ -53,7 +53,8 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(REQUEST_DIR), $(REQUEST_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(RESPONSE_DIR), $(RESPONSE_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(SET_DIR), $(SET_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(HTTPHANDLER_DIR), $(HTTPHANDLER_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(RESPONSEBUILDER_DIR), $(RESPONSEBUILDER_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(METHODS_DIR), $(METHODS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(GET_DIR), $(GET_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \

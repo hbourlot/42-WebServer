@@ -4,11 +4,11 @@
 #include "Client/ClientManager.hpp"
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
+#include "HttpHandler.hpp"
 #include "HttpLogs.hpp"
 #include "HttpStatus.hpp"
 #include "HttpStructs.hpp"
 #include "HttpUtils.hpp"
-#include "HttpHandler.hpp"
 #include "ResponseBuilder.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
@@ -67,14 +67,9 @@ namespace http
 		std::vector<pollfd> _fds;
 		Server _serverInfo;
 		SocketFD _serverSocket;
-		std::set<SocketFD> _toBeClosed;
+		//! Still figuring where put it on  std::set<SocketFD> _toBeClosed;
 		ClientManager _clientManager;
 
-		// httpRequest _request;
-		// httpResponse _response;
-		// std::string _serverMessage;
-		std::string _ipAddress;
-		int _port;
 		std::map<SocketFD, sockaddr_in> _socketAddressMap;
 		unsigned int _socketAddress_len;
 		std::vector<Cgi> _cgi;
@@ -90,29 +85,8 @@ namespace http
 		void closeClientConnection(size_t index);
 		bool readRequest(int index);
 
-		// std::map<int, clientState> _clients; // ! Maybe its better
-
-		void closeClient(std::vector<pollfd> &fds, size_t &i);
-		bool handleRequest(pollfd &socket, sockaddr_in &clientAddress);
-		bool handleGetRequest(const Location &location, sockaddr_in &clientAddress);
-		bool handlePostRequest(const Location &location);
-		bool handleDeleteRequest(const Location &location);
 		bool handleCgiResponse(pollfd &socket);
 		int sendResponse(pollfd &socket);
-
-		void prepareResponse(const HttpStatusCode &status, const std::string &body, const std::string &headerKey = "",
-		                     const std::string &headerValue = "");
-		void setResponse();
-		void setBodyResponse(const HttpStatusCode &status, const std::string &body,
-		                     const std::string &contentType = "text/plain");
-		void setFileResponse(const HttpStatusCode &status, const std::string &filePath, bool isError = false);
-		void setRedirect(const HttpStatusCode &status, std::string redirection);
-		void setResponseError(const HttpStatusCode &status);
-
-		bool parseMultipart(const Location &location);
-		bool handleDirectoryListing(const std::string &filePath, const Location &location);
-
-		void clearResponse();
 
 		bool parseCgi(const Location loc, std::string &filePath, sockaddr_in &clientAddress, httpRequest &request);
 	};
@@ -120,3 +94,6 @@ namespace http
 	std::string getLocationFieldAsString(const std::vector<Location> &locations, const std::string &field);
 
 } // namespace http
+
+// bool parseMultipart(const Location &location);
+// bool handleDirectoryListing(const std::string &filePath, const Location &location);
