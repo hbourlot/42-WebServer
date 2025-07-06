@@ -41,6 +41,7 @@ class ICgi;
 namespace http {
 
 	const int BUFFER_SIZE = 30720;
+	enum PROCESS_STATE { RUNNING = -5, FINISHED, ERROR, IN_PROGRESS };
 
 	class TcpServer {
 	  public:
@@ -61,7 +62,6 @@ namespace http {
 		void setCgi(SocketFD, ICgi *);
 
 	  private:
-		// *Setted inside a server must know the fds it handles, and less passing by parameter
 		std::vector<pollfd> _fds;
 		Server _serverInfo;
 		SocketFD _serverSocket;
@@ -82,11 +82,8 @@ namespace http {
 		void processClientEvents();
 		void closeClientConnection(size_t index);
 		bool readSocket(int index);
-
 		bool handleCgiResponse(pollfd &socket);
 		int sendResponse(pollfd &socket);
-
-		// bool parseCgi(const Location loc, std::string &filePath, sockaddr_in &clientAddress, httpRequest &request);
 	};
 
 	std::string getLocationFieldAsString(const std::vector<Location> &locations, const std::string &field);

@@ -2,6 +2,7 @@
 
 #include "Client.hpp"
 #include <map>
+#include <vector>
 
 namespace http {
 
@@ -10,11 +11,12 @@ namespace http {
 		ClientManager();
 		~ClientManager();
 
-		void addClient(SocketFD fd, sockaddr_in &socketAddress, pollfd &clientSocket, const Server serverInfo);
-		void removeClient(SocketFD fd);
-		Client *getClient(SocketFD fd);
-		bool hasClient(SocketFD fd) const;
-		std::map<int, Client *> &getClients();
+		void addClient(SocketFD fd, sockaddr_in &socketAddress, std::vector<pollfd> &fds, const Server serverInfo);
+		void removeClient(SocketFD);
+		Client *getClient(SocketFD);
+		bool hasClient(SocketFD) const;
+		bool hasCgiClient(SocketFD, std::vector<Client> &) const;
+		std::map<SocketFD, Client *> &getClients();
 
 		void resetClientState(int fd);
 

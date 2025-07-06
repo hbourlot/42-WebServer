@@ -41,7 +41,7 @@ int http::PythonCgi::getPollFd() const {
 	return _outputPipe[0];
 }
 
-SocketFD http::PythonCgi::getClientFd() {
+SocketFD http::PythonCgi::getClientFd() const {
 	return _client->getFd();
 };
 

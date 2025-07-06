@@ -1,24 +1,40 @@
 #include "Client/Client.hpp"
 #include <netinet/in.h>
 #include <sys/poll.h>
+#include <vector>
 
 namespace http {
 
-	Client::Client(int fd, sockaddr_in &socketAddress, pollfd &clientSocket, const Server serverInfo)
-	    : _fd(fd), _socketAddress(socketAddress), _clientSocket(clientSocket), _serverInfo(serverInfo),
-	      _requestComplete(false), _cgiInProgress(false) {
-	}
-
-	Client::Client(int fd, sockaddr_in &socketAddress, pollfd &clientSocket)
-	    : _fd(fd), _socketAddress(socketAddress), _clientSocket(clientSocket), _requestComplete(false),
+	Client::Client(SocketFD fd, sockaddr_in &socketAddress, std::vector<pollfd> &fds, const Server serverInfo)
+	    : _fd(fd), _socketAddress(socketAddress), _fds(fds), _serverInfo(serverInfo), _requestComplete(false),
 	      _cgiInProgress(false) {
 	}
 
 	Client::~Client() {
+		if (this->hasCgi())
+			delete _cgi;
 	}
 
 	SocketFD Client::getFd() const {
 		return (_fd);
+	}
+
+	ICgi &Client::getCgi() const {
+		return (*_cgi);
+	}
+
+	void Client::setCgi(ICgi *object) {
+		this->_cgi = object;
+	}
+
+	void Client::executeCgi() const {
+		this->_cgi->execute(_fds);
+	}
+
+	bool Client::hasCgi() const {
+		if (this->_cgi)
+			return true;
+		return false;
 	}
 
 	std::string &Client::getReadBuffer() {
@@ -51,8 +67,10 @@ namespace http {
 		return (_response);
 	}
 	void Client::resetRequest() {
+		// To be set
 	}
 	void Client::resetResponse() {
+		// To be set
 	}
 
 	bool Client::isRequestComplete() const {

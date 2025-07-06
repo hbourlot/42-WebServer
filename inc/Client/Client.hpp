@@ -6,21 +6,25 @@
 // #include "http_tcpServer_linux/HttpStructs.hpp"
 #include "Config/Configs.hpp"
 #include "http_tcpServer/HttpStructs.hpp"
+#include "http_tcpServer/ICgi.hpp"
 #include <string>
 #include <sys/poll.h>
+#include <vector>
 
 namespace http {
 
 	class Client {
 	  public:
 		// TODO: [] Maybe i wont need clientSocket for Cgi
-		Client(int fd, sockaddr_in &socketAddress, pollfd &clientSocket, const Server serverInfo);
+		Client(SocketFD fd, sockaddr_in &socketAddress, std::vector<pollfd> &fds, const Server serverInfo);
 
-		// Prev version
-		Client(int fd, sockaddr_in &socketAddress, pollfd &clientSocket);
 		~Client();
 
 		SocketFD getFd() const;
+		bool hasCgi() const;
+		ICgi &getCgi() const;
+		void setCgi(ICgi *);
+		void executeCgi() const;
 
 		// Buffers
 		std::string &getReadBuffer();
@@ -52,10 +56,11 @@ namespace http {
 		std::string _readBuffer;
 		std::string _writeBuffer;
 		sockaddr_in &_socketAddress;
+		ICgi *_cgi;
 
 		httpRequest _request;
 		httpResponse _response;
-		pollfd &_clientSocket;
+		std::vector<pollfd> &_fds;
 		Server _serverInfo;
 
 		bool _requestComplete;

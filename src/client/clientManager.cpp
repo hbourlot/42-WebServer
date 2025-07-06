@@ -1,5 +1,7 @@
 #include "Client/ClientManager.hpp"
 #include <netinet/in.h>
+#include <sys/poll.h>
+#include <vector>
 
 namespace http {
 
@@ -13,13 +15,13 @@ namespace http {
 		_clients.clear();
 	}
 
-	void ClientManager::addClient(SocketFD fd, sockaddr_in &socketAddress, pollfd &clientSocket,
+	void ClientManager::addClient(SocketFD fd, sockaddr_in &socketAddress, std::vector<pollfd> &fds,
 	                              const Server serverInfo) {
 		if (_clients.find(fd) != _clients.end()) {
 			std::cerr << "Client with FD " << fd << " already exists." << std::endl;
 			return;
 		}
-		_clients[fd] = new Client(fd, socketAddress, clientSocket, serverInfo);
+		_clients[fd] = new Client(fd, socketAddress, fds, serverInfo);
 	}
 
 	void ClientManager::removeClient(SocketFD fd) {
@@ -38,6 +40,14 @@ namespace http {
 	}
 	bool ClientManager::hasClient(SocketFD fd) const {
 		return _clients.find(fd) != _clients.end();
+	}
+
+	bool ClientManager::hasCgiClient(SocketFD fd, std::vector<Client> &clients) const {
+
+		// for (int idx = 0; idx < clients.size(); ++idx) {
+		// 	if (clients[idx].getCgi())
+		// }
+		return true;
 	}
 
 	std::map<int, Client *> &ClientManager::getClients() {

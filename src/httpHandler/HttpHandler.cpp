@@ -59,25 +59,15 @@ namespace http {
 			// return (false);
 		}
 
-		// * Handler CGI
+		//!!! * Handler CGI
 
 		std::string filePath = getFilePath(request.path, matchedLocation);
 		std::string prototypeFilePath = filePath.substr(1);
 
-		// ICgi *cgi = TcpServer::parseCgi(matchedLocation, filePath, &client);
-		// if (cgi) {
-		// 	_cgi
-		// }
-
-		// if (parseCgi(matchedLocation, prototypeFilePath, clientAddress, _request)) {
-		// 	_cgi[0].executeCgi(_fds);
-		// 	_cgi[0].markAsRunning();
-		// 	_cgiFdMap[_cgi[0].getPollFd()] = &_cgi[0];
-		// 	return true;
-		// }
-
-		// Set event POLLOUT only if it's not CGI
-		// socket.events |= POLLOUT;
+		ICgi *cgi = TcpServer::parseCgi(matchedLocation, filePath, &client);
+		if (cgi) {
+			//!! over here
+		}
 
 		if (request.method == "GET")
 			return (handleGet(client, server, matchedLocation));

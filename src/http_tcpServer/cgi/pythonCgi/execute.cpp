@@ -1,4 +1,5 @@
 #include "http_tcpServer/PythonCgi.hpp"
+#include <fcntl.h>
 
 void printEnvStrings(std::vector<std::string> &_envStrings) {
 	std::cerr << "ENVSTRINGS:" << std::endl;
@@ -66,12 +67,16 @@ namespace http {
 			handleChildProcess();
 		} else {
 
-			// int status;
-			// waitpid(_pid, &status, 0);
-
-			std::cout << "OVER HERE\n";
 			close(_inputPipe[1]);
 			close(_outputPipe[1]);
+
+			fcntl(_outputPipe[0], F_SETFL, fcntl(_outputPipe[0], F_GETFL, 0) | O_NONBLOCK);
+
+			_pfd.fd = _outputPipe[0];
+			_pfd.events = POLLIN;
+
+			// ! Maybe same timeout from my main poll
+			_retPfd = poll(&_pfd, 1, 1000); // 1 second timeout
 
 			// char buffer[BUFFER_SIZE] = {0};
 			// ssize_t bytes = read(_outputPipe[0], buffer, BUFFER_SIZE);

@@ -34,8 +34,6 @@ namespace http {
 		std::string getOutput() const;
 
 		// Get client socket fd
-		SocketFD getClientFd();
-
 		SocketFD getClientFd() const;
 
 		int getPollFd() const;
@@ -46,7 +44,8 @@ namespace http {
 		bool _status[3];
 		Client *_client;
 
-		// pollfd &_clientSocket;
+		pollfd _pfd;
+		int _retPfd;
 		httpRequest _request;
 		std::string _output;
 		httpResponse _response;
