@@ -22,62 +22,42 @@
 // 	return false;
 // }
 
-void http::TcpServer::closeClient(std::vector<pollfd> &fds, size_t &i) {
-	int fd = fds[i].fd;
+void http::TcpServer::closeClientConnection(size_t index) {
+	SocketFD fd = _fds[index].fd;
+
+	std::cout << "Closing client FD => " << fd << std::endl;
+
 	close(fd);
-	fds.erase(fds.begin() + i);
-	if (_socketAddressMap.count(fds[i].fd)) {
-		_socketAddressMap.erase(fds[i].fd);
-	}
-	--i;
+	_socketAddressMap.erase(fd);
+	_clientManager.removeClient(fd);
+	_fds.erase(_fds.begin() + index);
 }
 
-void http::TcpServer::processClientEvents(std::vector<pollfd> &fds) {
+void http::TcpServer::processClientEvents() {
 
 	SocketFD fd;
-	bool shouldCloseSend;
-	bool shouldCloseRead;
+	int shouldCloseSend;
+	int shouldCloseRead;
 	sockaddr_in *currentAddress;
 
-	for (size_t i = 1; i < fds.size(); ++i) {
+	for (size_t idx = 1; idx < _fds.size(); ++idx) {
 		shouldCloseSend = false;
 		shouldCloseRead = false;
 
-		fd = fds[i].fd;
+		fd = _fds[idx].fd;
 
-		if (fds[i].revents & POLLIN) {
-			shouldCloseRead = readSocket(fds, i);
+		if (_fds[idx].revents & POLLIN) {
+			shouldCloseRead = readSocket(idx);
 		}
-		// if (handleCgiResponse(fds[i])) {
-		// 	continue;
-		// }
-		// std::cout << "Here " << std::endl;
-		if (fds[i].revents & POLLOUT) {
+		if (_fds[idx].revents & POLLOUT) {
 
-			// Case it's a Cgi FD
-			// if (_cgiFdMap.count(fd) && _cgiFdMap.at(fd)) {
-
-			Cgi *cgi = _cgiFdMap[4];
-			std::cout << cgi->getOutputContent() << std::endl;
-			// SocketFD clientFd = cgi->getClientFd();
-			// std::cout << "OVER HERE123123123123\n";
-
-			// std::cout << "ClientFd => " << clientFd << std::endl;
-			int content = cgi->getStatus();
-			// std::string content = cgi->getOutputContent();
-
-			shouldCloseSend = sendResponse(4, cgi->getOutputContent());
-
-			// } else {
-
-			// shouldCloseSend = sendResponse(fd, _serverMessage);
-			// }
-
-			fds[i].events &= ~POLLOUT;
-			clearResponse();
+			shouldCloseSend = sendResponse(_fds[idx]);
+			if (shouldCloseSend != 2)
+				_fds[idx].events &= ~POLLOUT;
+			// clearResponse();
 		}
 		if (shouldCloseRead || shouldCloseSend) {
-			closeClient(fds, i);
+			closeClientConnection(idx);
 			continue;
 		}
 	}

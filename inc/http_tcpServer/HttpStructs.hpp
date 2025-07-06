@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpStructs.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbourlot <hbourlot@student.42.fr>          +#+  +:+       +#+        */
+/*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/06/26 16:48:20 by hbourlot         ###   ########.fr       */
+/*   Updated: 2025/06/30 01:33:31 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,17 +18,13 @@
 #include <unistd.h>
 #include <vector>
 
-// #define HTTP_200 "200"
-// #define HTTP_301 "301"
-// #define HTTP_404 "404"
-// #define HTTP_500 "500"
-
 typedef int SocketFD;
 
 struct Location;
 
 // Only interface propose
-enum headerKey {
+enum headerKey
+{
 	Accept,
 	AcceptEncoding,
 	AcceptLanguage,
@@ -44,13 +40,15 @@ enum headerKey {
 	UserAgent,
 };
 
-enum ParseStatus {
+enum ParseStatus
+{
 	PARSE_INCOMPLETE,
 	PARSE_TOO_LARGE,
 	PARSE_OK,
 };
 
-struct httpRequest {
+struct httpRequest
+{
 	std::string method;
 	std::string path;
 	std::string serverProtocol; // For Cgi
@@ -60,18 +58,35 @@ struct httpRequest {
 	std::string body;
 
 	std::string queryString; // test
-	std::string getType(std::string key, std::string value);
+	// std::string getType(std::string key, std::string value);
 };
 
-struct httpResponse {
+struct httpResponse
+{
 	std::string statusCode;
 	std::string statusMsg;
 	std::string body;
 	std::map<std::string, std::string> headers;
 
 	void setDefaultHeaders();
-	void setDefaultHeaders(httpRequest &request);
+	void setDefaultHeaders(httpRequest request);
 	void addToHeader(std::string key, std::string value);
-	// void setResponseError(std::string statusCode);
-	// void setResponseError(const HttpStatusCode &status);
+};
+
+// ! Maybe its better encapsulate al information about the client and its state
+// on a proper struct
+
+struct clientState
+{
+	httpRequest request;
+	httpResponse response;
+	std::string readBuffer;
+	std::string writeBuffer;
+	bool requestComplete;
+	bool cgiInProgress;
+	int clientFd;
+
+	clientState() : requestComplete(false), cgiInProgress(false), clientFd(-1)
+	{
+	}
 };

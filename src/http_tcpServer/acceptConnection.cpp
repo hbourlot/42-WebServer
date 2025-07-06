@@ -12,16 +12,15 @@ static void logAcceptError(const sockaddr_in &socketAddress) {
 	std::cerr << ss.str();
 }
 
-void http::TcpServer::acceptConnection(std::vector<pollfd> &fds) {
+void http::TcpServer::acceptConnection() {
 
 	SocketFD acceptSocket;
 	struct pollfd client_pollfd;
 	struct sockaddr_in socketAddress;
 
 	// Checks the if theres readable data available (event)
-	while (fds[0].revents & POLLIN) {
-		acceptSocket = accept(_serverSocket, (struct sockaddr *)&socketAddress,
-		                      &_socketAddress_len);
+	while (_fds[0].revents & POLLIN) {
+		acceptSocket = accept(_serverSocket, (struct sockaddr *)&socketAddress, &_socketAddress_len);
 		if (acceptSocket < 0) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
 				// Means no more connections to accept
@@ -32,15 +31,17 @@ void http::TcpServer::acceptConnection(std::vector<pollfd> &fds) {
 		} else {
 
 			// Set client socket to non-blocking
-			fcntl(acceptSocket, F_SETFL,
-			      fcntl(acceptSocket, F_GETFL, 0) | O_NONBLOCK);
+			fcntl(acceptSocket, F_SETFL, fcntl(acceptSocket, F_GETFL, 0) | O_NONBLOCK);
 
 			client_pollfd.fd = acceptSocket;
 			client_pollfd.events = POLLIN;
 			client_pollfd.revents = 0;
 
-			fds.push_back(client_pollfd);
+			_fds.push_back(client_pollfd);
 			_socketAddressMap[acceptSocket] = socketAddress;
+
+			_clientManager.addClient(acceptSocket, socketAddress, client_pollfd, _serverInfo);
+
 			std::cout << "----- Connection Accepted 🟩\n\n";
 		}
 	}

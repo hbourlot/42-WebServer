@@ -10,45 +10,51 @@
 #include <vector>
 
 // Remove and close all pollfd's with HUP, ERR, or NVAL events
-static void removeDeadConnections(std::vector<pollfd> &fds, std::map<SocketFD, sockaddr_in> &socketAddressMap) {
+void http::TcpServer::removeDeadConnections() {
 
-	for (size_t i = 1; i < fds.size(); ++i) {
-		if (fds[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {
-			std::cout << "--- Removing CONNECTIONS\n";
-			if (socketAddressMap.count(fds[i].fd)) {
-				std::cout << "  socketAddressMap => " << fds[i].fd << std::endl;
-				socketAddressMap.erase(fds[i].fd);
+	for (size_t i = 1; i < _fds.size(); ++i) {
+		if (_fds[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {
+			std::cout << "--- Removing CONNECTION\n";
+
+			SocketFD fd = _fds[i].fd;
+
+			if (_socketAddressMap.count(fd)) {
+				std::cout << "  socketAddressMap => " << fd << std::endl;
+				_socketAddressMap.erase(fd);
 			}
-			std::cout << "  Closing FD => " << fds[i].fd << std::endl;
-			close(fds[i].fd);
-			fds.erase(fds.begin() + i);
+
+			std::cout << "  Closing FD => " << fd << std::endl;
+			close(fd);
+
+			_clientManager.removeClient(fd);
+
+			_fds.erase(_fds.begin() + i);
 			--i;
 		}
 	}
 }
 
-void http::TcpServer::runLoop(std::vector<pollfd> &fds, int timeOut) {
+void http::TcpServer::runLoop(int timeOut) {
 
 	try {
 		while (true) {
-
 			// poll() waits for events on multiple file descriptors (like
 			// sockets), enabling non-blocking I/O in servers.
-			int ret = poll(fds.data(), fds.size(), timeOut);
+			int ret = poll(_fds.data(), _fds.size(), timeOut);
 
 			if (ret < 0) {
 				std::cerr << "poll() failed" << std::endl;
-				shutDownServer(fds);
+				shutDownServer();
 			} else if (ret == 0) {
 				std::cerr << "poll() timeOut. Closing Server." << std::endl;
-				shutDownServer(fds);
+				shutDownServer();
 				return;
 			}
 
 			// Checking for new connections
-			acceptConnection(fds);
-			removeDeadConnections(fds, _socketAddressMap);
-			processClientEvents(fds);
+			acceptConnection();
+			removeDeadConnections();
+			processClientEvents();
 		}
 	} catch (const TcpServerException &e) {
 		std::cerr << "Error handling client connection => " << e.what() << std::endl;

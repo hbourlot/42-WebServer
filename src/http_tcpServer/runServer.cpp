@@ -3,38 +3,40 @@
 /*                                                        :::      ::::::::   */
 /*   runServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbourlot <hbourlot@student.42.fr>          +#+  +:+       +#+        */
+/*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 13:59:31 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/06/19 20:05:44 by hbourlot         ###   ########.fr       */
+/*   Updated: 2025/06/28 22:36:58 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
-int http::TcpServer::runServer() {
+int http::TcpServer::runServer()
+{
 
 	int timeOut = 3 * 60 * 1000;
 
 	if (startServer())
 		return -1;
-	try {
+	try
+	{
 		startListen();
-	} catch (const TcpServerException &e) {
-		std::cerr << "Error while starting to listen => " << e.what()
-		          << std::endl;
+	}
+	catch (const TcpServerException &e)
+	{
+		std::cerr << "Error while starting to listen => " << e.what() << std::endl;
 		close(_serverSocket);
 		return -1;
 	}
 
-	std::vector<pollfd> fds;
 	pollfd listen_fd;
 	listen_fd.fd = _serverSocket;
 	listen_fd.events = POLLIN; // any readable data available
 	listen_fd.revents = 0;
-	fds.push_back(listen_fd);
+	_fds.push_back(listen_fd);
 
-	runLoop(fds, timeOut);
-	shutDownServer(fds);
+	runLoop(timeOut);
+	shutDownServer();
 	return 0;
 }

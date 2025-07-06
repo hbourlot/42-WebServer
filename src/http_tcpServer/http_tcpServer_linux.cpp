@@ -1,14 +1,11 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include <iostream>
 
 namespace http {
 
-	TcpServer::TcpServer(Configs configuration)
-	    : _serverInfo(configuration.servers[0]),
-	      m_ip_address(configuration.servers[0].host),
-	      _port(configuration.servers[0].port), _serverSocket(),
-	      _incomingMessage(), _socketAddress_len(sizeof(sockaddr_in)),
-	      _serverMessage("") { // Initialize m_serverMessage properly
-		                       // this->startServer();
+	TcpServer::TcpServer(Server server)
+	    : _serverInfo(server), _serverSocket(), _socketAddress_len(sizeof(sockaddr_in)) {
+		// this->startServer();
 	}
 
 	TcpServer::~TcpServer() {

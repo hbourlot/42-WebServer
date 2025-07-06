@@ -1,11 +1,13 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 
-namespace http {
-
-	void TcpServer::shutDownServer(std::vector<pollfd> &fds) {
-		for (int i = 0; i < fds.size(); ++i) {
-			close(fds[i].fd);
-			fds.erase(fds.begin() + i);
+namespace http
+{
+	void TcpServer::shutDownServer()
+	{
+		for (int i = 0; i < _fds.size(); ++i)
+		{
+			close(_fds[i].fd);
+			_fds.erase(_fds.begin() + i);
 		}
 	}
 } // namespace http

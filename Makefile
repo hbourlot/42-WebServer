@@ -18,14 +18,16 @@ FILE_DIR		= fileConfig/
 AUTH_DIR		= auth/
 UTILS_DIR		= utils/
 
+CLIENT_DIR 		= client/
+HTTP_HANDLER_DIR = httpHandler/
+RESPONSE_BUILDER_DIR = responseBuilder/
 HTTP_DIR		= http_tcpServer/
 REQUEST_DIR		= $(HTTP_DIR)request/
 RESPONSE_DIR	= $(HTTP_DIR)response/
-SET_DIR			= $(RESPONSE_DIR)set/
-METHODS_DIR		= $(HTTP_DIR)methods/
-# CGI_DIR			= $(HTTP_DIR)CgiHandler/
+METHODS_DIR		= $(HTTP_HANDLER_DIR)methods/
 GET_DIR			= $(METHODS_DIR)Get/
 CGI_DIR			= $(HTTP_DIR)cgi/
+PYTHON_CGI_DIR	= $(CGI_DIR)pythonCgi/
 
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
@@ -34,28 +36,32 @@ OBJ_DIR         = obj/
 COMPILED_FILES  = 0
 LEN             = 0
 
-
+CLIENT_FUNC		= client clientManager
 AUTH_FUNC		= loginHandler
-CGI_FUNC		= parseCgi executeCgi Cgi buildEnvStrings doDup #isValidCgiExtension
+PYTHON_CGI_FUNC = PythonCgi execute buildEnvStrings doDup saveCgiOutput sendResponse
+CGI_FUNC		= parseCgi
 UTILS_FUNC		= ft_strtrim utils split getLocationFieldAsString
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop clearResponse processClientEvents
-REQUEST_FUNC	= readSocket parseRequest handleRequest
-RESPONSE_FUNC 	= sendResponse 
-METHODS_FUNC 	= handlePostRequest uploadHandler handleDeleteRequest utils
-GET_FUNC		= autoindex handleGetRequest
-SET_FUNC		= setResponse setResponseError setFileResponse setBodyResponse setResponseAux setRedirect
+HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop processClientEvents setCgi
+REQUEST_FUNC	= readSocket parseRequest 
+HTTP_HANDLER_FUNC = HttpHandler
+RESPONSE_BUILDER_FUNC = ResponseBuilder setResponseAux sendResponse
+METHODS_FUNC 	= handlePostRequest uploadHandler handleDeleteRequest
+GET_FUNC		= autoindex handleGetRequest 
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CGI_DIR), $(CGI_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(REQUEST_DIR), $(REQUEST_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(RESPONSE_DIR), $(RESPONSE_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(SET_DIR), $(SET_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(HTTP_HANDLER_DIR), $(HTTP_HANDLER_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(RESPONSE_BUILDER_DIR), $(RESPONSE_BUILDER_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(METHODS_DIR), $(METHODS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(GET_DIR), $(GET_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(PYTHON_CGI_DIR), $(PYTHON_CGI_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR), main.cpp) 
 
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))

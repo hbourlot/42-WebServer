@@ -1,0 +1,56 @@
+#include "http_tcpServer/HttpStructs.hpp"
+#include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include <cerrno>
+#include <cstddef>
+#include <iostream>
+#include <unistd.h>
+#include <vector>
+
+int http::TcpServer::sendResponse(pollfd &socket) {
+	SocketFD clientFd = socket.fd;
+
+	Client &client = *_clientManager.getClient(clientFd);
+	std::string &writeBuffer = client.getWriteBuffer();
+	// std::cout << "writeBuffer "<<writeBuffer << "\n";
+
+	if (writeBuffer.empty())
+		return 0;
+
+	ssize_t bytesSent = send(clientFd, writeBuffer.c_str(), writeBuffer.size(), MSG_NOSIGNAL);
+
+	if (bytesSent < 0) {
+		if (errno == EPIPE)
+			log("Client disconnected before response");
+		else
+			log("Error sending response to client");
+		return 1; // cerrar conexión
+	}
+
+	writeBuffer.erase(0, bytesSent);
+
+	if (writeBuffer.empty()) {
+		log("----- Server Response sent to client -----\n\n");
+		return 0;
+	}
+
+	// Si todavía quedan datos, esperar siguiente POLLOUT
+	return 2; // aún quedan datos por enviar
+}
+
+// int http::TcpServer::sendResponse(pollfd &socket) {
+
+// 	ssize_t bytesSent = send(socket.fd, _serverMessage.c_str(),
+// 	                         _serverMessage.size(), MSG_NOSIGNAL);
+// 	if (bytesSent < 0) {
+// 		if (errno == EPIPE) {
+// 			log("Client disconnected before response");
+// 		} else {
+// 			log("Error sending response to client");
+// 		}
+// 		return 1;
+// 	} else {
+// 		log("----- Server Response sent to client -----\n\n");
+// 	}
+
+// 	return 0;
+// }
