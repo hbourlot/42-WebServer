@@ -1,4 +1,5 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include <exception>
 
 namespace http {
 
@@ -64,9 +65,12 @@ namespace http {
 		std::string filePath = getFilePath(request.path, matchedLocation);
 		std::string prototypeFilePath = filePath.substr(1);
 
-		ICgi *cgi = TcpServer::parseCgi(matchedLocation, filePath, &client);
-		if (cgi) {
-			//!! over here
+		try {
+			TcpServer::parseCgi(matchedLocation, filePath, &client);
+		} catch (std::exception &e) {
+			std::cerr << "[EXCEPTION] std::exception: " << e.what() << std::endl;
+			// Exit program properly since Allocation failed
+			exit(0);
 		}
 
 		if (request.method == "GET")

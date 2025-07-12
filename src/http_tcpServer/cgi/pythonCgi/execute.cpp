@@ -26,7 +26,7 @@ void debugCgiExec(const char *filePath, char *const argv[], char *const envp[]) 
 }
 
 void http::PythonCgi::handleChildProcess() {
-	//* Child process
+
 	doDup();
 
 	this->_filePath = "." + this->_filePath;
@@ -53,16 +53,14 @@ void http::PythonCgi::handleChildProcess() {
 
 namespace http {
 
-	void PythonCgi::execute(std::vector<pollfd> &fds) {
+	void PythonCgi::execute() {
 
 		if (pipe(this->_inputPipe) < 0 || pipe(this->_outputPipe) < 0) {
-			std::cerr << "Pipe creating failed\n";
-			return;
+			return this->setErrorStatusWLog("Error: Pipe creating failed");
 		}
 		this->_pid = fork();
 		if (this->_pid < 0) {
-			std::cerr << "Fork failed\n";
-			return;
+			return this->setErrorStatusWLog("Error: Fork failed");
 		} else if (this->_pid == 0) {
 			handleChildProcess();
 		} else {

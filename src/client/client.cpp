@@ -1,4 +1,5 @@
 #include "Client/Client.hpp"
+#include <iostream>
 #include <netinet/in.h>
 #include <sys/poll.h>
 #include <vector>
@@ -23,12 +24,16 @@ namespace http {
 		return (*_cgi);
 	}
 
-	void Client::setCgi(ICgi *object) {
+	void Client::addCgi(ICgi *object) {
 		this->_cgi = object;
 	}
 
 	void Client::executeCgi() const {
-		this->_cgi->execute(_fds);
+		if (!this->hasCgi()) {
+			std::cerr << "Client has no Cgi" << std::endl;
+			return;
+		}
+		this->_cgi->execute();
 	}
 
 	bool Client::hasCgi() const {

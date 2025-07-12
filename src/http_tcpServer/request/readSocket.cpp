@@ -17,6 +17,8 @@ bool http::TcpServer::readSocket(int index) {
 		client->appendToWriteBuffer(ResponseBuilder::buildResponseString(client->getResponse(), client->getRequest()));
 		_fds[index].events |= POLLOUT;
 		return true; // Close connection
+	} else if (client->hasCgi()) {
+		// Treat read of CGI here
 	}
 
 	ssize_t bytesReceived = read(fd, buffer, BUFFER_SIZE);

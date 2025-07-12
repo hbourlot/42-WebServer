@@ -45,8 +45,6 @@ void http::TcpServer::processClientEvents() {
 		shouldCloseRead = false;
 
 		fd = _fds[idx].fd;
-		if (_clientManager.getClient(fd)->hasCgi()) {
-		}
 
 		if (_fds[idx].revents & POLLIN) {
 			shouldCloseRead = readSocket(idx);

@@ -39,7 +39,7 @@ void http::TcpServer::runLoop(int timeOut) {
 	try {
 		while (true) {
 			// poll() waits for events on multiple file descriptors (like
-			// sockets), enabling non-blocking I/O in servers.
+			// sockets, enabling non-blocking I/O in servers.
 			int ret = poll(_fds.data(), _fds.size(), timeOut);
 
 			if (ret < 0) {

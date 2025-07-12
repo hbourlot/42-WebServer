@@ -1,4 +1,5 @@
 #include "http_tcpServer/PythonCgi.hpp"
+#include <iostream>
 
 http::PythonCgi::PythonCgi(Client *client, std::string &filePath)
     : _client(client), _filePath(filePath), _envp(), _output(""), _envStrings(), _inputPipe(), _outputPipe(),
@@ -23,6 +24,21 @@ bool http::PythonCgi::isFinished(void) const {
 
 bool http::PythonCgi::hasError(void) const {
 	return _status[ERROR_IDX];
+}
+
+void http::PythonCgi::setErrorStatus() {
+	this->_status[ERROR_IDX] = true;
+}
+
+void http::PythonCgi::setErrorStatusWLog(std::string msg) {
+	std::cerr << msg << std::endl;
+	this->_status[ERROR_IDX] = true;
+}
+void http::PythonCgi::setFinishedStatus() {
+	this->_status[FINISHED_IDX] = true;
+}
+void http::PythonCgi::setRunningStatus() {
+	this->_status[RUNNING_IDX] = true;
 }
 
 std::string http::PythonCgi::getFilePath() const {

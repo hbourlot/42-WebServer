@@ -58,7 +58,7 @@ namespace http {
 			explicit TcpServerException(const std::string &message) : std::runtime_error(message) {
 			}
 		};
-		static ICgi *parseCgi(const Location loc, std::string &filePath, Client *client);
+		static bool parseCgi(const Location loc, std::string &filePath, Client *client);
 		void setCgi(SocketFD, ICgi *);
 
 	  private:

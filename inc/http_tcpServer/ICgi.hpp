@@ -17,7 +17,8 @@ namespace http {
 		virtual ~ICgi() {};
 
 		// Start CGI process
-		virtual void execute(std::vector<pollfd> &fds) = 0;
+		// virtual void execute(std::vector<pollfd> &fds) = 0;
+		virtual void execute() = 0;
 
 		// Check Cgi State
 		virtual bool isRunning() const = 0;

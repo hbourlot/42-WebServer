@@ -23,7 +23,7 @@ namespace http {
 		SocketFD getFd() const;
 		bool hasCgi() const;
 		ICgi &getCgi() const;
-		void setCgi(ICgi *);
+		void addCgi(ICgi *);
 		void executeCgi() const;
 
 		// Buffers

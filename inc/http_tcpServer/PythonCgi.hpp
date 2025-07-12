@@ -17,12 +17,17 @@ namespace http {
 		~PythonCgi();
 
 		// Start CGI process
-		void execute(std::vector<pollfd> &fds);
+		// void execute(std::vector<pollfd> &fds);
+		void execute();
 
 		// Check Cgi State
 		bool isRunning(void) const;
 		bool isFinished(void) const;
 		bool hasError(void) const;
+		void setErrorStatus();
+		void setRunningStatus();
+		void setFinishedStatus();
+		void setErrorStatusWLog(std::string msg);
 
 		void sendResponse();
 
