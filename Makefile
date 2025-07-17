@@ -46,8 +46,8 @@ HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acce
 REQUEST_FUNC	= readSocket parseRequest 
 HTTP_HANDLER_FUNC = HttpHandler
 RESPONSE_BUILDER_FUNC = ResponseBuilder setResponseAux sendResponse
-METHODS_FUNC 	= handlePostRequest uploadHandler handleDeleteRequest
-GET_FUNC		= autoindex handleGetRequest 
+METHODS_FUNC 	=  uploadHandler
+GET_FUNC		= autoindex 
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \

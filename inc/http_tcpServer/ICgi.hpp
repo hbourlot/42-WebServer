@@ -10,6 +10,8 @@
 
 namespace http {
 
+	typedef int CgiFd;
+
 	class ICgi {
 	  public:
 		enum { RUNNING_IDX, FINISHED_IDX, ERROR_IDX };
@@ -21,9 +23,9 @@ namespace http {
 		virtual void execute() = 0;
 
 		// Check Cgi State
-		virtual bool isRunning() const = 0;
-		virtual bool isFinished() const = 0;
-		virtual bool hasError() const = 0;
+		virtual bool isRunning() = 0;
+		virtual bool isFinished() = 0;
+		virtual bool hasError() = 0;
 
 		// Read output from the CGI process
 		// virtual void readOutput() = 0;

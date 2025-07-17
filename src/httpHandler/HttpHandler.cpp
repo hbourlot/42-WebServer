@@ -62,16 +62,16 @@ namespace http {
 
 		//!!! * Handler CGI
 
-		std::string filePath = getFilePath(request.path, matchedLocation);
-		std::string prototypeFilePath = filePath.substr(1);
+		// std::string filePath = getFilePath(request.path, matchedLocation);
+		// std::string prototypeFilePath = filePath.substr(1);
 
-		try {
-			TcpServer::parseCgi(matchedLocation, filePath, &client);
-		} catch (std::exception &e) {
-			std::cerr << "[EXCEPTION] std::exception: " << e.what() << std::endl;
-			// Exit program properly since Allocation failed
-			exit(0);
-		}
+		// try {
+		// 	TcpServer::parseCgi(matchedLocation, filePath, &client);
+		// } catch (std::exception &e) {
+		// 	std::cerr << "[EXCEPTION] std::exception: " << e.what() << std::endl;
+		// 	// Exit program properly since Allocation failed
+		// 	exit(0);
+		// }
 
 		if (request.method == "GET")
 			return (handleGet(client, server, matchedLocation));

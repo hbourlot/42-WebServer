@@ -12,7 +12,8 @@ bool http::TcpServer::parseCgi(const Location loc, std::string &filePath, Client
 		std::cerr << "Error: Error allocating memory of Cgi." << std::endl;
 	} else {
 		client->addCgi(cgi);
-		client->executeCgi();
+		// client->executeCgi();
+		std::cout << "ADDED AND EXECUTED\n";
 	}
 	return true;
 }

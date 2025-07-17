@@ -1,5 +1,6 @@
 #include "http_tcpServer/PythonCgi.hpp"
 #include <iostream>
+#include <sys/wait.h>
 
 http::PythonCgi::PythonCgi(Client *client, std::string &filePath)
     : _client(client), _filePath(filePath), _envp(), _output(""), _envStrings(), _inputPipe(), _outputPipe(),
@@ -14,15 +15,44 @@ http::PythonCgi::~PythonCgi() {
 }
 
 // Check Cgi State
-bool http::PythonCgi::isRunning(void) const {
+bool http::PythonCgi::isRunning() {
 	return _status[RUNNING_IDX];
 }
 
-bool http::PythonCgi::isFinished(void) const {
+void http::PythonCgi::handleWait(pid_t &pid, bool *cgiStatus) {
+
+	int status;
+
+	if (_processResult == -1)
+		return;
+	_processResult = waitpid(pid, &status, WNOHANG);
+
+	if (_processResult == 0) {
+		cgiStatus[ICgi::FINISHED_IDX] = false;
+		return;
+	} else if (_processResult == pid) {
+		cgiStatus[ICgi::FINISHED_IDX] = true;
+	} else {
+		cgiStatus[ICgi::ERROR_IDX] = true;
+	}
+}
+
+bool http::PythonCgi::isFinished() {
+	int status;
+	pid_t result;
+
+	if (this->_status[FINISHED_IDX] || this->_status[ERROR_IDX])
+		return true;
+	handleWait(_pid, _status);
+
 	return _status[FINISHED_IDX];
 }
 
-bool http::PythonCgi::hasError(void) const {
+bool http::PythonCgi::hasError() {
+
+	if (this->_status[FINISHED_IDX] || this->_status[ERROR_IDX])
+		return true;
+	handleWait(_pid, _status);
 	return _status[ERROR_IDX];
 }
 

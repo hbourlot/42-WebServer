@@ -20,8 +20,8 @@ namespace http {
 		return (_fd);
 	}
 
-	ICgi &Client::getCgi() const {
-		return (*_cgi);
+	ICgi *Client::getCgi() const {
+		return (_cgi);
 	}
 
 	void Client::addCgi(ICgi *object) {

@@ -22,7 +22,7 @@ namespace http {
 
 		SocketFD getFd() const;
 		bool hasCgi() const;
-		ICgi &getCgi() const;
+		ICgi *getCgi() const;
 		void addCgi(ICgi *);
 		void executeCgi() const;
 

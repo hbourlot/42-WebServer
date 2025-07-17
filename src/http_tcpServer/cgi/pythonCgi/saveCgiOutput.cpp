@@ -10,8 +10,8 @@ void http::PythonCgi::saveCgiOutput() {
 	// 	_outputContent.append(buffer, _bytesReceived);
 	// 	std::memset(buffer, 0, BUFFER_SIZE);
 	// }
+	std::cout << "DASDASDASDAS\n";
 	_bytesReceived = read(_outputPipe[0], buffer, BUFFER_SIZE);
-	// std::cout << "DASDASDASDAS\n";
 	std::cout << buffer;
 
 	_output.append(buffer);

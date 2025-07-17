@@ -10,6 +10,7 @@
 #include <vector>
 
 namespace http {
+
 	class PythonCgi : public ICgi {
 
 	  public:
@@ -21,9 +22,9 @@ namespace http {
 		void execute();
 
 		// Check Cgi State
-		bool isRunning(void) const;
-		bool isFinished(void) const;
-		bool hasError(void) const;
+		bool isRunning();
+		bool isFinished();
+		bool hasError();
 		void setErrorStatus();
 		void setRunningStatus();
 		void setFinishedStatus();
@@ -66,10 +67,12 @@ namespace http {
 		int _inputPipe[2];
 		int _outputPipe[2];
 		pid_t _pid;
+		pid_t _processResult;
 
 		void buildEnvStrings();
 		void doDup();
 		void handleChildProcess();
+		void handleWait(pid_t &pid, bool *status);
 	};
 
 }; // namespace http

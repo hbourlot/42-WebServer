@@ -29,7 +29,7 @@ void http::PythonCgi::handleChildProcess() {
 
 	doDup();
 
-	this->_filePath = "." + this->_filePath;
+	// this->_filePath = "." + this->_filePath;
 
 	// build argv
 	std::vector<char *> argv;
@@ -74,7 +74,8 @@ namespace http {
 			_pfd.events = POLLIN;
 
 			// ! Maybe same timeout from my main poll
-			_retPfd = poll(&_pfd, 1, 1000); // 1 second timeout
+			// _retPfd = poll(&_pfd, 1, 1000); // 1 second timeout
+			_retPfd = poll(&_pfd, 1, 0); // 1 second timeout
 
 			// char buffer[BUFFER_SIZE] = {0};
 			// ssize_t bytes = read(_outputPipe[0], buffer, BUFFER_SIZE);

@@ -3,14 +3,14 @@
 #include <unistd.h>
 
 bool http::TcpServer::readSocket(int index) {
+
+	int fd = _fds[index].fd;
+	Client *client = _clientManager.getClient(fd);
 	const size_t CLIENT_MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
 	char buffer[BUFFER_SIZE + 1] = {0};
-	int fd = _fds[index].fd;
-
 	bool shouldPollOut = false;
 	bool finished = false;
 
-	Client *client = _clientManager.getClient(fd);
 	if (!client) {
 		std::cerr << "Error: Client not found for fd " << fd << std::endl;
 		client->getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
@@ -18,6 +18,9 @@ bool http::TcpServer::readSocket(int index) {
 		_fds[index].events |= POLLOUT;
 		return true; // Close connection
 	} else if (client->hasCgi()) {
+		std::cout << "HAS CGI\n";
+		// std::cout << client->getCgi().getOutput() << std::endl;
+		std::cout << "AFTER getOutput()\n";
 		// Treat read of CGI here
 	}
 
@@ -53,9 +56,11 @@ bool http::TcpServer::readSocket(int index) {
 			return false;
 	}
 
-	if (shouldPollOut)
+	if (shouldPollOut && !client->getCgi()) {
 		_fds[index].events |= POLLOUT;
+	}
 
 	// buffers.erase(fd);
+	finished = false;
 	return finished;
 }
