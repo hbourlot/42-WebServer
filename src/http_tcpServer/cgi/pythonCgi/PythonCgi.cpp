@@ -2,9 +2,9 @@
 #include <iostream>
 #include <sys/wait.h>
 
-http::PythonCgi::PythonCgi(Client *client, std::string &filePath)
-    : _client(client), _filePath(filePath), _envp(), _output(""), _envStrings(), _inputPipe(), _outputPipe(),
-      _status() {
+http::PythonCgi::PythonCgi(Client *client, ClientManager *manager, std::string &filePath)
+    : _client(client), _manager(manager), _filePath(filePath), _envp(), _output(""), _envStrings(), _inputPipe(),
+      _outputPipe(), _status() {
 }
 
 http::PythonCgi::~PythonCgi() {
@@ -91,11 +91,19 @@ SocketFD http::PythonCgi::getClientFd() const {
 	return _client->getFd();
 };
 
-std::string http::PythonCgi::getOutput() const {
+std::string http::PythonCgi::getOutput() { // Interface
+	this->saveCgiOutput();
 	return _output;
 }
 
-// ! Might not be necessary
+http::CgiFd http::PythonCgi::getCgiFd() const {
+	return this->_outputPipe[0];
+}
+
+void http::PythonCgi::registerWithManager() {
+	_manager->addCgi(this->getCgiFd(), _client);
+}
+
 void http::PythonCgi::registerPollFd(std::vector<pollfd> &fds) const {
 	pollfd pfd;
 

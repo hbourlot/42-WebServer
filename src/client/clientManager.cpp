@@ -1,4 +1,5 @@
 #include "Client/ClientManager.hpp"
+#include <cstddef>
 #include <netinet/in.h>
 #include <sys/poll.h>
 #include <vector>
@@ -24,6 +25,26 @@ namespace http {
 		_clients[fd] = new Client(fd, socketAddress, fds, serverInfo);
 	}
 
+	void ClientManager::addCgi(int fd, http::Client *client) {
+		if (_cgiToClient.find(fd) != _cgiToClient.end()) {
+			std::cerr << "Cgi with FD " << fd << "already exists." << std::endl;
+			return;
+		}
+		_cgiToClient[fd] = client;
+	}
+
+	void ClientManager::removeCgi(int fd) {
+		std::map<int, Client *>::iterator it = _cgiToClient.find(fd);
+		if (it != _cgiToClient.end()) {
+			_cgiToClient.erase(it);
+		}
+	}
+
+	Client *ClientManager::getCgiClient(int fd) {
+
+		return _cgiToClient.find(fd) != _cgiToClient.end() ? _cgiToClient.at(fd) : NULL;
+	}
+
 	void ClientManager::removeClient(SocketFD fd) {
 		std::map<int, Client *>::iterator it = _clients.find(fd);
 		if (it != _clients.end()) {
@@ -42,12 +63,8 @@ namespace http {
 		return _clients.find(fd) != _clients.end();
 	}
 
-	bool ClientManager::hasCgiClient(SocketFD fd, std::vector<Client> &clients) const {
-
-		// for (int idx = 0; idx < clients.size(); ++idx) {
-		// 	if (clients[idx].getCgi())
-		// }
-		return true;
+	bool ClientManager::hasCgiClient(int fd) const {
+		return _cgiToClient.find(fd) != _cgiToClient.end() ? true : false;
 	}
 
 	std::map<int, Client *> &ClientManager::getClients() {

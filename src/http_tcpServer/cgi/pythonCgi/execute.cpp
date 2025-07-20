@@ -69,24 +69,8 @@ namespace http {
 			close(_outputPipe[1]);
 
 			fcntl(_outputPipe[0], F_SETFL, fcntl(_outputPipe[0], F_GETFL, 0) | O_NONBLOCK);
-
-			_pfd.fd = _outputPipe[0];
-			_pfd.events = POLLIN;
-
-			// ! Maybe same timeout from my main poll
-			// _retPfd = poll(&_pfd, 1, 1000); // 1 second timeout
-			_retPfd = poll(&_pfd, 1, 0); // 1 second timeout
-
-			// char buffer[BUFFER_SIZE] = {0};
-			// ssize_t bytes = read(_outputPipe[0], buffer, BUFFER_SIZE);
-
-			// buffer[bytes] = '\0'; // Safely null-terminate
-			// std::cout << "[BUFFER]: " << buffer << std::endl;
-
-			// fcntl(_outputPipe[0], F_SETFL,
-			//       fcntl(_outputPipe[0], F_GETFL, 0) | O_NONBLOCK);
-			// fcntl(_outputPipe[0], F_SETFL, O_NONBLOCK);
-			// registerPollFd(fds);
+			registerPollFd(this->_client->getFdsLoop());
+			registerWithManager();
 		}
 	}
 

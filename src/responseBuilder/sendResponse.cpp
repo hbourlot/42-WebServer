@@ -7,16 +7,28 @@
 #include <vector>
 
 int http::TcpServer::sendResponse(pollfd &socket) {
-	SocketFD clientFd = socket.fd;
+	SocketFD fd = socket.fd;
 
-	Client &client = *_clientManager.getClient(clientFd);
+	Client &client = *_clientManager.getClient(fd);
+
+	// std::cout << "ON SENDRESPONSE = " << fd << std::endl;
+	if (client.hasCgi()) {
+
+		std::string buff = client.getCgi()->getOutput();
+		std::string httpResponse = "HTTP/1.1 200 OK\r\n";
+		httpResponse += buff;
+		// std::cout << client.getCgi()->getOutput();
+		ssize_t bytesSent = send(fd, httpResponse.c_str(), httpResponse.size(), MSG_NOSIGNAL);
+		return 2;
+	}
+
 	std::string &writeBuffer = client.getWriteBuffer();
 	// std::cout << "writeBuffer "<<writeBuffer << "\n";
 
 	if (writeBuffer.empty())
 		return 0;
 
-	ssize_t bytesSent = send(clientFd, writeBuffer.c_str(), writeBuffer.size(), MSG_NOSIGNAL);
+	ssize_t bytesSent = send(fd, writeBuffer.c_str(), writeBuffer.size(), MSG_NOSIGNAL);
 
 	if (bytesSent < 0) {
 		if (errno == EPIPE)
@@ -36,21 +48,3 @@ int http::TcpServer::sendResponse(pollfd &socket) {
 	// Si todavía quedan datos, esperar siguiente POLLOUT
 	return 2; // aún quedan datos por enviar
 }
-
-// int http::TcpServer::sendResponse(pollfd &socket) {
-
-// 	ssize_t bytesSent = send(socket.fd, _serverMessage.c_str(),
-// 	                         _serverMessage.size(), MSG_NOSIGNAL);
-// 	if (bytesSent < 0) {
-// 		if (errno == EPIPE) {
-// 			log("Client disconnected before response");
-// 		} else {
-// 			log("Error sending response to client");
-// 		}
-// 		return 1;
-// 	} else {
-// 		log("----- Server Response sent to client -----\n\n");
-// 	}
-
-// 	return 0;
-// }

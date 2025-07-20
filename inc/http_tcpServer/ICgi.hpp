@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Client/ClientManager.hpp"
 #include "HttpStructs.hpp"
 #include <poll.h>
 #include <vector>
@@ -34,16 +35,10 @@ namespace http {
 		virtual void sendResponse() = 0;
 
 		// Get the output content (header + body)
-		virtual std::string getOutput() const = 0;
+		virtual std::string getOutput() = 0;
 
 		// Get the file path of the CGI script/file
 		virtual std::string getFilePath() const = 0;
-
-		// Get the client socket fd (for poll/select)
-		virtual SocketFD getClientFd() const = 0;
-
-		// Register the CGI`s pipe fd(s) with poll/select
-		virtual void registerPollFd(std::vector<pollfd> &fds) const = 0;
 	};
 
 } // namespace http

@@ -23,6 +23,7 @@ namespace http {
 		SocketFD getFd() const;
 		bool hasCgi() const;
 		ICgi *getCgi() const;
+		std::vector<pollfd> &getFdsLoop();
 		void addCgi(ICgi *);
 		void executeCgi() const;
 
@@ -44,6 +45,7 @@ namespace http {
 		// State of CGi REquest
 		bool isRequestComplete() const;
 		void setRequestComplete(bool value);
+		void setPOLLOUT();
 
 		bool isCgiInProgress() const;
 		void setCgiInProgress(bool value);

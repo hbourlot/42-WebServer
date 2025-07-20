@@ -24,8 +24,20 @@ namespace http {
 		return (_cgi);
 	}
 
+	std::vector<pollfd> &Client::getFdsLoop() {
+		return this->_fds;
+	}
+
 	void Client::addCgi(ICgi *object) {
 		this->_cgi = object;
+	}
+
+	void Client::setPOLLOUT() {
+		for (int i = 0; i < _fds.size(); ++i) {
+			if (_fds[i].fd == _fd) {
+				_fds[i].events |= POLLOUT;
+			}
+		}
 	}
 
 	void Client::executeCgi() const {
