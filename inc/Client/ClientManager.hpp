@@ -25,6 +25,7 @@ namespace http {
 		void addCgi(int fd, Client *);
 		Client *getCgiClient(int fd);
 		void removeCgi(int fd);
+		void removeCgiByClientFd(int clientFd);
 
 	  private:
 		std::map<SocketFD, Client *> _clients;

@@ -2,12 +2,14 @@
 #include <iostream>
 #include <sys/wait.h>
 
-http::PythonCgi::PythonCgi(Client *client, ClientManager *manager, std::string &filePath)
-    : _client(client), _manager(manager), _filePath(filePath), _envp(), _output(""), _envStrings(), _inputPipe(),
-      _outputPipe(), _status() {
+using namespace http;
+
+PythonCgi::PythonCgi(Client *client, ClientManager *manager, std::string &filePath)
+    : _type(PYTHON_CGI), _client(client), _manager(manager), _filePath(filePath), _envp(), _output(""), _envStrings(),
+      _inputPipe(), _outputPipe(), _status() {
 }
 
-http::PythonCgi::~PythonCgi() {
+PythonCgi::~PythonCgi() {
 	close(_inputPipe[0]);
 	close(_inputPipe[1]);
 	close(_outputPipe[0]);
@@ -15,18 +17,18 @@ http::PythonCgi::~PythonCgi() {
 }
 
 // Check Cgi State
-bool http::PythonCgi::isRunning() {
+bool PythonCgi::isRunning() {
 	return _status[RUNNING_IDX];
 }
 
-void http::PythonCgi::handleWait(pid_t &pid, bool *cgiStatus) {
+void PythonCgi::handleWait(pid_t &pid, bool *cgiStatus) {
 
 	int status;
 
 	if (_processResult == -1)
 		return;
 	_processResult = waitpid(pid, &status, WNOHANG);
-
+	std::cerr << "PROCESS RESULT => " << _processResult << std::endl;
 	if (_processResult == 0) {
 		cgiStatus[ICgi::FINISHED_IDX] = false;
 		return;
@@ -37,7 +39,7 @@ void http::PythonCgi::handleWait(pid_t &pid, bool *cgiStatus) {
 	}
 }
 
-bool http::PythonCgi::isFinished() {
+bool PythonCgi::isFinished() {
 	int status;
 	pid_t result;
 
@@ -48,7 +50,7 @@ bool http::PythonCgi::isFinished() {
 	return _status[FINISHED_IDX];
 }
 
-bool http::PythonCgi::hasError() {
+bool PythonCgi::hasError() {
 
 	if (this->_status[FINISHED_IDX] || this->_status[ERROR_IDX])
 		return true;
@@ -56,55 +58,59 @@ bool http::PythonCgi::hasError() {
 	return _status[ERROR_IDX];
 }
 
-void http::PythonCgi::setErrorStatus() {
+void PythonCgi::setErrorStatus() {
 	this->_status[ERROR_IDX] = true;
 }
 
-void http::PythonCgi::setErrorStatusWLog(std::string msg) {
+void PythonCgi::setErrorStatusWLog(std::string msg) {
 	std::cerr << msg << std::endl;
 	this->_status[ERROR_IDX] = true;
 }
-void http::PythonCgi::setFinishedStatus() {
+void PythonCgi::setFinishedStatus() {
 	this->_status[FINISHED_IDX] = true;
 }
-void http::PythonCgi::setRunningStatus() {
+void PythonCgi::setRunningStatus() {
 	this->_status[RUNNING_IDX] = true;
 }
 
-std::string http::PythonCgi::getFilePath() const {
+std::string PythonCgi::getFilePath() const {
 	return this->_filePath;
 }
 
-httpRequest http::PythonCgi::getCgiRequest() const {
+httpRequest PythonCgi::getCgiRequest() const {
 	return _request;
 }
 
-httpResponse http::PythonCgi::getCgiResponse() const {
+httpResponse PythonCgi::getCgiResponse() const {
 	return _response;
 }
 
-int http::PythonCgi::getPollFd() const {
+int PythonCgi::getPollFd() const {
 	return _outputPipe[0];
 }
 
-SocketFD http::PythonCgi::getClientFd() const {
+SocketFD PythonCgi::getClientFd() const {
 	return _client->getFd();
 };
 
-std::string http::PythonCgi::getOutput() { // Interface
+std::string PythonCgi::getOutput() { // Interface
 	this->saveCgiOutput();
 	return _output;
 }
 
-http::CgiFd http::PythonCgi::getCgiFd() const {
+CgiFd PythonCgi::getCgiFd() const {
 	return this->_outputPipe[0];
 }
 
-void http::PythonCgi::registerWithManager() {
+CGI_TYPE PythonCgi::getCgiType() const {
+	return this->_type;
+}
+
+void PythonCgi::registerWithManager() {
 	_manager->addCgi(this->getCgiFd(), _client);
 }
 
-void http::PythonCgi::registerPollFd(std::vector<pollfd> &fds) const {
+void PythonCgi::registerPollFd(std::vector<pollfd> &fds) const {
 	pollfd pfd;
 
 	pfd.fd = _outputPipe[0];

@@ -45,10 +45,21 @@ namespace http {
 		return _cgiToClient.find(fd) != _cgiToClient.end() ? _cgiToClient.at(fd) : NULL;
 	}
 
+	void ClientManager::removeCgiByClientFd(int clientFd) {
+		std::map<int, Client *>::iterator it;
+		for (it = _cgiToClient.begin(); it != _cgiToClient.end(); ++it) {
+			if (it->second && it->second->getFd() == clientFd) {
+				_cgiToClient.erase(it);
+				break;
+			}
+		}
+	}
+
 	void ClientManager::removeClient(SocketFD fd) {
 		std::map<int, Client *>::iterator it = _clients.find(fd);
 		if (it != _clients.end()) {
-			delete it->second;
+			if (it->second->hasCgi())
+				delete it->second;
 			_clients.erase(it);
 		}
 	}

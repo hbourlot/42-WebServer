@@ -78,7 +78,7 @@ namespace http {
 		void shutDownServer();
 		void startListen();
 		void acceptConnection();
-		void removeDeadConnections();
+		void removeDeadConnections(void(cgiHandler)(ClientManager &, SocketFD));
 		void processClientEvents();
 		void closeClientConnection(size_t index);
 		bool readSocket(int index);

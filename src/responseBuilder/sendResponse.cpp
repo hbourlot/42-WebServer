@@ -11,8 +11,9 @@ int http::TcpServer::sendResponse(pollfd &socket) {
 
 	Client &client = *_clientManager.getClient(fd);
 
-	// std::cout << "ON SENDRESPONSE = " << fd << std::endl;
 	if (client.hasCgi()) {
+
+		std::cerr << "ON SENDRESPONSE = " << fd << std::endl;
 
 		std::string buff = client.getCgi()->getOutput();
 		std::string httpResponse = "HTTP/1.1 200 OK\r\n";

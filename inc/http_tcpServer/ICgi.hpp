@@ -5,15 +5,13 @@
 #include <poll.h>
 #include <vector>
 
-// #ifndef BUFFER_SIZE
-// #define BUFFER_SIZE 30720
-// #endif
-
 namespace http {
+	enum CGI_TYPE { PYTHON_CGI, PHP_CGI };
 
 	typedef int CgiFd;
 
 	class ICgi {
+
 	  public:
 		enum { RUNNING_IDX, FINISHED_IDX, ERROR_IDX };
 
@@ -39,6 +37,8 @@ namespace http {
 
 		// Get the file path of the CGI script/file
 		virtual std::string getFilePath() const = 0;
+
+		virtual CGI_TYPE getCgiType() const = 0;
 	};
 
 } // namespace http

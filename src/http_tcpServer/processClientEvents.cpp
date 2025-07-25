@@ -2,31 +2,14 @@
 #include <netinet/in.h>
 #include <sys/poll.h>
 
-// bool http::TcpServer::handleCgiResponse(pollfd &socket) {
-
-// 	if ((socket.revents & POLLIN) && _cgiFdMap.count(socket.fd)) {
-// 		Cgi *cgi = _cgiFdMap[socket.fd];
-// 		if (cgi->getStatus() != Cgi::FINISHED ||
-// 			cgi->getStatus() != Cgi::ERROR) {
-// 			cgi->readCgiOutput();
-// 		}
-// 		// if (cgi->getStatus() == Cgi::FINISHED) {
-// 		setBodyResponse(HTTP_OK, cgi->getOutputContent());
-// 		std::cout << cgi->getOutputContent();
-// 		sendResponse(socket);
-// 		_cgiFdMap.erase(socket.fd);
-// 		// }
-// 		return true;
-// 	}
-// 	// std::cout << "RETURNING FALSE\n";
-// 	return false;
-// }
-
 void http::TcpServer::closeClientConnection(size_t index) {
 	SocketFD fd = _fds[index].fd;
 
 	std::cout << "Closing client FD => " << fd << std::endl;
-
+	if (_clientManager.getClient(fd)->hasCgi()) {
+		// and assuming its python CGI
+		_clientManager.removeCgiByClientFd(fd);
+	}
 	close(fd);
 	_socketAddressMap.erase(fd);
 	_clientManager.removeClient(fd);

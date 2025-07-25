@@ -66,8 +66,10 @@ namespace http {
 		} else {
 
 			close(_inputPipe[1]);
+			close(_inputPipe[0]);
 			close(_outputPipe[1]);
 
+			std::cout << "PIPEOUT[0] => " << _outputPipe[0] << std::endl;
 			fcntl(_outputPipe[0], F_SETFL, fcntl(_outputPipe[0], F_GETFL, 0) | O_NONBLOCK);
 			registerPollFd(this->_client->getFdsLoop());
 			registerWithManager();

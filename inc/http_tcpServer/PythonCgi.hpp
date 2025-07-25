@@ -19,34 +19,37 @@ namespace http {
 
 		// Start CGI process
 		// void execute(std::vector<pollfd> &fds);
-		void execute();
+		void execute(); // Interface
 
 		// Check Cgi State
-		bool isRunning();
-		bool isFinished();
-		bool hasError();
+		bool isRunning();  // Interface
+		bool isFinished(); // Interface
+		bool hasError();   // Interface
 		void setErrorStatus();
 		void setRunningStatus();
 		void setFinishedStatus();
 		void setErrorStatusWLog(std::string msg);
 
-		void sendResponse();
+		void sendResponse(); // Interface
 
+		//
 		httpResponse getCgiResponse() const;
 		httpRequest getCgiRequest() const;
 		std::string getFilePath() const;
+		SocketFD getClientFd() const;
+		CgiFd getCgiFd() const;
 		int getPollFd() const;
 		void saveCgiOutput();
 		// Get the output content (header + body)
-		std::string getOutput();
-		// Get client socket fd1
-		SocketFD getClientFd() const;
-		CgiFd getCgiFd() const;
+		std::string getOutput(); // Interface
+		CGI_TYPE getCgiType() const;
 
 		void registerPollFd(std::vector<pollfd> &fds) const; //! Might not be necessary
 		void registerWithManager();
+		int _bytesReceived;
 
 	  private:
+		CGI_TYPE _type;
 		bool _status[3];
 		Client *_client;
 		ClientManager *_manager;
@@ -57,7 +60,6 @@ namespace http {
 		Server _serverInfo;
 		std::string _filePath;
 		sockaddr_in _clientAddress;
-		int _bytesReceived;
 
 		std::vector<char *> _envp;
 		std::vector<std::string> _envStrings;

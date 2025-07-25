@@ -12,9 +12,8 @@ bool http::TcpServer::readSocket(int index) {
 	bool finished = false;
 
 	if (_clientManager.hasCgiClient(fd)) {
-		_clientManager.getCgiClient(fd)->getCgi()->getOutput();
-		_clientManager.getCgiClient(fd)->setPOLLOUT();
-		// _fds[index].events |= POLLOUT;
+		client = _clientManager.getCgiClient(fd);
+		client->getCgi()->getOutput();
 		return false;
 	}
 

@@ -9,8 +9,20 @@
 #include <unistd.h>
 #include <vector>
 
+using namespace http;
+
+static void handleCgiConnection(ClientManager &clientManager, SocketFD fd) {
+
+	Client *client;
+
+	if (clientManager.hasCgiClient(fd)) {
+		client = clientManager.getCgiClient(fd);
+		client->setPOLLOUT();
+	}
+}
+
 // Remove and close all pollfd's with HUP, ERR, or NVAL events
-void http::TcpServer::removeDeadConnections() {
+void http::TcpServer::removeDeadConnections(void(cgiHandler)(ClientManager &, SocketFD)) {
 
 	for (size_t i = 1; i < _fds.size(); ++i) {
 		if (_fds[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {
@@ -18,6 +30,7 @@ void http::TcpServer::removeDeadConnections() {
 
 			SocketFD fd = _fds[i].fd;
 
+			cgiHandler(_clientManager, fd);
 			if (_socketAddressMap.count(fd)) {
 				std::cout << "  socketAddressMap => " << fd << std::endl;
 				_socketAddressMap.erase(fd);
@@ -53,7 +66,7 @@ void http::TcpServer::runLoop(int timeOut) {
 
 			// Checking for new connections
 			acceptConnection();
-			removeDeadConnections();
+			removeDeadConnections(handleCgiConnection);
 			processClientEvents();
 		}
 	} catch (const TcpServerException &e) {
