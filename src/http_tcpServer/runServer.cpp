@@ -1,75 +1,42 @@
-#include "http_tcpServer/http_tcpServerException_linux.hpp"
-#include "http_tcpServer/http_tcpServer_linux.hpp"
-#include <iostream>
-#include <sys/poll.h>
-#include <vector>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   runServer.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: miafonso <miafonso@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/26 13:59:31 by hbourlot          #+#    #+#             */
+/*   Updated: 2025/07/26 14:15:41 by miafonso         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-void http::TcpServer::runServer() {
+#include "http_tcpServer/Http_tcpServer_linux.hpp"
 
-	int timeOut = 10 * 10 * 1000;
+int http::TcpServer::runServer()
+{
 
-	startServer();
-	try {
+	int timeOut = 3 * 60 * 1000;
+
+	if (startServer())
+		return -1;
+	try
+	{
 		startListen();
-	} catch (const TcpServerException &e) {
-		std::cerr << "Error while starting to listen => " << e.what()
-				  << std::endl;
-		return;
+	}
+	catch (const TcpServerException &e)
+	{
+		std::cerr << "Error while starting to listen => " << e.what() << std::endl;
+		close(_serverSocket);
+		return -1;
 	}
 
-	std::vector<pollfd> fds;
-	struct pollfd listen_fd;
-	listen_fd.fd = m_serverSocket;
+	pollfd listen_fd;
+	listen_fd.fd = _serverSocket;
 	listen_fd.events = POLLIN; // any readable data available
 	listen_fd.revents = 0;
-	fds.push_back(listen_fd);
-	try {
-		while (true) {
-			//
-			// poll() waits for events on multiple file descriptors (like
-			// sockets), enabling non-blocking I/O in servers.
-			int ret = poll(fds.data(), fds.size(), timeOut); // ??
-			// std::cout << "Entrou no while true do runServer" << std::endl;
+	_fds.push_back(listen_fd);
 
-			if (ret < 0) {
-				std::cerr << "poll() failed" << std::endl;
-			} else if (ret == 0) {
-				std::cerr << "poll() timeOut. Closing Server." << std::endl;
-				shutDownServer();
-				return;
-			}
-
-			// Checking for new connections
-			acceptConnection(fds);
-			for (size_t i = 1; i < fds.size(); ++i) {
-				int fd = fds[i].fd;
-
-				// std::cout << "Entrou no loop do runServer" << std::endl;
-				if (fds[i].revents & POLLIN) {
-					readRequest(fds, i);
-				}
-				if (fds[i].revents & POLLOUT) {
-					bool shouldClose;
-					// std::cout << "Entrou no if do runServer" << std::endl;
-
-					validateRequestMethod();
-					shouldClose = sendResponse(fds[i]);
-					fds[i].events &= ~POLLOUT;
-					if (shouldClose) {
-						close(fds[i].fd);
-						fds.erase(fds.begin() + i);
-						continue;
-					}
-					request.headers.clear();
-					request.method.clear();
-					request.body.clear();
-					m_serverMessage.clear();
-				}
-			}
-		}
-	} catch (const TcpServerException &e) {
-		std::cerr << "Error handling client connection => " << e.what()
-				  << std::endl;
-	}
+	runLoop(timeOut);
 	shutDownServer();
+	return 0;
 }

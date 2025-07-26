@@ -1,42 +1,48 @@
-#include "http_tcpServer/http_tcpServer_linux.hpp"
+#include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include <netinet/in.h>
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <vector>
 
-void http::TcpServer::acceptConnection(std::vector<pollfd> &fds) {
+static void logAcceptError(const sockaddr_in &socketAddress) {
+	std::ostringstream ss;
+	ss << "Server failed to accept incoming connection from =>\n"
+	   << "[ADDRESS: " << inet_ntoa(socketAddress.sin_addr) << "]\n"
+	   << "[PORT: " << ntohs(socketAddress.sin_port) << "]\n";
+	std::cerr << ss.str();
+}
 
+void http::TcpServer::acceptConnection() {
+
+	SocketFD acceptSocket;
 	struct pollfd client_pollfd;
+	struct sockaddr_in socketAddress;
 
 	// Checks the if theres readable data available (event)
-	while (fds[0].revents & POLLIN) {
-		m_acceptSocket =
-			accept(m_serverSocket, (struct sockaddr *)&m_socketAddress,
-				   &m_socketAddress_len);
-		if (m_acceptSocket < 0) {
+	while (_fds[0].revents & POLLIN) {
+		acceptSocket = accept(_serverSocket, (struct sockaddr *)&socketAddress, &_socketAddress_len);
+		if (acceptSocket < 0) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
 				// Means no more connections to accept
 				break;
 			}
-			std::ostringstream ss;
-
-			ss << "Server failed to accept incoming connection from =>\n"
-				  "[ADDRESS: "
-			   << inet_ntoa(m_socketAddress.sin_addr) << "]\n"
-			   << "[PORT: " << ntohs(m_socketAddress.sin_port) << "]\n";
-			std::cerr << ss.str();
+			logAcceptError(socketAddress);
 			return;
 		} else {
 
 			// Set client socket to non-blocking
-			fcntl(m_acceptSocket, F_SETFL,
-				  fcntl(m_acceptSocket, F_GETFL, 0) | O_NONBLOCK);
+			fcntl(acceptSocket, F_SETFL, fcntl(acceptSocket, F_GETFL, 0) | O_NONBLOCK);
 
-			client_pollfd.fd = m_acceptSocket;
+			client_pollfd.fd = acceptSocket;
 			client_pollfd.events = POLLIN;
 			client_pollfd.revents = 0;
 
-			fds.push_back(client_pollfd);
-			std::cout << "----- Connection Accepted 🟩\n";
+			_fds.push_back(client_pollfd);
+			_socketAddressMap[acceptSocket] = socketAddress;
+
+			_clientManager.addClient(acceptSocket, socketAddress, _fds, _serverInfo);
+
+			std::cout << "----- Connection Accepted 🟩\n\n";
 		}
 	}
 }

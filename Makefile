@@ -14,42 +14,65 @@ PRINT_CMD       = printf
 INCLUDE         = inc/
 HEADERS         = $(shell find $(INCLUDE) -name "*.hpp")
 SRC_DIR         = src/
-HTTP_DIR		= http_tcpServer/
 FILE_DIR		= fileConfig/
+AUTH_DIR		= auth/
+UTILS_DIR		= utils/
+
+CLIENT_DIR 		= client/
+HTTP_HANDLER_DIR = httpHandler/
+RESPONSE_BUILDER_DIR = responseBuilder/
+HTTP_DIR		= http_tcpServer/
+REQUEST_DIR		= $(HTTP_DIR)request/
+RESPONSE_DIR	= $(HTTP_DIR)response/
+METHODS_DIR		= $(HTTP_HANDLER_DIR)methods/
+GET_DIR			= $(METHODS_DIR)Get/
+CGI_DIR			= $(HTTP_DIR)cgi/
+PYTHON_CGI_DIR	= $(CGI_DIR)pythonCgi/
+
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
 
 # -- Variables
 COMPILED_FILES  = 0
 LEN             = 0
+
+CLIENT_FUNC		= client clientManager
+AUTH_FUNC		= loginHandler
+PYTHON_CGI_FUNC = PythonCgi execute buildEnvStrings doDup saveCgiOutput sendResponse
+CGI_FUNC		= 
+UTILS_FUNC		= ft_strtrim utils split getLocationFieldAsString
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux validateRequestMethod readRequest sendResponse setResponse startServer startListen shutDownServer acceptConnection runServer
+HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop processClientEvents setCgi
+REQUEST_FUNC	= readSocket parseRequest 
+HTTP_HANDLER_FUNC = HttpHandler
+RESPONSE_BUILDER_FUNC = ResponseBuilder setResponseAux sendResponse
+METHODS_FUNC 	=  uploadHandler
+GET_FUNC		= autoindex 
+
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(CGI_DIR), $(CGI_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(REQUEST_DIR), $(REQUEST_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(RESPONSE_DIR), $(RESPONSE_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(HTTP_HANDLER_DIR), $(HTTP_HANDLER_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(RESPONSE_BUILDER_DIR), $(RESPONSE_BUILDER_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(METHODS_DIR), $(METHODS_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(GET_DIR), $(GET_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(PYTHON_CGI_DIR), $(PYTHON_CGI_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR), main.cpp) 
 
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB             = libHttp_tcpServer_linux.a
 CXX             = c++
-CXXFLAGS        = -std=c++98
+CXXFLAGS        = -std=c++98 -g
 NAME            = webserv
 TOTAL_FILES     = $(shell echo $$(($(words $(OBJS_SRC)))))
 VALGRIND        = valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
 # MSG             = "[ $(COMPILED_FILES)/$(TOTAL_FILES) $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))%% ] $(ORANGE)Compiling [$1]... $(RESET)"
 MSG 			= "$(CYAN) => ($(COMPILED_FILES)/$(TOTAL_FILES) $(PERCENT)%%) 🔧 Compiling [$1]...$(RESET)"
-
-# -- Function to print the compilation message
-define print_compile_msg
-	$(eval COMPILED_FILES = $(shell echo $$(($(COMPILED_FILES) + 1))))
-	$(eval PERCENT = $(shell echo $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))))
-	$(eval LEN = $(shell echo -n $(MSG) | wc -c))
-	@$(PRINT_CMD) "$$(printf '%*s\r' $(LEN) '')"
-	@$(PRINT_CMD) $(MSG)
-	@if [ $(COMPILED_FILES) -ne $(TOTAL_FILES) ]; then \
-		$(PRINT_CMD) "\r" $(CUT) \
-		$(PRINT_CMD) $(UP) $(CUT); \
-	fi
-endef
 
 # -- Cleaning functions
 define clean_func
@@ -93,8 +116,11 @@ $(LIB): $(OBJS_SRC)
 
 $(OBJ_DIR)%.o: %.cpp $(HEADERS)
 	@mkdir -p $(dir $@)
-	$(call print_compile_msg,$<)
+	$(eval COMPILED_FILES = $(shell echo $$(($(COMPILED_FILES) + 1))))
+	$(eval PERCENT = $(shell echo $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))))
+	@echo "$(CYAN) => ($(COMPILED_FILES)/$(TOTAL_FILES) $(PERCENT)%) Compiling [$<]...$(RESET)"
 	@$(CXX) $(CXXFLAGS) -c $< -I./$(INCLUDE) -o $@
+	@printf ${UP}${CUT}
 
 clean:
 	$(call clean_func)
@@ -120,7 +146,3 @@ v:
 fc: fclean
 
 c: clean
-
-# $(OBJ_DIR)main.o:	main.cpp $(HEADERS)
-# 					$(call print_compile_msg,$<)
-# 					@$(CXX) -c $< $(CXXFLAGS) -I./$(INCLUDE) -o $@

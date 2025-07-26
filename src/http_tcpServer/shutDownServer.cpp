@@ -1,10 +1,13 @@
-#include "http_tcpServer/http_tcpServer_linux.hpp"
+#include "http_tcpServer/Http_tcpServer_linux.hpp"
 
-namespace http {
-
-	void TcpServer::shutDownServer() {
-		close(m_serverSocket);
-		close(m_acceptSocket);
-		// exit(0); // Exit with failure code??
+namespace http
+{
+	void TcpServer::shutDownServer()
+	{
+		for (int i = 0; i < _fds.size(); ++i)
+		{
+			close(_fds[i].fd);
+			_fds.erase(_fds.begin() + i);
+		}
 	}
 } // namespace http
