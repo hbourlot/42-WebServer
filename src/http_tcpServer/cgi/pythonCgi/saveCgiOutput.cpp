@@ -1,4 +1,5 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include <cstring>
 
 void http::PythonCgi::saveCgiOutput() {
 

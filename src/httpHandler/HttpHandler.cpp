@@ -1,6 +1,6 @@
 #include "http_tcpServer/Http_tcpServer_linux.hpp"
 #include <exception>
-#include <future>
+// #include <future>
 
 static const Location *getMatchLocation(const std::string &path, const std::vector<Location> &locations) {
 
@@ -57,17 +57,21 @@ void http::HttpHandler::handle(ClientManager *object, Client &client, const Serv
 		// return (false);
 	}
 
-	try {
-		if (handleCgi(object, &client, request, *matchedLocation))
-			return;
-	} catch (std::exception &e) {
-		std::cerr << "[EXCEPTION] std::exception: " << e.what() << std::endl;
-		//! Need to properly handler error
-		exit(0);
-	}
+	// CGI DEBUG
+	// try {
+	// 	if (handleCgi(object, &client, request, *matchedLocation))
+	// 		return;
+	// } catch (std::exception &e) {
+	// 	std::cerr << "[EXCEPTION] std::exception: " << e.what() << std::endl;
+	// 	//! Need to properly handler error
+	// 	exit(0);
+	// }
 
-	if (request.method == "GET")
+	if (request.method == "GET") {
+		std::cout << "LAELE\n";
+
 		return (handleGet(client, server, *matchedLocation));
+	}
 	else if (request.method == "POST")
 		return (handlePost(client, server, *matchedLocation));
 	else if (request.method == "DELETE")

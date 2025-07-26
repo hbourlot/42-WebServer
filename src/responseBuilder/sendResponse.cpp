@@ -11,6 +11,7 @@ int http::TcpServer::sendResponse(pollfd &socket) {
 
 	Client &client = *_clientManager.getClient(fd);
 
+	// CGI DEBUG
 	if (client.hasCgi()) {
 
 		std::cerr << "ON SENDRESPONSE = " << fd << std::endl;

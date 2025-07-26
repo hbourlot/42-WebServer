@@ -11,11 +11,11 @@ bool http::TcpServer::readSocket(int index) {
 	bool shouldPollOut = false;
 	bool finished = false;
 
-	if (_clientManager.hasCgiClient(fd)) {
-		client = _clientManager.getCgiClient(fd);
-		client->getCgi()->getOutput();
-		return false;
-	}
+	// if (_clientManager.hasCgiClient(fd)) {
+	// 	client = _clientManager.getCgiClient(fd);
+	// 	client->getCgi()->getOutput();
+	// 	return false;
+	// }
 
 	if (!client) {
 		std::cerr << "Error: Client not found for fd " << fd << std::endl;
@@ -49,6 +49,7 @@ bool http::TcpServer::readSocket(int index) {
 		//! Need more lecture  says that its the max for each request
 
 		if (status == PARSE_OK) {
+
 			HttpHandler::handle(&_clientManager, *client, _serverInfo);
 			client->clearReadBuffer();
 			shouldPollOut = true;
