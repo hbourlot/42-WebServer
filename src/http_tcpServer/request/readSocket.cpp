@@ -58,6 +58,7 @@ bool http::TcpServer::readSocket(int index) {
 			return false;
 	}
 
+	//CGI DEBUG !client->getCgi()
 	if (shouldPollOut && !client->getCgi()) {
 		_fds[index].events |= POLLOUT;
 	}

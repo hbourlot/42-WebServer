@@ -8,7 +8,7 @@ namespace http {
 
 	Client::Client(SocketFD fd, sockaddr_in &socketAddress, std::vector<pollfd> &fds, const Server serverInfo)
 	    : _fd(fd), _socketAddress(socketAddress), _fds(fds), _serverInfo(serverInfo), _requestComplete(false),
-	      _cgiInProgress(false) {
+	      _cgiInProgress(false), _cgi(NULL){
 	}
 
 	Client::~Client() {
