@@ -49,6 +49,7 @@ void HttpHandler::handle(Client &client, const Server &server)
 	}
 
 	const Location &matchedLocation = *matchedLocationPtr;
+	// printLocation(*matchedLocationPtr); //* To remove
 
 	if (!matchedLocation.redirection.empty())
 	{
@@ -106,31 +107,26 @@ void HttpHandler::handleGet(Client &client, const Server &server, const Location
 	{
 		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
-
-		// return false;
 	}
 
 	response = ResponseBuilder::buildFileResponse(HTTP_OK, filePath, server);
 	// client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
 	client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
-
-	// return true;
 }
 
 void HttpHandler::handlePost(Client &client, const Server &serverInfo, const Location &location)
 {
 	httpResponse &response = client.getResponse();
 	httpRequest &request = client.getRequest();
+	std::string ContentType;
 
-	if (!location.cgi_path.empty())
-	{
-		std::cout << "HERE CGI POST" << std::endl;
-	}
+	// printLocation(location);
+	// 	! "HERE CGI POST"
 
-	// if (request.path == "/login")
+	//! if (request.path == "/login")
 	// {
 	// 	httpResponse result = validateForm(request);
-
+	//
 	// 	if (!result.body.empty())
 	// 	{
 	// 		// setFileResponse(result.statusCode, result.statusMsg,
@@ -139,31 +135,24 @@ void HttpHandler::handlePost(Client &client, const Server &serverInfo, const Loc
 	// 	// else
 	// 	// setResponseError(result.statusCode, result.statusMsg);
 	// }
-	else if (location.uploadEnable)
+
+	if (location.uploadEnable)
 	{
-		// std::cout << "_request.headers " << _request.headers["Content-Type"] << std::endl;
-		// if(_request.headers["Content-Type"] == "")
-		// parseMultipart(location);
+		UploadManager::handleUpload(location, client,serverInfo);
 	}
 	else if (!location.uploadEnable)
 	{
-		// setResponseError(HTTP_UPLOAD_FORBID);
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_UPLOAD_FORBID);
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
-
-		// return (false);
 	}
 	else
 	{
-		// setFileResponse(HTTP_NOT_FOUND, serverInfo.errorPage[404], true);
 		client.getResponse() =
 		    ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, serverInfo.errorPage.at(404), serverInfo, true);
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
-
-		// return (false);
 	}
-	// return true;
 }
+
 void HttpHandler::handleDelete(Client &client, const Server &server, const Location &location)
 {
 	httpResponse &response = client.getResponse();
@@ -180,4 +169,11 @@ void HttpHandler::handleDelete(Client &client, const Server &server, const Locat
 	if (remove(filePath.c_str()))
 		std::cout << "Files not delete" << std::endl;
 	// return (true);
+}
+
+std::string parseContentType(std::string &contentType)
+{
+	std::string parsedContentType;
+
+	parsedContentType = contentType.substr(0, contentType.find(';'));
 }

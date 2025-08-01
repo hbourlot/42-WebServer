@@ -49,6 +49,7 @@ bool http::TcpServer::readRequest(int index)
 
 		if (status == PARSE_OK)
 		{
+			
 			HttpHandler::handle(*client, _serverInfo);
 			client->clearReadBuffer();
 			shouldPollOut = true;

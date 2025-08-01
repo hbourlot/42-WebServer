@@ -31,7 +31,7 @@ class Client
 
 	// State of CGi REquest
 	bool isRequestComplete() const;
-	// void setRequestComplete(bool value);
+	void setRequestComplete(bool value);
 
 	bool isCgiInProgress() const;
 	void setCgiInProgress(bool value);
@@ -46,6 +46,6 @@ class Client
 	httpRequest _request;
 	httpResponse _response;
 
-	// bool _requestComplete;
+	bool _requestComplete;
 	bool _cgiInProgress;
 };

@@ -10,6 +10,7 @@
 #include "HttpStructs.hpp"
 #include "HttpUtils.hpp"
 #include "ResponseBuilder.hpp"
+#include "Upload/UploadManager.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <dirent.h>

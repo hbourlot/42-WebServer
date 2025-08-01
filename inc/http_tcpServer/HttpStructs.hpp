@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/06/30 01:33:31 by joralves         ###   ########.fr       */
+/*   Updated: 2025/07/26 16:59:21 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,22 +71,4 @@ struct httpResponse
 	void setDefaultHeaders();
 	void setDefaultHeaders(httpRequest request);
 	void addToHeader(std::string key, std::string value);
-};
-
-// ! Maybe its better encapsulate al information about the client and its state
-// on a proper struct
-
-struct clientState
-{
-	httpRequest request;
-	httpResponse response;
-	std::string readBuffer;
-	std::string writeBuffer;
-	bool requestComplete;
-	bool cgiInProgress;
-	int clientFd;
-
-	clientState() : requestComplete(false), cgiInProgress(false), clientFd(-1)
-	{
-	}
 };
