@@ -60,7 +60,7 @@ void http::PythonCgi::buildEnvStrings() {
 	newMap["GATEWAY_INTERFACE"] = "CGI/1.1";
 	newMap["PATH_INFO"] = _request.pathInfo;
 	newMap["PATH_TRANSLATED"] = _request.pathTranslated;
-	newMap["REMOTE_PORT"] = std::to_string(_clientAddress.sin_port);
+	newMap["REMOTE_PORT"] = _clientAddress.sin_port;
 	newMap["QUERY_STRING"] = _request.queryString;
 
 	for (std::map<std::string, std::string>::const_iterator it = _request.headers.begin(); it != _request.headers.end();

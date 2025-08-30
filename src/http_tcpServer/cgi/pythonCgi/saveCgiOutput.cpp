@@ -22,7 +22,7 @@ void http::PythonCgi::saveCgiOutput() {
 		if (errno == EAGAIN || errno == EWOULDBLOCK) {
 			_status[FINISHED_IDX] = false;
 		} else {
-			std::cerr << "[CGI] read() error: " << strerror(errno) << std::endl;
+			std::cerr << "[CGI] read() error: " << errno << std::endl;
 			_status[ERROR_IDX] = true;
 			close(_outputPipe[0]);
 		}
