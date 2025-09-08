@@ -10,17 +10,18 @@ int http::TcpServer::sendResponse(pollfd &socket) {
 	SocketFD fd = socket.fd;
 
 	Client &client = *_clientManager.getClient(fd);
-
 	// std::cout << "ON SENDRESPONSE = " << fd << std::endl;
-	if (client.hasCgi()) {
-
-		std::string buff = client.getCgi()->getOutput();
-		std::string httpResponse = "HTTP/1.1 200 OK\r\n";
-		httpResponse += buff;
-		// std::cout << client.getCgi()->getOutput();
-		ssize_t bytesSent = send(fd, httpResponse.c_str(), httpResponse.size(), MSG_NOSIGNAL);
-		return 2;
-	}
+	
+	// if (client.hasCgi()) {
+		
+	// 	std::cout << "Segfault 2" << std::endl;
+	// 	std::string buff = client.getCgi()->getOutput();
+	// 	std::string httpResponse = "HTTP/1.1 200 OK\r\n";
+	// 	httpResponse += buff;
+	// 	// std::cout << client.getCgi()->getOutput();
+	// 	ssize_t bytesSent = send(fd, httpResponse.c_str(), httpResponse.size(), MSG_NOSIGNAL);
+	// 	return 2;
+	// }
 
 	std::string &writeBuffer = client.getWriteBuffer();
 	// std::cout << "writeBuffer "<<writeBuffer << "\n";

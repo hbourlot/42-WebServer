@@ -20,6 +20,7 @@ void http::TcpServer::acceptConnection() {
 
 	// Checks the if theres readable data available (event)
 	while (_fds[0].revents & POLLIN) {
+
 		acceptSocket = accept(_serverSocket, (struct sockaddr *)&socketAddress, &_socketAddress_len);
 		if (acceptSocket < 0) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {

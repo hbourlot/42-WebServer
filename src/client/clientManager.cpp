@@ -48,8 +48,9 @@ namespace http {
 	void ClientManager::removeClient(SocketFD fd) {
 		std::map<int, Client *>::iterator it = _clients.find(fd);
 		if (it != _clients.end()) {
-			delete it->second;
-			_clients.erase(it);
+			// delete it->second;
+			// _clients.erase(it);
+			// std::cout << "Saaiu do remove client" << std::endl;
 		}
 	}
 	Client *ClientManager::getClient(SocketFD fd) {

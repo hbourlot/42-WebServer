@@ -64,6 +64,7 @@ namespace http {
 		_readBuffer += data;
 	}
 	void Client::appendToWriteBuffer(const std::string &data) {
+		// std::cout << "[DEBUG] Sending Adicionando data: " << data << std::endl;
 		_writeBuffer += data;
 	}
 	void Client::clearBuffers() {

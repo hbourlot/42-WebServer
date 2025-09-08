@@ -21,6 +21,8 @@ bool http::TcpServer::readSocket(int index) {
 	if (!client) {
 		std::cerr << "Error: Client not found for fd " << fd << std::endl;
 		client->getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
+			std::cout << "[DEBUG] Sending 8" << std::endl;
+
 		client->appendToWriteBuffer(ResponseBuilder::buildResponseString(client->getResponse(), client->getRequest()));
 		_fds[index].events |= POLLOUT;
 		return true; // Close connection
@@ -30,17 +32,16 @@ bool http::TcpServer::readSocket(int index) {
 	if (bytesReceived <= 0) {
 		if (bytesReceived < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
 			std::cerr << "Error: read()\n";
-
 		client->getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
+			// std::cout << "[DEBUG] Sending 9" << std::endl;
+
 		client->appendToWriteBuffer(ResponseBuilder::buildResponseString(client->getResponse(), client->getRequest()));
 		shouldPollOut = true;
 		finished = true;
 	} else {
 		client->appendToReadBuffer(std::string(buffer, bytesReceived));
 
-		ParseStatus status =
-		    parseRequest(client->getRequest(), client->getReadBuffer(), _serverInfo, CLIENT_MAX_BODY_SIZE);
-
+		ParseStatus status = parseRequest(client->getRequest(), client->getReadBuffer(), _serverInfo, CLIENT_MAX_BODY_SIZE);
 		// if (status == PARSE_TOO_LARGE)
 		// {
 		// 	setResponseError(HTTP_PAYLOAD);
@@ -50,18 +51,27 @@ bool http::TcpServer::readSocket(int index) {
 		//! Need more lecture  says that its the max for each request
 
 		if (status == PARSE_OK) {
+			std::cout << "Parsing esta ok" << std::endl;
 			HttpHandler::handle(&_clientManager, *client, _serverInfo);
 			client->clearReadBuffer();
 			shouldPollOut = true;
 			finished = false;
+			std::cout << "Parsing ja saiu" << std::endl;
 		} else if (status == PARSE_INCOMPLETE)
+		{
+			std::cout << "Parse Incomplete" << std::endl;
 			return false;
+		}
 	}
 
-	if (shouldPollOut && !client->getCgi()) {
+	std::cout << "ShouldPollout value: " << shouldPollOut << std::endl;
+	if (shouldPollOut) {
+		std::cout << "Vamos fechar com o POLLOUT" << std::endl;
 		_fds[index].events |= POLLOUT;
 	}
 
+	std::cout << "Ja fechou com o POLLOUT " << std::endl;
+	
 	// buffers.erase(fd);
 	finished = false;
 	return finished;

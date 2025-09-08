@@ -41,29 +41,29 @@ void http::HttpHandler::handle(ClientManager *object, Client &client, const Serv
 	if (!matchedLocation) {
 		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
 		client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
-		// return false;
+		// return ;
 	}
 
 	if (!matchedLocation->redirection.empty()) {
 		response = ResponseBuilder::buildRedirect(HTTP_MOVED, matchedLocation->redirection);
 		client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
-		// return (true);
+		// return ;
 	}
 
 	if (!validateRequestMethod(request, *matchedLocation)) {
 		response = ResponseBuilder::buildFileResponse(HTTP_FORBID_METHOD, DFL_405, server, true);
 		client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
-		// return (false);
+		// return ;
 	}
 
 	//!!! * Handler CGI
 
-	try {
-		handleCgi(object, &client, request, *matchedLocation);
-	} catch (std::exception &e) {
-		std::cerr << "[EXCEPTION] std::exception: " << e.what() << std::endl;
-		exit(0);
-	}
+	// try {
+	// 	handleCgi(object, &client, request, *matchedLocation);
+	// } catch (std::exception &e) {
+	// 	std::cerr << "[EXCEPTION] std::exception: " << e.what() << std::endl;
+	// 	exit(0);
+	// }
 
 	// std::string filePath = getFilePath(request.path, *matchedLocation);
 
@@ -118,6 +118,7 @@ void http::HttpHandler::handleGet(Client &client, const Server &server, const Lo
 	}
 
 	if (!std::ifstream(filePath.c_str()).is_open()) {
+		std::cout << "[DEBUG] Sending bruh1" << std::endl;
 		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 
@@ -126,8 +127,8 @@ void http::HttpHandler::handleGet(Client &client, const Server &server, const Lo
 
 	response = ResponseBuilder::buildFileResponse(HTTP_OK, filePath, server);
 	// client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
+	std::cout << "[DEBUG] Sending 2" << std::endl;
 	client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
-
 	// return true;
 }
 
@@ -158,6 +159,8 @@ void http::HttpHandler::handlePost(Client &client, const Server &serverInfo, con
 	} else if (!location.uploadEnable) {
 		// setResponseError(HTTP_UPLOAD_FORBID);
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_UPLOAD_FORBID);
+			std::cout << "[DEBUG] Sending 3" << std::endl;
+
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 
 		// return (false);
@@ -165,6 +168,7 @@ void http::HttpHandler::handlePost(Client &client, const Server &serverInfo, con
 		// setFileResponse(HTTP_NOT_FOUND, serverInfo.errorPage[404], true);
 		client.getResponse() =
 		    ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, serverInfo.errorPage.at(404), serverInfo, true);
+		std::cout << "[DEBUG] Sending 4" << std::endl;
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 
 		// return (false);

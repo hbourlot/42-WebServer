@@ -63,6 +63,8 @@ void handleDirectoryListing(http::Client &client, const Server &server, const st
 	if (hasIndexFile(filePath, location)) {
 		std::string indexPath = joinPath(filePath, location.index);
 		response = ResponseBuilder::buildFileResponse(HTTP_OK, indexPath, server);
+			std::cout << "[DEBUG] Sending 5" << std::endl;
+
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 
 		// return (true);
@@ -70,13 +72,17 @@ void handleDirectoryListing(http::Client &client, const Server &server, const st
 
 	if (!location.autoIndex) {
 		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
+			std::cout << "[DEBUG] Sending 6" << std::endl;
+
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 		// return false;
 	}
-
+	
 	std::string body = generateAutoIndexPage(filePath, location, request);
 
 	response = ResponseBuilder::buildResponse(HTTP_OK, body, "text/html");
+		std::cout << "[DEBUG] Sending 7" << std::endl;
+
 	client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 
 	// return true;

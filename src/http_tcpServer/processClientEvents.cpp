@@ -39,8 +39,10 @@ void http::TcpServer::processClientEvents() {
 	int shouldCloseSend;
 	int shouldCloseRead;
 	sockaddr_in *currentAddress;
+	std::vector<int> toClose;
 
-	for (size_t idx = 1; idx < _fds.size(); ++idx) {
+	for (int idx = _fds.size() -1 ; idx >= 1; --idx) {
+		std::cout << "Index: " << idx << std::endl;
 		shouldCloseSend = false;
 		shouldCloseRead = false;
 
@@ -49,14 +51,23 @@ void http::TcpServer::processClientEvents() {
 			shouldCloseRead = readSocket(idx);
 		}
 		if (_fds[idx].revents & POLLOUT) {
+			std::cout << "Segfault 1" << std::endl;
 			shouldCloseSend = sendResponse(_fds[idx]);
 			if (shouldCloseSend != 2)
 				_fds[idx].events &= ~POLLOUT;
 			// clearResponse();
 		}
 		if (shouldCloseRead || shouldCloseSend) {
-			closeClientConnection(idx);
-			continue;
+			std::cout << "Vamos fechar com o close client connection" << std::endl;
+			// closeClientConnection(idx);
+			toClose.push_back(idx);
+			// continue;
 		}
 	}
+	
+	for (size_t i = 0; i < toClose.size(); ++i) {
+		std::cout << "Entrou para fechar um fd" << std::endl;
+		closeClientConnection(toClose[i]);
+	}
+	std::cout << "Saiu do for loop" << std::endl;
 }
