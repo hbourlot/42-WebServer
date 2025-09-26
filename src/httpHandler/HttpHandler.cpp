@@ -37,7 +37,7 @@ void http::HttpHandler::handle(ClientManager *object, Client &client, const Serv
 	httpResponse &response = client.getResponse();
 
 	matchedLocation = getMatchLocation(request.path, server.locations);
-
+	
 	if (!matchedLocation) {
 		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
 		client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
@@ -56,8 +56,13 @@ void http::HttpHandler::handle(ClientManager *object, Client &client, const Serv
 		// return ;
 	}
 
+	std::cout << "CGI Path" << matchedLocation->path << std::endl;
+	std::cout << "CGI EXTENSION" << matchedLocation->cgi_extension.empty() << std::endl;
+	if (matchedLocation->cgi_extension.empty() == false){
+		std::cout << "Vamos para CGI" << std::endl;
+		handleCgi(object, &client, request, *matchedLocation);
+	}
 	//!!! * Handler CGI
-
 	// try {
 	// 	handleCgi(object, &client, request, *matchedLocation);
 	// } catch (std::exception &e) {
@@ -93,8 +98,11 @@ bool http::HttpHandler::handleCgi(ClientManager *clientManager, Client *client, 
 	path = request.path;
 	filePath = getFilePath(path, location);
 
-	// if (location.methods.empty() || ) {
-	// }
+	std::cout << "Path: " << path << " | Filepath: " << filePath << std::endl; //Path: /cgi-bin/hello.py | Filepath: ./var/www/cgi-bin/hello.py
+
+	if (location.methods.empty()) {
+		std::cout << "Invalid methods to execute CGI" << std::endl;
+	}
 
 	ICgi *cgi = new PythonCgi(client, clientManager, filePath);
 	if (!cgi) {
@@ -127,7 +135,7 @@ void http::HttpHandler::handleGet(Client &client, const Server &server, const Lo
 
 	response = ResponseBuilder::buildFileResponse(HTTP_OK, filePath, server);
 	// client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
-	std::cout << "[DEBUG] Sending 2" << std::endl;
+	// std::cout << "[DEBUG] Sending 2" << std::endl;
 	client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 	// return true;
 }

@@ -9,7 +9,7 @@ void http::PythonCgi::doDup() {
 
 	// -- Closes ends
 	close(_inputPipe[0]);
-	// close(_inputPipe[1]); // Doubt of this one
+	close(_inputPipe[1]); // Doubt of this one
 	close(_outputPipe[0]);
-	// close(_outputPipe[1]);
+	close(_outputPipe[1]);
 }

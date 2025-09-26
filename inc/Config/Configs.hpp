@@ -21,6 +21,7 @@ struct Location{
 	bool								uploadEnable;
 	std::string							uploadStore;
 	bool								autoIndex;
+	bool								IsMethodsForCGIValid() const;
 };
 
 struct Server{

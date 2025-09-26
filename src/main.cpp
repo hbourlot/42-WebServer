@@ -3,14 +3,17 @@
 
 int main(int argc, char **argv, char **envp)
 {
-
 	if (argc != 2)
-		throw std::invalid_argument("Error: Invalid number of arguments");
+	{
+		std::cerr << "Error: Invalid number of arguments" << std::endl;
+		return ;
+	}
 
 	using namespace http;
 
 	// Creates a config object
 	Configs configuration;
+	
 	// Reads the configuration file
 	ReadConfig::setConfigs(argv[1], configuration);
 

@@ -51,12 +51,13 @@ bool http::TcpServer::readSocket(int index) {
 		//! Need more lecture  says that its the max for each request
 
 		if (status == PARSE_OK) {
-			std::cout << "Parsing esta ok" << std::endl;
+			std::cout << "[DEBUG] Query: " << client->getRequest().path << "\n";
+			// std::cout << "Parsing esta ok" << std::endl;
 			HttpHandler::handle(&_clientManager, *client, _serverInfo);
 			client->clearReadBuffer();
 			shouldPollOut = true;
 			finished = false;
-			std::cout << "Parsing ja saiu" << std::endl;
+			// std::cout << "Parsing ja saiu" << std::endl;
 		} else if (status == PARSE_INCOMPLETE)
 		{
 			std::cout << "Parse Incomplete" << std::endl;
@@ -64,13 +65,13 @@ bool http::TcpServer::readSocket(int index) {
 		}
 	}
 
-	std::cout << "ShouldPollout value: " << shouldPollOut << std::endl;
+	// std::cout << "ShouldPollout value: " << shouldPollOut << std::endl;
 	if (shouldPollOut) {
-		std::cout << "Vamos fechar com o POLLOUT" << std::endl;
+		// std::cout << "Vamos fechar com o POLLOUT" << std::endl;
 		_fds[index].events |= POLLOUT;
 	}
 
-	std::cout << "Ja fechou com o POLLOUT " << std::endl;
+	// std::cout << "Ja fechou com o POLLOUT " << std::endl;
 	
 	// buffers.erase(fd);
 	finished = false;
