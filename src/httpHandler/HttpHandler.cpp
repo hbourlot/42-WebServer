@@ -108,6 +108,7 @@ bool http::HttpHandler::handleCgi(ClientManager *clientManager, Client *client, 
 	if (!cgi) {
 		std::cerr << "HandleCgi Error: Error allocating memory of Cgi." << std::endl;
 	} else {
+		std::cout << "estou aqui" << std::endl;
 		client->addCgi(cgi);
 		client->executeCgi();
 	}

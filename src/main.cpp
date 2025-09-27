@@ -6,7 +6,7 @@ int main(int argc, char **argv, char **envp)
 	if (argc != 2)
 	{
 		std::cerr << "Error: Invalid number of arguments" << std::endl;
-		return ;
+		return -1;
 	}
 
 	using namespace http;

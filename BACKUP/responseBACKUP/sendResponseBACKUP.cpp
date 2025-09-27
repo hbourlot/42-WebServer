@@ -20,7 +20,7 @@ int http::TcpServer::sendResponse(SocketFD fd, std::string contentToSend) {
 		}
 		return 1;
 	} else {
-		log("----- Server Response sent to client -----\n\n");
+		log("----- Server Response sent to client 1-----\n\n");
 	}
 	return 0;
 }

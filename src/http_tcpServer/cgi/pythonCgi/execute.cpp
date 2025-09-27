@@ -29,6 +29,7 @@ void http::PythonCgi::handleChildProcess() {
 
 	doDup();
 
+	std::cerr << "estou no child process" << std::endl;
 	// this->_filePath = "." + this->_filePath;
 
 	// build argv
@@ -36,6 +37,7 @@ void http::PythonCgi::handleChildProcess() {
 	argv.push_back(const_cast<char *>(_filePath.c_str()));
 	argv.push_back(NULL);
 
+	std::cerr << "Estou no child process 1" << std::endl;
 	// build envp
 	std::vector<char *> envp;
 	this->_envp.clear();
@@ -46,6 +48,7 @@ void http::PythonCgi::handleChildProcess() {
 	this->_envp.push_back(NULL);
 
 	// debugCgiExec(this->getFilePath().c_str(), argv.data(), envp.data());
+	std::cerr << "FilePath " << this->getFilePath() << std::endl; 
 	execve(this->getFilePath().c_str(), argv.data(), envp.data());
 	std::cerr << "EXECUTE WRONG\n ";
 	_exit(1);
@@ -55,6 +58,7 @@ namespace http {
 
 	void PythonCgi::execute() {
 
+		std::cout << "Vamos executar o CGI" << std::endl;
 		if (pipe(this->_inputPipe) < 0 || pipe(this->_outputPipe) < 0) {
 			return this->setErrorStatusWLog("Error: Pipe creating failed");
 		}

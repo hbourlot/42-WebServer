@@ -42,7 +42,7 @@ int http::TcpServer::sendResponse(pollfd &socket) {
 	writeBuffer.erase(0, bytesSent);
 
 	if (writeBuffer.empty()) {
-		log("----- Server Response sent to client -----\n\n");
+		log("----- Server Response sent to client 2 -----\n\n");
 		return 0;
 	}
 
