@@ -13,13 +13,11 @@ namespace http
 		{
 			return ("");
 		}
-		std::string boundary =
-		    "--" + contentType.substr(pos + boundaryPrefix.size());
+		std::string boundary = "--" + contentType.substr(pos + boundaryPrefix.size());
 		return (boundary);
 	}
 
-	static std::string extractFilePart(httpRequest &request,
-	                                   const std::string &boundary)
+	static std::string extractFilePart(httpRequest &request, const std::string &boundary)
 	{
 
 		std::string body = request.body;
@@ -28,8 +26,7 @@ namespace http
 		if (start == std::string::npos)
 			return ("");
 
-		start +=
-		    boundary.length() + 2; // To skip the begin boundary and the /r/n
+		start += boundary.length() + 2;
 		size_t end = body.find(boundary, start);
 
 		if (end == std::string::npos)
@@ -38,9 +35,7 @@ namespace http
 		return (body.substr(start, end - start));
 	}
 
-	static bool splitHeadersAndContent(const std::string &filePart,
-	                                   std::string &headers,
-	                                   std::string &content)
+	static bool splitHeadersAndContent(const std::string &filePart, std::string &headers, std::string &content)
 	{
 
 		size_t headerEnd = filePart.find("\r\n\r\n");
@@ -72,8 +67,7 @@ namespace http
 		return (headers.substr(start, end - start));
 	}
 
-	static bool saveFile(const std::string &filename,
-	                     const std::string &content, const Location &location)
+	static bool saveFile(const std::string &filename, const std::string &content, const Location &location)
 	{
 
 		std::string savePath = location.uploadStore + '/' + filename;
@@ -86,8 +80,9 @@ namespace http
 		newfile.close();
 		return (true);
 	}
-//!PArts to imporve after
-	// bool TcpServer::parseMultipart(const Location &location)
+
+	//! PArts to imporve after
+	// bool parseMultipart(const Location &location)
 	// {
 
 	// 	std::string boundary = extractBoundary(_request);

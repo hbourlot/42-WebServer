@@ -27,6 +27,7 @@ RESPONSE_DIR	= $(HTTP_DIR)response/
 METHODS_DIR		= $(HTTPHANDLER_DIR)methods/
 GET_DIR			= $(METHODS_DIR)Get/
 CGI_DIR			= $(HTTP_DIR)cgi/
+UPL_DIR			= UploadManager/
 
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
@@ -46,6 +47,7 @@ HTTPHANDLER_FUNC = HttpHandler
 RESPONSEBUILDER_FUNC = ResponseBuilder setResponseAux sendResponse
 METHODS_FUNC 	= handlePostRequest uploadHandler handleDeleteRequest
 GET_FUNC		= autoindex handleGetRequest 
+UPL_FUNC		= UploadManager
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
@@ -59,6 +61,7 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(GET_DIR), $(GET_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(UPL_DIR), $(UPL_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR), main.cpp) 
 
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
