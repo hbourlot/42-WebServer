@@ -24,8 +24,6 @@ RESPONSEBUILDER_DIR = responseBuilder/
 HTTP_DIR		= http_tcpServer/
 REQUEST_DIR		= $(HTTP_DIR)request/
 RESPONSE_DIR	= $(HTTP_DIR)response/
-METHODS_DIR		= $(HTTPHANDLER_DIR)methods/
-GET_DIR			= $(METHODS_DIR)Get/
 CGI_DIR			= $(HTTP_DIR)cgi/
 UPL_DIR			= UploadManager/
 
@@ -43,11 +41,9 @@ UTILS_FUNC		= ft_strtrim utils split getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
 HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop processClientEvents
 REQUEST_FUNC	= readRequest parseRequest 
-HTTPHANDLER_FUNC = HttpHandler
+HTTPHANDLER_FUNC = HttpHandler autoindex
 RESPONSEBUILDER_FUNC = ResponseBuilder setResponseAux sendResponse
-METHODS_FUNC 	= handlePostRequest uploadHandler handleDeleteRequest
-GET_FUNC		= autoindex handleGetRequest 
-UPL_FUNC		= UploadManager
+UPL_FUNC		= UploadManager parseMultipart
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
@@ -57,8 +53,6 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(RESPONSE_DIR), $(RESPONSE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTPHANDLER_DIR), $(HTTPHANDLER_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(RESPONSEBUILDER_DIR), $(RESPONSEBUILDER_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(METHODS_DIR), $(METHODS_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(GET_DIR), $(GET_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UPL_DIR), $(UPL_FUNC:=.cpp)) \

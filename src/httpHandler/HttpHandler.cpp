@@ -171,9 +171,13 @@ void HttpHandler::handleDelete(Client &client, const Server &server, const Locat
 	// return (true);
 }
 
+
+// ! Did i make this?
 std::string parseContentType(std::string &contentType)
 {
 	std::string parsedContentType;
 
 	parsedContentType = contentType.substr(0, contentType.find(';'));
+
+	return(parsedContentType);
 }

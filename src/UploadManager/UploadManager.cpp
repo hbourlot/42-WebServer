@@ -7,5 +7,10 @@ bool UploadManager::handleUpload(const Location &location, Client &client, const
 	contentType = client.getRequest().headers.at("Content-Type");
 
 	std::cout << contentType << std::endl;
+
+	if (contentType.find("multipart/form-data;") != std::string::npos)
+	{
+		UploadManager::parseMultipart(location, client);
+	}
 	return (false);
 }
