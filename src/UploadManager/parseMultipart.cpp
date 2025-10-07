@@ -137,6 +137,7 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 		return (false);
 	}
 	std::string msg = "File '" + filename + "' received";
-
+	client.getResponse() = ResponseBuilder::buildResponse(HTTP_OK, msg, "", "", &request);
+	client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 	return (true);
 }

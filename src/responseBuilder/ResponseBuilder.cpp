@@ -2,7 +2,7 @@
 
 httpResponse ResponseBuilder::buildResponse(const HttpStatusCode &status, const std::string &body,
                                             const std::string &headerKey, const std::string &headerValue,
-                                            const httpRequest *req)
+                                            httpRequest *req)
 {
 	httpResponse res;
 	res.statusCode = status.code;

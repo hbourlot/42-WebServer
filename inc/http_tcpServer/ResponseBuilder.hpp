@@ -8,7 +8,7 @@ class ResponseBuilder
   public:
 	static httpResponse buildResponse(const HttpStatusCode &status, const std::string &body,
 	                                  const std::string &headerKey = "", const std::string &headerValue = "",
-	                                  const httpRequest *req = NULL);
+	                                  httpRequest *req = NULL);
 
 	static httpResponse buildErrorResponse(const HttpStatusCode &status);
 	static httpResponse buildRedirect(const HttpStatusCode &status, const std::string &url);
