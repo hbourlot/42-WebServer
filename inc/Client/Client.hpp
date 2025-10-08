@@ -32,6 +32,7 @@ class Client
 	void resetRequest();
 	void resetResponse();
 
+
 	// State of CGi REquest
 	bool isRequestComplete() const;
 	void setRequestComplete(bool value);

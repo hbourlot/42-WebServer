@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Client/Client.hpp"
-#include "Config/Configs.hpp"
 #include "httpTcpServer/HttpStructs.hpp"
+#include "httpTcpServer/ResponseBuilder.hpp"
 
 class UploadManager
 {

@@ -39,47 +39,28 @@ void HttpHandler::handle(Client &client, const ServerConfig &server)
 	httpRequest &request = client.getRequest();
 	httpResponse &response = client.getResponse();
 
+
 	const Location *matchedLocationPtr = getMatchLocation(request.path, server.locations);
 
 	if (!matchedLocationPtr)
 	{
 		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
 		client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
-		// return false;
 	}
 
 	const Location &matchedLocation = *matchedLocationPtr;
-	// printLocation(*matchedLocationPtr); //* To remove
 
 	if (!matchedLocation.redirection.empty())
 	{
 		response = ResponseBuilder::buildRedirect(HTTP_MOVED, matchedLocation.redirection);
 		client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
-
-		// return (true);
 	}
 
 	if (!validateRequestMethod(request, matchedLocation))
 	{
 		response = ResponseBuilder::buildFileResponse(HTTP_FORBID_METHOD, DFL_405, server, true);
 		client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
-
-		// return (false);
 	}
-
-	// * Handler CGI
-	// std::string filePath = getFilePath(_request.path, matchedLocation);
-	// std::string prototypeFilePath = filePath.substr(1);
-	// if (parseCgi(matchedLocation, prototypeFilePath, clientAddress,
-	//              _request)) {
-	// 	_cgi[0].executeCgi(_fds);
-	// 	_cgi[0].markAsRunning();
-	// 	_cgiFdMap[_cgi[0].getPollFd()] = &_cgi[0];
-	// 	return true;
-	// }
-
-	// Set event POLLOUT only if it's not CGI
-	// socket.events |= POLLOUT;
 
 	if (request.method == "GET")
 		return (handleGet(client, server, matchedLocation));
@@ -87,7 +68,6 @@ void HttpHandler::handle(Client &client, const ServerConfig &server)
 		return (handlePost(client, server, matchedLocation));
 	else if (request.method == "DELETE")
 		return (handleDelete(client, server, matchedLocation));
-	// return (true);
 }
 
 void HttpHandler::handleGet(Client &client, const ServerConfig &server, const Location &location)
