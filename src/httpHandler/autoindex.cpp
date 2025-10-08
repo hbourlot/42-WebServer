@@ -59,7 +59,8 @@ static std::string generateAutoIndexPage(const std::string &dirPath, const Locat
 	return (html);
 }
 
-void handleDirectoryListing(Client &client, const Server &server, const std::string &filePath, const Location &location)
+void handleDirectoryListing(Client &client, const ServerConfig &server, const std::string &filePath,
+                            const Location &location)
 {
 	httpRequest &request = client.getRequest();
 	httpResponse &response = client.getResponse();

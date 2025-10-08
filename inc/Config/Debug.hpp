@@ -4,16 +4,15 @@
 
 void printConfigs(Configs &config)
 {
-	std::vector<Server>::iterator it = config.servers.begin();
-	std::vector<Server>::iterator ite = config.servers.end();
+	std::vector<ServerConfig>::iterator it = config.servers.begin();
+	std::vector<ServerConfig>::iterator ite = config.servers.end();
 	int i = 1;
 	while (it != ite)
 	{
 
 		std::cout << "\033[31m";
 		std::cout << "***************************************" << std::endl;
-		std::cout << "***********PRINTING SERVER " << i << "***********"
-		          << std::endl;
+		std::cout << "***********PRINTING SERVER " << i << "***********" << std::endl;
 		std::cout << "***************************************\n" << std::endl;
 		std::cout << "\033[0m";
 
@@ -22,15 +21,12 @@ void printConfigs(Configs &config)
 		std::cout << "Server_Name: " << it->serverName << std::endl;
 		std::cout << "Max request: " << it->maxRequest << std::endl;
 
-		for (std::map<int, std::string>::iterator ep_it = it->errorPage.begin();
-		     ep_it != it->errorPage.end(); ++ep_it)
+		for (std::map<int, std::string>::iterator ep_it = it->errorPage.begin(); ep_it != it->errorPage.end(); ++ep_it)
 		{
-			std::cout << "Code: " << ep_it->first
-			          << " | Path: " << ep_it->second << std::endl;
+			std::cout << "Code: " << ep_it->first << " | Path: " << ep_it->second << std::endl;
 		}
 
-		for (std::vector<Location>::iterator itl = it->locations.begin();
-		     itl != it->locations.end(); ++itl)
+		for (std::vector<Location>::iterator itl = it->locations.begin(); itl != it->locations.end(); ++itl)
 		{
 			std::cout << "  Location Path: " << itl->path << "|" << std::endl;
 			std::cout << "  Root: " << itl->root << std::endl;
@@ -42,12 +38,9 @@ void printConfigs(Configs &config)
 			if (!itl->cgi.empty())
 			{
 				std::cout << "      CGI INFORMATION: " << std::endl;
-				for (std::map<std::string, std::string>::iterator itm =
-				         itl->cgi.begin();
-				     itm != itl->cgi.end(); itm++)
+				for (std::map<std::string, std::string>::iterator itm = itl->cgi.begin(); itm != itl->cgi.end(); itm++)
 				{
-					std::cout << "               Extension: " << itm->first
-					          << " | Paths: " << itm->second << std::endl;
+					std::cout << "               Extension: " << itm->first << " | Paths: " << itm->second << std::endl;
 				}
 			}
 
@@ -98,18 +91,14 @@ void debugLocation(const Location &loc)
 	}
 	std::cout << std::endl;
 	std::cout << "  cgi map: ";
-	for (std::map<std::string, std::string>::const_iterator it =
-	         loc.cgi.begin();
-	     it != loc.cgi.end(); ++it)
+	for (std::map<std::string, std::string>::const_iterator it = loc.cgi.begin(); it != loc.cgi.end(); ++it)
 	{
 		std::cout << "[" << it->first << "]=" << it->second << " ";
 	}
 	std::cout << std::endl;
-	std::cout << "  uploadEnable: " << (loc.uploadEnable ? "true" : "false")
-	          << std::endl;
+	std::cout << "  uploadEnable: " << (loc.uploadEnable ? "true" : "false") << std::endl;
 	std::cout << "  uploadStore: " << loc.uploadStore << std::endl;
-	std::cout << "  autoIndex: " << (loc.autoIndex ? "true" : "false")
-	          << std::endl;
+	std::cout << "  autoIndex: " << (loc.autoIndex ? "true" : "false") << std::endl;
 
 	std::cout << "--- END DEBUG\n";
 }

@@ -6,15 +6,18 @@
 #include <sys/poll.h>
 #include <vector>
 
-namespace http {
-	class Cgi {
+namespace http
+{
+	class Cgi
+	{
 
 	  public:
-		Cgi(const httpRequest &request, std::string &filePath,
-		    const sockaddr_in &clientAddress, const Server &serverInfo);
+		Cgi(const httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
+		    const ServerConfig &serverInfo);
 		~Cgi();
 
-		enum CgiStatus {
+		enum CgiStatus
+		{
 			STILL_RUNNING,
 			NOT_STARTED,
 			RUNNING,
@@ -25,8 +28,7 @@ namespace http {
 		// // CGI
 		static const std::set<std::string> validCgiExtensions;
 		static bool isValidCgiExtension(const std::string &ext);
-		static std::set<std::string>
-		createValidCgiExtensions() // ! maybe must be outside
+		static std::set<std::string> createValidCgiExtensions() // ! maybe must be outside
 		{
 			std::set<std::string> s;
 			s.insert(".py");
@@ -51,7 +53,7 @@ namespace http {
 		SocketFD _clientFD;
 		httpRequest _request;
 		httpResponse _response;
-		Server _serverInfo;
+		ServerConfig _serverInfo;
 		std::string _filePath;
 		sockaddr_in _clientAddress;
 		int _bytesReceived;

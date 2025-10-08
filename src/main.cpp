@@ -11,6 +11,7 @@ int main(int argc, char **argv, char **envp)
 
 	// Creates a config object
 	Configs configuration;
+	
 	// Reads the configuration file
 	ReadConfig::setConfigs(argv[1], configuration);
 

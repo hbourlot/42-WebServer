@@ -3,9 +3,10 @@
 namespace http
 {
 
-	TcpServer::TcpServer(Server server) : _serverInfo(server), _serverSocket(), _socketAddress_len(sizeof(sockaddr_in))
+	TcpServer::TcpServer(ServerConfig server)
+	    : _serverInfo(server), _serverSocket(), _socketAddress_len(sizeof(sockaddr_in))
 	{
-	  // this->startServer();
+		// this->startServer();
 	}
 
 	TcpServer::~TcpServer()

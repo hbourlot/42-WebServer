@@ -9,27 +9,29 @@
 #define ERROR_PAGE 5
 #define LOCATION 6
 
-void 	getErrorPage(std::string noSpaceLine, Server& server){
+void getErrorPage(std::string noSpaceLine, ServerConfig &server)
+{
 	std::istringstream iss(noSpaceLine);
-    std::string directive;
-    std::string code;
-    std::string path;
+	std::string directive;
+	std::string code;
+	std::string path;
 
-    iss >> directive >> code >> path;
+	iss >> directive >> code >> path;
 
-	for (int i = 0; code[i]; i++){ // Checks if the code has only numbers
+	for (int i = 0; code[i]; i++)
+	{ // Checks if the code has only numbers
 		if (!isdigit(code[i]))
 			throw std::invalid_argument("Error: Route code is invalid\n");
 	}
 
-    if (!path.empty() && path[path.size() - 1] == ';') // Removes the ';'
-        path.erase(path.size() - 1);
+	if (!path.empty() && path[path.size() - 1] == ';') // Removes the ';'
+		path.erase(path.size() - 1);
 
 	server.errorPage.insert(std::pair<int, std::string>(std::atoi(code.c_str()), path));
-
 }
 
-int		getTypeServer(std::string& trimedLine){ // Return the type of information to use on switch
+int getTypeServer(std::string &trimedLine)
+{ // Return the type of information to use on switch
 	if (trimedLine == "host")
 		return HOST;
 	else if (trimedLine == "port")
@@ -45,51 +47,54 @@ int		getTypeServer(std::string& trimedLine){ // Return the type of information t
 	return 7;
 }
 
-bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Configs& configs){
-	std::string noSpaceLine; // Gets the string without the initial spaces	
-	std::string trimedLine; // Stores the atribute of the server
-	Server server; // Variable to save all the information
-	
+bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Configs &configs)
+{
+	std::string noSpaceLine; // Gets the string without the initial spaces
+	std::string trimedLine;  // Stores the atribute of the server
+	ServerConfig server;     // Variable to save all the information
+
 	server.maxRequest = 10; // Set the max value by default
-	while (std::getline(confFd, line)){ // Finish the server config block
+	while (std::getline(confFd, line))
+	{                                    // Finish the server config block
 		noSpaceLine = removeSpace(line); // Removes the first spaces
-		
+
 		if (!CheckConf::checkLineFinished(noSpaceLine))
 			throw std::invalid_argument("Error: Extra words after End of Line\n");
-			
+
 		trimedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
-		
+
 		if (trimedLine[0] == '}') // Finish the server info
 			break;
 
-		switch(getTypeServer(trimedLine)){
-			case HOST:
-				server.host = getInfo(noSpaceLine); // Get the information in string
-				break;
-	
-			case PORT:
-				server.port = std::atoi(getInfo(noSpaceLine).c_str()); // Convert the string into a int
-				break;
-		
-			case SERVER_NAME:
-				server.serverName = getInfo(noSpaceLine); // Gets the server name
-				break;
-			
-			case CLIENT_MAX_BDY:
-				if (getInfo(noSpaceLine) != "10M") // Verify if the value is valid
-					throw std::invalid_argument("Error: Invalid client_max_body, the only one is 10\n");
-				break;
-			
-			case ERROR_PAGE:
-				getErrorPage(noSpaceLine, server);
-				break;
-			
-			case LOCATION:
-				SetLocation::setLocationConfig(confFd, noSpaceLine.substr(noSpaceLine.find(' ')), server);
-				break;
+		switch (getTypeServer(trimedLine))
+		{
+		case HOST:
+			server.host = getInfo(noSpaceLine); // Get the information in string
+			break;
 
-			default:
-				break;
+		case PORT:
+			server.port = std::atoi(getInfo(noSpaceLine).c_str()); // Convert the string into a int
+			break;
+
+		case SERVER_NAME:
+			server.serverName = getInfo(noSpaceLine); // Gets the server name
+			break;
+
+		case CLIENT_MAX_BDY:
+			if (getInfo(noSpaceLine) != "10M") // Verify if the value is valid
+				throw std::invalid_argument("Error: Invalid client_max_body, the only one is 10\n");
+			break;
+
+		case ERROR_PAGE:
+			getErrorPage(noSpaceLine, server);
+			break;
+
+		case LOCATION:
+			SetLocation::setLocationConfig(confFd, noSpaceLine.substr(noSpaceLine.find(' ')), server);
+			break;
+
+		default:
+			break;
 		}
 		noSpaceLine = removeSpace(line);
 		trimedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
@@ -98,18 +103,22 @@ bool	ReadConfig::setServerConfig(std::ifstream& confFd, std::string& line, Confi
 	return (true);
 }
 
-bool    ReadConfig::setConfigs(char* conf, Configs& configs){
-    bool    		inServer = false;
-    std::ifstream 	confFd;
-	std::string		line;
+bool ReadConfig::setConfigs(char *conf, Configs &configs)
+{
+	bool inServer = false;
+	std::ifstream confFd;
+	std::string line;
 	confFd.open(conf); // Open the config file.
-	
-	while(std::getline(confFd, line)){
-		if (removeSpace(line) == "server {"){ // Removes the spaces before the name and return the value to check if it is a server
-			if (!ReadConfig::setServerConfig(confFd, line, configs)) // Will check if everything is OK when we get the server config info
+
+	while (std::getline(confFd, line))
+	{
+		if (removeSpace(line) == "server {")
+		{ // Removes the spaces before the name and return the value to check if it is a server
+			if (!ReadConfig::setServerConfig(
+			        confFd, line, configs)) // Will check if everything is OK when we get the server config info
 				return (false);
 		}
 	}
-    confFd.close();
+	confFd.close();
 	return (true);
 };

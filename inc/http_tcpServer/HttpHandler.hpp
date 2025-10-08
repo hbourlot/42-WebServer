@@ -6,12 +6,12 @@
 class HttpHandler
 {
   public:
-	static void handle(Client &client, const Server &server);
+	static void handle(Client &client, const ServerConfig &server);
 
   private:
-	static void handleGet(Client &client, const Server &server, const Location &location);
-	static void handlePost(Client &client, const Server &server, const Location &location);
-	static void handleDelete(Client &client, const Server &server, const Location &location);
+	static void handleGet(Client &client, const ServerConfig &server, const Location &location);
+	static void handlePost(Client &client, const ServerConfig &server, const Location &location);
+	static void handleDelete(Client &client, const ServerConfig &server, const Location &location);
 
 	// Can add also other http methods here
 };

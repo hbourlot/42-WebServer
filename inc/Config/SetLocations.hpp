@@ -1,9 +1,10 @@
 #include "Configs.hpp"
 
 struct Configs;
-struct Server;
+struct ServerConfig;
 struct Location;
 
-struct SetLocation{
-    static bool	setLocationConfig(std::ifstream& confFd, std::string line, Server& server);
+struct SetLocation
+{
+	static bool setLocationConfig(std::ifstream &confFd, std::string line, ServerConfig &server);
 };

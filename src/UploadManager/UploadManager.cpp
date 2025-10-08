@@ -1,6 +1,6 @@
 #include "Upload/UploadManager.hpp"
 
-bool UploadManager::handleUpload(const Location &location, Client &client, const Server &serverInfo)
+bool UploadManager::handleUpload(const Location &location, Client &client, const ServerConfig &serverInfo)
 {
 	std::string contentType;
 

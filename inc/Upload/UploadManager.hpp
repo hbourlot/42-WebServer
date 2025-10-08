@@ -10,5 +10,5 @@ class UploadManager
 	static bool parseMultipart(const Location &location, Client &Client);
 
   public:
-	static bool handleUpload(const Location &location, Client &client, const Server &serverInfo);
+	static bool handleUpload(const Location &location, Client &client, const ServerConfig &serverInfo);
 };

@@ -34,7 +34,7 @@ static bool validateRequestMethod(const httpRequest &request, const Location &lo
 	return false;
 }
 
-void HttpHandler::handle(Client &client, const Server &server)
+void HttpHandler::handle(Client &client, const ServerConfig &server)
 {
 	httpRequest &request = client.getRequest();
 	httpResponse &response = client.getResponse();
@@ -90,7 +90,7 @@ void HttpHandler::handle(Client &client, const Server &server)
 	// return (true);
 }
 
-void HttpHandler::handleGet(Client &client, const Server &server, const Location &location)
+void HttpHandler::handleGet(Client &client, const ServerConfig &server, const Location &location)
 {
 	httpRequest &request = client.getRequest();
 	httpResponse &response = client.getResponse();
@@ -114,7 +114,7 @@ void HttpHandler::handleGet(Client &client, const Server &server, const Location
 	client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 }
 
-void HttpHandler::handlePost(Client &client, const Server &serverInfo, const Location &location)
+void HttpHandler::handlePost(Client &client, const ServerConfig &serverInfo, const Location &location)
 {
 	httpResponse &response = client.getResponse();
 	httpRequest &request = client.getRequest();
@@ -138,7 +138,7 @@ void HttpHandler::handlePost(Client &client, const Server &serverInfo, const Loc
 
 	if (location.uploadEnable)
 	{
-		UploadManager::handleUpload(location, client,serverInfo);
+		UploadManager::handleUpload(location, client, serverInfo);
 	}
 	else if (!location.uploadEnable)
 	{
@@ -153,7 +153,7 @@ void HttpHandler::handlePost(Client &client, const Server &serverInfo, const Loc
 	}
 }
 
-void HttpHandler::handleDelete(Client &client, const Server &server, const Location &location)
+void HttpHandler::handleDelete(Client &client, const ServerConfig &server, const Location &location)
 {
 	httpResponse &response = client.getResponse();
 	httpRequest &request = client.getRequest();
@@ -171,7 +171,6 @@ void HttpHandler::handleDelete(Client &client, const Server &server, const Locat
 	// return (true);
 }
 
-
 // ! Did i make this?
 std::string parseContentType(std::string &contentType)
 {
@@ -179,5 +178,5 @@ std::string parseContentType(std::string &contentType)
 
 	parsedContentType = contentType.substr(0, contentType.find(';'));
 
-	return(parsedContentType);
+	return (parsedContentType);
 }

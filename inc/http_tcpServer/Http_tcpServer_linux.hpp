@@ -48,7 +48,7 @@ namespace http
 	{
 	  public:
 		// Default Constructor
-		TcpServer(Server server);
+		TcpServer(ServerConfig server);
 		// Default Destructor
 		~TcpServer();
 
@@ -66,7 +66,7 @@ namespace http
 	  private:
 		// *Setted inside a server must know the fds it handles, and less passing by parameter
 		std::vector<pollfd> _fds;
-		Server _serverInfo;
+		ServerConfig _serverInfo;
 		SocketFD _serverSocket;
 		//! Still figuring where put it on  std::set<SocketFD> _toBeClosed;
 		ClientManager _clientManager;

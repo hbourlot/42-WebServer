@@ -30,7 +30,7 @@ httpResponse ResponseBuilder::buildRedirect(const HttpStatusCode &status, const 
 	return buildResponse(status, "", "Location", url);
 }
 httpResponse ResponseBuilder::buildFileResponse(const HttpStatusCode &status, const std::string &filePath,
-                                                const Server &server, bool isError)
+                                                const ServerConfig &server, bool isError)
 {
 	std::string content = readFileContent(filePath);
 	if (content.empty())
