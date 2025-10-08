@@ -6,12 +6,12 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/07/26 16:59:21 by joralves         ###   ########.fr       */
+/*   Updated: 2025/10/08 17:03:49 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
-#include "http_tcpServer/HttpStatus.hpp"
+#include "httpTcpServer/HttpStatus.hpp"
 #include <map>
 #include <set>
 #include <string>

@@ -95,6 +95,3 @@ namespace http
 	std::string getLocationFieldAsString(const std::vector<Location> &locations, const std::string &field);
 
 } // namespace http
-
-// bool parseMultipart(const Location &location);
-// bool handleDirectoryListing(const std::string &filePath, const Location &location);

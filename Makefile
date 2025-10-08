@@ -21,7 +21,7 @@ UTILS_DIR		= utils/
 CLIENT_DIR 		= client/
 HTTPHANDLER_DIR = httpHandler/
 RESPONSEBUILDER_DIR = responseBuilder/
-HTTP_DIR		= http_tcpServer/
+HTTP_DIR		= httpTcpServer/
 REQUEST_DIR		= $(HTTP_DIR)request/
 RESPONSE_DIR	= $(HTTP_DIR)response/
 CGI_DIR			= $(HTTP_DIR)cgi/
@@ -39,7 +39,7 @@ AUTH_FUNC		= loginHandler
 CGI_FUNC		= parseCgi executeCgi Cgi buildEnvStrings doDup
 UTILS_FUNC		= utils getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop processClientEvents
+HTTP_FUNC	    = HttpTcpServerLinux startServer startListen shutDownServer acceptConnection runServer runLoop processClientEvents
 REQUEST_FUNC	= readRequest parseRequest 
 HTTPHANDLER_FUNC = HttpHandler autoindex
 RESPONSEBUILDER_FUNC = ResponseBuilder setResponseAux sendResponse
@@ -59,7 +59,7 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR), main.cpp) 
 
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
-LIB             = libHttp_tcpServer_linux.a
+LIB             = libHttpTcpServerLinux.a
 CXX             = c++
 CXXFLAGS        = -std=c++98 -g
 NAME            = webserv

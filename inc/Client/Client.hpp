@@ -2,8 +2,8 @@
 
 #pragma once
 
-// #include "http_tcpServer_linux/HttpStructs.hpp"
-#include "http_tcpServer/HttpStructs.hpp"
+
+#include "httpTcpServer/HttpStructs.hpp"
 #include <string>
 
 class Client

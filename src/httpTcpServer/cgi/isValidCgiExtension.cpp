@@ -1,5 +1,5 @@
-#include "http_tcpServer/Cgi.hpp"
-#include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include "httpTcpServer/Cgi.hpp"
+#include "httpTcpServer/HttpTcpServerLinux.hpp"
 
 const std::set<std::string> http::Cgi::validCgiExtensions =
     createValidCgiExtensions();

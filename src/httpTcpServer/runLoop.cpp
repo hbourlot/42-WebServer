@@ -1,5 +1,5 @@
-#include "http_tcpServer/HttpStructs.hpp"
-#include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include "httpTcpServer/HttpStructs.hpp"
+#include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include <cstddef>
 #include <exception>
 #include <map>

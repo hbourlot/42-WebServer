@@ -2,7 +2,7 @@
 
 #include "Client/Client.hpp"
 #include "Config/Configs.hpp"
-#include "http_tcpServer/HttpStructs.hpp"
+#include "httpTcpServer/HttpStructs.hpp"
 
 class UploadManager
 {

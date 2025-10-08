@@ -1,5 +1,5 @@
-#include "http_tcpServer/Cgi.hpp"
-#include "http_tcpServer/Http_tcpServer_linux.hpp"
+#include "httpTcpServer/Cgi.hpp"
+#include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include <cstddef>
 #include <map>
 #include <netinet/in.h>
