@@ -36,7 +36,7 @@ LEN             = 0
 
 CLIENT_FUNC		= client clientManager
 AUTH_FUNC		= loginHandler
-CGI_FUNC		= parseCgi executeCgi Cgi buildEnvStrings doDup #isValidCgiExtension
+CGI_FUNC		= parseCgi executeCgi Cgi buildEnvStrings doDup
 UTILS_FUNC		= utils getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
 HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop processClientEvents
