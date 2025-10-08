@@ -2,14 +2,17 @@
 
 #pragma once
 
-
 #include "httpTcpServer/HttpStructs.hpp"
 #include <string>
+namespace http
+{
+	class TcpServer;
+};
 
 class Client
 {
   public:
-	Client(int fd);
+	Client(int fd, http::TcpServer &server);
 	~Client();
 
 	int getFd() const;
@@ -36,7 +39,6 @@ class Client
 	bool isCgiInProgress() const;
 	void setCgiInProgress(bool value);
 
-
   private:
 	int _fd;
 
@@ -48,4 +50,6 @@ class Client
 
 	bool _requestComplete;
 	bool _cgiInProgress;
+
+	http::TcpServer &_server;
 };

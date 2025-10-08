@@ -1,6 +1,7 @@
 #include "Client/Client.hpp"
 
-Client::Client(int fd) : _fd(fd), _requestComplete(false), _cgiInProgress(false)
+Client::Client(int fd, http::TcpServer &server)
+    : _fd(fd), _server(server), _requestComplete(false), _cgiInProgress(false)
 {
 }
 Client::~Client()

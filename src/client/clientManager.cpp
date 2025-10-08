@@ -13,14 +13,14 @@ ClientManager::~ClientManager()
 	_clients.clear();
 }
 
-void ClientManager::addClient(int fd)
+void ClientManager::addClient(int fd, http::TcpServer &server)
 {
 	if (_clients.find(fd) != _clients.end())
 	{
 		std::cerr << "Client with FD " << fd << " already exists." << std::endl;
 		return;
 	}
-	_clients[fd] = new Client(fd);
+	_clients[fd] = new Client(fd, server);
 }
 void ClientManager::removeClient(int fd)
 {
