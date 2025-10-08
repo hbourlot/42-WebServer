@@ -28,7 +28,7 @@ std::string getContentType(const std::string &path)
 {
 	size_t dot = path.find_last_of('.');
 	if (dot == std::string::npos)
-		return "application/octet-stream"; // binario genérico
+		return "application/octet-stream"; // generic Binary
 
 	std::string ext = path.substr(dot + 1);
 	if (ext == "html" || ext == "htm")
@@ -46,4 +46,16 @@ std::string getContentType(const std::string &path)
 	if (ext == "pdf")
 		return "application/pdf";
 	return "application/octet-stream";
+}
+
+std::string ft_strtrim(const std::string &str)
+{
+	unsigned int start = 0;
+	unsigned int end = str.length();
+
+	while (start < str.length() && std::isspace(str[start]))
+		start++;
+	while (end > start && std::isspace(str[end - 1]))
+		end--;
+	return (str.substr(start, end - start));
 }
