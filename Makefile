@@ -131,11 +131,11 @@ bonus: all
 # Shortcuts
 r:
 	@make -s
-	@./$(NAME) ./conf_files/good/chat.conf
+	@./$(NAME) ./conf_files/good/webpage.conf
 
 v:
 	@make -s
-	@$(VALGRIND) ./$(NAME) ./conf_files/good/chat.conf
+	@$(VALGRIND) ./$(NAME) ./conf_files/good/webpage.conf
 
 fc: fclean
 
