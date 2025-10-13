@@ -1,0 +1,93 @@
+html {
+  font-size: 16px;
+}
+
+.about {
+  max-width: 900px;
+  margin: 1rem auto;
+  padding: 1rem 1rem;
+  text-align: center;
+}
+
+.about h1 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+
+.about p {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.team {
+  margin: 0px;
+  padding: 0px;
+}
+
+.team h1 {
+  text-align: center;
+}
+
+.card_container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 220px;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card p {
+  padding: 1rem;
+  font-size: 1rem;
+  color: white;
+  text-align: center;
+}
+
+/* h2 {
+  color: #28a745;
+  margin-bottom: 1rem;
+}
+
+p {
+  color: #cccaca;
+  margin-bottom: 1.5rem;
+}
+
+input[type="file"] {
+  display: block;
+  margin: 1rem auto;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+button:hover {
+  background: #0056b3;
+} */

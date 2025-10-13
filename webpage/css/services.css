@@ -1,0 +1,41 @@
+.upload {
+  max-width: 500px;
+  margin: 3rem auto;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.upload h2 {
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.upload p {
+  color: #ccc;
+  margin-bottom: 1.5rem;
+}
+
+.upload input[type="file"] {
+  display: block;
+  margin: 1rem auto;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+.upload button {
+  padding: 0.75rem 1.5rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s;
+}
+
+.upload button:hover {
+  background: #0056b3;
+}
