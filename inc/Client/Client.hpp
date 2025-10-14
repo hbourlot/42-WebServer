@@ -1,72 +1,54 @@
 #pragma once
 
-#include <netinet/in.h>
-#include <poll.h>
-
-// #include "http_tcpServer_linux/HttpStructs.hpp"
-#include "Config/Configs.hpp"
-#include "http_tcpServer/HttpStructs.hpp"
-#include "http_tcpServer/ICgi.hpp"
+#include "httpTcpServer/HttpStructs.hpp"
 #include <string>
-#include <sys/poll.h>
-#include <vector>
+namespace http
+{
+	class TcpServer;
+};
 
-namespace http {
+class Client
+{
+  public:
+	Client(int fd, http::TcpServer &server);
+	~Client();
 
-	class Client {
-	  public:
-		// TODO: [] Maybe i wont need clientSocket for Cgi
-		Client(SocketFD fd, sockaddr_in &socketAddress, std::vector<pollfd> &fds, const Server serverInfo);
+	int getFd() const;
 
-		~Client();
+	// Buffers
+	std::string &getReadBuffer();
+	std::string &getWriteBuffer();
+	void appendToReadBuffer(const std::string &data);
+	void appendToWriteBuffer(const std::string &data);
+	void clearBuffers();
+	void clearReadBuffer();
+	void clearWriteBuffer();
 
-		SocketFD getFd() const;
-		bool hasCgi() const;
-		ICgi *getCgi() const;
-		std::vector<pollfd> &getFdsLoop();
-		void addCgi(ICgi *);
-		void executeCgi() const;
+	// request-response structures
+	httpRequest &getRequest();
+	httpResponse &getResponse();
+	void resetRequest();
+	void resetResponse();
 
-		// Buffers
-		std::string &getReadBuffer();
-		std::string &getWriteBuffer();
-		void appendToReadBuffer(const std::string &data);
-		void appendToWriteBuffer(const std::string &data);
-		void clearBuffers();
-		void clearReadBuffer();
-		void clearWriteBuffer();
 
-		// request-response structures
-		httpRequest &getRequest();
-		httpResponse &getResponse();
-		void resetRequest();
-		void resetResponse();
+	// State of CGi REquest
+	bool isRequestComplete() const;
+	void setRequestComplete(bool value);
 
-		// State of CGi REquest
-		bool isRequestComplete() const;
-		void setRequestComplete(bool value);
-		void setPOLLOUT();
+	bool isCgiInProgress() const;
+	void setCgiInProgress(bool value);
 
-		bool isCgiInProgress() const;
-		void setCgiInProgress(bool value);
+  private:
+	int _fd;
 
-		bool parseCgi(const Location loc, std::string &filePath);
+	std::string _readBuffer;
+	std::string _writeBuffer;
 
-	  private:
-		int _fd;
+	httpRequest _request;
+	httpResponse _response;
 
-		std::string _readBuffer;
-		std::string _writeBuffer;
-		sockaddr_in &_socketAddress;
-		ICgi *_cgi;
+	bool _requestComplete;
+	bool _cgiInProgress;
 
-		httpRequest _request;
-		httpResponse _response;
-		std::vector<pollfd> &_fds;
-		Server _serverInfo;
-
-		bool _requestComplete;
-		bool _cgiInProgress;
-	};
-
-}; // namespace http
+	http::TcpServer &_server;
+};

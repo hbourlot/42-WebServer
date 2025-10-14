@@ -1,6 +1,6 @@
 *.a
 webServer
 obj/
-.vscode
+.vscode/
+notes_todo/
 webserv
-

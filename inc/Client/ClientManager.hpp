@@ -2,33 +2,24 @@
 
 #include "Client.hpp"
 #include <map>
-#include <vector>
 
 namespace http {
+    class TcpServer; 
+}
+class ClientManager
+{
+  public:
+	ClientManager();
+	~ClientManager();
 
-	struct Client;
+	void addClient(int fd, http::TcpServer &server);
+	void removeClient(int fd);
+	Client *getClient(int fd);
+	bool hasClient(int fd) const;
+	std::map<int, Client *> &getClients();
 
-	class ClientManager {
-	  public:
-		ClientManager();
-		~ClientManager();
+	void resetClientState(int fd);
 
-		void addClient(SocketFD fd, sockaddr_in &socketAddress, std::vector<pollfd> &fds, const Server serverInfo);
-		void removeClient(SocketFD);
-		Client *getClient(SocketFD);
-		bool hasClient(SocketFD) const;
-		bool hasCgiClient(int fd) const;
-		std::map<SocketFD, Client *> &getClients();
-
-		void resetClientState(int fd);
-
-		void addCgi(int fd, Client *);
-		Client *getCgiClient(int fd);
-		void removeCgi(int fd);
-		void removeCgiByClientFd(int clientFd);
-
-	  private:
-		std::map<SocketFD, Client *> _clients;
-		std::map<int, Client *> _cgiToClient;
-	};
-} // namespace http
+  private:
+	std::map<int, Client *> _clients;
+};

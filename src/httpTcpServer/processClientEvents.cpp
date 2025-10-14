@@ -1,0 +1,77 @@
+#include "httpTcpServer/HttpTcpServerLinux.hpp"
+#include <netinet/in.h>
+#include <sys/poll.h>
+
+bool http::TcpServer::handleCgiResponse(pollfd &socket)
+{
+	Client *client = _clientManager.getClient(socket.fd);
+
+	std::cout << "[DEBUG] FD: " << socket.fd << " | revents: " << socket.revents << " | events: " << socket.events
+	          << std::endl;
+	if ((socket.revents & POLLIN) && _cgiFdMap.count(socket.fd))
+	{
+		std::cout << "FD ON HANDLE => " << socket.fd << std::endl;
+		Cgi *cgi = _cgiFdMap[socket.fd];
+		cgi->readCgiOutput();
+		// if (cgi->getStatus() == Cgi::FINISHED) {
+
+		// setBodyResponse(HTTP_OK, cgi->getBody());
+		client->getResponse() = ResponseBuilder::buildResponse(HTTP_OK, cgi->getBody());
+		client->appendToWriteBuffer(ResponseBuilder::buildResponseString(client->getResponse(), client->getRequest()));
+
+		std::cout << cgi->getBody();
+		sendResponse(socket);
+		_cgiFdMap.erase(socket.fd);
+		// }
+		return true;
+	}
+	// std::cout << "RETURNING FALSE\n";
+	return false;
+}
+
+void http::TcpServer::closeClientConnection(size_t index)
+{
+	SocketFD fd = _fds[index].fd;
+
+	std::cout << "Closing client FD => " << fd << std::endl;
+
+	close(fd);
+	_socketAddressMap.erase(fd);
+	_clientManager.removeClient(fd);
+	_fds.erase(_fds.begin() + index);
+}
+
+void http::TcpServer::processClientEvents()
+{
+
+	SocketFD fd;
+	bool shouldCloseSend;
+	bool shouldCloseRead;
+	sockaddr_in *currentAddress;
+
+	for (size_t idx = 1; idx < _fds.size(); ++idx)
+	{
+		shouldCloseSend = false;
+		shouldCloseRead = false;
+
+		fd = _fds[idx].fd;
+
+		if (_fds[idx].revents & POLLIN)
+		{
+			shouldCloseRead = readRequest(idx);
+		}
+		if (_fds[idx].revents & POLLOUT)
+		{
+
+			shouldCloseSend = sendResponse(_fds[idx]);
+			if (shouldCloseSend != 2)
+				_fds[idx].events &= ~POLLOUT;
+			// clearResponse();
+		}
+		if (shouldCloseRead || shouldCloseSend)
+		{
+			closeClientConnection(idx);
+			continue;
+		}
+	}
+}

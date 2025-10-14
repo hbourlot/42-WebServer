@@ -21,13 +21,11 @@ UTILS_DIR		= utils/
 CLIENT_DIR 		= client/
 HTTP_HANDLER_DIR = httpHandler/
 RESPONSE_BUILDER_DIR = responseBuilder/
-HTTP_DIR		= http_tcpServer/
+HTTP_DIR		= httpTcpServer/
 REQUEST_DIR		= $(HTTP_DIR)request/
 RESPONSE_DIR	= $(HTTP_DIR)response/
-METHODS_DIR		= $(HTTP_HANDLER_DIR)methods/
-GET_DIR			= $(METHODS_DIR)Get/
 CGI_DIR			= $(HTTP_DIR)cgi/
-PYTHON_CGI_DIR	= $(CGI_DIR)pythonCgi/
+UPL_DIR			= UploadManager/
 
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
@@ -38,16 +36,14 @@ LEN             = 0
 
 CLIENT_FUNC		= client clientManager
 AUTH_FUNC		= loginHandler
-PYTHON_CGI_FUNC = PythonCgi execute buildEnvStrings doDup saveCgiOutput sendResponse
-CGI_FUNC		= 
-UTILS_FUNC		= ft_strtrim utils split getLocationFieldAsString
+CGI_FUNC		= parseCgi executeCgi Cgi buildEnvStrings doDup
+UTILS_FUNC		= utils getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = http_tcpServer_linux startServer startListen shutDownServer acceptConnection runServer runLoop processClientEvents setCgi
-REQUEST_FUNC	= readSocket parseRequest 
-HTTP_HANDLER_FUNC = HttpHandler
+HTTP_FUNC	    = HttpTcpServerLinux startServer startListen shutDownServer acceptConnection runServer runLoop processClientEvents
+REQUEST_FUNC	= readRequest parseRequest 
+HTTP_HANDLER_FUNC = HttpHandler autoindex
 RESPONSE_BUILDER_FUNC = ResponseBuilder setResponseAux sendResponse
-METHODS_FUNC 	=  uploadHandler
-GET_FUNC		= autoindex 
+UPL_FUNC		= UploadManager parseMultipart
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
@@ -57,15 +53,13 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(RESPONSE_DIR), $(RESPONSE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_HANDLER_DIR), $(HTTP_HANDLER_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(RESPONSE_BUILDER_DIR), $(RESPONSE_BUILDER_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(METHODS_DIR), $(METHODS_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(GET_DIR), $(GET_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(PYTHON_CGI_DIR), $(PYTHON_CGI_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(UPL_DIR), $(UPL_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR), main.cpp) 
 
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
-LIB             = libHttp_tcpServer_linux.a
+LIB             = libHttpTcpServerLinux.a
 CXX             = c++
 CXXFLAGS        = -std=c++98 -g
 NAME            = webserv
@@ -137,11 +131,11 @@ bonus: all
 # Shortcuts
 r:
 	@make -s
-	@./$(NAME) ./conf_files/good/chat.conf
+	@./$(NAME) ./conf_files/good/webpage.conf
 
 v:
 	@make -s
-	@$(VALGRIND) ./$(NAME) ./conf_files/good/chat.conf
+	@$(VALGRIND) ./$(NAME) ./conf_files/good/webpage.conf
 
 fc: fclean
 

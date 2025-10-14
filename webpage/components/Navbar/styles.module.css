@@ -1,0 +1,23 @@
+nav {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 2rem;
+	padding: 1rem;
+	flex-wrap: wrap;
+}
+
+nav a {
+	text-decoration: none;
+	color: inherit;
+	font-size: 1rem;
+	transition: color 0.2s ease;
+}
+
+nav a:hover {
+	color: #212221;
+}
+
+header {
+	background: rgba(0, 0, 0, 0.15);
+}
