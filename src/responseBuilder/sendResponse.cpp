@@ -39,21 +39,3 @@ int http::TcpServer::sendResponse(pollfd &socket)
 	// Si todavía quedan datos, esperar siguiente POLLOUT
 	return 2; // aún quedan datos por enviar
 }
-
-// int http::TcpServer::sendResponse(pollfd &socket) {
-
-// 	ssize_t bytesSent = send(socket.fd, _serverMessage.c_str(),
-// 	                         _serverMessage.size(), MSG_NOSIGNAL);
-// 	if (bytesSent < 0) {
-// 		if (errno == EPIPE) {
-// 			log("Client disconnected before response");
-// 		} else {
-// 			log("Error sending response to client");
-// 		}
-// 		return 1;
-// 	} else {
-// 		log("----- Server Response sent to client -----\n\n");
-// 	}
-
-// 	return 0;
-// }
