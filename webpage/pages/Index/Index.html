@@ -1,74 +1,61 @@
 <!DOCTYPE html>
 
 <html>
-	<head>
-		<title>WebServer</title>
-		<link
-			rel="stylesheet"
-			href="../../css/global.css" />
-		<link
-			rel="stylesheet"
-			href="../../components/Footer/styles.module.css" />
-		<link
-			rel="stylesheet"
-			href="../../components/Navbar/styles.module.css" />
-		<link
-			rel="stylesheet"
-			href="./styles.module.css" />
-		<link
-			rel="icon"
-			href="../../assets/wolfMoonIco.png"
-			type="image/x-icon" />
-		<script src="../../js/layout.js"></script>
-	</head>
-	<body>
-		<header id="navbar"></header>
 
-		<main>
-			<section class="about">
-				<h1>Welcome to our Webserver</h1>
-				<p>
-					Webserv is a project from the 42 curriculum whose goal is to
-					implement an HTTP server from scratch in C++, following the
-					HTTP/1.1 standard. This server must be capable of handling
-					multiple clients simultaneously, processing GET, POST, and
-					DELETE requests, serving static files, executing CGI, and
-					managing configurations through a file similar to Nginx.
-				</p>
-				<p>
-					In this project, we worked as a group of three to gain a
-					deep understanding of how communication between client and
-					server works, the fundamentals of network architecture
-					(sockets, poll, etc.), and the core concepts of web
-					protocols.
-				</p>
-			</section>
-			<section class="team">
-				<h1>Our Team</h1>
-				<div class="card_container">
-					<div class="card">
-						<img
-							src="../../assets/miguel_photo.jpg"
-							alt="miguel_photo" />
-						<p>miafonso</p>
-					</div>
-					<div class="card">
-						<img
-							src="../../assets/hugo_photo.jpg"
-							alt="hugo_photo" />
-						<p>hbourlot</p>
-					</div>
-					<div class="card">
-						<img
-							src="../../assets/jorge_photo.jpg"
-							alt="jorge_photo" />
-						<p>joralves</p>
-					</div>
+<head>
+	<title>WebServer</title>
+	<link rel="stylesheet" href="../../css/global.css" />
+	<link rel="stylesheet" href="../../components/Footer/styles.module.css" />
+	<link rel="stylesheet" href="../../components/Navbar/styles.module.css" />
+	<link rel="stylesheet" href="./styles.module.css" />
+	<link rel="icon" href="../../assets/wolfMoonIco.png" type="image/x-icon" />
+	<script src="../../js/layout.js"></script>
+	
+</head>
+
+<body>
+	<header id="navbar"></header>
+
+	<main>
+		<section class="about">
+			<h1>Welcome to our Webserver</h1>
+			<p>
+				Webserv is a project from the 42 curriculum whose goal is to
+				implement an HTTP server from scratch in C++, following the
+				HTTP/1.1 standard. This server must be capable of handling
+				multiple clients simultaneously, processing GET, POST, and
+				DELETE requests, serving static files, executing CGI, and
+				managing configurations through a file similar to Nginx.
+			</p>
+			<p>
+				In this project, we worked as a group of three to gain a
+				deep understanding of how communication between client and
+				server works, the fundamentals of network architecture
+				(sockets, poll, etc.), and the core concepts of web
+				protocols.
+			</p>
+		</section>
+		<section class="team">
+			<h1>Our Team</h1>
+			<div class="card_container">
+				<div class="card">
+					<img src="../../assets/miguel_photo.jpg" alt="miguel_photo" />
+					<p>miafonso</p>
 				</div>
-			</section>
-		</main>
-		<div class="flex">
-			<footer id="footer"></footer>
-		</div>
-	</body>
+				<div class="card">
+					<img src="../../assets/hugo_photo.jpg" alt="hugo_photo" />
+					<p>hbourlot</p>
+				</div>
+				<div class="card">
+					<img src="../../assets/jorge_photo.jpg" alt="jorge_photo" />
+					<p>joralves</p>
+				</div>
+			</div>
+		</section>
+	</main>
+	<div class="flex">
+		<footer id="footer"></footer>
+	</div>
+</body>
+
 </html>
