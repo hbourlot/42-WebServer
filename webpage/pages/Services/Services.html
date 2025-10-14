@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>WebServer</title>
-    <link rel="stylesheet" href="../css/main.css" />
-    <link rel="stylesheet" href="../css/services.css" />
-    <link rel="icon" href="../assets/wolfMoonIco.png" type="image/x-icon" />
 
-    <script src="../js/layout.js"></script>
-  </head>
-  <body>
-    <header id="navbar"></header>
-    <div class="upload">
-      <h2>Upload Files</h2>
-      <p>Welcome! You can upload any type of file below.</p>
-      <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="media" hidden required />
-        <button type="submit">📤 Upload File</button>
-      </form>
-    </div>
-    <footer id="footer"></footer>
-  </body>
+<head>
+  <title>WebServer</title>
+  <link rel="stylesheet" href="../../css/global.css" />
+  <link rel="stylesheet" href="../../components/Footer/styles.module.css" />
+  <link rel="stylesheet" href="../../components/Navbar/styles.module.css" />
+  <link rel="stylesheet" href="./styles.module.css" />
+  <link rel="icon" href="../../assets/wolfMoonIco.png" type="image/x-icon" />
+  <script src="../../js/layout.js"></script>
+  
+</head>
+
+<body>
+  <header id="navbar"></header>
+  <div class="upload">
+    <h2>Upload Files</h2>
+    <p>Welcome! You can upload any type of file below.</p>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+      <input type="file" name="media" hidden required />
+      <button type="submit">📤 Upload File</button>
+    </form>
+  </div>
+  <footer id="footer"></footer>
+</body>
+
 </html>
