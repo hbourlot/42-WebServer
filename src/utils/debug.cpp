@@ -19,4 +19,5 @@ void printLocation(const Location &location)
 	std::cout << "location.uploadEnable " << location.uploadEnable << std::endl;
 	std::cout << "location.uploadStore " << location.uploadStore << std::endl;
 	std::cout << "location.autoIndex " << location.autoIndex << std::endl;
+	std::cout << "location.index " << location.index << std::endl;
 }

@@ -39,7 +39,6 @@ void HttpHandler::handle(Client &client, const ServerConfig &server)
 	httpRequest &request = client.getRequest();
 	httpResponse &response = client.getResponse();
 
-
 	const Location *matchedLocationPtr = getMatchLocation(request.path, server.locations);
 
 	if (!matchedLocationPtr)
@@ -49,6 +48,8 @@ void HttpHandler::handle(Client &client, const ServerConfig &server)
 	}
 
 	const Location &matchedLocation = *matchedLocationPtr;
+
+	printLocation(matchedLocation);
 
 	if (!matchedLocation.redirection.empty())
 	{

@@ -16,10 +16,15 @@ static std::string getParentPath(const std::string &path)
 
 static bool hasIndexFile(const std::string &path, const Location &location)
 {
+	std::cout << "\033[0;31mEnter Here: " << __func__ << "\033[0m" << std::endl;
+
 	if (location.index.empty())
 		return false;
+	std::cout << "\033[0;31mEnter Here: AFTER " << __func__ << "\033[0m" << std::endl;
 
-	std::string indexPath = path + location.index;
+	// std::string indexPath = path + location.index;
+	std::string indexPath = joinPath(path, location.index);
+	std::cout << "\033[0;31m" << indexPath << "\033[0m" << std::endl;
 	return (std::ifstream(indexPath.c_str()).is_open());
 }
 
@@ -64,6 +69,8 @@ void handleDirectoryListing(Client &client, const ServerConfig &server, const st
 {
 	httpRequest &request = client.getRequest();
 	httpResponse &response = client.getResponse();
+
+	std::cout << "\033[0;31mEnter Here: " << __func__ << "\033[0m" << std::endl;
 
 	if (hasIndexFile(filePath, location))
 	{
