@@ -54,7 +54,7 @@ bool	CheckConf::checkLineFinished(std::string& line){
 		if (openBrackets + 1 != lineSize){
 				std::cout << "Line: " << line << " | open bracket: " << openBrackets << " | Comma: " << end << " | Line size: " << lineSize << std::endl;
 
-			std::cerr << "Its something wrong with 2: " << line << std::endl;
+			std::cerr << "Its something wrong with: " << line << std::endl;
 			return false;
 		}
 	}
@@ -63,7 +63,7 @@ bool	CheckConf::checkLineFinished(std::string& line){
 	if (closeBrackets != std::string::npos){
 		if (closeBrackets + 1!= lineSize){
 
-			std::cerr << "Its something wrong with 3: " << line << std::endl;
+			std::cerr << "Its something wrong with: " << line << std::endl;
 			return false;
 		}
 	}
