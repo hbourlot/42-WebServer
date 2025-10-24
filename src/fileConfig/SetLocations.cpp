@@ -110,7 +110,7 @@ int getCgi(std::string noSpaceLine, Location &location, int cgiInfo)
 			location.cgi_path.push_back(info); // Send it for the cgi_path variable
 	}
 
-	std::cout << "CGI path: " << info << "|" << std::endl;
+	// std::cout << "CGI path: " << info << "|" << std::endl; //!Comment this line (Jorge)
 	return ready; // If 0, not enough information | If 1, ready to build the map
 }
 
