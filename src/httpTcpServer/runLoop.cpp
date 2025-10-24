@@ -27,7 +27,10 @@ void http::TcpServer::removeDeadConnections()
 				_socketAddressMap.erase(fd);
 			}
 
-			std::cout << "  Closing FD => " << fd << std::endl;
+			std::string msg("Closing FD => ");
+			msg += to_str(fd);
+
+			Logs::log(ERROR, msg);
 			close(fd);
 
 			_clientManager.removeClient(fd);

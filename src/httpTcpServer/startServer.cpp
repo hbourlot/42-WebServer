@@ -30,7 +30,7 @@ namespace http
 		int opt = 1;
 		if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 		{
-			log("setsockopt failed");
+			log_prev("setsockopt failed");
 			close(_serverSocket);
 			exit(EXIT_FAILURE);
 		}

@@ -33,7 +33,11 @@ void http::TcpServer::closeClientConnection(size_t index)
 {
 	SocketFD fd = _fds[index].fd;
 
-	std::cout << "Closing client FD => " << fd << std::endl;
+	// std::cout << "Closing client FD => " << fd << std::endl;
+	std::string msg("Closing FD => ");
+	msg += to_str(fd);
+
+	Logs::log(ERROR, msg);
 
 	close(fd);
 	_socketAddressMap.erase(fd);

@@ -49,7 +49,7 @@ void HttpHandler::handle(Client &client, const ServerConfig &server)
 
 	const Location &matchedLocation = *matchedLocationPtr;
 
-	printLocation(matchedLocation);
+	// printLocation(matchedLocation);
 
 	if (!matchedLocation.redirection.empty())
 	{

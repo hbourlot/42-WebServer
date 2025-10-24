@@ -59,3 +59,20 @@ std::string ft_strtrim(const std::string &str)
 		end--;
 	return (str.substr(start, end - start));
 }
+
+std::string dateString()
+{
+	time_t timestamp;
+	time(&timestamp);
+	std::string date = ctime(&timestamp);
+	if (!date.empty() && date[date.length() - 1] == '\n')
+		date.erase(date.length() - 1);
+	return (date);
+}
+
+std::string to_str(int n)
+{
+	std::stringstream ss;
+	ss << n;
+	return ss.str();
+}

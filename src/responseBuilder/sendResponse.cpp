@@ -9,10 +9,10 @@
 int http::TcpServer::sendResponse(pollfd &socket)
 {
 	SocketFD clientFd = socket.fd;
-	
+
 	Client &client = *_clientManager.getClient(clientFd);
 	std::string &writeBuffer = client.getWriteBuffer();
-	std::cout << "writeBuffer "<<writeBuffer << "\n";
+	// std::cout << "writeBuffer " << writeBuffer << "\n";
 
 	if (writeBuffer.empty())
 		return 0;
@@ -22,9 +22,9 @@ int http::TcpServer::sendResponse(pollfd &socket)
 	if (bytesSent < 0)
 	{
 		if (errno == EPIPE)
-			log("Client disconnected before response");
+			Logs::log(ERROR,"Client disconnected before response");
 		else
-			log("Error sending response to client");
+			Logs::log(ERROR,"Error sending response to client");
 		return 1; // cerrar conexión
 	}
 
@@ -32,7 +32,9 @@ int http::TcpServer::sendResponse(pollfd &socket)
 
 	if (writeBuffer.empty())
 	{
-		log("----- Server Response sent to client -----\n\n");
+		std::string msg("Server Response sent to client ");
+		msg += to_str(clientFd);
+		Logs::log(INFO,msg);
 		return 0;
 	}
 

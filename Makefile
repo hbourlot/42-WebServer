@@ -26,6 +26,7 @@ REQUEST_DIR		= $(HTTP_DIR)request/
 RESPONSE_DIR	= $(HTTP_DIR)response/
 CGI_DIR			= $(HTTP_DIR)cgi/
 UPL_DIR			= UploadManager/
+LOGS_DIR		= Logs/
 
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
@@ -44,6 +45,7 @@ REQUEST_FUNC	= readRequest parseRequest
 HTTP_HANDLER_FUNC = HttpHandler autoindex
 RESPONSE_BUILDER_FUNC = ResponseBuilder setResponseAux sendResponse
 UPL_FUNC		= UploadManager parseMultipart
+LOGS_FUNC		= Logs
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
@@ -56,6 +58,7 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UPL_DIR), $(UPL_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(LOGS_DIR), $(LOGS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR), main.cpp) 
 
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))

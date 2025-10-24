@@ -12,16 +12,6 @@ std::string readFileContent(const std::string &filePath)
 	return buffer.str();
 }
 
-static std::string dateString()
-{
-	time_t timestamp;
-	time(&timestamp);
-	std::string date = ctime(&timestamp);
-	if (!date.empty() && date[date.length() - 1] == '\n')
-		date.erase(date.length() - 1);
-	return (date);
-}
-
 void httpResponse::addToHeader(std::string key, std::string value)
 {
 	this->headers[key] = value;

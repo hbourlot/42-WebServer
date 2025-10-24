@@ -19,5 +19,4 @@ class ResponseBuilder
   private:
 	static std::string readFileContent(const std::string &filePath);
 	static std::string getContentType(const std::string &filePath);
-	static std::string dateString();
 };

@@ -91,7 +91,7 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 	{
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
-		log("400 Bad Request: No boundary");
+		log_prev("400 Bad Request: No boundary");
 
 		return (false);
 	}
@@ -102,7 +102,7 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 	{
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
-		log("Bad Request: No boundary filePart");
+		log_prev("Bad Request: No boundary filePart");
 
 		return (false);
 	}
@@ -114,7 +114,7 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 	{
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
-		log("Bad Request: Malformed multipart body");
+		log_prev("Bad Request: Malformed multipart body");
 
 		return (false);
 	}
@@ -125,7 +125,7 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 	{
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
-		log("Bad Request: Filename not found");
+		log_prev("Bad Request: Filename not found");
 		return (false);
 	}
 
@@ -133,7 +133,7 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 	{
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_SERVER_ERR);
 		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
-		log("Internal Server Error: File not saved");
+		log_prev("Internal Server Error: File not saved");
 		return (false);
 	}
 	std::string msg = "File '" + filename + "' received";

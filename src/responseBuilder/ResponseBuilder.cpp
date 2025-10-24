@@ -92,12 +92,3 @@ std::string ResponseBuilder::getContentType(const std::string &filePath)
 		return "application/pdf";
 	return "application/octet-stream";
 }
-std::string ResponseBuilder::dateString()
-{
-	time_t timestamp;
-	time(&timestamp);
-	std::string date = ctime(&timestamp);
-	if (!date.empty() && date[date.length() - 1] == '\n')
-		date.erase(date.length() - 1);
-	return (date);
-}

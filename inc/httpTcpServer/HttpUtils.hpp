@@ -3,10 +3,7 @@
 #include "../Config/Configs.hpp"
 #include "HttpStructs.hpp"
 
-// void parseRequest(httpRequest &request, const std::string &requestContent,
-//                   const ServerConfig &serverInfo);
 std::string ft_strtrim(const std::string &str);
-httpResponse validateForm(httpRequest request);
 void printHttpHeaders(const httpRequest &request);
 
 bool isDirectory(const std::string &filePath);
@@ -27,5 +24,3 @@ ParseStatus parseRequest(httpRequest &request, const std::string &requestContent
                          size_t maxBodySize);
 
 void printLocation(const Location &location);
-
-// std::string getStatusMessage(const std::string &code);

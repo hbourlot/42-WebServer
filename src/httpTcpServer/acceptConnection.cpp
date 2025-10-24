@@ -10,7 +10,7 @@ static void logAcceptError(const sockaddr_in &socketAddress)
 	ss << "Server failed to accept incoming connection from =>\n"
 	   << "[ADDRESS: " << inet_ntoa(socketAddress.sin_addr) << "]\n"
 	   << "[PORT: " << ntohs(socketAddress.sin_port) << "]\n";
-	std::cerr << ss.str();
+	Logs::log(ERROR, ss.str());
 }
 
 void http::TcpServer::acceptConnection()
@@ -49,7 +49,10 @@ void http::TcpServer::acceptConnection()
 
 			_clientManager.addClient(acceptSocket, *this);
 
-			std::cout << "----- Connection Accepted 🟩\n\n";
+			// std::cout << "----- Connection Accepted 🟩\n\n";
+			std::string msg("Connection Accepted 🟩 ");
+			msg += to_str(client_pollfd.fd); 
+			Logs::log(INFO, msg);
 		}
 	}
 }

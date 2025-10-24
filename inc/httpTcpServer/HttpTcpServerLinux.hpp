@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils.hpp"
 #include "Cgi.hpp"
 #include "Client/ClientManager.hpp"
 #include "Config/CheckConf.hpp"
@@ -11,6 +12,7 @@
 #include "HttpUtils.hpp"
 #include "ResponseBuilder.hpp"
 #include "Upload/UploadManager.hpp"
+#include "Logs/Logs.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <dirent.h>
