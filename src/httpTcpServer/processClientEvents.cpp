@@ -13,19 +13,14 @@ bool http::TcpServer::handleCgiResponse(pollfd &socket)
 		std::cout << "FD ON HANDLE => " << socket.fd << std::endl;
 		Cgi *cgi = _cgiFdMap[socket.fd];
 		cgi->readCgiOutput();
-		// if (cgi->getStatus() == Cgi::FINISHED) {
 
-		// setBodyResponse(HTTP_OK, cgi->getBody());
 		client->getResponse() = ResponseBuilder::buildResponse(HTTP_OK, cgi->getBody());
-		client->appendToWriteBuffer(ResponseBuilder::buildResponseString(client->getResponse(), client->getRequest()));
 
 		std::cout << cgi->getBody();
 		sendResponse(socket);
 		_cgiFdMap.erase(socket.fd);
-		// }
 		return true;
 	}
-	// std::cout << "RETURNING FALSE\n";
 	return false;
 }
 

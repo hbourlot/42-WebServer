@@ -87,12 +87,10 @@ void HttpHandler::handleGet(Client &client, const ServerConfig &server, const Lo
 	if (!std::ifstream(filePath.c_str()).is_open())
 	{
 		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
-		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
+		return;
 	}
 
 	response = ResponseBuilder::buildFileResponse(HTTP_OK, filePath, server);
-	// client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
-	client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 }
 
 void HttpHandler::handlePost(Client &client, const ServerConfig &serverInfo, const Location &location)
@@ -101,22 +99,6 @@ void HttpHandler::handlePost(Client &client, const ServerConfig &serverInfo, con
 	httpRequest &request = client.getRequest();
 	std::string ContentType;
 
-	// printLocation(location);
-	// 	! "HERE CGI POST"
-
-	//! if (request.path == "/login")
-	// {
-	// 	httpResponse result = validateForm(request);
-	//
-	// 	if (!result.body.empty())
-	// 	{
-	// 		// setFileResponse(result.statusCode, result.statusMsg,
-	// 		// result.body);
-	// 	}
-	// 	// else
-	// 	// setResponseError(result.statusCode, result.statusMsg);
-	// }
-
 	if (location.uploadEnable)
 	{
 		UploadManager::handleUpload(location, client, serverInfo);
@@ -124,13 +106,11 @@ void HttpHandler::handlePost(Client &client, const ServerConfig &serverInfo, con
 	else if (!location.uploadEnable)
 	{
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_UPLOAD_FORBID);
-		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 	}
 	else
 	{
 		client.getResponse() =
 		    ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, serverInfo.errorPage.at(404), serverInfo, true);
-		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 	}
 }
 

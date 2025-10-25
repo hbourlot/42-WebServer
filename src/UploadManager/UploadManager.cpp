@@ -22,8 +22,6 @@ bool UploadManager::handleUpload(const Location &location, Client &client, const
 	else
 	{
 		response = ResponseBuilder::buildErrorResponse(HTTP_UNSUPPORTED_MEDIA);
-		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 	}
 	return (false);
 }
- 

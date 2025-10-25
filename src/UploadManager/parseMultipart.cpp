@@ -90,7 +90,6 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 	if (boundary.empty())
 	{
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
-		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 		log_prev("400 Bad Request: No boundary");
 
 		return (false);
@@ -101,7 +100,6 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 	if (filePart.empty())
 	{
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
-		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 		log_prev("Bad Request: No boundary filePart");
 
 		return (false);
@@ -113,7 +111,6 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 	if (!splitHeadersAndContent(filePart, headers, content))
 	{
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
-		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 		log_prev("Bad Request: Malformed multipart body");
 
 		return (false);
@@ -124,7 +121,6 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 	if (filename.empty())
 	{
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
-		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 		log_prev("Bad Request: Filename not found");
 		return (false);
 	}
@@ -132,12 +128,10 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 	if (!saveFile(filename, content, location))
 	{
 		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_SERVER_ERR);
-		client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 		log_prev("Internal Server Error: File not saved");
 		return (false);
 	}
 	std::string msg = "File '" + filename + "' received";
 	client.getResponse() = ResponseBuilder::buildResponse(HTTP_OK, msg, "", "", &request);
-	client.appendToWriteBuffer(ResponseBuilder::buildResponseString(response, request));
 	return (true);
 }

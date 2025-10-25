@@ -16,7 +16,6 @@ bool http::TcpServer::readRequest(int index)
 	{
 		std::cerr << "Error: Client not found for fd " << fd << std::endl;
 		client->getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
-		client->appendToWriteBuffer(ResponseBuilder::buildResponseString(client->getResponse(), client->getRequest()));
 		_fds[index].events |= POLLOUT;
 		return true; // Close connection
 	}
@@ -28,7 +27,6 @@ bool http::TcpServer::readRequest(int index)
 			std::cerr << "Error: read()\n";
 
 		client->getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
-		client->appendToWriteBuffer(ResponseBuilder::buildResponseString(client->getResponse(), client->getRequest()));
 		shouldPollOut = true;
 		finished = true;
 	}
@@ -39,17 +37,18 @@ bool http::TcpServer::readRequest(int index)
 		ParseStatus status =
 		    parseRequest(client->getRequest(), client->getReadBuffer(), _serverInfo, CLIENT_MAX_BODY_SIZE);
 
-		// if (status == PARSE_TOO_LARGE)
-		// {
-		// 	setResponseError(HTTP_PAYLOAD);
-		// 	shouldPollOut = true;
-		// 	finished = true;
-		// }
+		if (status == PARSE_TOO_LARGE)
+		{
+			client->getResponse() = ResponseBuilder::buildErrorResponse(HTTP_PAYLOAD);
+			// setResponseError(HTTP_PAYLOAD);
+			shouldPollOut = true;
+			finished = true;
+		}
 		//! Need more lecture  says that its the max for each request
 
 		if (status == PARSE_OK)
 		{
-			
+
 			HttpHandler::handle(*client, _serverInfo);
 			client->clearReadBuffer();
 			shouldPollOut = true;
@@ -62,6 +61,5 @@ bool http::TcpServer::readRequest(int index)
 	if (shouldPollOut)
 		_fds[index].events |= POLLOUT;
 
-	// buffers.erase(fd);
 	return finished;
 }
