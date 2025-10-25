@@ -126,6 +126,7 @@ void http::HttpHandler::handleGet(Client &client, const Server &server, const Lo
 		return;
 	}
 
+	std::cout << "filepath " << filePath.c_str() << std::endl;
 	if (!std::ifstream(filePath.c_str()).is_open()) {
 		std::cout << "[DEBUG] Sending bruh1" << std::endl;
 		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);

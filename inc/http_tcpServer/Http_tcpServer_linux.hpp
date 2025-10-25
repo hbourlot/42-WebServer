@@ -84,6 +84,8 @@ namespace http {
 		bool readSocket(int index);
 		bool handleCgiResponse(pollfd &socket);
 		int sendResponse(pollfd &socket);
+
+		// void cleanAll();
 	};
 
 	std::string getLocationFieldAsString(const std::vector<Location> &locations, const std::string &field);

@@ -61,6 +61,7 @@ namespace http {
 
 		// * Handler CGI
 		if (parseCgi(matchedLocation, clientAddress, _request, socket, fds)) {
+			std::cout << "Entered here" << std::endl;
 			// SocketFD fd = _cgi.back().getPollFd();
 			// _cgiFdMap[socket.fd] = _cgi[0];
 

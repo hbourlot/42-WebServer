@@ -51,7 +51,7 @@ void http::TcpServer::processClientEvents() {
 			shouldCloseRead = readSocket(idx);
 		}
 		if (_fds[idx].revents & POLLOUT) {
-			std::cout << "Segfault 1" << std::endl;
+			// std::cout << "Segfault 1" << std::endl;
 			shouldCloseSend = sendResponse(_fds[idx]);
 			if (shouldCloseSend != 2)
 				_fds[idx].events &= ~POLLOUT;

@@ -15,6 +15,7 @@ bool http::TcpServer::readSocket(int index) {
 		_clientManager.getCgiClient(fd)->getCgi()->getOutput();
 		_clientManager.getCgiClient(fd)->setPOLLOUT();
 		// _fds[index].events |= POLLOUT;
+		std::cout << "Have Cgi" << std::endl;
 		return false;
 	}
 
