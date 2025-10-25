@@ -39,5 +39,5 @@ void httpResponse::setDefaultHeaders()
 	oss << body.size();
 	addToHeader("Content-Length", oss.str());
 
-	addToHeader("Connection", "close");
+	addToHeader("Connection", "keep-alive");
 }
