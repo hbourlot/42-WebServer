@@ -22,6 +22,7 @@ void ClientManager::addClient(int fd, http::TcpServer &server)
 	}
 	_clients[fd] = new Client(fd, server);
 }
+
 void ClientManager::removeClient(int fd)
 {
 	std::map<int, Client *>::iterator it = _clients.find(fd);
@@ -31,6 +32,7 @@ void ClientManager::removeClient(int fd)
 		_clients.erase(it);
 	}
 }
+
 Client *ClientManager::getClient(int fd)
 {
 	std::map<int, Client *>::iterator it = _clients.find(fd);

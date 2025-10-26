@@ -1,49 +1,68 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
-static const Location *getMatchLocation(const std::string &path, const std::vector<Location> &locations)
-{
+static const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations ) {
 
 	const Location *matchedLocation = NULL;
 	size_t matchLength = 0;
 
-	for (size_t i = 0; i < locations.size(); ++i)
-	{
+	for ( size_t i = 0; i < locations.size(); ++i ) {
 
-		const std::string &locPath = locations[i].path;
+		const std::string &locPath = locations[ i ].path;
 
-		if (path.compare(0, locPath.size(), locPath) == 0 && locPath.size() > matchLength)
-		{
-			matchedLocation = &locations[i];
+		if ( path.compare( 0, locPath.size(), locPath ) == 0 && locPath.size() > matchLength ) {
+			matchedLocation = &locations[ i ];
 			matchLength = locPath.size();
 		}
 	}
-	return (matchedLocation);
+	return ( matchedLocation );
 }
 
-static bool validateRequestMethod(const httpRequest &request, const Location &location)
-{
+static bool validateRequestMethod( const httpRequest &request, const Location &location ) {
 
-	if (request.method != "GET" && request.method != "POST" && request.method != "DELETE")
+	if ( request.method != "GET" && request.method != "POST" && request.method != "DELETE" )
 		return false;
 
-	for (size_t i = 0; i < location.methods.size(); ++i)
-	{
-		if (request.method == location.methods[i])
+	for ( size_t i = 0; i < location.methods.size(); ++i ) {
+		if ( request.method == location.methods[ i ] )
 			return true;
 	}
 	return false;
 }
 
-void HttpHandler::handle(Client &client, const ServerConfig &server)
-{
+REQUEST_STATUS HttpHandler::validateRequest( Client &client, const ServerConfig &server ) {
+
 	httpRequest &request = client.getRequest();
 	httpResponse &response = client.getResponse();
 
-	const Location *matchedLocationPtr = getMatchLocation(request.path, server.locations);
+	request.urlMatchedLocation = getMatchLocation( request.path, server.locations );
 
-	if (!matchedLocationPtr)
+	if ( !request.urlMatchedLocation ) { // TODO: URL NOT FOUND
+
+		// response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
+		return REQUEST_STATUS.URL_NOT_FOUND;
+	}
+
+	const Location &matchedLocation = *request.urlMatchedLocation;
+
+	// printLocation(matchedLocation);
+
+	if ( !request.urlMatchedLocation->redirection.empty() ) { // TODO: 
+		return URL_REDIRECT;
+		
+		// response = ResponseBuilder::buildRedirect( HTTP_MOVED, matchedLocation.redirection );
+	}
+	
+}
+
+void HttpHandler::handle( Client &client, const ServerConfig &server ) {
+	httpRequest &request = client.getRequest();
+	httpResponse &response = client.getResponse();
+
+	const Location *matchedLocationPtr = getMatchLocation( request.path, server.locations );
+
+	if ( !matchedLocationPtr ) // TODO: URL NOT FOUND
 	{
-		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
+		response = ResponseBuilder::buildFileResponse( HTTP_NOT_FOUND, server.errorPage.at( 404 ), server, true );
 		return;
 	}
 
@@ -51,93 +70,82 @@ void HttpHandler::handle(Client &client, const ServerConfig &server)
 
 	// printLocation(matchedLocation);
 
-	if (!matchedLocation.redirection.empty())
-	{
-		response = ResponseBuilder::buildRedirect(HTTP_MOVED, matchedLocation.redirection);
+	if ( !matchedLocation.redirection.empty() ) {
+		response = ResponseBuilder::buildRedirect( HTTP_MOVED, matchedLocation.redirection );
 		return;
 	}
 
-	if (!validateRequestMethod(request, matchedLocation))
-	{
-		response = ResponseBuilder::buildFileResponse(HTTP_FORBID_METHOD, DFL_405, server, true);
+	if ( !validateRequestMethod( request, matchedLocation ) ) {
+		response = ResponseBuilder::buildFileResponse( HTTP_FORBID_METHOD, DFL_405, server, true );
 		return;
 	}
 
-	if (request.method == "GET")
-		return (handleGet(client, server, matchedLocation));
-	else if (request.method == "POST")
-		return (handlePost(client, server, matchedLocation));
-	else if (request.method == "DELETE")
-		return (handleDelete(client, server, matchedLocation));
+	if ( request.method == "GET" )
+		return ( handleGet( client, server, matchedLocation ) );
+	else if ( request.method == "POST" )
+		return ( handlePost( client, server, matchedLocation ) );
+	else if ( request.method == "DELETE" )
+		return ( handleDelete( client, server, matchedLocation ) );
 }
 
-void HttpHandler::handleGet(Client &client, const ServerConfig &server, const Location &location)
-{
+void HttpHandler::
+
+    void
+    HttpHandler::handleGet( Client &client, const ServerConfig &server, const Location &location ) {
 	httpRequest &request = client.getRequest();
 	httpResponse &response = client.getResponse();
 
-	std::string filePath = getFilePath(request.path, location);
+	std::string filePath = getFilePath( request.path, location );
 
-	if (isDirectory(filePath))
-	{
-		handleDirectoryListing(client, server, filePath, location);
+	if ( isDirectory( filePath ) ) {
+		handleDirectoryListing( client, server, filePath, location );
 		return;
 	}
 
-	if (!std::ifstream(filePath.c_str()).is_open())
-	{
-		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
+	if ( !std::ifstream( filePath.c_str() ).is_open() ) {
+		response = ResponseBuilder::buildFileResponse( HTTP_NOT_FOUND, server.errorPage.at( 404 ), server, true );
 		return;
 	}
 
-	response = ResponseBuilder::buildFileResponse(HTTP_OK, filePath, server);
+	response = ResponseBuilder::buildFileResponse( HTTP_OK, filePath, server );
 }
 
-void HttpHandler::handlePost(Client &client, const ServerConfig &serverInfo, const Location &location)
-{
+void HttpHandler::handlePost( Client &client, const ServerConfig &serverInfo, const Location &location ) {
 	httpResponse &response = client.getResponse();
 	httpRequest &request = client.getRequest();
 	std::string ContentType;
 
-	if (location.uploadEnable)
-	{
-		UploadManager::handleUpload(location, client, serverInfo);
-	}
-	else if (!location.uploadEnable)
-	{
-		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_UPLOAD_FORBID);
-	}
-	else
-	{
+	if ( location.uploadEnable ) {
+		UploadManager::handleUpload( location, client, serverInfo );
+	} else if ( !location.uploadEnable ) {
+		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_UPLOAD_FORBID );
+	} else {
 		client.getResponse() =
-		    ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, serverInfo.errorPage.at(404), serverInfo, true);
+		    ResponseBuilder::buildFileResponse( HTTP_NOT_FOUND, serverInfo.errorPage.at( 404 ), serverInfo, true );
 	}
 }
 
-void HttpHandler::handleDelete(Client &client, const ServerConfig &server, const Location &location)
-{
+void HttpHandler::handleDelete( Client &client, const ServerConfig &server, const Location &location ) {
 	httpResponse &response = client.getResponse();
 	httpRequest &request = client.getRequest();
 
-	std::string filePath = getFilePath(request.path, location);
+	std::string filePath = getFilePath( request.path, location );
 
 	std::cout << filePath << std::endl;
-	if (isDirectory(filePath))
-	{
+	if ( isDirectory( filePath ) ) {
 		std::cout << "Is a dir cannot delete" << std::endl;
 		// return (false);
 	}
-	if (remove(filePath.c_str()))
+	if ( remove( filePath.c_str() ) )
 		std::cout << "Files not delete" << std::endl;
 	// return (true);
 }
 
 // ! Did i make this?
-std::string parseContentType(std::string &contentType)
-{
+std::string parseContentType( std::string &contentType ) {
 	std::string parsedContentType;
 
-	parsedContentType = contentType.substr(0, contentType.find(';'));
+	parsedContentType = contentType.substr( 0, contentType.find( ';' ) );
 
-	return (parsedContentType);
+	return ( parsedContentType );
 }

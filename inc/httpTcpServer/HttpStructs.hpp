@@ -23,8 +23,7 @@ typedef int SocketFD;
 struct Location;
 
 // Only interface propose
-enum headerKey
-{
+enum headerKey {
 	Accept,
 	AcceptEncoding,
 	AcceptLanguage,
@@ -40,36 +39,48 @@ enum headerKey
 	UserAgent,
 };
 
-enum ParseStatus
-{
+enum PARSE_STATUS { // ! PROB WILL BE REMOVED
 	PARSE_INCOMPLETE,
 	PARSE_TOO_LARGE,
 	PARSE_OK,
 };
 
-struct httpRequest
-{
+enum REQUEST_STATUS {
+
+	CLIENT_NOT_FOUND = 1, // ! if there's no client. what to do?? CGI
+	MAIN_FUNCTIONALITY_PROBLEMS,
+	REQUEST_EMPTY,
+	REQUEST_READ_SUCCESSFULLY,
+	PARSE_OK,
+	PARSE_INCOMPLETE,
+	PARSE_TOO_LARGE,
+	URL_NOT_FOUND,
+	URL_REDIRECT,
+
+};
+
+struct httpRequest {
 	std::string method;
 	std::string path;
 	std::string serverProtocol; // For Cgi
 	std::string pathInfo;       // For Cgi
 	std::string pathTranslated;
-	std::map<std::string, std::string> headers;
+	std::map< std::string, std::string > headers;
 	std::string body;
 	bool shouldCloseConnection();
-	std::string queryString; // test
-	                         // std::string getType(std::string key, std::string value);
+	std::string rawRequestBuffer;
+	std::string queryString;
+	const Location *urlMatchedLocation; // ! Must Initialize as NULL;
 };
 
-struct httpResponse
-{
+struct httpResponse {
 	std::string statusCode;
 	std::string statusMsg;
 	std::string body;
-	std::map<std::string, std::string> headers;
+	std::map< std::string, std::string > headers;
 
 	void setDefaultHeaders();
-	void setDefaultHeaders(httpRequest request);
-	void addToHeader(std::string key, std::string value);
-	std::string buildResponseString(const httpRequest &request);
+	void setDefaultHeaders( httpRequest request );
+	void addToHeader( std::string key, std::string value );
+	std::string buildResponseString( const httpRequest &request );
 };

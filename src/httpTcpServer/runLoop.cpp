@@ -22,10 +22,7 @@ void http::TcpServer::removeDeadConnections()
 			SocketFD fd = _fds[i].fd;
 
 			if (_socketAddressMap.count(fd))
-			{
-				std::cout << "  socketAddressMap => " << fd << std::endl;
 				_socketAddressMap.erase(fd);
-			}
 
 			std::string msg("Closing FD => ");
 			msg += to_str(fd);

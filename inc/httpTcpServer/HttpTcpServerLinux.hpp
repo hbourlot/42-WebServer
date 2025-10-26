@@ -1,6 +1,5 @@
 #pragma once
 
-#include "utils.hpp"
 #include "Cgi.hpp"
 #include "Client/ClientManager.hpp"
 #include "Config/CheckConf.hpp"
@@ -10,9 +9,10 @@
 #include "HttpStatus.hpp"
 #include "HttpStructs.hpp"
 #include "HttpUtils.hpp"
+#include "Logs/Logs.hpp"
 #include "ResponseBuilder.hpp"
 #include "Upload/UploadManager.hpp"
-#include "Logs/Logs.hpp"
+#include "utils.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <dirent.h>
@@ -41,59 +41,55 @@
 
 class Cgi;
 
-namespace http
-{
+namespace http {
 
 	const int BUFFER_SIZE = 30720;
 
-	class TcpServer
-	{
+	class TcpServer {
 	  public:
 		// Default Constructor
-		TcpServer(ServerConfig server);
+		TcpServer( ServerConfig server );
 		// Default Destructor
 		~TcpServer();
 
 		// Main member
 		int runServer();
 
-		class TcpServerException : public std::runtime_error
-		{
+		class TcpServerException : public std::runtime_error {
 		  public:
-			explicit TcpServerException(const std::string &message) : std::runtime_error(message)
-			{
+			explicit TcpServerException( const std::string &message ) : std::runtime_error( message ) {
 			}
 		};
 
 	  private:
 		// *Setted inside a server must know the fds it handles, and less passing by parameter
-		std::vector<pollfd> _fds;
+		std::vector< pollfd > _fds;
 		ServerConfig _serverInfo;
 		SocketFD _serverSocket;
 		//! Still figuring where put it on  std::set<SocketFD> _toBeClosed;
 		ClientManager _clientManager;
 
-		std::map<SocketFD, sockaddr_in> _socketAddressMap;
+		std::map< SocketFD, sockaddr_in > _socketAddressMap;
 		unsigned int _socketAddress_len;
-		std::vector<Cgi> _cgi;
-		std::map<int, Cgi *> _cgiFdMap;
+		std::vector< Cgi > _cgi;
+		std::map< int, Cgi * > _cgiFdMap;
 
 		int startServer();
-		void runLoop(int timeOut);
+		void runLoop( int timeOut );
 		void shutDownServer();
 		void startListen();
 		void acceptConnection();
 		void removeDeadConnections();
 		void processClientEvents();
-		void closeClientConnection(size_t index);
-		bool readRequest(int index);
+		void closeClientConnection( size_t index );
+		REQUEST_STATUS readRequest( int index );
 
-		bool handleCgiResponse(pollfd &socket);
-		int sendResponse(pollfd &socket);
+		bool handleCgiResponse( pollfd &socket );
+		int sendResponse( pollfd &socket );
 
-		bool parseCgi(const Location loc, std::string &filePath, sockaddr_in &clientAddress, httpRequest &request);
+		bool parseCgi( const Location loc, std::string &filePath, sockaddr_in &clientAddress, httpRequest &request );
 	};
 
-	std::string getLocationFieldAsString(const std::vector<Location> &locations, const std::string &field);
+	std::string getLocationFieldAsString( const std::vector< Location > &locations, const std::string &field );
 
 } // namespace http
