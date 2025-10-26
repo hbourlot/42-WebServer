@@ -14,7 +14,6 @@ class ResponseBuilder
 	static httpResponse buildRedirect(const HttpStatusCode &status, const std::string &url);
 	static httpResponse buildFileResponse(const HttpStatusCode &status, const std::string &filePath,
 	                                      const ServerConfig &server, bool isError = false);
-	static std::string buildResponseString(const httpResponse &res, const httpRequest &req);
 
   private:
 	static std::string readFileContent(const std::string &filePath);

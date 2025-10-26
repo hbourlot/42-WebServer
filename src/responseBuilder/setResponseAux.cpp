@@ -41,3 +41,18 @@ void httpResponse::setDefaultHeaders()
 
 	addToHeader("Connection", "keep-alive");
 }
+
+std::string httpResponse::buildResponseString(const httpRequest &request)
+{
+	std::ostringstream responseString;
+	responseString << request.serverProtocol + " " << this->statusCode << " " << this->statusMsg << "\r\n";
+
+	std::map<std::string, std::string>::const_iterator it;
+	for (it = this->headers.begin(); it != this->headers.end(); ++it)
+		responseString << it->first << ": " << it->second << "\r\n";
+
+	responseString << "\r\n";
+	responseString << this->body;
+
+	return responseString.str();
+}

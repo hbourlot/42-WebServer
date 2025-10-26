@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/10/08 17:03:49 by joralves         ###   ########.fr       */
+/*   Updated: 2025/10/26 00:54:52 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ struct httpRequest
 	std::string body;
 
 	std::string queryString; // test
-	// std::string getType(std::string key, std::string value);
+	                         // std::string getType(std::string key, std::string value);
 };
 
 struct httpResponse
@@ -71,4 +71,5 @@ struct httpResponse
 	void setDefaultHeaders();
 	void setDefaultHeaders(httpRequest request);
 	void addToHeader(std::string key, std::string value);
+	std::string buildResponseString(const httpRequest &request);
 };

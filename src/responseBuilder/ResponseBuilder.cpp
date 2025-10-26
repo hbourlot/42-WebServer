@@ -43,20 +43,6 @@ httpResponse ResponseBuilder::buildFileResponse(const HttpStatusCode &status, co
 
 	return buildResponse(status, content, "Content-Type", getContentType(filePath));
 }
-std::string ResponseBuilder::buildResponseString(const httpResponse &response, const httpRequest &request)
-{
-	std::ostringstream responseString;
-	responseString << request.serverProtocol + " " << response.statusCode << " " << response.statusMsg << "\r\n";
-
-	std::map<std::string, std::string>::const_iterator it;
-	for (it = response.headers.begin(); it != response.headers.end(); ++it)
-		responseString << it->first << ": " << it->second << "\r\n";
-
-	responseString << "\r\n";
-	responseString << response.body;
-
-	return responseString.str();
-}
 
 std::string ResponseBuilder::readFileContent(const std::string &filePath)
 {

@@ -11,7 +11,7 @@ int http::TcpServer::sendResponse(pollfd &socket)
 	SocketFD clientFd = socket.fd;
 
 	Client *client = _clientManager.getClient(clientFd);
-	client->appendToWriteBuffer(ResponseBuilder::buildResponseString(client->getResponse(), client->getRequest()));
+	client->appendToWriteBuffer(client->getResponse().buildResponseString(client->getRequest()));
 
 	std::string &writeBuffer = client->getWriteBuffer();
 	// std::cout << "writeBuffer " << writeBuffer << "\n";

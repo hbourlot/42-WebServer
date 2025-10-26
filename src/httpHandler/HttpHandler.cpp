@@ -44,7 +44,7 @@ void HttpHandler::handle(Client &client, const ServerConfig &server)
 	if (!matchedLocationPtr)
 	{
 		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
-		client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
+		return;
 	}
 
 	const Location &matchedLocation = *matchedLocationPtr;
@@ -54,13 +54,13 @@ void HttpHandler::handle(Client &client, const ServerConfig &server)
 	if (!matchedLocation.redirection.empty())
 	{
 		response = ResponseBuilder::buildRedirect(HTTP_MOVED, matchedLocation.redirection);
-		client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
+		return;
 	}
 
 	if (!validateRequestMethod(request, matchedLocation))
 	{
 		response = ResponseBuilder::buildFileResponse(HTTP_FORBID_METHOD, DFL_405, server, true);
-		client.getWriteBuffer() = ResponseBuilder::buildResponseString(response, request);
+		return;
 	}
 
 	if (request.method == "GET")
