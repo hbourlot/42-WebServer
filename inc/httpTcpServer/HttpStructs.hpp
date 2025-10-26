@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/10/26 00:54:52 by joralves         ###   ########.fr       */
+/*   Updated: 2025/10/26 01:28:49 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ struct httpRequest
 	std::string pathTranslated;
 	std::map<std::string, std::string> headers;
 	std::string body;
-
+	bool shouldCloseConnection();
 	std::string queryString; // test
 	                         // std::string getType(std::string key, std::string value);
 };

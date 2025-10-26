@@ -14,7 +14,6 @@ int http::TcpServer::sendResponse(pollfd &socket)
 	client->appendToWriteBuffer(client->getResponse().buildResponseString(client->getRequest()));
 
 	std::string &writeBuffer = client->getWriteBuffer();
-	// std::cout << "writeBuffer " << writeBuffer << "\n";
 
 	if (writeBuffer.empty())
 		return 0;
@@ -36,10 +35,17 @@ int http::TcpServer::sendResponse(pollfd &socket)
 	{
 		std::string msg("Server Response sent to client ");
 		msg += to_str(clientFd);
+		msg += " ";                       //! For Debug
+		msg += client->getRequest().path; //! For Debug
 		Logs::log(INFO, msg);
+
+		if (client->getRequest().shouldCloseConnection())
+			return (_clientManager.resetClientState(clientFd), 1);
+
+		_clientManager.resetClientState(clientFd);
+		socket.events |= POLLIN;
 		return 0;
 	}
 
-	// Si todavía quedan datos, esperar siguiente POLLOUT
-	return 2; // aún quedan datos por enviar
+	return 2;
 }

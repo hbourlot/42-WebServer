@@ -61,16 +61,20 @@ void http::TcpServer::processClientEvents()
 		}
 		if (_fds[idx].revents & POLLOUT)
 		{
-
-			shouldCloseSend = sendResponse(_fds[idx]);
-			if (shouldCloseSend != 2)
+			int sendResult = sendResponse(_fds[idx]);
+			if (sendResult == 1)
+				shouldCloseSend = true;
+			else if (sendResult == 2)
+				_fds[idx].events |= POLLOUT;
+			else
 				_fds[idx].events &= ~POLLOUT;
-			// clearResponse();
 		}
 		if (shouldCloseRead || shouldCloseSend)
 		{
 			closeClientConnection(idx);
+			--idx;
 			continue;
 		}
+		// _fds[idx].events |= POLLIN;
 	}
 }
