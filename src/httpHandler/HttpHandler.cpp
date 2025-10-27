@@ -45,7 +45,7 @@ VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfi
 		return VALID_REDIRECT_REQUIRED;
 
 	if ( !validateRequestMethod( request, matchedLocation ) )
-		return VALID_ERROR;
+		return VALID_METHOD_NOT_ALLOWED;
 
 	return VALID_OK;
 }

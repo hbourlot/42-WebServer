@@ -119,11 +119,6 @@ bool http::TcpServer::handleRouteValidation( Client *client, size_t index ) {
 		_fds[ index ].events |= POLLOUT;
 		return false;
 
-	case VALID_ERROR:
-		response = ResponseBuilder::buildFileResponse( HTTP_FORBID_METHOD, DFL_405, _serverInfo, true );
-		_fds[ index ].events |= POLLOUT;
-		return false;
-
 	default:
 		response = ResponseBuilder::buildErrorResponse( HTTP_SERVER_ERR );
 		_fds[ index ].events |= POLLOUT;
