@@ -93,43 +93,7 @@ static void parseRequestHeaders( httpRequest &request, std::istringstream &reque
 	}
 }
 
-// PARSE_STATUS parseRequest( httpRequest &request, const std::string &requestContent, const ServerConfig &serverInfo,
-//                            size_t maxBodySize ) {
-// 	std::istringstream request_stream( requestContent );
-// 	std::string line;
-// 	if ( !std::getline( request_stream, line ) )
-// 		return PARSE_INCOMPLETE; // ! H = Might come not completed
-
-// 	std::istringstream first_line( line );
-// 	first_line >> request.method >> request.path >> request.serverProtocol;
-
-// 	parseRequestQueries( request );
-// 	parsePath( request, serverInfo );
-// 	parseRequestHeaders( request, request_stream, line );
-
-// 	std::string body;
-// 	while ( std::getline( request_stream, line ) )
-// 		body += line + "\n";
-// 	request.body = body;
-
-// 	std::cout << "----------- HEADER -----------\n";
-// 	for ( std::map< std::string, std::string >::iterator it = request.headers.begin(); it != request.headers.end();
-// 	      ++it ) {
-// 		std::cout << "[" << it->first << "] = [" << it->second << "]\n";
-// 	}
-// 	std::cout << "----------- HEADER / -----------\n";
-
-// 	if ( request.headers.count( "Content-Length" ) ) {
-// 		size_t contentLength = std::strtoul( request.headers[ "Content-Length" ].c_str(), NULL, 10 );
-// 		if ( contentLength > maxBodySize )
-// 			return PARSE_TOO_LARGE;
-// 		if ( request.body.size() < contentLength )
-// 			return PARSE_INCOMPLETE;
-// 	}
-// 	return PARSE_OK;
-// }
-
-REQUEST_STATUS parseRequest( Client *client, const ServerConfig &serverInfo ) {
+PARSE_STATUS parseRequest( Client *client, const ServerConfig &serverInfo ) {
 
 	httpRequest &clientRequest = client->getRequest();
 	std::istringstream requestStream( client->getReadBuffer() );

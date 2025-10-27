@@ -1,6 +1,6 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
-static const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations ) {
+const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations ) {
 
 	const Location *matchedLocation = NULL;
 	size_t matchLength = 0;
@@ -29,73 +29,50 @@ static bool validateRequestMethod( const httpRequest &request, const Location &l
 	return false;
 }
 
-REQUEST_STATUS HttpHandler::validateRequest( Client &client, const ServerConfig &server ) {
+VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfig &server ) {
 
 	httpRequest &request = client.getRequest();
 	httpResponse &response = client.getResponse();
 
 	request.urlMatchedLocation = getMatchLocation( request.path, server.locations );
 
-	if ( !request.urlMatchedLocation ) { // TODO: URL NOT FOUND
-
-		// response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
-		return REQUEST_STATUS.URL_NOT_FOUND;
-	}
+	if ( !request.urlMatchedLocation ) // URL NOT FOUND
+		return VALID_NOT_FOUND;
 
 	const Location &matchedLocation = *request.urlMatchedLocation;
 
-	// printLocation(matchedLocation);
+	if ( !request.urlMatchedLocation->redirection.empty() ) // /redirect-me
+		return VALID_REDIRECT_REQUIRED;
 
-	if ( !request.urlMatchedLocation->redirection.empty() ) { // TODO: 
-		return URL_REDIRECT;
-		
-		// response = ResponseBuilder::buildRedirect( HTTP_MOVED, matchedLocation.redirection );
-	}
+	if ( !validateRequestMethod( request, matchedLocation ) )
+		return VALID_ERROR;
+
+	return VALID_OK;
+}
+
+void HttpRouter::handleMethods( Client &client, const ServerConfig &server ) {
+
 	
-}
-
-void HttpHandler::handle( Client &client, const ServerConfig &server ) {
 	httpRequest &request = client.getRequest();
-	httpResponse &response = client.getResponse();
+	const Location *( &matchedLocation ) = client.getRequest().urlMatchedLocation;
+	
+	if ( request.method == "GET" ) {
 
-	const Location *matchedLocationPtr = getMatchLocation( request.path, server.locations );
-
-	if ( !matchedLocationPtr ) // TODO: URL NOT FOUND
-	{
-		response = ResponseBuilder::buildFileResponse( HTTP_NOT_FOUND, server.errorPage.at( 404 ), server, true );
-		return;
+		return ( handleGet( client, server, *matchedLocation ) );
 	}
-
-	const Location &matchedLocation = *matchedLocationPtr;
-
-	// printLocation(matchedLocation);
-
-	if ( !matchedLocation.redirection.empty() ) {
-		response = ResponseBuilder::buildRedirect( HTTP_MOVED, matchedLocation.redirection );
-		return;
-	}
-
-	if ( !validateRequestMethod( request, matchedLocation ) ) {
-		response = ResponseBuilder::buildFileResponse( HTTP_FORBID_METHOD, DFL_405, server, true );
-		return;
-	}
-
-	if ( request.method == "GET" )
-		return ( handleGet( client, server, matchedLocation ) );
 	else if ( request.method == "POST" )
-		return ( handlePost( client, server, matchedLocation ) );
+		return ( handlePost( client, server, *matchedLocation ) );
 	else if ( request.method == "DELETE" )
-		return ( handleDelete( client, server, matchedLocation ) );
+		return ( handleDelete( client, server, *matchedLocation ) );
 }
 
-void HttpHandler::
+void HttpRouter::handleGet( Client &client, const ServerConfig &server, const Location &location ) {
 
-    void
-    HttpHandler::handleGet( Client &client, const ServerConfig &server, const Location &location ) {
 	httpRequest &request = client.getRequest();
 	httpResponse &response = client.getResponse();
-
+	
 	std::string filePath = getFilePath( request.path, location );
+	write(2, "OVER\n", 6);
 
 	if ( isDirectory( filePath ) ) {
 		handleDirectoryListing( client, server, filePath, location );
@@ -110,7 +87,7 @@ void HttpHandler::
 	response = ResponseBuilder::buildFileResponse( HTTP_OK, filePath, server );
 }
 
-void HttpHandler::handlePost( Client &client, const ServerConfig &serverInfo, const Location &location ) {
+void HttpRouter::handlePost( Client &client, const ServerConfig &serverInfo, const Location &location ) {
 	httpResponse &response = client.getResponse();
 	httpRequest &request = client.getRequest();
 	std::string ContentType;
@@ -125,7 +102,7 @@ void HttpHandler::handlePost( Client &client, const ServerConfig &serverInfo, co
 	}
 }
 
-void HttpHandler::handleDelete( Client &client, const ServerConfig &server, const Location &location ) {
+void HttpRouter::handleDelete( Client &client, const ServerConfig &server, const Location &location ) {
 	httpResponse &response = client.getResponse();
 	httpRequest &request = client.getRequest();
 

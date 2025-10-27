@@ -65,6 +65,7 @@ OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB             = libHttpTcpServerLinux.a
 CXX             = c++
 CXXFLAGS        = -std=c++98 -g
+DEBUG_FLAGS		= -DDEBUG -g -O0
 NAME            = webserv
 TOTAL_FILES     = $(shell echo $$(($(words $(OBJS_SRC)))))
 VALGRIND        = valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
@@ -139,6 +140,14 @@ r:
 v:
 	@make -s
 	@$(VALGRIND) ./$(NAME) ./conf_files/good/webpage.conf
+
+debug: CXXFLAGS += $(DEBUG_FLAGS) -DDEBUG -g -O0
+debug: re
+	@echo "$(GREEN)Debug build complete!$(RESET)"
+
+d: debug
+	@make -s
+	@./$(NAME) ./conf_files/good/webpage.conf
 
 fc: fclean
 

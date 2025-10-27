@@ -4,8 +4,8 @@
 #include "Client/ClientManager.hpp"
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
-#include "HttpHandler.hpp"
 #include "HttpLogs.hpp"
+#include "HttpRouter.hpp"
 #include "HttpStatus.hpp"
 #include "HttpStructs.hpp"
 #include "HttpUtils.hpp"
@@ -37,6 +37,10 @@
 
 #ifndef nullptr
 #define nullptr NULL
+#endif
+
+#ifndef DEBUG
+#define DEBUG false
 #endif
 
 class Cgi;
@@ -82,7 +86,16 @@ namespace http {
 		void removeDeadConnections();
 		void processClientEvents();
 		void closeClientConnection( size_t index );
-		REQUEST_STATUS readRequest( int index );
+		READ_STATUS readRequest( int index );
+
+		// ---
+		void handleClientRead( size_t index );
+		bool handleReadStatus( READ_STATUS status, Client *client, size_t index );
+		PARSE_STATUS parseClientRequest( Client *client );
+		bool handleParseStatus( PARSE_STATUS status, Client *client, size_t index );
+		void routeClientRequest( Client *client, size_t index );
+		bool handleRouteValidation(Client *client, size_t index);
+		// ---
 
 		bool handleCgiResponse( pollfd &socket );
 		int sendResponse( pollfd &socket );
