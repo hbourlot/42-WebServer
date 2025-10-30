@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Client.hpp"
+#include "http_tcpServer/HttpStructs.hpp"
 #include <map>
 #include <vector>
 

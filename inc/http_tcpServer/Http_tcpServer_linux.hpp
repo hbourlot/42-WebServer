@@ -8,7 +8,7 @@
 #include "HttpStatus.hpp"
 #include "HttpStructs.hpp"
 #include "HttpUtils.hpp"
-#include "PythonCgi.hpp"
+#include "mypythonCgi.hpp"
 #include "ResponseBuilder.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>

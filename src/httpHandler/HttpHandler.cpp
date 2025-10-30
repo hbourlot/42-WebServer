@@ -104,7 +104,7 @@ bool http::HttpHandler::handleCgi(ClientManager *clientManager, Client *client, 
 		std::cout << "Invalid methods to execute CGI" << std::endl;
 	}
 
-	ICgi *cgi = new PythonCgi(client, clientManager, filePath);
+	ICgi *cgi = new PythonCGI(client, clientManager, filePath);
 	if (!cgi) {
 		std::cerr << "HandleCgi Error: Error allocating memory of Cgi." << std::endl;
 	} else {
