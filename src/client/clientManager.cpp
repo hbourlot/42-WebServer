@@ -57,6 +57,7 @@ void ClientManager::resetClientState(int fd)
 	if (!hasClient(fd))
 		return;
 	Client *client = _clients[fd];
+	client->setState(RESET);
 	client->clearBuffers();
 	client->resetRequest();
 	client->resetResponse();

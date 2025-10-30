@@ -1,5 +1,7 @@
-#include "httpTcpServer/HttpStructs.hpp"
+ #include "httpTcpServer/HttpStructs.hpp"
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
+#include "Client/ClientEventProcessor.hpp"
+
 #include <cstddef>
 #include <exception>
 #include <map>
@@ -40,7 +42,7 @@ void http::TcpServer::removeDeadConnections()
 
 void http::TcpServer::runLoop(int timeOut)
 {
-
+	ClientEventProcessor processor( *this );
 	try
 	{
 		while (true)
@@ -64,7 +66,7 @@ void http::TcpServer::runLoop(int timeOut)
 			// Checking for new connections
 			acceptConnection();
 			removeDeadConnections();
-			processClientEvents();
+			processClientEvents(processor);
 		}
 	}
 	catch (const TcpServerException &e)

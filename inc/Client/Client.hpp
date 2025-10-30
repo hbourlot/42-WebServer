@@ -2,15 +2,28 @@
 
 #include "httpTcpServer/HttpStructs.hpp"
 #include <string>
-namespace http
-{
+namespace http {
 	class TcpServer;
 };
 
-class Client
-{
+enum CLIENT_STATE {
+	RESET,
+	READ_SUCCESS = 1,
+	READ_INCOMPLETE,
+	READ_ERROR,
+	READ_EMPTY,
+	/////
+	PARSE_INCOMPLETE,
+	PARSE_TOO_LARGE,
+	PARSE_OK,
+	PARSE_ERROR
+};
+
+class Client {
+
   public:
-	Client(int fd, http::TcpServer &server);
+	friend class ClientEventProcessor;
+	Client( int fd, http::TcpServer &server );
 	~Client();
 
 	int getFd() const;
@@ -18,11 +31,13 @@ class Client
 	// Buffers
 	std::string &getReadBuffer();
 	std::string &getWriteBuffer();
-	void appendToReadBuffer(const std::string &data);
-	void appendToWriteBuffer(const std::string &data);
+	void appendToReadBuffer( const std::string &data );
+	void appendToWriteBuffer( const std::string &data );
 	void clearBuffers();
 	void clearReadBuffer();
 	void clearWriteBuffer();
+	void setState( CLIENT_STATE state );
+	CLIENT_STATE getState() const;
 
 	// request-response structures
 	httpRequest &getRequest();
@@ -30,16 +45,16 @@ class Client
 	void resetRequest();
 	void resetResponse();
 
-
 	// State of CGi REquest
 	bool isRequestComplete() const;
-	void setRequestComplete(bool value);
+	void setRequestComplete( bool value );
 
 	bool isCgiInProgress() const;
-	void setCgiInProgress(bool value);
+	void setCgiInProgress( bool value );
 
   private:
 	int _fd;
+	CLIENT_STATE _state;
 
 	std::string _readBuffer;
 	std::string _writeBuffer;

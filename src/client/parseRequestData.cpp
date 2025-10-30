@@ -1,8 +1,4 @@
-#include "httpTcpServer/HttpTcpServerLinux.hpp"
-#include <cstddef>
-#include <map>
-#include <string>
-#include <vector>
+#include "Client/ClientEventProcessor.hpp"
 
 static void parseRequestQueries( httpRequest &request ) {
 	std::string fullPath = request.path;
@@ -93,14 +89,16 @@ static void parseRequestHeaders( httpRequest &request, std::istringstream &reque
 	}
 }
 
-PARSE_STATUS parseRequest( Client *client, const ServerConfig &serverInfo ) {
+bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerConfig &serverInfo ) {
 
-	httpRequest &clientRequest = client->getRequest();
-	std::istringstream requestStream( client->getReadBuffer() );
+	httpRequest &clientRequest = client.getRequest();
+	std::istringstream requestStream( client.getReadBuffer() );
 	std::string line;
 
-	if ( !std::getline( requestStream, line ) )
-		return PARSE_INCOMPLETE;
+	if ( !std::getline( requestStream, line ) ) {
+		client.setState( PARSE_INCOMPLETE );
+		return false;
+	}
 
 	std::istringstream firstLine( line );
 
@@ -117,11 +115,15 @@ PARSE_STATUS parseRequest( Client *client, const ServerConfig &serverInfo ) {
 
 	if ( clientRequest.headers.count( "Content-length" ) ) {
 		size_t contentLength = std::strtoul( clientRequest.headers[ "Content-length" ].c_str(), NULL, 10 );
-		if ( contentLength > serverInfo.maxRequest )
-			return PARSE_TOO_LARGE;
-		if ( clientRequest.body.size() < contentLength )
-			return PARSE_INCOMPLETE;
+		if ( contentLength > serverInfo.maxRequest ) {
+			client.setState( PARSE_TOO_LARGE );
+			return true;
+		}
+		if ( clientRequest.body.size() < contentLength ) {
+			client.setState( PARSE_INCOMPLETE );
+			return false;
+		}
 	}
-	return PARSE_OK;
+	client.setState( PARSE_OK );
+	return true;
 }
-

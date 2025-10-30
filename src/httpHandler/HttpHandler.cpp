@@ -52,15 +52,12 @@ VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfi
 
 void HttpRouter::handleMethods( Client &client, const ServerConfig &server ) {
 
-	
 	httpRequest &request = client.getRequest();
 	const Location *( &matchedLocation ) = client.getRequest().urlMatchedLocation;
-	
-	if ( request.method == "GET" ) {
 
+	if ( request.method == "GET" ) {
 		return ( handleGet( client, server, *matchedLocation ) );
-	}
-	else if ( request.method == "POST" )
+	} else if ( request.method == "POST" )
 		return ( handlePost( client, server, *matchedLocation ) );
 	else if ( request.method == "DELETE" )
 		return ( handleDelete( client, server, *matchedLocation ) );
@@ -70,9 +67,8 @@ void HttpRouter::handleGet( Client &client, const ServerConfig &server, const Lo
 
 	httpRequest &request = client.getRequest();
 	httpResponse &response = client.getResponse();
-	
+
 	std::string filePath = getFilePath( request.path, location );
-	write(2, "OVER\n", 6);
 
 	if ( isDirectory( filePath ) ) {
 		handleDirectoryListing( client, server, filePath, location );

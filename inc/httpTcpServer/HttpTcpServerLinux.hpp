@@ -4,6 +4,7 @@
 #include "Client/ClientManager.hpp"
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
+// #include "Client/ClientEventProcessor.hpp"
 #include "HttpLogs.hpp"
 #include "HttpRouter.hpp"
 #include "HttpStatus.hpp"
@@ -47,10 +48,12 @@ class Cgi;
 
 namespace http {
 
+	class ClientEventProcessor;
 	const int BUFFER_SIZE = 30720;
 
 	class TcpServer {
 	  public:
+		friend class ClientEventProcessor;
 		// Default Constructor
 		TcpServer( ServerConfig server );
 		// Default Destructor
@@ -66,12 +69,10 @@ namespace http {
 		};
 
 	  private:
-		// *Setted inside a server must know the fds it handles, and less passing by parameter
 		std::vector< pollfd > _fds;
-		ServerConfig _serverInfo;
 		SocketFD _serverSocket;
-		//! Still figuring where put it on  std::set<SocketFD> _toBeClosed;
 		ClientManager _clientManager;
+		ServerConfig _serverInfo;
 
 		std::map< SocketFD, sockaddr_in > _socketAddressMap;
 		unsigned int _socketAddress_len;
@@ -84,22 +85,10 @@ namespace http {
 		void startListen();
 		void acceptConnection();
 		void removeDeadConnections();
-		void processClientEvents();
+		void processClientEvents(ClientEventProcessor &processor);
 		void closeClientConnection( size_t index );
-		READ_STATUS readRequest( int index );
 
-		// ---
-		void handleClientRead( size_t index );
-		bool handleReadStatus( READ_STATUS status, Client *client, size_t index );
-		PARSE_STATUS parseClientRequest( Client *client );
-		bool handleParseStatus( PARSE_STATUS status, Client *client, size_t index );
-		void routeClientRequest( Client *client, size_t index );
-		bool handleRouteValidation(Client *client, size_t index);
-		// ---
-
-		bool handleCgiResponse( pollfd &socket );
-		int sendResponse( pollfd &socket );
-
+		// bool handleCgiResponse( pollfd &socket );
 		bool parseCgi( const Location loc, std::string &filePath, sockaddr_in &clientAddress, httpRequest &request );
 	};
 

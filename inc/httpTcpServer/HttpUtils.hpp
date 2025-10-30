@@ -20,6 +20,6 @@ std::string readFileContent( const std::string &filePath );
 std::string joinPath( const std::string &base, const std::string &sub );
 std::vector< std::string > split( const std::string &s, char delimiter );
 
-PARSE_STATUS parseRequest( Client *client, const ServerConfig &serverInfo );
+// PARSE_STATUS parseRequest( Client *client, const ServerConfig &serverInfo );
 
 void printLocation( const Location &location );

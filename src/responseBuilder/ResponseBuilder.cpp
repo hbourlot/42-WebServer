@@ -29,6 +29,7 @@ httpResponse ResponseBuilder::buildRedirect(const HttpStatusCode &status, const 
 {
 	return buildResponse(status, "", "Location", url);
 }
+
 httpResponse ResponseBuilder::buildFileResponse(const HttpStatusCode &status, const std::string &filePath,
                                                 const ServerConfig &server, bool isError)
 {
