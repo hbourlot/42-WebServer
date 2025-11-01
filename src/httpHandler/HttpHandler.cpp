@@ -44,8 +44,15 @@ VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfi
 	if ( !request.urlMatchedLocation->redirection.empty() ) // /redirect-me
 		return VALID_REDIRECT_REQUIRED;
 
+	// !!!!CGI
+
+	// if (!request.urlMatchedLocation->cgi_extension.empty())
+	// 	return VALID_CGI;
+
 	if ( !validateRequestMethod( request, matchedLocation ) )
 		return VALID_METHOD_NOT_ALLOWED;
+
+	
 
 	return VALID_OK;
 }
@@ -54,6 +61,9 @@ void HttpRouter::handleMethods( Client &client, const ServerConfig &server ) {
 
 	httpRequest &request = client.getRequest();
 	const Location *( &matchedLocation ) = client.getRequest().urlMatchedLocation;
+
+
+	///!!!!CGI
 
 	if ( request.method == "GET" ) {
 		return ( handleGet( client, server, *matchedLocation ) );

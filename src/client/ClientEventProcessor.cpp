@@ -96,6 +96,9 @@ bool http::ClientEventProcessor::handleRouteValidation( Client &client ) {
 	case VALID_OK:
 		return true; // Continue to routing
 
+	// case VALID_CGI:
+	// 	return true;
+
 	case VALID_NOT_FOUND:
 		response =
 		    ResponseBuilder::buildFileResponse( HTTP_NOT_FOUND, serverInfo.errorPage.at( 404 ), serverInfo, true );
