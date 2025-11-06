@@ -66,24 +66,24 @@ void handleDirectoryListing(Client &client, const ServerConfig &server, const st
                             const Location &location)
 {
 	httpRequest &request = client.getRequest();
-	httpResponse &response = client.getResponse();
+	HttpResponse &response = client.getResponse();
 
 	if (hasIndexFile(filePath, location))
 	{
 		std::string indexPath = joinPath(filePath, location.index);
-		response = ResponseBuilder::buildFileResponse(HTTP_OK, indexPath, server);
+		response.buildFileResponse(HTTP_OK, indexPath, server);
 		return;
 	}
 
 	if (!location.autoIndex)
 	{
-		response = ResponseBuilder::buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
+		response.buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
 		return;
 	}
 
 	std::string body = generateAutoIndexPage(filePath, location, request);
 
-	response = ResponseBuilder::buildResponse(HTTP_OK, body, "text/html");
+	response.buildResponse(HTTP_OK, body, "text/html");
 
 	return;
 }

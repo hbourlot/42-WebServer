@@ -32,7 +32,7 @@ static bool validateRequestMethod( const httpRequest &request, const Location &l
 VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfig &server ) {
 
 	httpRequest &request = client.getRequest();
-	httpResponse &response = client.getResponse();
+	HttpResponse &response = client.getResponse();
 
 	request.urlMatchedLocation = getMatchLocation( request.path, server.locations );
 
@@ -76,7 +76,7 @@ void HttpRouter::handleMethods( Client &client, const ServerConfig &server ) {
 void HttpRouter::handleGet( Client &client, const ServerConfig &server, const Location &location ) {
 
 	httpRequest &request = client.getRequest();
-	httpResponse &response = client.getResponse();
+	HttpResponse &response = client.getResponse();
 
 	std::string filePath = getFilePath( request.path, location );
 
@@ -86,30 +86,29 @@ void HttpRouter::handleGet( Client &client, const ServerConfig &server, const Lo
 	}
 
 	if ( !std::ifstream( filePath.c_str() ).is_open() ) {
-		response = ResponseBuilder::buildFileResponse( HTTP_NOT_FOUND, server.errorPage.at( 404 ), server, true );
+		response.buildFileResponse( HTTP_NOT_FOUND, server.errorPage.at( 404 ), server, true );
 		return;
 	}
 
-	response = ResponseBuilder::buildFileResponse( HTTP_OK, filePath, server );
+	response.buildFileResponse( HTTP_OK, filePath, server );
 }
 
 void HttpRouter::handlePost( Client &client, const ServerConfig &serverInfo, const Location &location ) {
-	httpResponse &response = client.getResponse();
+	HttpResponse &response = client.getResponse();
 	httpRequest &request = client.getRequest();
 	std::string ContentType;
 
 	if ( location.uploadEnable ) {
 		UploadManager::handleUpload( location, client, serverInfo );
 	} else if ( !location.uploadEnable ) {
-		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_UPLOAD_FORBID );
+		client.getResponse().buildErrorResponse( HTTP_UPLOAD_FORBID );
 	} else {
-		client.getResponse() =
-		    ResponseBuilder::buildFileResponse( HTTP_NOT_FOUND, serverInfo.errorPage.at( 404 ), serverInfo, true );
+		client.getResponse().buildFileResponse( HTTP_NOT_FOUND, serverInfo.errorPage.at( 404 ), serverInfo, true );
 	}
 }
 
 void HttpRouter::handleDelete( Client &client, const ServerConfig &server, const Location &location ) {
-	httpResponse &response = client.getResponse();
+	HttpResponse &response = client.getResponse();
 	httpRequest &request = client.getRequest();
 
 	std::string filePath = getFilePath( request.path, location );

@@ -11,7 +11,6 @@
 #include "HttpStructs.hpp"
 #include "HttpUtils.hpp"
 #include "Logs/Logs.hpp"
-#include "ResponseBuilder.hpp"
 #include "Upload/UploadManager.hpp"
 #include "utils.hpp"
 #include <arpa/inet.h>

@@ -41,7 +41,7 @@ class Client {
 
 	// request-response structures
 	httpRequest &getRequest();
-	httpResponse &getResponse();
+	HttpResponse &getResponse();
 	void resetRequest();
 	void resetResponse();
 
@@ -60,7 +60,7 @@ class Client {
 	std::string _writeBuffer;
 
 	httpRequest _request;
-	httpResponse _response;
+	HttpResponse _response;
 
 	bool _requestComplete;
 	bool _cgiInProgress;

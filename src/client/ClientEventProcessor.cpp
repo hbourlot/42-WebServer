@@ -1,82 +1,93 @@
 #include "Client/ClientEventProcessor.hpp"
 
-http::ClientEventProcessor::ClientEventProcessor( TcpServer &server ) : _server( server ) {};
+http::ClientEventProcessor::ClientEventProcessor(TcpServer &server) : _server(server){};
 
-bool http::ClientEventProcessor::readFromSocket( Client &client ) {
+bool http::ClientEventProcessor::readFromSocket(Client &client)
+{
 
 	const size_t CLIENT_MAX_BODY_SIZE = _server._serverInfo.maxRequest * 1024 * 1024;
 	const int MAX_READS_PER_EVENT = 3;
-	char buffer[ BUFFER_SIZE ];
+	char buffer[BUFFER_SIZE];
 	int fd = client.getFd();
 	int readCount = 0;
 	bool dataReceived = false;
 
 	// Read up to MAX_READS_PER_EVENT times per poll event
-	while ( readCount < MAX_READS_PER_EVENT ) {
-		ssize_t bytesReceived = recv( fd, buffer, BUFFER_SIZE, 0 );
+	while (readCount < MAX_READS_PER_EVENT)
+	{
+		ssize_t bytesReceived = recv(fd, buffer, BUFFER_SIZE, 0);
 
-		if ( bytesReceived > 0 ) {
+		if (bytesReceived > 0)
+		{
 			// Check if we exceed max body size
-			if ( client.getReadBuffer().size() + bytesReceived > CLIENT_MAX_BODY_SIZE ) {
-				client.setState( PARSE_TOO_LARGE );
+			if (client.getReadBuffer().size() + bytesReceived > CLIENT_MAX_BODY_SIZE)
+			{
+				client.setState(PARSE_TOO_LARGE);
 				return false;
 			}
 
-			client.appendToReadBuffer( std::string( buffer, static_cast< size_t >( bytesReceived ) ) );
+			client.appendToReadBuffer(std::string(buffer, static_cast<size_t>(bytesReceived)));
 			dataReceived = true;
 			readCount++;
 			continue; // Try to read more data
 		}
 
-		if ( bytesReceived == 0 && readCount == 0) {
+		if (bytesReceived == 0 && readCount == 0)
+		{
 			// Peer closed connection
-			client.setState( READ_EMPTY );
+			client.setState(READ_EMPTY);
 			return false;
 		}
 
 		// bytesReceived < 0
-		if ( errno == EAGAIN || errno == EWOULDBLOCK ) {
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+		{
 			// No more data available, this is normal
 			break;
 		}
 
 		// Fatal error
-		Logs::log( ERROR, "Error: recv()" );
-		client.setState( READ_ERROR );
+		Logs::log(ERROR, "Error: recv()");
+		client.setState(READ_ERROR);
 		return false;
 	}
 
-	if ( dataReceived ) {
-		client.setState( READ_SUCCESS );
+	if (dataReceived)
+	{
+		client.setState(READ_SUCCESS);
 		return true;
 	}
 
-	client.setState( READ_EMPTY );
+	client.setState(READ_EMPTY);
 	return false;
 }
 
-void http::ClientEventProcessor::closeConnection( size_t index ) {
-	_server.closeClientConnection( index );
+void http::ClientEventProcessor::closeConnection(size_t index)
+{
+	_server.closeClientConnection(index);
 }
 
-bool http::ClientEventProcessor::buildResponse( Client &client ) {
+bool http::ClientEventProcessor::buildResponse(Client &client)
+{
 	CLIENT_STATE state = client.getState();
 
-	switch ( state ) {
-	case PARSE_OK: {
-		if ( !handleRouteValidation( client ) )
+	switch (state)
+	{
+	case PARSE_OK:
+	{
+		if (!handleRouteValidation(client))
 			return false;
-		routeClientRequest( client );
+		routeClientRequest(client);
 		return true;
 	}
 	case READ_ERROR:
-		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_SERVER_ERR );
+		client.getResponse().buildErrorResponse(HTTP_SERVER_ERR);
 		return true;
 	case READ_EMPTY:
-		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_BAD_REQ );
+		client.getResponse().buildErrorResponse(HTTP_BAD_REQ);
 		return true;
 	case PARSE_TOO_LARGE:
-		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_PAYLOAD );
+		client.getResponse().buildErrorResponse(HTTP_PAYLOAD);
 		return true;
 
 	default:
@@ -86,107 +97,121 @@ bool http::ClientEventProcessor::buildResponse( Client &client ) {
 	return true;
 }
 
-bool http::ClientEventProcessor::handleRouteValidation( Client &client ) {
-	httpResponse &response = client.getResponse();
+bool http::ClientEventProcessor::handleRouteValidation(Client &client)
+{
+	HttpResponse &response = client.getResponse();
 	ServerConfig &serverInfo = _server._serverInfo;
 
-	VALIDATION_STATUS validationStatus = HttpRouter::validateRequest( client, _server._serverInfo );
+	VALIDATION_STATUS validationStatus = HttpRouter::validateRequest(client, _server._serverInfo);
 
-	switch ( validationStatus ) {
+	switch (validationStatus)
+	{
 	case VALID_OK:
 		return true; // Continue to routing
 
-	// case VALID_CGI:
-	// 	return true;
+		// case VALID_CGI:
+		// 	return true;
 
 	case VALID_NOT_FOUND:
-		response =
-		    ResponseBuilder::buildFileResponse( HTTP_NOT_FOUND, serverInfo.errorPage.at( 404 ), serverInfo, true );
+		response.buildFileResponse(HTTP_NOT_FOUND, serverInfo.errorPage.at(404), serverInfo, true);
 		return false;
 
 	case VALID_REDIRECT_REQUIRED:
-		response = ResponseBuilder::buildRedirect( HTTP_MOVED, client.getRequest().urlMatchedLocation->redirection );
+		response.buildRedirect(HTTP_MOVED, client.getRequest().urlMatchedLocation->redirection);
 		return false;
 
 	case VALID_METHOD_NOT_ALLOWED:
-		response = ResponseBuilder::buildFileResponse( HTTP_FORBID_METHOD, DFL_405, serverInfo, true );
+		response.buildFileResponse(HTTP_FORBID_METHOD, DFL_405, serverInfo, true);
 		return false;
 
 	default:
-		response = ResponseBuilder::buildErrorResponse( HTTP_SERVER_ERR );
+		response.buildErrorResponse(HTTP_SERVER_ERR);
 		return false;
 	}
 }
 
-void http::ClientEventProcessor::routeClientRequest( Client &client ) {
+void http::ClientEventProcessor::routeClientRequest(Client &client)
+{
 
 	ServerConfig &serverInfo = _server._serverInfo;
 
-	HttpRouter::handleMethods( client, serverInfo );
+	HttpRouter::handleMethods(client, serverInfo);
 
 	client.clearBuffers();
 }
 
-bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
+bool http::ClientEventProcessor::sendResponse(pollfd &pfd, Client &client)
+{
 	SocketFD clientFd = client.getFd();
 	const int MAX_SENDS_PER_EVENT = 3;
 
 	// Build response if write buffer is empty
-	if ( client.getWriteBuffer().empty() ) {
-		client.appendToWriteBuffer( client.getResponse().buildResponseString( client.getRequest() ) );
+	if (client.getWriteBuffer().empty())
+	{
+		client.appendToWriteBuffer(client.getResponse().buildResponseString(client.getRequest()));
 	}
 
 	std::string &writeBuffer = client.getWriteBuffer();
 
-	if ( writeBuffer.empty() )
+	if (writeBuffer.empty())
 		return 0;
 
 	int sendCount = 0;
 
 	// Send up to MAX_SENDS_PER_EVENT times per poll event
-	while ( sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty() ) {
-		ssize_t bytesSent = send( clientFd, writeBuffer.c_str(), writeBuffer.size(), MSG_NOSIGNAL );
+	while (sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty())
+	{
+		ssize_t bytesSent = send(clientFd, writeBuffer.c_str(), writeBuffer.size(), MSG_NOSIGNAL);
 
-		if ( bytesSent < 0 ) {
-			if ( errno == EAGAIN || errno == EWOULDBLOCK ) {
+		if (bytesSent < 0)
+		{
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+			{
 				// Socket buffer full, will continue later
 				pfd.events |= POLLOUT;
 				return 1; // Keep connection alive, continue sending later
 			}
 
-			if ( errno == EPIPE ) {
-				Logs::log( ERROR, "Client disconnected before response" );
-			} else {
-				Logs::log( ERROR, "Error sending response to client" );
+			if (errno == EPIPE)
+			{
+				Logs::log(ERROR, "Client disconnected before response");
+			}
+			else
+			{
+				Logs::log(ERROR, "Error sending response to client");
 			}
 			return 1; // Close connection
 		}
 
-		if ( bytesSent == 0 ) {
+		if (bytesSent == 0)
+		{
 			// Should not happen with send(), but handle gracefully
 			break;
 		}
 
-		writeBuffer.erase( 0, bytesSent );
+		writeBuffer.erase(0, bytesSent);
 		sendCount++;
 	}
 
 	// Check if all data was sent
-	if ( writeBuffer.empty() ) {
-		std::string msg( "Server Response sent to client " );
-		msg += to_str( clientFd );
-		if ( DEBUG ) {
+	if (writeBuffer.empty())
+	{
+		std::string msg("Server Response sent to client ");
+		msg += to_str(clientFd);
+		if (DEBUG)
+		{
 			msg += " ";                      //! For Debug
 			msg += client.getRequest().path; //! For Debug
 		}
-		Logs::log( INFO, msg );
+		Logs::log(INFO, msg);
 
-		if ( client.getRequest().shouldCloseConnection() ) {
-			_server._clientManager.resetClientState( clientFd );
+		if (client.getRequest().shouldCloseConnection())
+		{
+			_server._clientManager.resetClientState(clientFd);
 			return 1; // Close connection
 		}
 
-		_server._clientManager.resetClientState( clientFd );
+		_server._clientManager.resetClientState(clientFd);
 		pfd.events = POLLIN; // Reset to read for next request
 		return 0;
 	}

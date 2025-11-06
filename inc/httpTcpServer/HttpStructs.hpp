@@ -6,12 +6,13 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/10/26 01:28:49 by joralves         ###   ########.fr       */
+/*   Updated: 2025/11/06 13:27:04 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 #include "httpTcpServer/HttpStatus.hpp"
+#include "httpTcpServer/HttpResponse.hpp"
 #include <map>
 #include <set>
 #include <string>
@@ -72,14 +73,3 @@ struct httpRequest {
 	const Location *urlMatchedLocation; // ! Must Initialize as NULL;
 };
 
-struct httpResponse {
-	std::string statusCode;
-	std::string statusMsg;
-	std::string body;
-	std::map< std::string, std::string > headers;
-
-	void setDefaultHeaders();
-	void setDefaultHeaders( httpRequest request );
-	void addToHeader( std::string key, std::string value );
-	std::string buildResponseString( const httpRequest &request );
-};

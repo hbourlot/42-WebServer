@@ -82,14 +82,14 @@ static bool saveFile(const std::string &filename, const std::string &content, co
 //! Parts to imporve after
 bool UploadManager::parseMultipart(const Location &location, Client &client)
 {
-	httpResponse &response = client.getResponse();
+	HttpResponse &response = client.getResponse();
 	httpRequest &request = client.getRequest();
 
 	std::string boundary = extractBoundary(client.getRequest());
 
 	if (boundary.empty())
 	{
-		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
+		client.getResponse().buildErrorResponse(HTTP_BAD_REQ);
 		log_prev("400 Bad Request: No boundary");
 
 		return (false);
@@ -99,7 +99,7 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 
 	if (filePart.empty())
 	{
-		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
+		client.getResponse().buildErrorResponse(HTTP_BAD_REQ);
 		log_prev("Bad Request: No boundary filePart");
 
 		return (false);
@@ -110,7 +110,7 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 
 	if (!splitHeadersAndContent(filePart, headers, content))
 	{
-		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
+		client.getResponse().buildErrorResponse(HTTP_BAD_REQ);
 		log_prev("Bad Request: Malformed multipart body");
 
 		return (false);
@@ -120,18 +120,18 @@ bool UploadManager::parseMultipart(const Location &location, Client &client)
 
 	if (filename.empty())
 	{
-		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_BAD_REQ);
+		client.getResponse().buildErrorResponse(HTTP_BAD_REQ);
 		log_prev("Bad Request: Filename not found");
 		return (false);
 	}
 
 	if (!saveFile(filename, content, location))
 	{
-		client.getResponse() = ResponseBuilder::buildErrorResponse(HTTP_SERVER_ERR);
+		client.getResponse().buildErrorResponse(HTTP_SERVER_ERR);
 		log_prev("Internal Server Error: File not saved");
 		return (false);
 	}
 	std::string msg = "File '" + filename + "' received";
-	client.getResponse() = ResponseBuilder::buildResponse(HTTP_OK, msg, "", "", &request);
+	client.getResponse().buildResponse(HTTP_OK, msg, "", "", &request);
 	return (true);
 }

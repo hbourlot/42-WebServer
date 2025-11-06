@@ -5,7 +5,7 @@ bool UploadManager::handleUpload(const Location &location, Client &client, const
 	std::string contentType;
 
 	httpRequest &request = client.getRequest();
-	httpResponse &response = client.getResponse();
+	HttpResponse &response = client.getResponse();
 
 	contentType = client.getRequest().headers.at("Content-Type");
 
@@ -21,7 +21,7 @@ bool UploadManager::handleUpload(const Location &location, Client &client, const
 	}
 	else
 	{
-		response = ResponseBuilder::buildErrorResponse(HTTP_UNSUPPORTED_MEDIA);
+		response.buildErrorResponse(HTTP_UNSUPPORTED_MEDIA);
 	}
 	return (false);
 }
