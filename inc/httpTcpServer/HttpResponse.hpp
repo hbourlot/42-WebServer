@@ -31,9 +31,7 @@ class HttpResponse
 	~HttpResponse();
 
 	// function Member
-	// std::string buildResponseString(const httpRequest &request);
 	std::string buildResponseString();
-	void setDefaultHeaders(httpRequest request);
 	void setDefaultHeaders();
 	std::string getContentType(const std::string &filePath);
 	std::string readFileContent(const std::string &filePath);

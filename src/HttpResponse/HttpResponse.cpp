@@ -32,28 +32,6 @@ void HttpResponse::addToHeader(std::string key, std::string value)
 	this->_headers[key] = value;
 }
 
-void HttpResponse::setDefaultHeaders(httpRequest request)
-{
-	addToHeader("Date", dateString());
-
-	std::ostringstream oss;
-	oss << _body.size();
-	addToHeader("Content-Length", oss.str());
-
-	std::string connectionValue;
-	std::map<std::string, std::string>::const_iterator it = request.headers.find("Connection");
-	if (it != request.headers.end())
-		connectionValue = it->second;
-	else
-	{
-		if (request.serverProtocol == "HTTP/1.1")
-			connectionValue = "keep-alive";
-		else
-			connectionValue = "close";
-	}
-	addToHeader("Connection", connectionValue);
-}
-
 void HttpResponse::setDefaultHeaders()
 {
 	addToHeader("Date", dateString());
@@ -62,7 +40,7 @@ void HttpResponse::setDefaultHeaders()
 	oss << _body.size();
 	addToHeader("Content-Length", oss.str());
 
-	addToHeader("Connection", "keep-alive");
+	addToHeader(_connectionType.first, _connectionType.second);
 }
 
 std::string HttpResponse::buildResponseString()
@@ -92,10 +70,7 @@ void HttpResponse::buildResponse(const HttpStatusCode &status, const std::string
 	if (!headerKey.empty())
 		addToHeader(headerKey, headerValue);
 
-	if (req)
-		setDefaultHeaders(*req);
-	else
-		setDefaultHeaders();
+	setDefaultHeaders();
 }
 
 void HttpResponse::buildErrorResponse(const HttpStatusCode &status)
