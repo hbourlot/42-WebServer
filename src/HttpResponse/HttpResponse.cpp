@@ -19,7 +19,7 @@ HttpResponse::HttpResponse(const httpRequest &request) : _protocol(request.serve
 		else
 			_connectionType = std::make_pair("Connection", "close");
 	}
-	std::cout << "connetionType" << _connectionType.first << ":" << _connectionType.second << std::endl;
+	// std::cout << "connetionType" << _connectionType.first << ":" << _connectionType.second << std::endl;
 }
 HttpResponse::~HttpResponse()
 {
@@ -76,11 +76,11 @@ void HttpResponse::buildResponse(const HttpStatusCode &status, const std::string
 void HttpResponse::buildErrorResponse(const HttpStatusCode &status)
 {
 	std::string body = status.message + " (" + status.code + ")";
-	return buildResponse(status, body, "Content-Type", "text/plain");
+	buildResponse(status, body, "Content-Type", "text/plain");
 }
 void HttpResponse::buildRedirect(const HttpStatusCode &status, const std::string &url)
 {
-	return buildResponse(status, "", "Location", url);
+	buildResponse(status, "", "Location", url);
 }
 
 void HttpResponse::buildFileResponse(const HttpStatusCode &status, const std::string &filePath,
@@ -90,11 +90,11 @@ void HttpResponse::buildFileResponse(const HttpStatusCode &status, const std::st
 	if (content.empty())
 	{
 		if (!isError)
-			return buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
+			buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
 		else
-			return buildErrorResponse(status);
+			buildErrorResponse(status);
 	}
-	return buildResponse(status, content, "Content-Type", getContentType(filePath));
+	buildResponse(status, content, "Content-Type", getContentType(filePath));
 }
 
 std::string HttpResponse::readFileContent(const std::string &filePath)
