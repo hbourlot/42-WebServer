@@ -17,7 +17,7 @@ class HttpResponse
 {
   private:
 	std::string _protocol;
-	std::pair<std::string, std::string> _contentType;
+	std::pair<std::string, std::string> _connectionType;
 	std::string _statusCode;
 	std::string _statusMsg;
 	std::string _body;
@@ -31,7 +31,8 @@ class HttpResponse
 	~HttpResponse();
 
 	// function Member
-	std::string buildResponseString(const httpRequest &request);
+	// std::string buildResponseString(const httpRequest &request);
+	std::string buildResponseString();
 	void setDefaultHeaders(httpRequest request);
 	void setDefaultHeaders();
 	std::string getContentType(const std::string &filePath);

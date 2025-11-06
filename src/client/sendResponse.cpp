@@ -7,7 +7,7 @@ bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
 
 	// Build response if write buffer is empty
 	if ( client.getWriteBuffer().empty() ) {
-		client.appendToWriteBuffer( client.getResponse().buildResponseString( client.getRequest() ) );
+		client.appendToWriteBuffer( client.getResponse().buildResponseString( ) );
 	}
 
 	std::string &writeBuffer = client.getWriteBuffer();

@@ -10,15 +10,16 @@ HttpResponse::HttpResponse(const httpRequest &request) : _protocol(request.serve
 	if (it != request.headers.end())
 	{
 		std::string val = it->second;
-		_contentType = std::make_pair("Connection", it->second);
+		_connectionType = std::make_pair("Connection", it->second);
 	}
 	else
 	{
 		if (_protocol == "HTTP/1.1")
-			_contentType = std::make_pair("Connection", "keep-alive");
+			_connectionType = std::make_pair("Connection", "keep-alive");
 		else
-			_contentType = std::make_pair("Connection", "close");
+			_connectionType = std::make_pair("Connection", "close");
 	}
+	std::cout << "connetionType" << _connectionType.first << ":" << _connectionType.second << std::endl;
 }
 HttpResponse::~HttpResponse()
 {
@@ -64,10 +65,10 @@ void HttpResponse::setDefaultHeaders()
 	addToHeader("Connection", "keep-alive");
 }
 
-std::string HttpResponse::buildResponseString(const httpRequest &request)
+std::string HttpResponse::buildResponseString()
 {
 	std::ostringstream responseString;
-	responseString << request.serverProtocol + " " << _statusCode << " " << _statusMsg << "\r\n";
+	responseString << _protocol + " " << _statusCode << " " << _statusMsg << "\r\n";
 
 	std::map<std::string, std::string>::const_iterator it;
 	for (it = _headers.begin(); it != _headers.end(); ++it)
