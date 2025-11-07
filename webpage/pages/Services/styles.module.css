@@ -41,8 +41,8 @@
 }
 
 .upload_img {
-  width: 2rem; /* o el tamaño que quieras */
-  height: 2rem; /* usa auto si quieres mantener proporción */
-  object-fit: contain; /* asegura que no se distorsione */
-  vertical-align: middle; /* alinea bien con el texto */
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  vertical-align: middle;
 }
