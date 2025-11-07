@@ -60,15 +60,11 @@ std::string HttpResponse::buildResponseString()
 
 // Here function
 
-void HttpResponse::buildResponse(const HttpStatusCode &status, const std::string &body, const std::string &headerKey,
-                                 const std::string &headerValue, httpRequest *req)
+void HttpResponse::buildResponse(const HttpStatusCode &status, const std::string &body)
 {
 	_statusCode = status.code;
 	_statusMsg = status.message;
 	_body = body;
-
-	if (!headerKey.empty())
-		addToHeader(headerKey, headerValue);
 
 	setDefaultHeaders();
 }
@@ -76,11 +72,13 @@ void HttpResponse::buildResponse(const HttpStatusCode &status, const std::string
 void HttpResponse::buildErrorResponse(const HttpStatusCode &status)
 {
 	std::string body = status.message + " (" + status.code + ")";
-	buildResponse(status, body, "Content-Type", "text/plain");
+	buildResponse(status, body);
+	addToHeader("Content-Type", "text/plain");
 }
 void HttpResponse::buildRedirect(const HttpStatusCode &status, const std::string &url)
 {
-	buildResponse(status, "", "Location", url);
+	buildResponse(status, "");
+	addToHeader("Location", url);
 }
 
 void HttpResponse::buildFileResponse(const HttpStatusCode &status, const std::string &filePath,
@@ -94,7 +92,8 @@ void HttpResponse::buildFileResponse(const HttpStatusCode &status, const std::st
 		else
 			buildErrorResponse(status);
 	}
-	buildResponse(status, content, "Content-Type", getContentType(filePath));
+	buildResponse(status, content);
+	addToHeader("Content-Type", getContentType(filePath));
 }
 
 std::string HttpResponse::readFileContent(const std::string &filePath)

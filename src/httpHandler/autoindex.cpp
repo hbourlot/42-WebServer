@@ -83,7 +83,8 @@ void handleDirectoryListing(Client &client, const ServerConfig &server, const st
 
 	std::string body = generateAutoIndexPage(filePath, location, request);
 
-	response.buildResponse(HTTP_OK, body, "text/html");
+	response.buildResponse(HTTP_OK, body);
+	//"text/html"
 
 	return;
 }

@@ -36,8 +36,7 @@ class HttpResponse
 	std::string getContentType(const std::string &filePath);
 	std::string readFileContent(const std::string &filePath);
 
-	void buildResponse(const HttpStatusCode &status, const std::string &body, const std::string &headerKey = "",
-	                   const std::string &headerValue = "", httpRequest *req = NULL);
+	void buildResponse(const HttpStatusCode &status, const std::string &body);
 	void buildErrorResponse(const HttpStatusCode &status);
 	void buildRedirect(const HttpStatusCode &status, const std::string &url);
 	void buildFileResponse(const HttpStatusCode &status, const std::string &filePath, const ServerConfig &server,
