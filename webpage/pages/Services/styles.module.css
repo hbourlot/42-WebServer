@@ -39,3 +39,10 @@
 .upload button:hover {
   background: #0056b3;
 }
+
+.upload_img {
+  width: 2rem; /* o el tamaño que quieras */
+  height: 2rem; /* usa auto si quieres mantener proporción */
+  object-fit: contain; /* asegura que no se distorsione */
+  vertical-align: middle; /* alinea bien con el texto */
+}
