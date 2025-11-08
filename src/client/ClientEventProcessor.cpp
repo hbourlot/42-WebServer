@@ -70,6 +70,7 @@ void http::ClientEventProcessor::closeConnection(size_t index)
 bool http::ClientEventProcessor::buildResponse(Client &client)
 {
 	CLIENT_STATE state = client.getState();
+	ServerConfig &serverInfo = _server._serverInfo;
 
 	switch (state)
 	{
@@ -81,13 +82,13 @@ bool http::ClientEventProcessor::buildResponse(Client &client)
 		return true;
 	}
 	case READ_ERROR:
-		client.getResponse().buildErrorResponse(HTTP_SERVER_ERR);
+		client.getResponse().buildErrorResponse(HTTP_SERVER_ERR, serverInfo);
 		return true;
 	case READ_EMPTY:
-		client.getResponse().buildErrorResponse(HTTP_BAD_REQ);
+		client.getResponse().buildErrorResponse(HTTP_BAD_REQ, serverInfo);
 		return true;
 	case PARSE_TOO_LARGE:
-		client.getResponse().buildErrorResponse(HTTP_PAYLOAD);
+		client.getResponse().buildErrorResponse(HTTP_PAYLOAD, serverInfo);
 		return true;
 
 	default:
@@ -113,7 +114,7 @@ bool http::ClientEventProcessor::handleRouteValidation(Client &client)
 		// 	return true;
 
 	case VALID_NOT_FOUND:
-		response.buildFileResponse(HTTP_NOT_FOUND, serverInfo.errorPage.at(404), serverInfo, true);
+		response.buildErrorResponse(HTTP_NOT_FOUND, serverInfo);
 		return false;
 
 	case VALID_REDIRECT_REQUIRED:
@@ -121,11 +122,11 @@ bool http::ClientEventProcessor::handleRouteValidation(Client &client)
 		return false;
 
 	case VALID_METHOD_NOT_ALLOWED:
-		response.buildFileResponse(HTTP_FORBID_METHOD, DFL_405, serverInfo, true);
+		response.buildErrorResponse(HTTP_FORBID_METHOD, serverInfo);
 		return false;
 
 	default:
-		response.buildErrorResponse(HTTP_SERVER_ERR);
+		response.buildErrorResponse(HTTP_SERVER_ERR, serverInfo);
 		return false;
 	}
 }

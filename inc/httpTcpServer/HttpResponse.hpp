@@ -37,10 +37,9 @@ class HttpResponse
 	std::string readFileContent(const std::string &filePath);
 
 	void buildResponse(const HttpStatusCode &status, const std::string &body);
-	void buildErrorResponse(const HttpStatusCode &status);
+	void buildErrorResponse(const HttpStatusCode &status, const ServerConfig &server);
 	void buildRedirect(const HttpStatusCode &status, const std::string &url);
-	void buildFileResponse(const HttpStatusCode &status, const std::string &filePath, const ServerConfig &server,
-	                       bool isError = false);
+	void buildFileResponse(const HttpStatusCode &status, const std::string &filePath, const ServerConfig &server);
 };
 
 // struct httpResponse

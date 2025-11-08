@@ -77,7 +77,7 @@ void handleDirectoryListing(Client &client, const ServerConfig &server, const st
 
 	if (!location.autoIndex)
 	{
-		response.buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
+		response.buildErrorResponse(HTTP_NOT_FOUND, server);
 		return;
 	}
 

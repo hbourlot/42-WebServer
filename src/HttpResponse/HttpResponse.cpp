@@ -68,12 +68,50 @@ void HttpResponse::buildResponse(const HttpStatusCode &status, const std::string
 
 	setDefaultHeaders();
 }
-
-void HttpResponse::buildErrorResponse(const HttpStatusCode &status)
+static std::string createErrorBody(const HttpStatusCode &status)
 {
-	std::string body = status.message + " (" + status.code + ")";
-	buildResponse(status, body);
-	addToHeader("Content-Type", "text/plain");
+	std::string html;
+
+	html += "<!DOCTYPE html>\n";
+	html += "<html>\n<head>\n<title>Error Occurred</title>\n";
+	html += "<style>\n";
+	html +=
+	    "body { font-family: Arial, sans-serif; text-align: center; padding-top: 10%; background-color: #f9f9f9; }\n";
+	html += ".error-box { display: inline-block; border-radius: 10px; padding: 2em 3em; background: #fff; box-shadow: "
+	        "0 2px 8px rgba(0,0,0,0.1); }\n";
+	html += "h1 { margin-bottom: 0.5em; color: #d9534f; }\n";
+	html += "p { color: #555; margin-bottom: 1.5em; }\n";
+	html += "a.button { text-decoration: none; color: white; background: #007bff; padding: 0.7em 1.5em; border-radius: "
+	        "5px; font-weight: bold; }\n";
+	html += "a.button:hover { background: #0056b3; }\n";
+	html += "</style>\n";
+	html += "</head>\n<body>\n";
+	html += "<div class=\"error-box\">";
+	html += "<h1>Error " + status.code + "</h1>\n";
+	html += "<p>Sorry, " + status.message + "</p>\n";
+	html += "<a href=\"/\" class=\"button\">Go Home</a>\n";
+	html += "</div>\n";
+	html += "</body>\n</html>\n";
+
+	return html;
+}
+
+void HttpResponse::buildErrorResponse(const HttpStatusCode &status, const ServerConfig &server)
+{
+	std::map<int, std::string>::const_iterator it;
+	it = server.errorPage.find(atoi(status.code.c_str()));
+	if (it != server.errorPage.end())
+	{
+		std::ifstream file(it->second.c_str());
+		if (file.good())
+		{
+			buildFileResponse(status, it->second, server);
+			return;
+		}
+	}
+	// std::string body = status.message + " (" + status.code + ")";
+	buildResponse(status, createErrorBody(status));
+	addToHeader("Content-Type", "text/html");
 }
 void HttpResponse::buildRedirect(const HttpStatusCode &status, const std::string &url)
 {
@@ -82,15 +120,12 @@ void HttpResponse::buildRedirect(const HttpStatusCode &status, const std::string
 }
 
 void HttpResponse::buildFileResponse(const HttpStatusCode &status, const std::string &filePath,
-                                     const ServerConfig &server, bool isError)
+                                     const ServerConfig &server)
 {
 	std::string content = readFileContent(filePath);
 	if (content.empty())
 	{
-		if (!isError)
-			buildFileResponse(HTTP_NOT_FOUND, server.errorPage.at(404), server, true);
-		else
-			buildErrorResponse(status);
+		buildErrorResponse(HTTP_NOT_FOUND, server);
 	}
 	buildResponse(status, content);
 	addToHeader("Content-Type", getContentType(filePath));
