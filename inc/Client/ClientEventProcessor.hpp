@@ -14,21 +14,11 @@ namespace http {
 	  public:
 		ClientEventProcessor( TcpServer &server );
 
-		void processRead( pollfd &pfd, Client &client ) {
+		~ClientEventProcessor();
 
-			if ( !readFromSocket( client ) )
-				return;
-			if ( !parseRequestData( client, _server._serverInfo ) )
-				return;
-			pfd.events |= POLLOUT; // Set to POLL OUT
-		}
+		void processRead( pollfd &pfd, Client &client );
 
-		void processWrite( pollfd &pfd, Client &client ) {
-
-			if ( !buildResponse( client ) )
-				return;
-			sendResponse( pfd, client );
-		}
+		void processWrite( pollfd &pfd, Client &client );
 
 	  private:
 		TcpServer &_server;
@@ -40,10 +30,18 @@ namespace http {
 
 		void closeConnection( size_t index );
 
-		bool buildResponse( Client &client );
+		// Main request processing pipeline
+		bool processRequest( Client &client );
 
+		// Error handling
+		bool buildErrorResponse( Client &client, CLIENT_STATE state );
+
+		// Successful request handling
+		bool handleSuccessfulRequest( Client &client );
+
+		// Request validation (URL, method, permissions, redirects)
 		bool handleRouteValidation( Client &client );
 
-		void routeClientRequest( Client &client );
+		void executeRequest( Client &client );
 	};
 } // namespace http

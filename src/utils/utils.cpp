@@ -8,7 +8,7 @@ bool isDirectory(const std::string &filePath)
 	return (S_ISDIR(s.st_mode));
 }
 
-std::string getFilePath(std::string &path, const Location &location)
+std::string getFilePath(const std::string &path, const Location &location)
 {
 
 	std::string relativePath = path.substr(location.path.length());

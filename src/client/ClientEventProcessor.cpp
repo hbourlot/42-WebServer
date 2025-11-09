@@ -2,6 +2,25 @@
 
 http::ClientEventProcessor::ClientEventProcessor( TcpServer &server ) : _server( server ) {};
 
+http::ClientEventProcessor::~ClientEventProcessor() {};
+
+void http::ClientEventProcessor::processRead( pollfd &pfd, Client &client ) {
+
+	if ( !readFromSocket( client ) )
+		return;
+	if ( !parseRequestData( client, _server._serverInfo ) )
+		return;
+	pfd.events |= POLLOUT; // Setting to POLL OUT
+};
+
+void http::ClientEventProcessor::processWrite( pollfd &pfd, Client &client ) {
+
+	// !! Need to check if it's a childProcess or a ClientSocket
+	if ( !processRequest( client ) )
+		return;
+	sendResponse( pfd, client );
+};
+
 bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 
 	const size_t CLIENT_MAX_BODY_SIZE = _server._serverInfo.maxRequest * 1024 * 1024;
@@ -28,7 +47,7 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 			continue; // Try to read more data
 		}
 
-		if ( bytesReceived == 0 && readCount == 0) {
+		if ( bytesReceived == 0 && readCount == 0 ) {
 			// Peer closed connection
 			client.setState( READ_EMPTY );
 			return false;
@@ -59,28 +78,55 @@ void http::ClientEventProcessor::closeConnection( size_t index ) {
 	_server.closeClientConnection( index );
 }
 
-bool http::ClientEventProcessor::buildResponse( Client &client ) {
+bool http::ClientEventProcessor::processRequest( Client &client ) {
 	CLIENT_STATE state = client.getState();
 
-	switch ( state ) {
-	case PARSE_OK: {
-		if ( !handleRouteValidation( client ) )
-			return false;
-		routeClientRequest( client );
-		return true;
+	// Handle error states first (build error responses)
+	if ( state != PARSE_OK ) {
+		return buildErrorResponse( client, state );
 	}
+
+	// Handle successful parse (validate & route)
+	return handleSuccessfulRequest( client );
+}
+
+bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STATE state ) {
+	httpResponse &response = client.getResponse();
+
+	switch ( state ) {
 	case READ_ERROR:
-		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_SERVER_ERR );
+		response = ResponseBuilder::buildErrorResponse( HTTP_SERVER_ERR );
 		return true;
 	case READ_EMPTY:
-		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_BAD_REQ );
+		response = ResponseBuilder::buildErrorResponse( HTTP_BAD_REQ );
 		return true;
 	case PARSE_TOO_LARGE:
-		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_PAYLOAD );
+		response = ResponseBuilder::buildErrorResponse( HTTP_PAYLOAD );
 		return true;
-
 	default:
+		response = ResponseBuilder::buildErrorResponse( HTTP_SERVER_ERR );
 		return true;
+	}
+}
+
+bool http::ClientEventProcessor::handleSuccessfulRequest( Client &client ) {
+	// Validate the request (routing, permissions, etc.)
+	if ( !handleRouteValidation( client ) ) {
+		return false; // Error response already built in handleRouteValidation
+	}
+
+	if ( client.getState() == CGI_IN_EXECUTION ) {
+		// Try to read childProcessAnswer
+		try {
+			// client.getCgiResponse() ...
+		} catch ( std::exception &e ) {
+			std::cout << "CGI ERROR => " << e.what() << std::endl;
+		}
+
+	} else {
+
+		//  Process the validated request
+		executeRequest( client );
 	}
 
 	return true;
@@ -93,11 +139,8 @@ bool http::ClientEventProcessor::handleRouteValidation( Client &client ) {
 	VALIDATION_STATUS validationStatus = HttpRouter::validateRequest( client, _server._serverInfo );
 
 	switch ( validationStatus ) {
-	case VALID_OK:
+	case VALID_OK || VALID_IS_CGI:
 		return true; // Continue to routing
-
-	// case VALID_CGI:
-	// 	return true;
 
 	case VALID_NOT_FOUND:
 		response =
@@ -118,11 +161,11 @@ bool http::ClientEventProcessor::handleRouteValidation( Client &client ) {
 	}
 }
 
-void http::ClientEventProcessor::routeClientRequest( Client &client ) {
+void http::ClientEventProcessor::executeRequest( Client &client ) {
 
 	ServerConfig &serverInfo = _server._serverInfo;
 
-	HttpRouter::handleMethods( client, serverInfo );
+	HttpRouter::routeRequest( client, serverInfo );
 
 	client.clearBuffers();
 }

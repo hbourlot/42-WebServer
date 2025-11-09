@@ -10,15 +10,20 @@ enum VALIDATION_STATUS {
 	VALID_NOT_FOUND,
 	VALID_FORBIDDEN,
 	VALID_REDIRECT_REQUIRED,
+	VALID_IS_CGI,
 
 };
 
 class HttpRouter {
   public:
 	static VALIDATION_STATUS validateRequest( Client &client, const ServerConfig &server );
-	static void handleMethods( Client &client, const ServerConfig &server );
+	static void routeRequest( Client &client, const ServerConfig &server );
 
   private:
+	static bool isCgiRequest( const httpRequest &request, const Location &location );
+	static void handleCgiRequest( Client &client, const ServerConfig &server, const Location &location );
+	static void handleStaticRequest( Client &client, const ServerConfig &server, const Location &location );
+
 	static void handleGet( Client &client, const ServerConfig &server, const Location &location );
 	static void handlePost( Client &client, const ServerConfig &server, const Location &location );
 	static void handleDelete( Client &client, const ServerConfig &server, const Location &location );

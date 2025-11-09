@@ -44,33 +44,61 @@ VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfi
 	if ( !request.urlMatchedLocation->redirection.empty() ) // /redirect-me
 		return VALID_REDIRECT_REQUIRED;
 
-	// !!!!CGI
-
-	// if (!request.urlMatchedLocation->cgi_extension.empty())
-	// 	return VALID_CGI;
+		
+		// !!!!CGI
+	if (!request.urlMatchedLocation->cgi_extension.empty())
+		return VALID_IS_CGI;
 
 	if ( !validateRequestMethod( request, matchedLocation ) )
 		return VALID_METHOD_NOT_ALLOWED;
 
-	
-
 	return VALID_OK;
 }
 
-void HttpRouter::handleMethods( Client &client, const ServerConfig &server ) {
+void HttpRouter::routeRequest( Client &client, const ServerConfig &server ) {
 
 	httpRequest &request = client.getRequest();
-	const Location *( &matchedLocation ) = client.getRequest().urlMatchedLocation;
+	const Location &location = *( client.getRequest().urlMatchedLocation );
 
+	if ( isCgiRequest( request, location ) )
+		return handleCgiRequest( client, server, location );
 
-	///!!!!CGI
+	return handleStaticRequest( client, server, location );
+}
+
+bool HttpRouter::isCgiRequest( const httpRequest &request, const Location &location ) {
+	// Check file extension (.php, .py, .cgi, etc.)
+	std::string filePath = getFilePath( request.path, location );
+	// return isValidCgiExtension( filePath );
+	return false;
+}
+
+void HttpRouter::handleCgiRequest( Client &client, const ServerConfig &server, const Location &location ) {
+
+	httpRequest &request = client.getRequest();
+
+	if ( request.method == "GET" || request.method == "POST" ) {
+		// Cgi cgiHandler() //
+		// cgiHandler.execute();
+		client.setState(CGI_IN_EXECUTION);
+	} else {
+		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_FORBID_METHOD );
+	}
+}
+
+void HttpRouter::handleStaticRequest( Client &client, const ServerConfig &server, const Location &location ) {
+
+	httpRequest &request = client.getRequest();
 
 	if ( request.method == "GET" ) {
-		return ( handleGet( client, server, *matchedLocation ) );
+		return ( handleGet( client, server, location ) );
 	} else if ( request.method == "POST" )
-		return ( handlePost( client, server, *matchedLocation ) );
+		return ( handlePost( client, server, location ) );
 	else if ( request.method == "DELETE" )
-		return ( handleDelete( client, server, *matchedLocation ) );
+		return ( handleDelete( client, server, location ) );
+	else {
+		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_FORBID_METHOD );
+	}
 }
 
 void HttpRouter::handleGet( Client &client, const ServerConfig &server, const Location &location ) {
