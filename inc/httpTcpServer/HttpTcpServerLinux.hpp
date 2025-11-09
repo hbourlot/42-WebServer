@@ -68,6 +68,9 @@ namespace http {
 			}
 		};
 
+		SocketFD getServerSocket(){
+			return _serverSocket;
+		}
 	  private:
 		std::vector< pollfd > _fds;
 		SocketFD _serverSocket;

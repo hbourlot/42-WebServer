@@ -45,7 +45,7 @@ void http::Cgi::markAsRunning() {
 	this->_status = RUNNING;
 }
 
-http::Cgi::Cgi(const httpRequest &request, std::string &filePath,
+http::Cgi::Cgi(httpRequest &request, std::string &filePath,
                const sockaddr_in &clientAddress, const ServerConfig &serverInfo)
     : _request(request), _filePath(filePath), _clientAddress(clientAddress),
       _serverInfo(serverInfo), _envp(), _argv(), _envStrings(), _body(),

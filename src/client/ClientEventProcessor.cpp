@@ -116,7 +116,7 @@ bool http::ClientEventProcessor::handleSuccessfulRequest( Client &client ) {
 	}
 
 	if ( client.getState() == CGI_IN_EXECUTION ) {
-		// Try to read childProcessAnswer
+		// Try to read childProcessAnswer, if child is not finished
 		try {
 			// client.getCgiResponse() ...
 		} catch ( std::exception &e ) {

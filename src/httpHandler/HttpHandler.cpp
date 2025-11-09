@@ -45,8 +45,8 @@ VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfi
 		return VALID_REDIRECT_REQUIRED;
 
 		
-		// !!!!CGI
-	if (!request.urlMatchedLocation->cgi_extension.empty())
+	// !!!!CGI
+	if (!request.urlMatchedLocation->cgi_extension.empty()) // Improve Miguel
 		return VALID_IS_CGI;
 
 	if ( !validateRequestMethod( request, matchedLocation ) )
@@ -76,9 +76,12 @@ bool HttpRouter::isCgiRequest( const httpRequest &request, const Location &locat
 void HttpRouter::handleCgiRequest( Client &client, const ServerConfig &server, const Location &location ) {
 
 	httpRequest &request = client.getRequest();
-
+	std::string path = location.path;
 	if ( request.method == "GET" || request.method == "POST" ) {
-		// Cgi cgiHandler() //
+		// !!CGI
+		sockaddr_in socket;
+		http::Cgi cgi(request, path, socket, server);
+		cgi.cgiHandler() //
 		// cgiHandler.execute();
 		client.setState(CGI_IN_EXECUTION);
 	} else {

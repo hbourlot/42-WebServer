@@ -12,7 +12,7 @@ namespace http
 	{
 
 	  public:
-		Cgi(const httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
+		Cgi(httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
 		    const ServerConfig &serverInfo);
 		~Cgi();
 

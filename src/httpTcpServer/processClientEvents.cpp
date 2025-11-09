@@ -39,18 +39,18 @@ void http::TcpServer::closeClientConnection( size_t index ) {
 
 void http::TcpServer::processClientEvents( ClientEventProcessor &processor ) {
 
-	for ( size_t i = 1; i < _fds.size(); ++i ) {
+	for ( size_t i = 1; i < _fds.size(); ++i ) { // Main loop
 		Client *client = _clientManager.getClient( _fds[ i ].fd );
 		if ( !client ) {
 			closeClientConnection( i );
 			continue;
 		}
 
-		if ( _fds[ i ].revents & POLLIN ) {
+		if ( _fds[ i ].revents & POLLIN ) { // 
 			processor.processRead( _fds[ i ], *client );
 		}
 
-		if ( _fds[ i ].revents & POLLOUT ) {
+		if ( _fds[ i ].revents & POLLOUT ) { // Read child process CGI, creates response and sent to the client
 			processor.processWrite( _fds[ i ], *client );
 		}
 	}
