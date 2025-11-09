@@ -99,7 +99,7 @@ void http::Cgi::handleChildProcess() {
 
 namespace http {
 
-	void Cgi::executeCgi(std::vector<pollfd> &fds) {
+	void Cgi::executeCgi(std::vector<pollfd> &fds) { // Working on
 
 		if (pipe(this->_inputPipe) < 0 || pipe(this->_outputPipe) < 0) {
 			std::cerr << "Pipe creating failed\n";
@@ -116,7 +116,7 @@ namespace http {
 			// int status;
 			// waitpid(_pid, &status, 0);
 
-			close(_inputPipe[1]);
+			close(_inputPipe[0]); // Working on (I think this one is '0' and not '1')
 			close(_outputPipe[1]);
 
 			// char buffer[BUFFER_SIZE] = {0};

@@ -46,8 +46,10 @@ VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfi
 
 		
 	// !!!!CGI
-	if (!request.urlMatchedLocation->cgi_extension.empty()) // Improve Miguel
+	if (!request.urlMatchedLocation->cgi_extension.empty()){
+		std::cerr << "Encontrei CGI valido" << std::endl;
 		return VALID_IS_CGI;
+	} // Improve Miguel
 
 	if ( !validateRequestMethod( request, matchedLocation ) )
 		return VALID_METHOD_NOT_ALLOWED;
@@ -59,7 +61,7 @@ void HttpRouter::routeRequest( Client &client, const ServerConfig &server ) {
 
 	httpRequest &request = client.getRequest();
 	const Location &location = *( client.getRequest().urlMatchedLocation );
-
+	std::cerr << "vou validar CGI" << std::endl;
 	if ( isCgiRequest( request, location ) )
 		return handleCgiRequest( client, server, location );
 
@@ -79,11 +81,10 @@ void HttpRouter::handleCgiRequest( Client &client, const ServerConfig &server, c
 	std::string path = location.path;
 	if ( request.method == "GET" || request.method == "POST" ) {
 		// !!CGI
-		sockaddr_in socket;
-		http::Cgi cgi(request, path, socket, server);
-		cgi.cgiHandler() //
-		// cgiHandler.execute();
-		client.setState(CGI_IN_EXECUTION);
+		// sockaddr_in socket;
+		// http::Cgi cgi(request, path, socket, server); // Working on
+		// cgi.executeCgi(); // Working on (what to pass as a parameter)
+		// client.setState(CGI_IN_EXECUTION);
 	} else {
 		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_FORBID_METHOD );
 	}
