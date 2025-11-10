@@ -19,7 +19,7 @@ HttpResponse::HttpResponse(const httpRequest &request) : _protocol(request.serve
 		else
 			_connectionType = std::make_pair("Connection", "close");
 	}
-	// std::cout << "connetionType" << _connectionType.first << ":" << _connectionType.second << std::endl;
+	std::cout << _connectionType.first << _connectionType.second << std::endl;
 }
 HttpResponse::~HttpResponse()
 {
