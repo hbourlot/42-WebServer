@@ -44,10 +44,8 @@ VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfi
 	if ( !request.urlMatchedLocation->redirection.empty() ) // /redirect-me
 		return VALID_REDIRECT_REQUIRED;
 
-		
 	// !!!!CGI
-	if (!request.urlMatchedLocation->cgi_extension.empty()){
-		std::cerr << "Encontrei CGI valido" << std::endl;
+	if ( !request.urlMatchedLocation->cgi_extension.empty() ) {
 		return VALID_IS_CGI;
 	} // Improve Miguel
 
@@ -59,9 +57,9 @@ VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfi
 
 void HttpRouter::routeRequest( Client &client, const ServerConfig &server ) {
 
+	std::cout << "In routeRequest\n";
 	httpRequest &request = client.getRequest();
 	const Location &location = *( client.getRequest().urlMatchedLocation );
-	std::cerr << "vou validar CGI" << std::endl;
 	if ( isCgiRequest( request, location ) )
 		return handleCgiRequest( client, server, location );
 
@@ -71,20 +69,30 @@ void HttpRouter::routeRequest( Client &client, const ServerConfig &server ) {
 bool HttpRouter::isCgiRequest( const httpRequest &request, const Location &location ) {
 	// Check file extension (.php, .py, .cgi, etc.)
 	std::string filePath = getFilePath( request.path, location );
+	if ( filePath.find( ".py" ) != std::string::npos )
+		return true;
 	// return isValidCgiExtension( filePath );
 	return false;
 }
 
 void HttpRouter::handleCgiRequest( Client &client, const ServerConfig &server, const Location &location ) {
 
+	std::cout << "Going to validate CGI" << std::endl;
+
+	sockaddr_in socket;
+
 	httpRequest &request = client.getRequest();
 	std::string path = location.path;
 	if ( request.method == "GET" || request.method == "POST" ) {
-		// !!CGI
 		// sockaddr_in socket;
-		// http::Cgi cgi(request, path, socket, server); // Working on
-		// cgi.executeCgi(); // Working on (what to pass as a parameter)
-		// client.setState(CGI_IN_EXECUTION);
+		http::Cgi cgi( request, path, socket, server ); // Working on
+		                                                // cgi.executeCgi(); // Working on (what to pass as a parameter)
+		                                                // client.setState(CGI_IN_EXECUTION);
+		cgi.executeCgi( client.getServer()._fds );
+		cgi.readCgiOutput();
+		std::cout << cgi.getBody();
+		client.getResponse() = ResponseBuilder::buildResponse( HTTP_OK, cgi.getBody() );
+		std::cout << client.getResponse().body;
 	} else {
 		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_FORBID_METHOD );
 	}

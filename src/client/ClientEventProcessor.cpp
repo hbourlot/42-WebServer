@@ -6,6 +6,11 @@ http::ClientEventProcessor::~ClientEventProcessor() {};
 
 void http::ClientEventProcessor::processRead( pollfd &pfd, Client &client ) {
 
+	// _clientManager.IsCgi(fd);
+	// * Client client = _clientManaget.getClientFromCgi(fd);
+
+	// cgi.read
+
 	if ( !readFromSocket( client ) )
 		return;
 	if ( !parseRequestData( client, _server._serverInfo ) )
@@ -18,6 +23,7 @@ void http::ClientEventProcessor::processWrite( pollfd &pfd, Client &client ) {
 	// !! Need to check if it's a childProcess or a ClientSocket
 	if ( !processRequest( client ) )
 		return;
+	std::cout << "In processWrite\n";
 	sendResponse( pfd, client );
 };
 
@@ -111,23 +117,23 @@ bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STAT
 
 bool http::ClientEventProcessor::handleSuccessfulRequest( Client &client ) {
 	// Validate the request (routing, permissions, etc.)
-	if ( handleRouteValidation( client ) == false) { // he is stck here, always returning false (tested in linux on mac)
-		std::cerr << "Aleluia" << std::endl;
-		return false; // Error response already built in handleRouteValidation
+	if ( !handleRouteValidation( client ) ) { // he is stck here, always returning false (tested in linux on mac)
+		return false;                         // Error response already built in handleRouteValidation
 	}
 	if ( client.getState() == CGI_IN_EXECUTION ) {
-		// Try to read childProcessAnswer, if child is not finished
-		try {
-			// client.getCgiResponse() ...
-		} catch ( std::exception &e ) {
-			std::cout << "CGI ERROR => " << e.what() << std::endl;
-		}
 
-	} else {
-
-		//  Process the validated request
-		executeRequest( client );
+		std::cout << "CGI_IN_EXECUTION\n";
+		// 	// Try to read childProcessAnswer, if child is not finished
+		// 	try {
+		// 		// client.getCgiResponse() ...
+		// 	} catch ( std::exception &e ) {
+		// 		std::cout << "CGI ERROR => " << e.what() << std::endl;
 	}
+
+	// } else {
+	//  Process the validated request
+	executeRequest( client );
+	// }
 
 	return true;
 }
@@ -138,17 +144,19 @@ bool http::ClientEventProcessor::handleRouteValidation( Client &client ) {
 
 	VALIDATION_STATUS validationStatus = HttpRouter::validateRequest( client, _server._serverInfo );
 
-	if (validationStatus == VALID_IS_CGI || validationStatus == VALID_OK){
-		std::cerr << "Estamos em CGI" << std::endl;
-	}
+	// if ( validationStatus == VALID_IS_CGI || validationStatus == VALID_OK ) {
+	// 	std::cerr << "Estamos em CGI" << std::endl;
+	// }
 
-	else {
-		std::cerr << "nao estamos em CGI" << std::endl;
-	}
+	// else {
+	// 	std::cerr << "nao estamos em CGI" << std::endl;
+	// }
 
 	switch ( validationStatus ) {
-	case VALID_OK || VALID_IS_CGI:
+	case VALID_OK:
 		return true; // Continue to routing
+	case VALID_IS_CGI:
+		return true;
 
 	case VALID_NOT_FOUND:
 		response =
@@ -173,6 +181,7 @@ void http::ClientEventProcessor::executeRequest( Client &client ) {
 
 	ServerConfig &serverInfo = _server._serverInfo;
 
+	std::cout << "In executeRequest\n";
 	HttpRouter::routeRequest( client, serverInfo );
 
 	client.clearBuffers();
@@ -245,4 +254,23 @@ bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
 	// Still have data to send, keep POLLOUT active
 	pfd.events |= POLLOUT;
 	return 1; // Continue sending in next poll event
+}
+
+void http::ClientEventProcessor::processClientEvents() {
+
+	for ( size_t i = 1; i < _server._fds.size(); ++i ) { // Main loop
+		Client *client = _server._clientManager.getClient( _server._fds[ i ].fd );
+		if ( !client ) {
+			_server.closeClientConnection( i );
+			continue;
+		}
+
+		if ( _server._fds[ i ].revents & POLLIN ) { //
+			processRead( _server._fds[ i ], *client );
+		}
+
+		if ( _server._fds[ i ].revents & POLLOUT ) { // Read child process CGI, creates response and sent to the client
+			processWrite( _server._fds[ i ], *client );
+		}
+	}
 }

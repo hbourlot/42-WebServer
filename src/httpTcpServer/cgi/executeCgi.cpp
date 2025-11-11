@@ -35,7 +35,7 @@ void http::Cgi::readCgiOutput() {
 
 	char buffer[http::BUFFER_SIZE + 1] = {0};
 
-	// std::cerr << "HEREEEEEE\n";
+
 	while ((_bytesReceived =
 	            read(this->_outputPipe[0], buffer, http::BUFFER_SIZE)) > 0) {
 		_body.append(buffer, _bytesReceived);
@@ -53,8 +53,11 @@ void http::Cgi::readCgiOutput() {
 	// if (_bytesReceived == 0) {
 	// 	_status = FINISHED;
 
-	// int status;
-	// waitpid(_pid, &status, WNOHANG);
+	int status;
+	waitpid(_pid, &status, WNOHANG);
+	// > 0 : Child process has finished
+	// 0 : still running
+	// < 0 : Error occurred
 	// close(_pipefd[0]);
 	// return;
 
@@ -90,6 +93,13 @@ void http::Cgi::handleChildProcess() {
 		this->_envp.push_back(const_cast<char *>(_envStrings[i].c_str()));
 	}
 	this->_envp.push_back(NULL);
+	// printEnvStrings(_envStrings);
+
+
+	// this->_filePath = "./webpage/cgi-bin/cgi_tester";
+	this->_filePath = "./webpage/cgi-bin/hello.py";
+	// !! Must fix filePath
+	std::cerr << this->getFilePath().c_str() << "  <->\n";
 
 	// debugCgiExec(this->getFilePath().c_str(), argv.data(), envp.data());
 	execve(this->getFilePath().c_str(), argv.data(), envp.data());

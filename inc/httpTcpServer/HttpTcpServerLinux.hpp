@@ -68,11 +68,12 @@ namespace http {
 			}
 		};
 
-		SocketFD getServerSocket(){
+		SocketFD getServerSocket() {
 			return _serverSocket;
 		}
-	  private:
 		std::vector< pollfd > _fds;
+
+	  private:
 		SocketFD _serverSocket;
 		ClientManager _clientManager;
 		ServerConfig _serverInfo;
@@ -88,10 +89,7 @@ namespace http {
 		void startListen();
 		void acceptConnection();
 		void removeDeadConnections();
-		void processClientEvents(ClientEventProcessor &processor);
-		void closeClientConnection( size_t index );
-
-		// bool handleCgiResponse( pollfd &socket );
+		void closeClientConnection( size_t index ); // bool handleCgiResponse( pollfd &socket );
 		bool parseCgi( const Location loc, std::string &filePath, sockaddr_in &clientAddress, httpRequest &request );
 	};
 

@@ -20,6 +20,8 @@ namespace http {
 
 		void processWrite( pollfd &pfd, Client &client );
 
+		void processClientEvents();
+
 	  private:
 		TcpServer &_server;
 		size_t _clientIndex;
