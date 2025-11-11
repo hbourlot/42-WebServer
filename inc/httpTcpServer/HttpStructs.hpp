@@ -6,11 +6,12 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/10/26 01:28:49 by joralves         ###   ########.fr       */
+/*   Updated: 2025/11/11 12:55:55 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
+#include "httpTcpServer/HttpResponse.hpp"
 #include "httpTcpServer/HttpStatus.hpp"
 #include <map>
 #include <set>
@@ -23,7 +24,8 @@ typedef int SocketFD;
 struct Location;
 
 // Only interface propose
-enum headerKey {
+enum headerKey
+{
 	Accept,
 	AcceptEncoding,
 	AcceptLanguage,
@@ -38,7 +40,6 @@ enum headerKey {
 	UpgradeInsecureRequests,
 	UserAgent,
 };
-
 
 // enum READ_STATUS {
 // 	READ_SUCCESS,
@@ -56,30 +57,17 @@ enum headerKey {
 // 	PARSE_ERROR,
 // };
 
-
-
-struct httpRequest {
+struct httpRequest
+{
 	std::string method;
 	std::string path;
 	std::string serverProtocol; // For Cgi
 	std::string pathInfo;       // For Cgi
 	std::string pathTranslated;
-	std::map< std::string, std::string > headers;
+	std::map<std::string, std::string> headers;
 	std::string body;
 	bool shouldCloseConnection();
 	std::string rawRequestBuffer;
 	std::string queryString;
 	const Location *urlMatchedLocation; // ! Must Initialize as NULL;
-};
-
-struct httpResponse {
-	std::string statusCode;
-	std::string statusMsg;
-	std::string body;
-	std::map< std::string, std::string > headers;
-
-	void setDefaultHeaders();
-	void setDefaultHeaders( httpRequest request );
-	void addToHeader( std::string key, std::string value );
-	std::string buildResponseString( const httpRequest &request );
 };

@@ -16,7 +16,7 @@ httpRequest http::Cgi::getCgiRequest() const {
 	return _request;
 }
 
-httpResponse http::Cgi::getCgiResponse() const {
+HttpResponse http::Cgi::getCgiResponse() const {
 	return _response;
 }
 

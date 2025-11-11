@@ -20,7 +20,7 @@ UTILS_DIR		= utils/
 
 CLIENT_DIR 		= client/
 HTTP_HANDLER_DIR = httpHandler/
-RESPONSE_BUILDER_DIR = responseBuilder/
+HTTP_RESPONSE_DIR = HttpResponse/
 HTTP_DIR		= httpTcpServer/
 REQUEST_DIR		= $(HTTP_DIR)request/
 RESPONSE_DIR	= $(HTTP_DIR)response/
@@ -40,9 +40,13 @@ AUTH_FUNC		= loginHandler
 CGI_FUNC		= parseCgi executeCgi Cgi buildEnvStrings doDup
 UTILS_FUNC		= utils getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
+
 HTTP_FUNC	    = HttpTcpServerLinux
+# HTTP_HANDLER_FUNC = HttpRouter autoindex
+# RESPONSE_BUILDER_FUNC = ResponseBuilder setResponseAux
+# HTTP_FUNC	    = HttpTcpServerLinux startServer startListen shutDownServer acceptConnection runServer runLoop processClientEvents
 HTTP_HANDLER_FUNC = HttpRouter autoindex
-RESPONSE_BUILDER_FUNC = ResponseBuilder setResponseAux
+HTTP_RESPONSE_FUNC = setResponseAux HttpResponse
 UPL_FUNC		= UploadManager parseMultipart
 LOGS_FUNC		= Logs
 
@@ -52,7 +56,7 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(RESPONSE_DIR), $(RESPONSE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_HANDLER_DIR), $(HTTP_HANDLER_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(RESPONSE_BUILDER_DIR), $(RESPONSE_BUILDER_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(HTTP_RESPONSE_DIR), $(HTTP_RESPONSE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UPL_DIR), $(UPL_FUNC:=.cpp)) \

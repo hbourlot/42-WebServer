@@ -36,7 +36,7 @@ void Client::clearWriteBuffer() {
 httpRequest &Client::getRequest() {
 	return ( _request );
 }
-httpResponse &Client::getResponse() {
+HttpResponse &Client::getResponse() {
 	return ( _response );
 }
 void Client::resetRequest() {

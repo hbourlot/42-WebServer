@@ -37,7 +37,7 @@ namespace http
 		}
 
 		void executeCgi(std::vector<pollfd> &fds);
-		httpResponse getCgiResponse() const;
+		HttpResponse getCgiResponse() const;
 		httpRequest getCgiRequest() const;
 		std::string getFilePath() const;
 		std::string getBody() const;
@@ -52,7 +52,7 @@ namespace http
 		CgiStatus _status;
 		SocketFD _clientFD;
 		httpRequest _request;
-		httpResponse _response;
+		HttpResponse _response;
 		ServerConfig _serverInfo;
 		std::string _filePath;
 		sockaddr_in _clientAddress;
