@@ -27,7 +27,7 @@ namespace http {
 
 			if ( !buildResponse( client ) )
 				return;
-			sendResponse( pfd, client );
+			handleResponse( pfd, client );
 		}
 
 	  private:
@@ -37,6 +37,7 @@ namespace http {
 		bool readFromSocket( Client &client );
 		bool parseRequestData( Client &client, const ServerConfig &serverInfo );
 		bool sendResponse( pollfd &pfd, Client &client );
+		bool handleResponse( pollfd &pfd, Client &client );
 
 		void closeConnection( size_t index );
 

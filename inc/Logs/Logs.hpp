@@ -9,6 +9,10 @@
 #define GREEN "\033[32m"
 #define BLUE "\033[34m"
 
+#ifndef DEBUG
+#define DEBUG false
+#endif
+
 enum Level
 {
 	INFO,

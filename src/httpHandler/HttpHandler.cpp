@@ -70,12 +70,10 @@ void HttpRouter::handleMethods(Client &client, const ServerConfig &server)
 	///!!!!CGI
 
 	if (request.method == "GET")
-	{
 		return (handleGet(client, server, *matchedLocation));
-	}
-	else if (request.method == "POST")
+	if (request.method == "POST")
 		return (handlePost(client, server, *matchedLocation));
-	else if (request.method == "DELETE")
+	if (request.method == "DELETE")
 		return (handleDelete(client, server, *matchedLocation));
 }
 
