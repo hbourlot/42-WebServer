@@ -36,22 +36,3 @@ void http::TcpServer::closeClientConnection( size_t index ) {
 	_clientManager.removeClient( fd );
 	_fds.erase( _fds.begin() + index );
 }
-
-void http::TcpServer::processClientEvents( ClientEventProcessor &processor ) {
-
-	for ( size_t i = 1; i < _fds.size(); ++i ) {
-		Client *client = _clientManager.getClient( _fds[ i ].fd );
-		if ( !client ) {
-			closeClientConnection( i );
-			continue;
-		}
-
-		if ( _fds[ i ].revents & POLLIN ) {
-			processor.processRead( _fds[ i ], *client );
-		}
-
-		if ( _fds[ i ].revents & POLLOUT ) {
-			processor.processWrite( _fds[ i ], *client );
-		}
-	}
-};

@@ -85,7 +85,6 @@ namespace http {
 		void startListen();
 		void acceptConnection();
 		void removeDeadConnections();
-		void processClientEvents(ClientEventProcessor &processor);
 		void closeClientConnection( size_t index );
 
 		// bool handleCgiResponse( pollfd &socket );

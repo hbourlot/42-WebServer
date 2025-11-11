@@ -238,3 +238,22 @@ bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
 	pfd.events |= POLLOUT;
 	return 1; // Continue sending in next poll event
 }
+
+void http::ClientEventProcessor::processClientEvents() {
+
+	for ( size_t i = 1; i < _server._fds.size(); ++i ) {
+		Client *client = _server._clientManager.getClient( _server._fds[ i ].fd );
+		if ( !client ) {
+			_server.closeClientConnection( i );
+			continue;
+		}
+
+		if ( _server._fds[ i ].revents & POLLIN ) {
+			processRead( _server._fds[ i ], *client );
+		}
+
+		if ( _server._fds[ i ].revents & POLLOUT ) {
+			processWrite( _server._fds[ i ], *client );
+		}
+	}
+}
