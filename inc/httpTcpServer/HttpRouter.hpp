@@ -2,6 +2,7 @@
 #include "Client/Client.hpp"
 #include "Config/Configs.hpp"
 #include "HttpUtils.hpp"
+#include "Cgi.hpp"
 
 enum VALIDATION_STATUS {
 

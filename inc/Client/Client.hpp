@@ -55,9 +55,10 @@ class Client {
 	bool isCgiInProgress() const;
 	void setCgiInProgress( bool value );
 
-	http::TcpServer& getServer(){
+	http::TcpServer &getServer() {
 		return _server;
 	}
+	http::Cgi *cgi;
 
   private:
 	int _fd;

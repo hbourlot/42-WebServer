@@ -6,47 +6,42 @@
 #include <sys/poll.h>
 #include <vector>
 
-namespace http
-{
-	class Cgi
-	{
+namespace http {
+	class Cgi {
 
 	  public:
-		Cgi(httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
-		    const ServerConfig &serverInfo);
+		Cgi( httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
+		     const ServerConfig &serverInfo );
 		~Cgi();
 
-		enum CgiStatus
-		{
-			STILL_RUNNING,
-			NOT_STARTED,
-			RUNNING,
-			FINISHED,
-			ERROR = -1
-		};
+		enum CgiStatus { CGI_NOT_STARTED, CGI_RUNNING, CGI_FINISHED, CGI_TOO_LARGE, CGI_ERROR = -1 };
 
 		// // CGI
-		static const std::set<std::string> validCgiExtensions;
-		static bool isValidCgiExtension(const std::string &ext);
-		static std::set<std::string> createValidCgiExtensions() // ! maybe must be outside
+		static const std::set< std::string > validCgiExtensions;
+		static bool isValidCgiExtension( const std::string &ext );
+		static std::set< std::string > createValidCgiExtensions() // ! maybe must be outside
 		{
-			std::set<std::string> s;
-			s.insert(".py");
-			s.insert(".cgi");
+			std::set< std::string > s;
+			s.insert( ".py" );
+			s.insert( ".cgi" );
 			return s;
 		}
 
-		void executeCgi(std::vector<pollfd> &fds); // Working on
 		httpResponse getCgiResponse() const;
 		httpRequest getCgiRequest() const;
 		std::string getFilePath() const;
 		std::string getBody() const;
 		CgiStatus getStatus() const;
-		std::vector<std::string> getArgv() const;
+		std::vector< std::string > getArgv() const;
 		int getPollFd() const;
-		void registerPollFd(std::vector<pollfd> &fds) const;
-		void markAsRunning();
-		void readCgiOutput();
+
+		void executeCgi( std::vector< pollfd > &fds ); // Working on
+		void registerPollFd( std::vector< pollfd > &fds ) const;
+		bool readCgiOutput( void ( *updateStatusPtr )() = nullptr );
+		bool processCgiOut(); // Process CGI output and handle errors
+		void updateStatus();
+		bool isCgiFinished();
+		bool hasDataToRead();
 
 	  private:
 		CgiStatus _status;
@@ -59,14 +54,14 @@ namespace http
 		int _bytesReceived;
 		std::string _body;
 
-		std::vector<char *> _envp;
-		std::vector<char *> _argv;
-		std::vector<std::string> _envStrings;
+		std::vector< char * > _envp;
+		std::vector< char * > _argv;
+		std::vector< std::string > _envStrings;
 
 		// Pipe handling
-		int _pipefd[2];
-		int _inputPipe[2];
-		int _outputPipe[2];
+		int _pipefd[ 2 ];
+		int _inputPipe[ 2 ];
+		int _outputPipe[ 2 ];
 		pid_t _pid;
 
 		void buildEnvStrings();

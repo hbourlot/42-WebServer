@@ -116,24 +116,12 @@ bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STAT
 }
 
 bool http::ClientEventProcessor::handleSuccessfulRequest( Client &client ) {
+
 	// Validate the request (routing, permissions, etc.)
-	if ( !handleRouteValidation( client ) ) { // he is stck here, always returning false (tested in linux on mac)
-		return false;                         // Error response already built in handleRouteValidation
-	}
-	if ( client.getState() == CGI_IN_EXECUTION ) {
+	if ( !handleRouteValidation( client ) )
+		return false;
 
-		std::cout << "CGI_IN_EXECUTION\n";
-		// 	// Try to read childProcessAnswer, if child is not finished
-		// 	try {
-		// 		// client.getCgiResponse() ...
-		// 	} catch ( std::exception &e ) {
-		// 		std::cout << "CGI ERROR => " << e.what() << std::endl;
-	}
-
-	// } else {
-	//  Process the validated request
 	executeRequest( client );
-	// }
 
 	return true;
 }
@@ -144,17 +132,11 @@ bool http::ClientEventProcessor::handleRouteValidation( Client &client ) {
 
 	VALIDATION_STATUS validationStatus = HttpRouter::validateRequest( client, _server._serverInfo );
 
-	// if ( validationStatus == VALID_IS_CGI || validationStatus == VALID_OK ) {
-	// 	std::cerr << "Estamos em CGI" << std::endl;
-	// }
-
-	// else {
-	// 	std::cerr << "nao estamos em CGI" << std::endl;
-	// }
-
 	switch ( validationStatus ) {
+
 	case VALID_OK:
 		return true; // Continue to routing
+
 	case VALID_IS_CGI:
 		return true;
 

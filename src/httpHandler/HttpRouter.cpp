@@ -57,7 +57,6 @@ VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfi
 
 void HttpRouter::routeRequest( Client &client, const ServerConfig &server ) {
 
-	std::cout << "In routeRequest\n";
 	httpRequest &request = client.getRequest();
 	const Location &location = *( client.getRequest().urlMatchedLocation );
 	if ( isCgiRequest( request, location ) )
@@ -84,15 +83,17 @@ void HttpRouter::handleCgiRequest( Client &client, const ServerConfig &server, c
 	httpRequest &request = client.getRequest();
 	std::string path = location.path;
 	if ( request.method == "GET" || request.method == "POST" ) {
-		// sockaddr_in socket;
-		http::Cgi cgi( request, path, socket, server ); // Working on
-		                                                // cgi.executeCgi(); // Working on (what to pass as a parameter)
-		                                                // client.setState(CGI_IN_EXECUTION);
-		cgi.executeCgi( client.getServer()._fds );
-		cgi.readCgiOutput();
-		std::cout << cgi.getBody();
-		client.getResponse() = ResponseBuilder::buildResponse( HTTP_OK, cgi.getBody() );
-		std::cout << client.getResponse().body;
+
+		client.cgi = new http::Cgi( request, path, socket, server );
+
+		client.cgi->executeCgi( client.getServer()._fds );
+		if ( client.cgi->processCgiOut() ) {
+			httpResponse cgiResponse = client.cgi->getCgiResponse();
+			const HttpStatusCode CGI_STATUS = { cgiResponse.statusCode, cgiResponse.statusMsg };
+			client.getResponse() = ResponseBuilder::buildResponse( CGI_STATUS, client.cgi->getBody() );
+		} else {
+			// OVER HERE HOW TO BUILD IN CHUNk
+		}
 	} else {
 		client.getResponse() = ResponseBuilder::buildErrorResponse( HTTP_FORBID_METHOD );
 	}
