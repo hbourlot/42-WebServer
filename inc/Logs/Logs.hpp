@@ -12,8 +12,18 @@
 #define GREEN "\033[32m"
 #define BLUE "\033[34m"
 
-enum Level { INFO, WARN, ERROR };
-class Logs {
+#ifndef DEBUG
+#define DEBUG false
+#endif
+
+enum Level
+{
+	INFO,
+	WARN,
+	ERROR
+};
+class Logs
+{
   public:
 	static void log( Level lvl, const std::string &msg );
 	static void logAcceptError( const sockaddr_in &socketAddress );

@@ -20,7 +20,7 @@ void http::ClientEventProcessor::processWrite(pollfd &pfd, Client &client)
 	// !! Need to check if it's a childProcess or a ClientSocket
 	if (!processRequest(client))
 		return;
-	sendResponse(pfd, client);
+	handleResponse(pfd, client);
 };
 
 bool http::ClientEventProcessor::readFromSocket(Client &client)
@@ -194,59 +194,22 @@ void http::ClientEventProcessor::executeRequest(Client &client)
 	client.clearBuffers();
 }
 
-bool http::ClientEventProcessor::sendResponse(pollfd &pfd, Client &client)
+bool http::ClientEventProcessor::handleResponse(pollfd &pfd, Client &client)
 {
 	SocketFD clientFd = client.getFd();
-	const int MAX_SENDS_PER_EVENT = 3;
 
 	// Build response if write buffer is empty
 	if (client.getWriteBuffer().empty())
-	{
 		client.appendToWriteBuffer(client.getResponse().buildResponseString());
-	}
 
 	std::string &writeBuffer = client.getWriteBuffer();
 
-	if (writeBuffer.empty())
-		return 0;
+	// if (writeBuffer.empty())
+	// 	return 0;
 
-	int sendCount = 0;
-
-	// Send up to MAX_SENDS_PER_EVENT times per poll event
-	while (sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty())
-	{
-		ssize_t bytesSent = send(clientFd, writeBuffer.c_str(), writeBuffer.size(), MSG_NOSIGNAL);
-
-		if (bytesSent < 0)
-		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-			{
-				// Socket buffer full, will continue later
-				pfd.events |= POLLOUT;
-				return 1; // Keep connection alive, continue sending later
-			}
-
-			if (errno == EPIPE)
-			{
-				Logs::log(ERROR, "Client disconnected before response");
-			}
-			else
-			{
-				Logs::log(ERROR, "Error sending response to client");
-			}
-			return 1; // Close connection
-		}
-
-		if (bytesSent == 0)
-		{
-			// Should not happen with send(), but handle gracefully
-			break;
-		}
-
-		writeBuffer.erase(0, bytesSent);
-		sendCount++;
-	}
-
+	if (sendResponse(pfd, client))
+		return (1);
+		
 	// Check if all data was sent
 	if (writeBuffer.empty())
 	{
@@ -297,4 +260,41 @@ void http::ClientEventProcessor::processClientEvents()
 			processWrite(_server._fds[i], *client);
 		}
 	}
+}
+bool http::ClientEventProcessor::sendResponse(pollfd &pfd, Client &client)
+{
+	SocketFD clientFd = client.getFd();
+
+	const int MAX_SENDS_PER_EVENT = 3;
+	int sendCount = 0;
+	std::string &writeBuffer = client.getWriteBuffer();
+
+	// Send up to MAX_SENDS_PER_EVENT times per poll event
+	while (sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty())
+	{
+		ssize_t bytesSent = send(clientFd, writeBuffer.c_str(), writeBuffer.size(), MSG_NOSIGNAL);
+
+		if (bytesSent < 0)
+		{
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+			{
+				// Socket buffer full, will continue later
+				pfd.events |= POLLOUT;
+				return 1; // Keep connection alive, continue sending later
+			}
+
+			if (errno == EPIPE)
+				Logs::log(ERROR, "Client disconnected before response");
+			else
+				Logs::log(ERROR, "Error sending response to client");
+			return 1; // Close connection
+		}
+
+		if (bytesSent == 0)
+			break; // Should not happen with send(), but handle gracefully
+
+		writeBuffer.erase(0, bytesSent);
+		sendCount++;
+	}
+	return (0);
 }

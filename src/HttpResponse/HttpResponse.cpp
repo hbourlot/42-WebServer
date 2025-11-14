@@ -1,4 +1,7 @@
 #include "httpTcpServer/HttpResponse.hpp"
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 HttpResponse::HttpResponse()
 {
@@ -19,6 +22,11 @@ HttpResponse::HttpResponse(const httpRequest &request) : _protocol(request.serve
 		else
 			_connectionType = std::make_pair("Connection", "close");
 	}
+
+	std::map<std::string, std::string>::const_iterator itRange = request.headers.find("Range");
+
+	if (itRange != request.headers.end())
+		_range = std::make_pair(itRange->first, itRange->second);
 }
 HttpResponse::~HttpResponse()
 {
@@ -118,14 +126,89 @@ void HttpResponse::buildRedirect(const HttpStatusCode &status, const std::string
 	addToHeader("Location", url);
 }
 
+static bool parseRange(std::string &rangeValue, off_t &fileSize, off_t &start, off_t &end)
+{
+	std::string prefix = "bytes=";
+	if (rangeValue.compare(0, prefix.size(), prefix) != 0)
+		return (false);
+
+	std::string rangeSpec = rangeValue.substr(prefix.size());
+	size_t dash = rangeSpec.find('-');
+	if (dash == std::string::npos)
+		return (false);
+
+	std::string startStr = rangeSpec.substr(0, dash);
+	std::string endStr = rangeSpec.substr(dash + 1);
+
+	start = 0;
+	end = fileSize - 1;
+
+	if (!startStr.empty())
+		start = static_cast<off_t>(atoll(startStr.c_str()));
+	if (!endStr.empty())
+		end = static_cast<off_t>(atoll(endStr.c_str()));
+
+	if (start >= fileSize)
+		return (false);
+	if (end >= fileSize)
+		end = fileSize - 1;
+	if (start > end)
+		return (false);
+
+	return (true);
+}
+
+void HttpResponse::buildRangeResponse(const std::string &filePath, const ServerConfig &server, struct stat &st)
+{
+	off_t start;
+	off_t end;
+
+	if (!parseRange(_range.second, st.st_size, start, end))
+		return (buildErrorResponse(HTTP_RANGE_NOT_SATISFIABLE, server));
+
+	off_t diff = end - start + 1;
+
+	std::ifstream file(filePath.c_str(), std::ios::binary);
+	if (!file.is_open())
+		return (buildErrorResponse(HTTP_SERVER_ERR, server));
+
+	file.seekg(start, std::ios::beg);
+
+	std::ostringstream body;
+	char buffer[CHUNK_SIZE + 1] = {0};
+	while (diff > 0 && file.good())
+	{
+		std::streamsize toRead = std::min<off_t>(diff, CHUNK_SIZE);
+		file.read(buffer, toRead);
+		std::streamsize bytesRead = file.gcount();
+		if (bytesRead <= 0)
+			break;
+
+		body.write(buffer, bytesRead);
+		diff -= bytesRead;
+	}
+	file.close();
+
+	buildResponse(HTTP_PARTIAL_CONTENT, body.str());
+	std::ostringstream rangeHeader;
+	rangeHeader << "bytes " << start << "-" << end << "/" << st.st_size;
+	if (DEBUG)
+		Logs::log(INFO, "Request for range: " + rangeHeader.str());
+	addToHeader("Content-Range", rangeHeader.str());
+	addToHeader("Content-Type", getContentType(filePath));
+}
 void HttpResponse::buildFileResponse(const HttpStatusCode &status, const std::string &filePath,
                                      const ServerConfig &server)
 {
+	struct stat st;
+	if (stat(filePath.c_str(), &st) != 0)
+		return (buildErrorResponse(HTTP_NOT_FOUND, server));
+
+	if (!_range.first.empty())
+		return (buildRangeResponse(filePath, server, st));
+
 	std::string content = readFileContent(filePath);
-	if (content.empty())
-	{
-		buildErrorResponse(HTTP_NOT_FOUND, server);
-	}
+
 	buildResponse(status, content);
 	addToHeader("Content-Type", getContentType(filePath));
 }
@@ -133,8 +216,6 @@ void HttpResponse::buildFileResponse(const HttpStatusCode &status, const std::st
 std::string HttpResponse::readFileContent(const std::string &filePath)
 {
 	std::ifstream file(filePath.c_str());
-	if (!file.is_open())
-		return "";
 
 	std::ostringstream buffer;
 	buffer << file.rdbuf();

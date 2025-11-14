@@ -1,5 +1,6 @@
 #pragma once
 #include "Config/Configs.hpp"
+#include "Logs/Logs.hpp"
 #include "httpTcpServer/HttpStructs.hpp"
 #include "httpTcpServer/HttpStatus.hpp"
 #include "utils.hpp"
@@ -12,6 +13,8 @@
 #include <unistd.h>
 #include <vector>
 
+#define CHUNK_SIZE 8192
+
 struct httpRequest;
 
 class HttpResponse
@@ -19,6 +22,7 @@ class HttpResponse
   private:
 	std::string _protocol;
 	std::pair<std::string, std::string> _connectionType;
+	std::pair<std::string, std::string> _range;
 	std::string _statusCode;
 	std::string _statusMsg;
 	std::string _body;
@@ -41,6 +45,7 @@ class HttpResponse
 	void buildErrorResponse(const HttpStatusCode &status, const ServerConfig &server);
 	void buildRedirect(const HttpStatusCode &status, const std::string &url);
 	void buildFileResponse(const HttpStatusCode &status, const std::string &filePath, const ServerConfig &server);
+	void buildRangeResponse(const std::string &filePath, const ServerConfig &server, struct stat &st);
 };
 
 // struct httpResponse

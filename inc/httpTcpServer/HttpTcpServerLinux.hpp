@@ -39,9 +39,6 @@
 #define nullptr NULL
 #endif
 
-#ifndef DEBUG
-#define DEBUG false
-#endif
 
 class Cgi;
 
