@@ -34,6 +34,8 @@ class Client
 
 	int getFd() const;
 
+	http::TcpServer &getServer();
+
 	// Buffers
 	std::string &getReadBuffer();
 	std::string &getWriteBuffer();

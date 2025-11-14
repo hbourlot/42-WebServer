@@ -25,7 +25,6 @@ namespace http {
 
 	TcpServer::TcpServer( ServerConfig server )
 	    : _serverInfo( server ), _serverSocket(), _socketAddress_len( sizeof( sockaddr_in ) ) {
-		// this->startServer();
 		std::string msg( "CREATED SERVER " );
 		msg = msg + _serverInfo.host + ":";
 		msg += to_str( _serverInfo.port );
@@ -37,6 +36,10 @@ namespace http {
 		// close(_acceptSocket);
 		// exit(1); //TODO Exit with a failure code??
 	}
+
+	std::vector< pollfd > &TcpServer::getVectorPollFds() {
+		return _fds;
+	};
 
 	int TcpServer::startServer() {
 
@@ -57,6 +60,7 @@ namespace http {
 			close( _serverSocket );
 			exit( EXIT_FAILURE );
 		}
+
 		struct sockaddr_in socketAddress;
 		// Set the socket address struct
 		setSocketAddr( socketAddress, AF_INET, INADDR_ANY, _serverInfo.port );
@@ -68,6 +72,7 @@ namespace http {
 			throw TcpServerException( "Cannot bind socket to address" );
 			return -1;
 		}
+
 		_socketAddressMap[ _serverSocket ] = socketAddress;
 		return 0;
 	}

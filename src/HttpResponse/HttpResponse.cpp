@@ -3,60 +3,68 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-HttpResponse::HttpResponse()
-{
+HttpResponse::HttpResponse() : _protocol( "HTTP/1.1" ) {
 }
-HttpResponse::HttpResponse(const httpRequest &request) : _protocol(request.serverProtocol)
-{
-	std::map<std::string, std::string>::const_iterator it = request.headers.find("Connection");
 
-	if (it != request.headers.end())
-	{
+HttpResponse::HttpResponse( const httpRequest &request ) : _protocol( request.serverProtocol ) {
+	std::map< std::string, std::string >::const_iterator it = request.headers.find( "Connection" );
+
+	if ( it != request.headers.end() ) {
 		std::string val = it->second;
-		_connectionType = std::make_pair("Connection", it->second);
-	}
-	else
-	{
-		if (_protocol == "HTTP/1.1")
-			_connectionType = std::make_pair("Connection", "keep-alive");
+		_connectionType = std::make_pair( "Connection", it->second );
+	} else {
+		if ( _protocol == "HTTP/1.1" )
+			_connectionType = std::make_pair( "Connection", "keep-alive" );
 		else
-			_connectionType = std::make_pair("Connection", "close");
+			_connectionType = std::make_pair( "Connection", "close" );
 	}
 
-	std::map<std::string, std::string>::const_iterator itRange = request.headers.find("Range");
+	std::map< std::string, std::string >::const_iterator itRange = request.headers.find( "Range" );
 
-	if (itRange != request.headers.end())
-		_range = std::make_pair(itRange->first, itRange->second);
+	if ( itRange != request.headers.end() )
+		_range = std::make_pair( itRange->first, itRange->second );
 }
-HttpResponse::~HttpResponse()
-{
+
+HttpResponse &HttpResponse::operator=( const HttpResponse &other ) {
+
+	if ( this != &other ) {
+		this->_protocol = other._protocol;
+		this->_connectionType = other._connectionType;
+		this->_range = other._range;
+		this->_statusCode = other._statusCode;
+		this->_statusMsg = other._statusMsg;
+		this->_body = other._body;
+		this->_headers = other._headers;
+	}
+
+	return *this;
+}
+
+HttpResponse::~HttpResponse() {
 }
 
 //! Member Function
 
-void HttpResponse::addToHeader(std::string key, std::string value)
-{
-	this->_headers[key] = value;
+void HttpResponse::addToHeader( std::string key, std::string value ) {
+	this->_headers[ key ] = value;
 }
 
-void HttpResponse::setDefaultHeaders()
-{
-	addToHeader("Date", dateString());
+void HttpResponse::setDefaultHeaders() {
+	addToHeader( "Date", dateString() );
 
 	std::ostringstream oss;
 	oss << _body.size();
-	addToHeader("Content-Length", oss.str());
+	addToHeader( "Content-Length", oss.str() );
 
-	addToHeader(_connectionType.first, _connectionType.second);
+	addToHeader( _connectionType.first, _connectionType.second );
 }
 
-std::string HttpResponse::buildResponseString()
-{
+std::string HttpResponse::buildResponseString() {
 	std::ostringstream responseString;
 	responseString << _protocol + " " << _statusCode << " " << _statusMsg << "\r\n";
 
-	std::map<std::string, std::string>::const_iterator it;
-	for (it = _headers.begin(); it != _headers.end(); ++it)
+	std::map< std::string, std::string >::const_iterator it;
+	for ( it = _headers.begin(); it != _headers.end(); ++it )
 		responseString << it->first << ": " << it->second << "\r\n";
 
 	responseString << "\r\n";
@@ -67,16 +75,14 @@ std::string HttpResponse::buildResponseString()
 
 // Here function
 
-void HttpResponse::buildResponse(const HttpStatusCode &status, const std::string &body)
-{
+void HttpResponse::buildResponse( const HttpStatusCode &status, const std::string &body ) {
 	_statusCode = status.code;
 	_statusMsg = status.message;
 	_body = body;
 
 	setDefaultHeaders();
 }
-static std::string createErrorBody(const HttpStatusCode &status)
-{
+static std::string createErrorBody( const HttpStatusCode &status ) {
 	std::string html;
 
 	html += "<!DOCTYPE html>\n";
@@ -103,119 +109,110 @@ static std::string createErrorBody(const HttpStatusCode &status)
 	return html;
 }
 
-void HttpResponse::buildErrorResponse(const HttpStatusCode &status, const ServerConfig &server)
-{
-	std::map<int, std::string>::const_iterator it;
-	it = server.errorPage.find(atoi(status.code.c_str()));
-	if (it != server.errorPage.end())
-	{
-		std::ifstream file(it->second.c_str());
-		if (file.good())
-		{
-			buildFileResponse(status, it->second, server);
+void HttpResponse::buildErrorResponse( const HttpStatusCode &status, const ServerConfig &server ) {
+	std::map< int, std::string >::const_iterator it;
+	it = server.errorPage.find( atoi( status.code.c_str() ) );
+	if ( it != server.errorPage.end() ) {
+		std::ifstream file( it->second.c_str() );
+		if ( file.good() ) {
+			buildFileResponse( status, it->second, server );
 			return;
 		}
 	}
 	// std::string body = status.message + " (" + status.code + ")";
-	buildResponse(status, createErrorBody(status));
-	addToHeader("Content-Type", "text/html");
+	buildResponse( status, createErrorBody( status ) );
+	addToHeader( "Content-Type", "text/html" );
 }
-void HttpResponse::buildRedirect(const HttpStatusCode &status, const std::string &url)
-{
-	buildResponse(status, "");
-	addToHeader("Location", url);
+void HttpResponse::buildRedirect( const HttpStatusCode &status, const std::string &url ) {
+	buildResponse( status, "" );
+	addToHeader( "Location", url );
 }
 
-static bool parseRange(std::string &rangeValue, off_t &fileSize, off_t &start, off_t &end)
-{
+static bool parseRange( std::string &rangeValue, off_t &fileSize, off_t &start, off_t &end ) {
 	std::string prefix = "bytes=";
-	if (rangeValue.compare(0, prefix.size(), prefix) != 0)
-		return (false);
+	if ( rangeValue.compare( 0, prefix.size(), prefix ) != 0 )
+		return ( false );
 
-	std::string rangeSpec = rangeValue.substr(prefix.size());
-	size_t dash = rangeSpec.find('-');
-	if (dash == std::string::npos)
-		return (false);
+	std::string rangeSpec = rangeValue.substr( prefix.size() );
+	size_t dash = rangeSpec.find( '-' );
+	if ( dash == std::string::npos )
+		return ( false );
 
-	std::string startStr = rangeSpec.substr(0, dash);
-	std::string endStr = rangeSpec.substr(dash + 1);
+	std::string startStr = rangeSpec.substr( 0, dash );
+	std::string endStr = rangeSpec.substr( dash + 1 );
 
 	start = 0;
 	end = fileSize - 1;
 
-	if (!startStr.empty())
-		start = static_cast<off_t>(atoll(startStr.c_str()));
-	if (!endStr.empty())
-		end = static_cast<off_t>(atoll(endStr.c_str()));
+	if ( !startStr.empty() )
+		start = static_cast< off_t >( atoll( startStr.c_str() ) );
+	if ( !endStr.empty() )
+		end = static_cast< off_t >( atoll( endStr.c_str() ) );
 
-	if (start >= fileSize)
-		return (false);
-	if (end >= fileSize)
+	if ( start >= fileSize )
+		return ( false );
+	if ( end >= fileSize )
 		end = fileSize - 1;
-	if (start > end)
-		return (false);
+	if ( start > end )
+		return ( false );
 
-	return (true);
+	return ( true );
 }
 
-void HttpResponse::buildRangeResponse(const std::string &filePath, const ServerConfig &server, struct stat &st)
-{
+void HttpResponse::buildRangeResponse( const std::string &filePath, const ServerConfig &server, struct stat &st ) {
 	off_t start;
 	off_t end;
 
-	if (!parseRange(_range.second, st.st_size, start, end))
-		return (buildErrorResponse(HTTP_RANGE_NOT_SATISFIABLE, server));
+	if ( !parseRange( _range.second, st.st_size, start, end ) )
+		return ( buildErrorResponse( HTTP_RANGE_NOT_SATISFIABLE, server ) );
 
 	off_t diff = end - start + 1;
 
-	std::ifstream file(filePath.c_str(), std::ios::binary);
-	if (!file.is_open())
-		return (buildErrorResponse(HTTP_SERVER_ERR, server));
+	std::ifstream file( filePath.c_str(), std::ios::binary );
+	if ( !file.is_open() )
+		return ( buildErrorResponse( HTTP_SERVER_ERR, server ) );
 
-	file.seekg(start, std::ios::beg);
+	file.seekg( start, std::ios::beg );
 
 	std::ostringstream body;
-	char buffer[CHUNK_SIZE + 1] = {0};
-	while (diff > 0 && file.good())
-	{
-		std::streamsize toRead = std::min<off_t>(diff, CHUNK_SIZE);
-		file.read(buffer, toRead);
+	char buffer[ CHUNK_SIZE + 1 ] = { 0 };
+	while ( diff > 0 && file.good() ) {
+		std::streamsize toRead = std::min< off_t >( diff, CHUNK_SIZE );
+		file.read( buffer, toRead );
 		std::streamsize bytesRead = file.gcount();
-		if (bytesRead <= 0)
+		if ( bytesRead <= 0 )
 			break;
 
-		body.write(buffer, bytesRead);
+		body.write( buffer, bytesRead );
 		diff -= bytesRead;
 	}
 	file.close();
 
-	buildResponse(HTTP_PARTIAL_CONTENT, body.str());
+	buildResponse( HTTP_PARTIAL_CONTENT, body.str() );
 	std::ostringstream rangeHeader;
 	rangeHeader << "bytes " << start << "-" << end << "/" << st.st_size;
-	if (DEBUG)
-		Logs::log(INFO, "Request for range: " + rangeHeader.str());
-	addToHeader("Content-Range", rangeHeader.str());
-	addToHeader("Content-Type", getContentType(filePath));
+	if ( DEBUG )
+		Logs::log( INFO, "Request for range: " + rangeHeader.str() );
+	addToHeader( "Content-Range", rangeHeader.str() );
+	addToHeader( "Content-Type", getContentType( filePath ) );
 }
-void HttpResponse::buildFileResponse(const HttpStatusCode &status, const std::string &filePath,
-                                     const ServerConfig &server)
-{
+void HttpResponse::buildFileResponse( const HttpStatusCode &status, const std::string &filePath,
+                                      const ServerConfig &server ) {
 	struct stat st;
-	if (stat(filePath.c_str(), &st) != 0)
-		return (buildErrorResponse(HTTP_NOT_FOUND, server));
+	if ( stat( filePath.c_str(), &st ) != 0 )
+		return ( buildErrorResponse( HTTP_NOT_FOUND, server ) );
 
-	if (!_range.first.empty())
-		return (buildRangeResponse(filePath, server, st));
+	if ( !_range.first.empty() )
+		return ( buildRangeResponse( filePath, server, st ) );
 
-	std::string content = readFileContent(filePath);
+	std::string content = readFileContent( filePath );
 
-	buildResponse(status, content);
-	addToHeader("Content-Type", getContentType(filePath));
+	buildResponse( status, content );
+	addToHeader( "Content-Type", getContentType( filePath ) );
 }
 
-std::string HttpResponse::readFileContent(const std::string &filePath)
-{
-	std::ifstream file(filePath.c_str());
+std::string HttpResponse::readFileContent( const std::string &filePath ) {
+	std::ifstream file( filePath.c_str() );
 
 	std::ostringstream buffer;
 	buffer << file.rdbuf();
@@ -223,26 +220,25 @@ std::string HttpResponse::readFileContent(const std::string &filePath)
 	return buffer.str();
 }
 
-std::string HttpResponse::getContentType(const std::string &filePath)
-{
-	size_t dot = filePath.find_last_of('.');
-	if (dot == std::string::npos)
+std::string HttpResponse::getContentType( const std::string &filePath ) {
+	size_t dot = filePath.find_last_of( '.' );
+	if ( dot == std::string::npos )
 		return "application/octet-stream"; // binario genérico
 
-	std::string ext = filePath.substr(dot + 1);
-	if (ext == "html" || ext == "htm")
+	std::string ext = filePath.substr( dot + 1 );
+	if ( ext == "html" || ext == "htm" )
 		return "text/html";
-	if (ext == "css")
+	if ( ext == "css" )
 		return "text/css";
-	if (ext == "png")
+	if ( ext == "png" )
 		return "image/png";
-	if (ext == "jpg" || ext == "jpeg")
+	if ( ext == "jpg" || ext == "jpeg" )
 		return "image/jpeg";
-	if (ext == "gif")
+	if ( ext == "gif" )
 		return "image/gif";
-	if (ext == "txt")
+	if ( ext == "txt" )
 		return "text/plain";
-	if (ext == "pdf")
+	if ( ext == "pdf" )
 		return "application/pdf";
 	return "application/octet-stream";
 }
