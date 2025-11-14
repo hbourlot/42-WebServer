@@ -82,7 +82,7 @@ void HttpRouter::handleCgiRequest( Client &client, const ServerConfig &server, c
 
 	httpRequest &request = client.getRequest();
 	std::string path = location.path;
-	if ( request.method == "GET" || request.method == "POST" ) {
+	if ( (request.method == "GET" || request.method == "POST") && client.getState() != CGI_IN_EXECUTION ) {
 
 		client.cgi = new http::Cgi( request, path, socket, server );
 

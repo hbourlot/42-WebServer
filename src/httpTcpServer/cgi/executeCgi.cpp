@@ -97,40 +97,35 @@ void http::Cgi::handleChildProcess() {
 	_exit( 1 );
 }
 
-namespace http {
+void http::Cgi::executeCgi( std::vector< pollfd > &fds ) { // Working on
 
-	void Cgi::executeCgi( std::vector< pollfd > &fds ) { // Working on
-
-		if ( pipe( this->_inputPipe ) < 0 || pipe( this->_outputPipe ) < 0 ) {
-			std::cerr << "Pipe creating failed\n";
-			return;
-		}
-		this->_pid = fork();
-		if ( this->_pid < 0 ) {
-			std::cerr << "Fork failed\n";
-			return;
-		} else if ( this->_pid == 0 ) {
-			handleChildProcess();
-		} else {
-
-			// int status;
-			// waitpid(_pid, &status, 0);
-
-			close( _inputPipe[ 0 ] ); // Working on (I think this one is '0' and not '1')
-			close( _outputPipe[ 1 ] );
-
-			// char buffer[BUFFER_SIZE] = {0};
-			// ssize_t bytes = read(_outputPipe[0], buffer, BUFFER_SIZE);
-
-			// buffer[bytes] = '\0'; // Safely null-terminate
-			// std::cout << "[BUFFER]: " << buffer << std::endl;
-
-			// fcntl(_outputPipe[0], F_SETFL,
-			//       fcntl(_outputPipe[0], F_GETFL, 0) | O_NONBLOCK);
-			fcntl( _outputPipe[ 0 ], F_SETFL, O_NONBLOCK );
-			registerPollFd( fds );
-		}
+	if ( pipe( this->_inputPipe ) < 0 || pipe( this->_outputPipe ) < 0 ) {
+		std::cerr << "Pipe creating failed\n";
+		return;
 	}
+	this->_pid = fork();
+	if ( this->_pid < 0 ) {
+		std::cerr << "Fork failed\n";
+		return;
+	} else if ( this->_pid == 0 ) {
+		this->handleChildProcess();
+	} else {
 
-} // namespace http
+		// int status;
+		// waitpid(_pid, &status, 0);
 
+		close( _inputPipe[ 0 ] ); // Working on (I think this one is '0' and not '1')
+		close( _outputPipe[ 1 ] );
+
+		// char buffer[BUFFER_SIZE] = {0};
+		// ssize_t bytes = read(_outputPipe[0], buffer, BUFFER_SIZE);
+
+		// buffer[bytes] = '\0'; // Safely null-terminate
+		// std::cout << "[BUFFER]: " << buffer << std::endl;
+
+		// fcntl(_outputPipe[0], F_SETFL,
+		//       fcntl(_outputPipe[0], F_GETFL, 0) | O_NONBLOCK);
+		fcntl( _outputPipe[ 0 ], F_SETFL, O_NONBLOCK );
+		this->registerPollFd( fds );
+	}
+}
