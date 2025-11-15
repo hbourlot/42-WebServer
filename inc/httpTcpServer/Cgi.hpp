@@ -27,7 +27,7 @@ namespace http {
 		int getPollFd() const;
 		void registerPollFd( std::vector< pollfd > &fds ) const;
 		void markAsRunning();
-		bool readCgiOutput( void ( *updateStatusPtr )() = nullptr );
+		bool readCgiOutput( void ( *updateStatusPtr )() = NULL);
 		bool isCgiFinished();
 		bool hasDataToRead();
 		bool processCgiOut();

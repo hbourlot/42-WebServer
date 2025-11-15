@@ -1,6 +1,7 @@
 #include "Config/Configs.hpp"
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include <ios>
+#include <cstring>
 #include <iostream>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -70,8 +71,6 @@ void http::Cgi::handleChildProcess() {
 	//* Child process
 	doDup();
 
-	this->_filePath = "." + this->_filePath;
-
 	// build argv
 	std::vector< char * > argv;
 	argv.push_back( const_cast< char * >( _filePath.c_str() ) );
@@ -86,8 +85,7 @@ void http::Cgi::handleChildProcess() {
 	}
 	this->_envp.push_back( NULL );
 
-	
-	this->_filePath = "./webpage/cgi-bin/hello.py";
+	// this->_filePath = "./webpage/cgi-bin/hello.py";
 
 	// Execute the actual CGI script with proper environment
 	execve( this->getFilePath().c_str(), argv.data(), this->_envp.data() );

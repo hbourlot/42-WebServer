@@ -7,6 +7,8 @@
 #include <string>
 #include <sys/poll.h>
 #include <vector>
+#include <sys/wait.h>
+
 
 std::string http::Cgi::getFilePath() const {
 	return this->_filePath;
@@ -48,10 +50,14 @@ void http::Cgi::markAsRunning() {
 http::Cgi::Cgi( const httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
                 const ServerConfig &serverInfo )
     : _status( CGI_NOT_STARTED ), _clientFD(), _request( request ), _response( HttpResponse( request ) ),
-      _serverInfo( serverInfo ), _filePath( filePath ), _clientAddress( clientAddress ), _bytesReceived(), _body(),
+      _serverInfo( serverInfo ), _clientAddress( clientAddress ), _bytesReceived(), _body(),
       _envp(), _argv(), _envStrings() {
 
 	// Cgi::createValidCgiExtensions();
+	Location* cgiLocation = _serverInfo.GetLocationByPath("/cgi-bin");
+	std::cout << "Cgi root " << cgiLocation->root << std::endl;
+	_filePath = cgiLocation->root + "/" + _request.GetFileName();
+	std::cout << "File path vai ser aqui " << filePath << "Filepath "<< _filePath << std::endl; 
 
 	// execve
 	buildEnvStrings();
