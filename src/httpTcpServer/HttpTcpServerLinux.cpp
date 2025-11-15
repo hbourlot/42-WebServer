@@ -157,14 +157,19 @@ namespace http {
 		return 0;
 	}
 
-	// Remove and close all pollfd's with HUP, ERR, or NVAL events
-	void TcpServer::removeDeadConnections() {
+	void TcpServer::removeDeadConnections( ClientEventProcessor &processor ) {
 
 		for ( size_t i = 1; i < _fds.size(); ++i ) {
 			if ( _fds[ i ].revents & ( POLLHUP | POLLERR | POLLNVAL ) ) {
 				std::cout << "--- Removing CONNECTION\n";
 
 				SocketFD fd = _fds[ i ].fd;
+
+				// Clean up CGI resources if this is a client with active CGI
+				Client *client = _clientManager.getClient( fd );
+				if ( client && client->getCgiPid() != -1 ) {
+					processor.cleanupCgiForClient( *client );
+				}
 
 				if ( _socketAddressMap.count( fd ) )
 					_socketAddressMap.erase( fd );
@@ -202,7 +207,7 @@ namespace http {
 
 				// Checking for new connections
 				acceptConnection();
-				removeDeadConnections();
+				removeDeadConnections( processor );
 				processor.processClientEvents();
 			}
 		} catch ( const TcpServerException &e ) {
@@ -213,6 +218,9 @@ namespace http {
 	}
 
 	void TcpServer::shutDownServer() {
+		// Close all CGI pipes before shutting down
+		closeAllCgiPipes();
+
 		for ( int i = 0; i < _fds.size(); ++i ) {
 			close( _fds[ i ].fd );
 			_fds.erase( _fds.begin() + i );
@@ -231,6 +239,21 @@ namespace http {
 		_socketAddressMap.erase( fd );
 		_clientManager.removeClient( fd );
 		_fds.erase( _fds.begin() + index );
+	}
+
+	void TcpServer::closeAllCgiPipes() {
+		for ( size_t i = 0; i < _cgiPipes.size(); ++i ) {
+			if ( _cgiPipes[ i ].inputPipe[ 0 ] >= 0 )
+				close( _cgiPipes[ i ].inputPipe[ 0 ] );
+			if ( _cgiPipes[ i ].inputPipe[ 1 ] >= 0 )
+				close( _cgiPipes[ i ].inputPipe[ 1 ] );
+			if ( _cgiPipes[ i ].outputPipe[ 0 ] >= 0 )
+				close( _cgiPipes[ i ].outputPipe[ 0 ] );
+			if ( _cgiPipes[ i ].outputPipe[ 1 ] >= 0 )
+				close( _cgiPipes[ i ].outputPipe[ 1 ] );
+		}
+		_cgiPipes.clear();
+		Logs::log( INFO, "Closed all CGI pipes" );
 	}
 
 } // namespace http

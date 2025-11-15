@@ -37,10 +37,8 @@ bool http::Cgi::readCgiOutput( void ( *updateStatusPtr )() ) {
 	int readCount = 0;
 
 	while ( readCount < MAX_READS_PER_EVENT ) {
-		ssize_t bytesReceived = read( this->_outputPipe[ 0 ], buffer, BUFFER_SIZE);
+		ssize_t bytesReceived = read( this->_outputPipe[ 0 ], buffer, BUFFER_SIZE );
 
-		std::cout << "BUFFER INSIDE readCgiOutput() \n\n";
-		std::cout << buffer << "\n\nEND BUFFER\n";
 		if ( bytesReceived > 0 ) {
 			_body.append( buffer, bytesReceived ); // Only append received bytes
 			readCount++;
@@ -68,7 +66,7 @@ bool http::Cgi::readCgiOutput( void ( *updateStatusPtr )() ) {
 
 void http::Cgi::handleChildProcess() {
 	//* Child process
-	doDup();
+	doDupOneWay();
 
 	this->_filePath = "." + this->_filePath;
 
@@ -86,7 +84,6 @@ void http::Cgi::handleChildProcess() {
 	}
 	this->_envp.push_back( NULL );
 
-	
 	this->_filePath = "./webpage/cgi-bin/hello.py";
 
 	// Execute the actual CGI script with proper environment
@@ -109,14 +106,19 @@ void http::Cgi::executeCgi( std::vector< pollfd > &fds ) { // Working on
 	} else if ( this->_pid == 0 ) {
 		this->handleChildProcess();
 	} else {
-		close( _inputPipe[ 1 ] );
-		close( _outputPipe[ 1 ] );
+		closeForOneWay();
+		// Parent now can:
+		// - Write to CGI via _inputPipe[1]
+		// - Read from CGI via _outputPipe[0]
 
 		int status;
-		waitpid( _pid, &status, 0);
+		waitpid( _pid, &status, 0 );
 		// this->updateStatus();
 
+		// Set both pipes to non-blocking if doing async I/O
+		fcntl( _inputPipe[ 1 ], F_SETFL, O_NONBLOCK );
 		fcntl( _outputPipe[ 0 ], F_SETFL, O_NONBLOCK );
+
 		// this->readCgiOutput();
 
 		// char buffer[ BUFFER_SIZE ] = { 0 };

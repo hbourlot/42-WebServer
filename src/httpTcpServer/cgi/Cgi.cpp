@@ -16,7 +16,7 @@ httpRequest http::Cgi::getRequest() const {
 	return _request;
 }
 
-HttpResponse http::Cgi::getResponse() const {
+http::Response http::Cgi::getResponse() const {
 	return _response;
 }
 
@@ -30,6 +30,18 @@ http::Cgi::CgiStatus http::Cgi::getStatus() const {
 
 std::string http::Cgi::getBody() const {
 	return _body;
+}
+
+pid_t http::Cgi::getPid() const {
+	return _pid;
+}
+
+const int *http::Cgi::getInputPipe() const {
+	return _inputPipe;
+}
+
+const int *http::Cgi::getOutputPipe() const {
+	return _outputPipe;
 }
 
 void http::Cgi::registerPollFd( std::vector< pollfd > &fds ) const {
@@ -47,7 +59,7 @@ void http::Cgi::markAsRunning() {
 
 http::Cgi::Cgi( const httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
                 const ServerConfig &serverInfo )
-    : _status( CGI_NOT_STARTED ), _clientFD(), _request( request ), _response( HttpResponse( request ) ),
+    : _status( CGI_NOT_STARTED ), _clientFD(), _request( request ), _response( Response( request ) ),
       _serverInfo( serverInfo ), _filePath( filePath ), _clientAddress( clientAddress ), _bytesReceived(), _body(),
       _envp(), _argv(), _envStrings() {
 
@@ -150,4 +162,42 @@ bool http::Cgi::processCgiOut() {
 	};
 
 	return true;
+}
+
+void http::Cgi::doDupOneWay() {
+	// One-way: CGI writes to stdout only (no stdin from parent)
+	dup2( _outputPipe[ 1 ], STDOUT_FILENO );
+
+	// Close all pipe fds
+	close( _inputPipe[ 0 ] );
+	close( _inputPipe[ 1 ] );
+	close( _outputPipe[ 0 ] );
+	close( _outputPipe[ 1 ] );
+}
+
+void http::Cgi::doDupTwoWay() {
+	dup2( _inputPipe[ 0 ], STDIN_FILENO );
+	dup2( _outputPipe[ 1 ], STDOUT_FILENO );
+
+	// Close all pipe fds - we now use stdin/stdout
+	close( _inputPipe[ 0 ] );
+	close( _inputPipe[ 1 ] );
+	close( _outputPipe[ 0 ] );
+	close( _outputPipe[ 1 ] );
+}
+
+void http::Cgi::closeForOneWay() {
+	// One-way: parent only reads from CGI output
+	close( _inputPipe[ 0 ] );  // Not using stdin pipe
+	close( _inputPipe[ 1 ] );  // Not using stdin pipe
+	close( _outputPipe[ 1 ] ); // Child writes to stdout
+	                           // Keep _outputPipe[0] to read from CGI
+}
+
+void http::Cgi::closeForTwoWay() {
+	// Two-way: parent writes to CGI stdin and reads from stdout
+	close( _inputPipe[ 0 ] );  // Child reads from stdin
+	close( _outputPipe[ 1 ] ); // Child writes to stdout
+	                           // Keep _inputPipe[1] to write to CGI
+	                           // Keep _outputPipe[0] to read from CGI
 }

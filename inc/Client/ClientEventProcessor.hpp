@@ -12,6 +12,8 @@ namespace http {
 
 	class ClientEventProcessor {
 	  public:
+		friend class Router;
+
 		ClientEventProcessor( TcpServer &server );
 
 		~ClientEventProcessor();
@@ -21,6 +23,12 @@ namespace http {
 		void processWrite( pollfd &pfd, Client &client );
 
 		void processClientEvents();
+
+		void registerCgiPipes( const int inputPipe[ 2 ], const int outputPipe[ 2 ], pid_t pid );
+		void closeCgiPipes( pid_t pid );
+		void registerCgiForClient( Client &client, int cgiOutputFd );
+		void cleanupCgiForClient( Client &client );
+		void processCgiOutput(Client &client, pollfd &pfd);
 
 	  private:
 		TcpServer &_server;
@@ -36,13 +44,25 @@ namespace http {
 		// Main request processing pipeline
 		bool processRequest( Client &client );
 
-		// Error handling
+		/// @brief Builds an HTTP error response based on client state
+		/// @param client Client to send error response to
+		/// @param state Error state (READ_ERROR, READ_EMPTY, PARSE_TOO_LARGE, etc.)
+		/// @return true after building error response
 		bool buildErrorResponse( Client &client, CLIENT_STATE state );
 
-		// Successful request handling
+		/// @brief Handles successful request processing and response generation
+		/// @param client Client with successfully parsed and validated request
+		/// @return true on successful handling, false on error
 		bool handleSuccessfulRequest( Client &client );
 
-		// Request validation (URL, method, permissions, redirects)
+		/// @brief Validates and processes the route for the client's HTTP request
+		/// 
+		/// This function performs route validation for the given client, checking if the
+		/// requested route is valid, accessible, and properly configured according to
+		/// the server's routing rules and permissions.
+		/// 
+		/// @param client Reference to the Client object containing the HTTP request to validate
+		/// @return true if the route validation succeeds, false otherwise
 		bool handleRouteValidation( Client &client );
 
 		void executeRequest( Client &client );

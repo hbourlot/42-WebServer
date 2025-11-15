@@ -1,137 +1,125 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
-static std::string extractBoundary(httpRequest &request)
-{
+static std::string extractBoundary( httpRequest &request ) {
 
-	std::string contentType = request.headers["Content-Type"];
+	std::string contentType = request.headers[ "Content-Type" ];
 	std::string boundaryPrefix = "boundary=";
 
-	size_t pos = contentType.find(boundaryPrefix);
-	if (pos == std::string::npos)
-	{
-		return ("");
+	size_t pos = contentType.find( boundaryPrefix );
+	if ( pos == std::string::npos ) {
+		return ( "" );
 	}
-	std::string boundary = "--" + contentType.substr(pos + boundaryPrefix.size());
-	return (boundary);
+	std::string boundary = "--" + contentType.substr( pos + boundaryPrefix.size() );
+	return ( boundary );
 }
 
-static std::string extractFilePart(httpRequest &request, const std::string &boundary)
-{
+static std::string extractFilePart( httpRequest &request, const std::string &boundary ) {
 
 	std::string body = request.body;
-	size_t start = body.find(boundary);
+	size_t start = body.find( boundary );
 
-	if (start == std::string::npos)
-		return ("");
+	if ( start == std::string::npos )
+		return ( "" );
 
 	start += boundary.length() + 2;
-	size_t end = body.find(boundary, start);
+	size_t end = body.find( boundary, start );
 
-	if (end == std::string::npos)
+	if ( end == std::string::npos )
 		end = body.size();
 
-	return (body.substr(start, end - start));
+	return ( body.substr( start, end - start ) );
 }
 
-static bool splitHeadersAndContent(const std::string &filePart, std::string &headers, std::string &content)
-{
+static bool splitHeadersAndContent( const std::string &filePart, std::string &headers, std::string &content ) {
 
-	size_t headerEnd = filePart.find("\r\n\r\n");
+	size_t headerEnd = filePart.find( "\r\n\r\n" );
 
-	if (headerEnd == std::string::npos)
-		return (false);
+	if ( headerEnd == std::string::npos )
+		return ( false );
 
-	headers = filePart.substr(0, headerEnd);
-	content = filePart.substr(headerEnd + 4);
+	headers = filePart.substr( 0, headerEnd );
+	content = filePart.substr( headerEnd + 4 );
 
-	return (true);
+	return ( true );
 }
 
-static std::string extractFilename(const std::string &headers)
-{
+static std::string extractFilename( const std::string &headers ) {
 
 	std::string token = "filename=\"";
-	size_t start = headers.find(token);
+	size_t start = headers.find( token );
 
-	if (start == std::string::npos)
-		return ("");
+	if ( start == std::string::npos )
+		return ( "" );
 
 	start += token.length();
-	size_t end = headers.find("\"", start);
+	size_t end = headers.find( "\"", start );
 
-	if (end == std::string::npos)
-		return ("");
+	if ( end == std::string::npos )
+		return ( "" );
 
-	return (headers.substr(start, end - start));
+	return ( headers.substr( start, end - start ) );
 }
 
-static bool saveFile(const std::string &filename, const std::string &content, const Location &location)
-{
+static bool saveFile( const std::string &filename, const std::string &content, const Location &location ) {
 
 	std::string savePath = location.uploadStore + '/' + filename;
 
-	std::ofstream newfile(savePath.c_str(), std::ios::binary);
-	if (!newfile.is_open())
-		return (false);
+	std::ofstream newfile( savePath.c_str(), std::ios::binary );
+	if ( !newfile.is_open() )
+		return ( false );
 
 	newfile << content;
 	newfile.close();
-	return (true);
+	return ( true );
 }
 
 //! Parts to imporve after
-bool UploadManager::parseMultipart(const Location &location, Client &client, const ServerConfig &serverInfo)
-{
-	HttpResponse &response = client.getResponse();
+bool UploadManager::parseMultipart( const Location &location, Client &client, const ServerConfig &serverInfo ) {
+	http::Response &response = client.getResponse();
 	httpRequest &request = client.getRequest();
 
-	std::string boundary = extractBoundary(client.getRequest());
+	std::string boundary = extractBoundary( client.getRequest() );
 
-	if (boundary.empty())
-	{
-		client.getResponse().buildErrorResponse(HTTP_BAD_REQ, serverInfo);
-		log_prev("400 Bad Request: No boundary");
+	if ( boundary.empty() ) {
+		client.getResponse().buildErrorResponse( HTTP_BAD_REQ, serverInfo );
+		log_prev( "400 Bad Request: No boundary" );
 
-		return (false);
+		return ( false );
 	}
 
-	std::string filePart = extractFilePart(client.getRequest(), boundary);
+	std::string filePart = extractFilePart( client.getRequest(), boundary );
 
-	if (filePart.empty())
-	{
-		client.getResponse().buildErrorResponse(HTTP_BAD_REQ, serverInfo);
-		log_prev("Bad Request: No boundary filePart");
+	if ( filePart.empty() ) {
+		client.getResponse().buildErrorResponse( HTTP_BAD_REQ, serverInfo );
+		log_prev( "Bad Request: No boundary filePart" );
 
-		return (false);
+		return ( false );
 	}
 
 	std::string headers;
 	std::string content;
 
-	if (!splitHeadersAndContent(filePart, headers, content))
-	{
-		client.getResponse().buildErrorResponse(HTTP_BAD_REQ, serverInfo);
-		log_prev("Bad Request: Malformed multipart body");
+	if ( !splitHeadersAndContent( filePart, headers, content ) ) {
+		client.getResponse().buildErrorResponse( HTTP_BAD_REQ, serverInfo );
+		log_prev( "Bad Request: Malformed multipart body" );
 
-		return (false);
+		return ( false );
 	}
 
-	std::string filename = extractFilename(headers);
+	std::string filename = extractFilename( headers );
 
-	if (filename.empty())
-	{
-		client.getResponse().buildErrorResponse(HTTP_BAD_REQ, serverInfo);
-		log_prev("Bad Request: Filename not found");
-		return (false);
+	if ( filename.empty() ) {
+		client.getResponse().buildErrorResponse( HTTP_BAD_REQ, serverInfo );
+		log_prev( "Bad Request: Filename not found" );
+		return ( false );
 	}
 
-	if (!saveFile(filename, content, location))
-	{
-		client.getResponse().buildErrorResponse(HTTP_SERVER_ERR, serverInfo);
-		log_prev("Internal Server Error: File not saved");
-		return (false);
+	if ( !saveFile( filename, content, location ) ) {
+		client.getResponse().buildErrorResponse( HTTP_SERVER_ERR, serverInfo );
+		log_prev( "Internal Server Error: File not saved" );
+		return ( false );
 	}
 	std::string msg = "File '" + filename + "' received";
-	client.getResponse().buildResponse(HTTP_OK, msg);
-	return (true);
+	client.getResponse().buildResponse( HTTP_OK, msg );
+	return ( true );
 }

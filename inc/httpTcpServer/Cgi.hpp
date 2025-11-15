@@ -18,13 +18,16 @@ namespace http {
 		enum CgiStatus { CGI_NOT_STARTED, CGI_RUNNING, CGI_FINISHED, CGI_TOO_LARGE, CGI_ERROR = -1 };
 
 		void executeCgi( std::vector< pollfd > &fds );
-		HttpResponse getResponse() const;
+		Response getResponse() const;
 		httpRequest getRequest() const;
 		std::string getFilePath() const;
 		std::string getBody() const;
 		CgiStatus getStatus() const;
 		std::vector< std::string > getArgv() const;
 		int getPollFd() const;
+		pid_t getPid() const;
+		const int *getInputPipe() const;
+		const int *getOutputPipe() const;
 		void registerPollFd( std::vector< pollfd > &fds ) const;
 		void markAsRunning();
 		bool readCgiOutput( void ( *updateStatusPtr )() = nullptr );
@@ -36,7 +39,7 @@ namespace http {
 		CgiStatus _status;
 		SocketFD _clientFD;
 		httpRequest _request;
-		HttpResponse _response;
+		Response _response;
 		ServerConfig _serverInfo;
 		std::string _filePath;
 		sockaddr_in _clientAddress;
@@ -54,7 +57,10 @@ namespace http {
 		pid_t _pid;
 
 		void buildEnvStrings();
-		void doDup();
+		void doDupOneWay();
+		void doDupTwoWay();
+		void closeForOneWay();
+		void closeForTwoWay();
 		void handleChildProcess();
 		void updateStatus();
 	};

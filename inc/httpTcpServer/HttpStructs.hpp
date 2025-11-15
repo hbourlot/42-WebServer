@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   HttpStructs.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hugobourlot <hugobourlot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/11/11 12:55:55 by joralves         ###   ########.fr       */
+/*   Updated: 2025/11/15 12:52:42 by hugobourlot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
-#include "httpTcpServer/HttpResponse.hpp"
 #include "httpTcpServer/HttpStatus.hpp"
+#include "httpTcpServer/Response.hpp"
 #include <map>
 #include <set>
 #include <string>
@@ -24,8 +24,7 @@ typedef int SocketFD;
 struct Location;
 
 // Only interface propose
-enum headerKey
-{
+enum headerKey {
 	Accept,
 	AcceptEncoding,
 	AcceptLanguage,
@@ -57,14 +56,13 @@ enum headerKey
 // 	PARSE_ERROR,
 // };
 
-struct httpRequest
-{
+struct httpRequest {
 	std::string method;
 	std::string path;
 	std::string serverProtocol; // For Cgi
 	std::string pathInfo;       // For Cgi
 	std::string pathTranslated;
-	std::map<std::string, std::string> headers;
+	std::map< std::string, std::string > headers;
 	std::string body;
 	bool shouldCloseConnection();
 	std::string rawRequestBuffer;

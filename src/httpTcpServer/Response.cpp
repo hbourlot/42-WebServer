@@ -1,12 +1,92 @@
-#include "httpTcpServer/HttpResponse.hpp"
+#include "httpTcpServer/Response.hpp"
+#include <cstdlib>
+#include <sstream>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <utility>
 
-HttpResponse::HttpResponse() : _protocol( "HTTP/1.1" ) {
+http::Response::Response() : _protocol( "HTTP/1.1" ) {
 }
 
-HttpResponse::HttpResponse( const httpRequest &request ) : _protocol( request.serverProtocol ) {
+void http::Response::buildCgiResponse( const HttpStatusCode &status, const std::string &body,
+                                       const ServerConfig &server ) {
+	(void)server;
+
+	size_t headerEnd = body.find( "\r\n\r\n" );
+	std::string headers;
+	std::string content;
+
+	if ( headerEnd != std::string::npos ) {
+		headers = body.substr( 0, headerEnd );
+		content = body.substr( headerEnd + 4 ); // Skipping \r\n\r\n
+	} else {
+		// No headers found in body of Cgi
+		content = body;
+	}
+
+	// Parse CGI headers
+	std::istringstream headerStream( headers );
+	std::string line;
+	bool hasStatus = false;
+	bool hasContentType = false;
+
+	while ( std::getline( headerStream, line ) ) {
+		if ( line.empty() || line == "\r" )
+			break;
+
+		// Remove \r if has
+		if ( !line.empty() && line[ line.size() - 1 ] == '\r' )
+			line.erase( line.size() - 1 );
+
+		size_t colonPos = line.find( ':' );
+		if ( colonPos == std::string::npos )
+			continue;
+
+		std::string key = line.substr( 0, colonPos );
+		std::string value = line.substr( colonPos + 1 );
+
+		// Trim leading spaces from value
+		size_t start = value.find_first_not_of( " \t" );
+		if ( start != std::string::npos )
+			value = value.substr( start );
+
+		// Checking Status header (CGI can override status)
+		if ( key == "Status" ) {
+			hasStatus = true;
+			// Parse status code from value (e.g., "200 OK")
+			_statusCode = value.substr( 0, 3 ); // First 3 chars are the code
+
+			size_t spacePos = value.find( ' ' );
+			if ( spacePos != std::string::npos )
+				_statusMsg = value.substr( spacePos + 1 );
+			else
+				_statusMsg = "";
+		} else {
+			// Store other CGI headers (Content-Type, Location, etc.)
+			if ( key == "Content-Type" )
+				hasContentType = true;
+			_headers[ key ] = value;
+		}
+	}
+
+	// If CGI didn't provide Status, use the one passed as parameter
+	if ( !hasStatus ) {
+		_statusCode = status.code;
+		_statusMsg = status.message;
+	}
+
+	// If CGI didn't provide Content-Type, set default
+	if ( !hasContentType ) {
+		_headers[ "Content-Type" ] = "text/html";
+	}
+
+	_body = content;
+
+	setDefaultHeaders();
+}
+
+http::Response::Response( const httpRequest &request ) : _protocol( request.serverProtocol ) {
 	std::map< std::string, std::string >::const_iterator it = request.headers.find( "Connection" );
 
 	if ( it != request.headers.end() ) {
@@ -25,7 +105,7 @@ HttpResponse::HttpResponse( const httpRequest &request ) : _protocol( request.se
 		_range = std::make_pair( itRange->first, itRange->second );
 }
 
-HttpResponse &HttpResponse::operator=( const HttpResponse &other ) {
+http::Response &http::Response::operator=( const Response &other ) {
 
 	if ( this != &other ) {
 		this->_protocol = other._protocol;
@@ -40,16 +120,16 @@ HttpResponse &HttpResponse::operator=( const HttpResponse &other ) {
 	return *this;
 }
 
-HttpResponse::~HttpResponse() {
+http::Response::~Response() {
 }
 
 //! Member Function
 
-void HttpResponse::addToHeader( std::string key, std::string value ) {
+void http::Response::addToHeader( std::string key, std::string value ) {
 	this->_headers[ key ] = value;
 }
 
-void HttpResponse::setDefaultHeaders() {
+void http::Response::setDefaultHeaders() {
 	addToHeader( "Date", dateString() );
 
 	std::ostringstream oss;
@@ -59,7 +139,7 @@ void HttpResponse::setDefaultHeaders() {
 	addToHeader( _connectionType.first, _connectionType.second );
 }
 
-std::string HttpResponse::buildResponseString() {
+std::string http::Response::buildResponseString() {
 	std::ostringstream responseString;
 	responseString << _protocol + " " << _statusCode << " " << _statusMsg << "\r\n";
 
@@ -75,7 +155,7 @@ std::string HttpResponse::buildResponseString() {
 
 // Here function
 
-void HttpResponse::buildResponse( const HttpStatusCode &status, const std::string &body ) {
+void http::Response::buildResponse( const HttpStatusCode &status, const std::string &body ) {
 	_statusCode = status.code;
 	_statusMsg = status.message;
 	_body = body;
@@ -109,7 +189,7 @@ static std::string createErrorBody( const HttpStatusCode &status ) {
 	return html;
 }
 
-void HttpResponse::buildErrorResponse( const HttpStatusCode &status, const ServerConfig &server ) {
+void http::Response::buildErrorResponse( const HttpStatusCode &status, const ServerConfig &server ) {
 	std::map< int, std::string >::const_iterator it;
 	it = server.errorPage.find( atoi( status.code.c_str() ) );
 	if ( it != server.errorPage.end() ) {
@@ -123,7 +203,7 @@ void HttpResponse::buildErrorResponse( const HttpStatusCode &status, const Serve
 	buildResponse( status, createErrorBody( status ) );
 	addToHeader( "Content-Type", "text/html" );
 }
-void HttpResponse::buildRedirect( const HttpStatusCode &status, const std::string &url ) {
+void http::Response::buildRedirect( const HttpStatusCode &status, const std::string &url ) {
 	buildResponse( status, "" );
 	addToHeader( "Location", url );
 }
@@ -159,7 +239,7 @@ static bool parseRange( std::string &rangeValue, off_t &fileSize, off_t &start, 
 	return ( true );
 }
 
-void HttpResponse::buildRangeResponse( const std::string &filePath, const ServerConfig &server, struct stat &st ) {
+void http::Response::buildRangeResponse( const std::string &filePath, const ServerConfig &server, struct ::stat &st ) {
 	off_t start;
 	off_t end;
 
@@ -196,10 +276,10 @@ void HttpResponse::buildRangeResponse( const std::string &filePath, const Server
 	addToHeader( "Content-Range", rangeHeader.str() );
 	addToHeader( "Content-Type", getContentType( filePath ) );
 }
-void HttpResponse::buildFileResponse( const HttpStatusCode &status, const std::string &filePath,
-                                      const ServerConfig &server ) {
-	struct stat st;
-	if ( stat( filePath.c_str(), &st ) != 0 )
+void http::Response::buildFileResponse( const HttpStatusCode &status, const std::string &filePath,
+                                        const ServerConfig &server ) {
+	struct ::stat st;
+	if ( ::stat( filePath.c_str(), &st ) != 0 )
 		return ( buildErrorResponse( HTTP_NOT_FOUND, server ) );
 
 	if ( !_range.first.empty() )
@@ -211,7 +291,7 @@ void HttpResponse::buildFileResponse( const HttpStatusCode &status, const std::s
 	addToHeader( "Content-Type", getContentType( filePath ) );
 }
 
-std::string HttpResponse::readFileContent( const std::string &filePath ) {
+std::string http::Response::readFileContent( const std::string &filePath ) {
 	std::ifstream file( filePath.c_str() );
 
 	std::ostringstream buffer;
@@ -220,7 +300,7 @@ std::string HttpResponse::readFileContent( const std::string &filePath ) {
 	return buffer.str();
 }
 
-std::string HttpResponse::getContentType( const std::string &filePath ) {
+std::string http::Response::getContentType( const std::string &filePath ) {
 	size_t dot = filePath.find_last_of( '.' );
 	if ( dot == std::string::npos )
 		return "application/octet-stream"; // binario genérico
@@ -241,4 +321,27 @@ std::string HttpResponse::getContentType( const std::string &filePath ) {
 	if ( ext == "pdf" )
 		return "application/pdf";
 	return "application/octet-stream";
+}
+
+
+bool httpRequest::shouldCloseConnection()
+{
+	std::map<std::string, std::string>::const_iterator it = headers.find("Connection");
+
+	if (it != headers.end())
+	{
+		std::string val = it->second;
+
+		for (std::string::size_type i = 0; i < val.size(); ++i)
+			val[i] = std::tolower(val[i]);
+
+		return (val == "close");
+	}
+	else
+	{
+		if (serverProtocol == "HTTP/1.1")
+			return (false);
+		else
+			return (true);
+	}
 }

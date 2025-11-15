@@ -1,7 +1,8 @@
 #include "Client/Client.hpp"
 
 Client::Client( int fd, http::TcpServer &server )
-    : _fd( fd ), _state(), _server( server ), _requestComplete( false ), _cgiInProgress( false ) {
+    : _fd( fd ), _state(), _server( server ), _requestComplete( false ), _cgiInProgress( false ), _cgiPid( -1 ),
+      _cgiOutputFd( -1 ) {
 }
 
 Client::~Client() {
@@ -41,14 +42,14 @@ void Client::clearWriteBuffer() {
 httpRequest &Client::getRequest() {
 	return ( _request );
 }
-HttpResponse &Client::getResponse() {
+http::Response &Client::getResponse() {
 	return ( _response );
 }
 void Client::resetRequest() {
 	_request = httpRequest();
 }
 void Client::resetResponse() {
-	_response = HttpResponse();
+	_response = http::Response();
 }
 
 bool Client::isRequestComplete() const {
@@ -64,6 +65,25 @@ bool Client::isCgiInProgress() const {
 
 void Client::setCgiInProgress( bool value ) {
 	_cgiInProgress = value;
+}
+
+pid_t Client::getCgiPid() const {
+	return _cgiPid;
+}
+
+void Client::setCgiPid( pid_t pid ) {
+	_cgiPid = pid;
+}
+
+int Client::getCgiOutputFd() const {
+	return _cgiOutputFd;
+}
+
+void Client::setCgiOutputFd( int fd ) {
+	_cgiOutputFd = fd;
+}
+
+void Client::storeCgiInfo( pid_t pid, int fd ) {
 }
 
 void Client::setState( CLIENT_STATE state ) {

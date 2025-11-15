@@ -6,8 +6,7 @@ http::ClientEventProcessor::~ClientEventProcessor() {};
 
 void http::ClientEventProcessor::processRead( pollfd &pfd, Client &client ) {
 
-	if (pfd.fd == 7)
-		return ;
+	// _clientManger
 
 	if ( !readFromSocket( client ) )
 		return;
@@ -19,9 +18,11 @@ void http::ClientEventProcessor::processRead( pollfd &pfd, Client &client ) {
 void http::ClientEventProcessor::processWrite( pollfd &pfd, Client &client ) {
 
 	// !! Need to check if it's a childProcess or a ClientSocket
+	if ( client.getState() != CGI_COMPLETED ) {
+		if ( !processRequest( client ) )
+			return;
+	}
 
-	if ( !processRequest( client ) )
-		return;
 	handleResponse( pfd, client );
 };
 
@@ -96,7 +97,7 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 }
 
 bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STATE state ) {
-	HttpResponse &response = client.getResponse();
+	http::Response &response = client.getResponse();
 
 	switch ( state ) {
 	case READ_ERROR:
@@ -129,18 +130,18 @@ bool http::ClientEventProcessor::handleSuccessfulRequest( Client &client ) {
 	// 	}
 	// } else {
 
-		//  Process the validated request
-		executeRequest( client );
+	//  Process the validated request
+	executeRequest( client );
 	// }
 
 	return true;
 }
 
 bool http::ClientEventProcessor::handleRouteValidation( Client &client ) {
-	HttpResponse &response = client.getResponse();
+	http::Response &response = client.getResponse();
 	ServerConfig &serverInfo = _server._serverInfo;
 
-	VALIDATION_STATUS validationStatus = HttpRouter::validateRequest( client, _server._serverInfo );
+	VALIDATION_STATUS validationStatus = Router::validateRequest( client, _server._serverInfo );
 
 	switch ( validationStatus ) {
 
@@ -172,7 +173,7 @@ void http::ClientEventProcessor::executeRequest( Client &client ) {
 
 	ServerConfig &serverInfo = _server._serverInfo;
 
-	HttpRouter::routeRequest( client, serverInfo );
+	Router::routeRequest( client, serverInfo, *this );
 
 	client.clearBuffers();
 }
@@ -221,13 +222,23 @@ void http::ClientEventProcessor::processClientEvents() {
 
 	for ( size_t i = 1; i < _server._fds.size(); ++i ) {
 		Client *client = _server._clientManager.getClient( _server._fds[ i ].fd );
-		if ( !client ) {
-			_server.closeClientConnection( i );
-			continue;
-		}
+		// if ( !client ) {
+		// 	_server.closeClientConnection( i );
+		// 	continue;
+		// }
 
 		if ( _server._fds[ i ].revents & POLLIN ) {
-			processRead( _server._fds[ i ], *client );
+
+			if ( !client ) {
+				client = _server._cgiFdToClient[ _server._fds[ i ].fd ];
+				if ( client ) {
+					this->processCgiOutput( *client, _server._fds[ i ] );
+					std::cout << client->getWriteBuffer();
+					exit( 0 );
+				}
+			} else {
+				processRead( _server._fds[ i ], *client );
+			}
 		}
 
 		if ( _server._fds[ i ].revents & POLLOUT ) {
@@ -235,6 +246,7 @@ void http::ClientEventProcessor::processClientEvents() {
 		}
 	}
 }
+
 bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
 	SocketFD clientFd = client.getFd();
 

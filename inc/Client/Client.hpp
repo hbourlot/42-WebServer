@@ -2,13 +2,11 @@
 
 #include "httpTcpServer/HttpStructs.hpp"
 #include <string>
-namespace http
-{
+namespace http {
 	class TcpServer;
 };
 
-enum CLIENT_STATE
-{
+enum CLIENT_STATE {
 	RESET,
 	READ_SUCCESS = 1,
 	READ_INCOMPLETE,
@@ -24,12 +22,11 @@ enum CLIENT_STATE
 	CGI_COMPLETED,
 };
 
-class Client
-{
+class Client {
 
   public:
 	friend class ClientEventProcessor;
-	Client(int fd, http::TcpServer &server);
+	Client( int fd, http::TcpServer &server );
 	~Client();
 
 	int getFd() const;
@@ -39,26 +36,33 @@ class Client
 	// Buffers
 	std::string &getReadBuffer();
 	std::string &getWriteBuffer();
-	void appendToReadBuffer(const std::string &data);
-	void appendToWriteBuffer(const std::string &data);
+	void appendToReadBuffer( const std::string &data );
+	void appendToWriteBuffer( const std::string &data );
 	void clearBuffers();
 	void clearReadBuffer();
 	void clearWriteBuffer();
-	void setState(CLIENT_STATE state);
+	void setState( CLIENT_STATE state );
 	CLIENT_STATE getState() const;
 
 	// request-response structures
 	httpRequest &getRequest();
-	HttpResponse &getResponse();
+	http::Response &getResponse();
 	void resetRequest();
 	void resetResponse();
 
 	// State of CGi REquest
 	bool isRequestComplete() const;
-	void setRequestComplete(bool value);
+	void setRequestComplete( bool value );
 
 	bool isCgiInProgress() const;
-	void setCgiInProgress(bool value);
+	void setCgiInProgress( bool value );
+
+	// CGI process tracking
+	pid_t getCgiPid() const;
+	void setCgiPid( pid_t pid );
+	int getCgiOutputFd() const;
+	void setCgiOutputFd( int fd );
+	void storeCgiInfo( pid_t pid, int fd );
 
   private:
 	int _fd;
@@ -68,10 +72,13 @@ class Client
 	std::string _writeBuffer;
 
 	httpRequest _request;
-	HttpResponse _response;
+	http::Response _response;
 
 	bool _requestComplete;
 	bool _cgiInProgress;
+
+	pid_t _cgiPid;
+	int _cgiOutputFd;
 
 	http::TcpServer &_server;
 };

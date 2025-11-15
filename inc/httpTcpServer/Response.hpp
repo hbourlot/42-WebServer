@@ -1,0 +1,58 @@
+#pragma once
+#include "Config/Configs.hpp"
+#include "Logs/Logs.hpp"
+#include "httpTcpServer/HttpStatus.hpp"
+#include "httpTcpServer/HttpStructs.hpp"
+#include "utils.hpp"
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <set>
+#include <sstream>
+#include <string>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <vector>
+
+#define CHUNK_SIZE 8192
+
+struct httpRequest;
+
+namespace http {
+	class Response {
+	  private:
+		std::string _protocol;
+		std::pair< std::string, std::string > _connectionType;
+		std::pair< std::string, std::string > _range;
+		std::string _statusCode;
+		std::string _statusMsg;
+		std::string _body;
+		std::map< std::string, std::string > _headers;
+
+		void addToHeader( std::string key, std::string value );
+
+	  public:
+		Response();
+		Response( const httpRequest &request );
+
+		Response &operator=( const Response &other );
+		~Response();
+
+		// function Member
+		std::string buildResponseString();
+
+		/// @brief Sets default HTTP headers including Date, Content-Length, and Connection type
+		void setDefaultHeaders();
+
+		std::string getContentType( const std::string &filePath );
+		std::string readFileContent( const std::string &filePath );
+
+		void buildCgiResponse( const HttpStatusCode &status, const std::string &body, const ServerConfig &server );
+		void buildResponse( const HttpStatusCode &status, const std::string &body );
+		void buildErrorResponse( const HttpStatusCode &status, const ServerConfig &server );
+		void buildRedirect( const HttpStatusCode &status, const std::string &url );
+		void buildFileResponse( const HttpStatusCode &status, const std::string &filePath, const ServerConfig &server );
+		void buildRangeResponse( const std::string &filePath, const ServerConfig &server, struct ::stat &st );
+	};
+
+} // namespace http

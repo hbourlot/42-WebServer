@@ -29,10 +29,10 @@ static bool validateRequestMethod( const httpRequest &request, const Location &l
 	return false;
 }
 
-VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfig &server ) {
+VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerConfig &server ) {
 
 	httpRequest &request = client.getRequest();
-	HttpResponse &response = client.getResponse();
+	http::Response &response = client.getResponse();
 
 	request.urlMatchedLocation = getMatchLocation( request.path, server.locations );
 
@@ -54,20 +54,18 @@ VALIDATION_STATUS HttpRouter::validateRequest( Client &client, const ServerConfi
 	return VALID_OK;
 }
 
-void HttpRouter::routeRequest( Client &client, const ServerConfig &server ) {
+void http::Router::routeRequest( Client &client, const ServerConfig &server, ClientEventProcessor &processor ) {
 
 	httpRequest &request = client.getRequest();
 	const Location &location = *( client.getRequest().urlMatchedLocation );
 
 	if ( isCgiRequest( request, location ) )
-		return handleCgiRequest( client, server, location );
+		return handleCgiRequest( client, server, location, processor );
 
 	return handleStaticRequest( client, server, location ); // Static (GET, POST, DELETE)
 }
 
-bool HttpRouter::isCgiRequest( const httpRequest &request, const Location &location ) {
-
-	return true;
+bool http::Router::isCgiRequest( const httpRequest &request, const Location &location ) {
 
 	if ( location.cgi_extension.empty() ) { // Checking if location has CGI configured
 		return false;
@@ -93,7 +91,8 @@ bool HttpRouter::isCgiRequest( const httpRequest &request, const Location &locat
 	return false;
 }
 
-void HttpRouter::handleCgiRequest( Client &client, const ServerConfig &server, const Location &location ) {
+void http::Router::handleCgiRequest( Client &client, const ServerConfig &server, const Location &location,
+                                     ClientEventProcessor &processor ) {
 
 	httpRequest &request = client.getRequest();
 
@@ -103,28 +102,36 @@ void HttpRouter::handleCgiRequest( Client &client, const ServerConfig &server, c
 		httpRequest &request = client.getRequest();
 		std::string path = location.path;
 		sockaddr_in socket;
-		http::Cgi myCgi( request, path, socket, server );
+		Cgi myCgi( request, path, socket, server );
 
 		myCgi.executeCgi( client.getServer()._fds );
-		// sleep(1);
-		// if (myCgi.hasDataToRead())
-			myCgi.readCgiOutput();
-		std::cout << "\n\nmyCgi Response -------------\n\n";
-		std::cout << myCgi.getResponse().buildResponseString() << std::endl;
-		std::cout << "\n\nmyCgi Response END ----------\n\n";
 
+		// Store CGI info in client
+		client.setCgiPid( myCgi.getPid() );
+		client.setCgiOutputFd( myCgi.getOutputPipe()[ 0 ] );
 
-		if ( myCgi.processCgiOut() ) {
-			std::cout << "Inside 'if scoop' in ProcessCgiOut()\n";
-			client.getResponse() = myCgi.getResponse();
-		}
+		// Register CGI pipes for proper cleanup
+		processor.registerCgiPipes( myCgi.getInputPipe(), myCgi.getOutputPipe(), myCgi.getPid() );
+
+		// Map CGI fd to client for event loop lookup
+		processor.registerCgiForClient( client, client.getCgiOutputFd() );
+
+		// myCgi.readCgiOutput();
+		// std::cout << "\n\nmyCgi Response -------------\n\n";
+		// std::cout << myCgi.getResponse().buildResponseString() << std::endl;
+		// std::cout << "\n\nmyCgi Response END ----------\n\n";
+
+		// if ( myCgi.processCgiOut() ) {
+		// 	std::cout << "Inside 'if scoop' in ProcessCgiOut()\n";
+		// 	client.getResponse() = myCgi.getResponse();
+		// }
 	} else {
 		std::cout << "Else case in handleCgiRequest()\n";
 		client.getResponse().buildErrorResponse( HTTP_FORBID_METHOD, server );
 	}
 }
 
-void HttpRouter::handleStaticRequest( Client &client, const ServerConfig &server, const Location &location ) {
+void http::Router::handleStaticRequest( Client &client, const ServerConfig &server, const Location &location ) {
 
 	httpRequest &request = client.getRequest();
 
@@ -139,10 +146,10 @@ void HttpRouter::handleStaticRequest( Client &client, const ServerConfig &server
 	}
 }
 
-void HttpRouter::handleGet( Client &client, const ServerConfig &server, const Location &location ) {
+void http::Router::handleGet( Client &client, const ServerConfig &server, const Location &location ) {
 
 	httpRequest &request = client.getRequest();
-	HttpResponse &response = client.getResponse();
+	http::Response &response = client.getResponse();
 
 	std::string filePath = getFilePath( request.path, location );
 
@@ -159,8 +166,8 @@ void HttpRouter::handleGet( Client &client, const ServerConfig &server, const Lo
 	response.buildFileResponse( HTTP_OK, filePath, server );
 }
 
-void HttpRouter::handlePost( Client &client, const ServerConfig &serverInfo, const Location &location ) {
-	HttpResponse &response = client.getResponse();
+void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, const Location &location ) {
+	http::Response &response = client.getResponse();
 	httpRequest &request = client.getRequest();
 	std::string ContentType;
 
@@ -173,8 +180,8 @@ void HttpRouter::handlePost( Client &client, const ServerConfig &serverInfo, con
 	}
 }
 
-void HttpRouter::handleDelete( Client &client, const ServerConfig &server, const Location &location ) {
-	HttpResponse &response = client.getResponse();
+void http::Router::handleDelete( Client &client, const ServerConfig &server, const Location &location ) {
+	http::Response &response = client.getResponse();
 	httpRequest &request = client.getRequest();
 
 	std::string filePath = getFilePath( request.path, location );
@@ -197,3 +204,5 @@ std::string parseContentType( std::string &contentType ) {
 
 	return ( parsedContentType );
 }
+
+
