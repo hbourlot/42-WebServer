@@ -65,7 +65,7 @@ bool http::Cgi::readCgiOutput( void ( *updateStatusPtr )() ) {
 }
 
 void http::Cgi::handleChildProcess() {
-	//* Child process
+
 	doDupOneWay();
 
 	this->_filePath = "." + this->_filePath;
@@ -106,17 +106,14 @@ void http::Cgi::executeCgi( std::vector< pollfd > &fds ) { // Working on
 	} else if ( this->_pid == 0 ) {
 		this->handleChildProcess();
 	} else {
-		closeForOneWay();
-		// Parent now can:
-		// - Write to CGI via _inputPipe[1]
-		// - Read from CGI via _outputPipe[0]
+		this->closeForOneWay();
 
-		int status;
-		waitpid( _pid, &status, 0 );
-		// this->updateStatus();
+		// int status;
+		// waitpid( _pid, &status, 0 );
 
 		// Set both pipes to non-blocking if doing async I/O
-		fcntl( _inputPipe[ 1 ], F_SETFL, O_NONBLOCK );
+		// fcntl( _inputPipe[ 1 ], F_SETFL, O_NONBLOCK );
+		// std::cout << "_input[1] : " << _inputPipe[1] << std::endl;
 		fcntl( _outputPipe[ 0 ], F_SETFL, O_NONBLOCK );
 
 		// this->readCgiOutput();

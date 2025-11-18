@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <map>
 #include <netinet/in.h>
+#include <signal.h>
 #include <sstream>
 #include <string>
 #include <sys/poll.h>
@@ -24,10 +25,6 @@ int http::Cgi::getPollFd() const {
 	return _outputPipe[ 0 ];
 }
 
-http::Cgi::CgiStatus http::Cgi::getStatus() const {
-	return _status;
-}
-
 std::string http::Cgi::getBody() const {
 	return _body;
 }
@@ -40,28 +37,36 @@ const int *http::Cgi::getInputPipe() const {
 	return _inputPipe;
 }
 
+int http::Cgi::getStatus() const {
+	return _status;
+}
+int &http::Cgi::getStatus() {
+	return _status;
+}
+
 const int *http::Cgi::getOutputPipe() const {
 	return _outputPipe;
+}
+
+Client *http::Cgi::getClient() const {
+	return _client;
 }
 
 void http::Cgi::registerPollFd( std::vector< pollfd > &fds ) const {
 	pollfd pfd;
 
+	std::cout << "Regintering _outputPipe[0] : " << _outputPipe[ 0 ] << std::endl;
 	pfd.fd = _outputPipe[ 0 ];
 	pfd.events = POLLIN;
 	pfd.revents = 0;
 	fds.push_back( pfd );
 }
 
-void http::Cgi::markAsRunning() {
-	this->_status = CGI_RUNNING;
-}
-
 http::Cgi::Cgi( const httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
-                const ServerConfig &serverInfo )
-    : _status( CGI_NOT_STARTED ), _clientFD(), _request( request ), _response( Response( request ) ),
-      _serverInfo( serverInfo ), _filePath( filePath ), _clientAddress( clientAddress ), _bytesReceived(), _body(),
-      _envp(), _argv(), _envStrings() {
+                const ServerConfig &serverInfo, Client *client )
+    : _status(), _clientFD(), _request( request ), _response( Response( request ) ), _serverInfo( serverInfo ),
+      _filePath( filePath ), _clientAddress( clientAddress ), _bytesReceived(), _body(), _client( client ), _envp(),
+      _argv(), _envStrings() {
 
 	// Cgi::createValidCgiExtensions();
 
@@ -70,42 +75,15 @@ http::Cgi::Cgi( const httpRequest &request, std::string &filePath, const sockadd
 }
 
 http::Cgi::~Cgi() {
-	close( _inputPipe[ 0 ] );
-	close( _inputPipe[ 1 ] );
-	close( _outputPipe[ 0 ] );
-	close( _outputPipe[ 1 ] );
-}
-
-void http::Cgi::updateStatus() {
-
-	int status;
-	std::cout << "CHECKING RESULT -------------------\n";
-	pid_t result = waitpid( _pid, &status, WNOHANG );
-	std::cout << "Result => " << result << "-------------------\n";
-	if ( result > 0 ) { // Child Process has finished
-		if ( WIFEXITED( status ) ) {
-			int exitCode = WEXITSTATUS( status );
-			if ( exitCode == 0 ) { // Finished successfully
-				std::cout << "SUCCESS\n";
-				_status = CGI_FINISHED;
-			} else { // Finished with error
-				_status = CGI_ERROR;
-			}
-		} else if ( WIFSIGNALED( status ) ) { // Process was killed by signal
-			_status = CGI_ERROR;
-		}
-	} else if ( result == 0 ) { // Still running
-		if ( _status == CGI_NOT_STARTED ) {
-			_status = CGI_RUNNING;
-		}
-	} else { // Error in waitpid
-		_status = CGI_ERROR;
-	}
-}
-
-bool http::Cgi::isCgiFinished() {
-	this->updateStatus();
-	return _status == CGI_FINISHED ? true : false;
+	// Close all pipe fds
+	if ( _inputPipe[ 0 ] >= 0 )
+		close( _inputPipe[ 0 ] );
+	if ( _inputPipe[ 1 ] >= 0 )
+		close( _inputPipe[ 1 ] );
+	if ( _outputPipe[ 0 ] >= 0 )
+		close( _outputPipe[ 0 ] );
+	if ( _outputPipe[ 1 ] >= 0 )
+		close( _outputPipe[ 1 ] );
 }
 
 bool http::Cgi::hasDataToRead() {
@@ -125,43 +103,6 @@ bool http::Cgi::hasDataToRead() {
 		return false; // No data available
 
 	return false; // Any other error
-}
-
-bool http::Cgi::processCgiOut() {
-
-	// // this->readCgiOutput();
-	_response.buildResponse( HTTP_OK, _body );
-	return true;
-
-	this->updateStatus();
-	CgiStatus status = _status;
-	const std::string bodyError =
-	    "<html><body><h1>500 Internal Server Error</h1><p>Error monitoring CGI process.</p></body></html>";
-
-	if ( status == CGI_FINISHED ) {
-		this->readCgiOutput();
-
-		if ( !_body.empty() ) {
-			std::cerr << "HERE\n";
-			_response.buildResponse( HTTP_OK, _body );
-		} else {
-			std::cerr << "HERE1\n";
-			_response.buildResponse( HTTP_SERVER_ERR, bodyError );
-		}
-		return true;
-
-	} else if ( status == CGI_RUNNING ) {
-		if ( this->hasDataToRead() ) {
-			this->readCgiOutput();
-			// send as chunk
-			return false;
-		}
-	} else if ( status == CGI_ERROR ) {
-		std::cout << "CGI_ERROR\n";
-		_response.buildResponse( HTTP_SERVER_ERR, bodyError );
-	};
-
-	return true;
 }
 
 void http::Cgi::doDupOneWay() {
@@ -200,4 +141,17 @@ void http::Cgi::closeForTwoWay() {
 	close( _outputPipe[ 1 ] ); // Child writes to stdout
 	                           // Keep _inputPipe[1] to write to CGI
 	                           // Keep _outputPipe[0] to read from CGI
+}
+
+void http::Cgi::killProcess() {
+	if ( _pid > 0 ) {
+		// Check if process is still running
+		int status;
+		pid_t result = waitpid( _pid, &status, WNOHANG );
+
+		if ( result == 0 ) { // Process still running - kill it
+			kill( _pid, SIGKILL );
+			waitpid( _pid, &status, 0 ); // Reap zombie
+		}
+	}
 }

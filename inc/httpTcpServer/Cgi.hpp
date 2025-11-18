@@ -4,39 +4,58 @@
 #include <netinet/in.h>
 #include <string>
 #include <sys/poll.h>
+#include <sys/wait.h>
 #include <vector>
 
+class Client;
+
 namespace http {
+	const std::string CGI_NO_OUTPUT_PAGE =
+	    "<!DOCTYPE html>\n"
+	    "<html><head><title>CGI Error</title><style>\n"
+	    "body{font-family:Arial,sans-serif;background:#f4f4f4;display:flex;justify-content:center;align-items:"
+	    "center;"
+	    "height:100vh;margin:0}\n"
+	    ".container{background:white;padding:40px;border-radius:8px;box-shadow:0 2px 10px "
+	    "rgba(0,0,0,0.1);text-align:center;max-width:500px}\n"
+	    "h1{color:#e74c3c;margin-bottom:20px}p{color:#555;line-height:1.6}.error-code{font-size:72px;color:#e74c3c;"
+	    "font-weight:bold;margin:20px 0}\n"
+	    "</style></head><body>\n"
+	    "<div class='container'><div class='error-code'>⚠️</div>\n"
+	    "<h1>CGI Script Error</h1><p><strong>No Output Received</strong></p>\n"
+	    "<p>The CGI script executed but did not produce any output.</p>\n"
+	    "<p>This could indicate an issue with the script or missing output headers.</p>\n"
+	    "</div></body></html>";
 	class Cgi {
 
 	  public:
 		Cgi( const httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
-		     const ServerConfig &serverInfo );
+		     const ServerConfig &serverInfo, Client *client );
 
 		~Cgi();
 
-		enum CgiStatus { CGI_NOT_STARTED, CGI_RUNNING, CGI_FINISHED, CGI_TOO_LARGE, CGI_ERROR = -1 };
+		// enum CgiStatus { CGI_NOT_STARTED, CGI_RUNNING, CGI_FINISHED, CGI_TOO_LARGE, CGI_ERROR = -1 };
 
 		void executeCgi( std::vector< pollfd > &fds );
 		Response getResponse() const;
 		httpRequest getRequest() const;
 		std::string getFilePath() const;
 		std::string getBody() const;
-		CgiStatus getStatus() const;
+		int &getStatus();
+		int getStatus() const;
 		std::vector< std::string > getArgv() const;
 		int getPollFd() const;
 		pid_t getPid() const;
 		const int *getInputPipe() const;
 		const int *getOutputPipe() const;
+		void killProcess();
+		Client *getClient() const;
 		void registerPollFd( std::vector< pollfd > &fds ) const;
-		void markAsRunning();
 		bool readCgiOutput( void ( *updateStatusPtr )() = nullptr );
-		bool isCgiFinished();
 		bool hasDataToRead();
-		bool processCgiOut();
 
 	  private:
-		CgiStatus _status;
+		int _status;
 		SocketFD _clientFD;
 		httpRequest _request;
 		Response _response;
@@ -45,6 +64,7 @@ namespace http {
 		sockaddr_in _clientAddress;
 		int _bytesReceived;
 		std::string _body;
+		Client *_client; // Back-reference to client
 
 		std::vector< char * > _envp;
 		std::vector< char * > _argv;
@@ -62,7 +82,6 @@ namespace http {
 		void closeForOneWay();
 		void closeForTwoWay();
 		void handleChildProcess();
-		void updateStatus();
 	};
 
 }; // namespace http

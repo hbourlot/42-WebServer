@@ -8,8 +8,6 @@
 
 namespace http {
 
-	// const int BUFFER_SIZE = 30720;
-
 	class ClientEventProcessor {
 	  public:
 		friend class Router;
@@ -18,17 +16,30 @@ namespace http {
 
 		~ClientEventProcessor();
 
-		void processRead( pollfd &pfd, Client &client );
+		void processRead( pollfd &pfd, Client *client );
 
-		void processWrite( pollfd &pfd, Client &client );
+		void processWrite( pollfd &pfd, Client *client, int index );
 
-		void processClientEvents();
+		void processCgiEvents( int fd, int index );
 
-		void registerCgiPipes( const int inputPipe[ 2 ], const int outputPipe[ 2 ], pid_t pid );
-		void closeCgiPipes( pid_t pid );
-		void registerCgiForClient( Client &client, int cgiOutputFd );
-		void cleanupCgiForClient( Client &client );
-		void processCgiOutput(Client &client, pollfd &pfd);
+		void processClientEvents( int index );
+
+		void registerCgi( http::Cgi *cgi );
+		void cleanupCgi( http::Cgi *cgi );
+		void processCgiOutput( http::Cgi *cgi, pollfd &pfd );
+
+		/// @brief Checks if a CGI process completed with exit status 0.
+		/// @param cgi Pointer to the Cgi object to check.
+		/// @return true if CGI finished with status > 0, false otherwise.
+		bool hasCgiFinished( Cgi *cgi ) const;
+
+		/// @brief Checks if a CGI process completed successfully with exit status 0.
+		/// @param cgi Pointer to the Cgi object to check.
+		/// @return true if CGI exited normally with status 0, false otherwise.
+		/// @note IMPORTANT: Only call this function if hasCgiFinished() returned true.
+		///       Calling this before the process has finished will result in undefined behavior
+		///       as the status will not be properly set by waitpid().
+		bool hasCgiSuccessfullyFinished( Cgi *cgi ) const;
 
 	  private:
 		TcpServer &_server;
@@ -50,21 +61,14 @@ namespace http {
 		/// @return true after building error response
 		bool buildErrorResponse( Client &client, CLIENT_STATE state );
 
-		/// @brief Handles successful request processing and response generation
-		/// @param client Client with successfully parsed and validated request
-		/// @return true on successful handling, false on error
-		bool handleSuccessfulRequest( Client &client );
-
 		/// @brief Validates and processes the route for the client's HTTP request
-		/// 
+		///
 		/// This function performs route validation for the given client, checking if the
 		/// requested route is valid, accessible, and properly configured according to
 		/// the server's routing rules and permissions.
-		/// 
+		///
 		/// @param client Reference to the Client object containing the HTTP request to validate
 		/// @return true if the route validation succeeds, false otherwise
 		bool handleRouteValidation( Client &client );
-
-		void executeRequest( Client &client );
 	};
 } // namespace http

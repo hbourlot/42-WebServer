@@ -5,12 +5,12 @@
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
 // #include "Client/ClientEventProcessor.hpp"
-#include "Logs.hpp"
-#include "Router.hpp"
 #include "HttpStatus.hpp"
 #include "HttpStructs.hpp"
 #include "HttpUtils.hpp"
+#include "Logs.hpp"
 #include "Logs/Logs.hpp"
+#include "Router.hpp"
 #include "Upload/UploadManager.hpp"
 #include "utils.hpp"
 #include <arpa/inet.h>
@@ -45,20 +45,7 @@ namespace http {
 
 	class ClientEventProcessor;
 	const int BUFFER_SIZE = 30720;
-
-	// Structure to track CGI pipe file descriptors
-	struct CgiPipeFds {
-		int inputPipe[ 2 ];  // [0] = read, [1] = write
-		int outputPipe[ 2 ]; // [0] = read, [1] = write
-		pid_t pid;           // CGI process ID
-
-		CgiPipeFds() : pid( -1 ) {
-			inputPipe[ 0 ] = -1;
-			inputPipe[ 1 ] = -1;
-			outputPipe[ 0 ] = -1;
-			outputPipe[ 1 ] = -1;
-		}
-	};
+	const int MAX_READS_PER_EVENT = 3;
 
 	class TcpServer {
 	  public:
@@ -87,22 +74,18 @@ namespace http {
 
 		std::map< SocketFD, sockaddr_in > _socketAddressMap;
 		unsigned int _socketAddress_len;
-		std::vector< Cgi > _cgi;
-		std::map< int, Cgi * > _cgiFdMap;
-		std::vector< CgiPipeFds > _cgiPipes;      // Track all CGI pipe fds
-		std::map< int, Client * > _cgiFdToClient; // CGI fd → Client lookup
+
+		std::map< int, http::Cgi * > _cgiByFd; // CGI output fd → Cgi instance
 
 		int startServer();
 		void runLoop( int timeOut );
 		void shutDownServer();
 		void startListen();
 		void acceptConnection();
-		void removeDeadConnections( ClientEventProcessor &processor );
+		void removeDeadConnections( ClientEventProcessor &processor, int &index );
+		// void removeCgiDeadConnection( ClientEventProcessor &processor );
 		void closeClientConnection( size_t index );
-		void closeAllCgiPipes();
-
-		// bool handleCgiResponse( pollfd &socket );
-		bool parseCgi( const Location loc, std::string &filePath, sockaddr_in &clientAddress, httpRequest &request );
+		void cleanupAllCgis();
 	};
 
 	std::string getLocationFieldAsString( const std::vector< Location > &locations, const std::string &field );

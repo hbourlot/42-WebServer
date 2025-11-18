@@ -34,7 +34,7 @@ LEN             = 0
 
 CLIENT_FUNC		= client clientManager ClientEventProcessor ClientEventProcessor_cgi parseRequestData
 AUTH_FUNC		= loginHandler
-CGI_FUNC		= parseCgi executeCgi Cgi buildEnvStrings
+CGI_FUNC		= executeCgi Cgi buildEnvStrings
 UTILS_FUNC		= utils getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
 

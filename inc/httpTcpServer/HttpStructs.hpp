@@ -6,7 +6,7 @@
 /*   By: hugobourlot <hugobourlot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/11/15 12:52:42 by hugobourlot      ###   ########.fr       */
+/*   Updated: 2025/11/17 18:30:56 by hugobourlot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,21 +40,7 @@ enum headerKey {
 	UserAgent,
 };
 
-// enum READ_STATUS {
-// 	READ_SUCCESS,
-// 	READ_INCOMPLETE,
-// 	READ_ERROR,
-// 	READ_CLIENT_CLOSED,
-// 	READ_CLIENT_NOT_FOUND,
-// 	READ_EMPTY
-// };
 
-// enum PARSE_STATUS {
-// 	PARSE_INCOMPLETE,
-// 	PARSE_TOO_LARGE,
-// 	PARSE_OK,
-// 	PARSE_ERROR,
-// };
 
 struct httpRequest {
 	std::string method;

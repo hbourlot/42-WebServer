@@ -157,36 +157,49 @@ namespace http {
 		return 0;
 	}
 
-	void TcpServer::removeDeadConnections( ClientEventProcessor &processor ) {
+	void TcpServer::removeDeadConnections( ClientEventProcessor &processor, int &index ) {
 
-		for ( size_t i = 1; i < _fds.size(); ++i ) {
-			if ( _fds[ i ].revents & ( POLLHUP | POLLERR | POLLNVAL ) ) {
-				std::cout << "--- Removing CONNECTION\n";
+		// for ( size_t i = 1; i < _fds.size(); ++i ) {
+		if ( _fds[ index ].revents & ( POLLHUP | POLLERR | POLLNVAL ) ) {
+			SocketFD fd = _fds[ index ].fd;
 
-				SocketFD fd = _fds[ i ].fd;
-
-				// Clean up CGI resources if this is a client with active CGI
-				Client *client = _clientManager.getClient( fd );
-				if ( client && client->getCgiPid() != -1 ) {
-					processor.cleanupCgiForClient( *client );
-				}
-
-				if ( _socketAddressMap.count( fd ) )
-					_socketAddressMap.erase( fd );
-
-				std::string msg( "Closing FD => " );
-				msg += to_str( fd );
-
-				Logs::log( ERROR, msg );
-				close( fd );
-
-				_clientManager.removeClient( fd );
-
-				_fds.erase( _fds.begin() + i );
-				--i;
+			// Check if this is a CGI pipe fd - skip it (handled by processCgiOutput)
+			if ( _cgiByFd.find( fd ) != _cgiByFd.end() ) {
+				return; // CGI pipes are managed separately
 			}
+
+			std::cout << "--- Removing CONNECTION\n";
+
+			// Clean up CGI resources if this is a client with active CGI
+			Client *client = _clientManager.getClient( fd );
+			if ( client && client->getCgiOutputFd() != -1 ) {
+				// Find and cleanup the CGI
+				std::map< int, http::Cgi * >::iterator it = _cgiByFd.find( client->getCgiOutputFd() );
+				if ( it != _cgiByFd.end() ) {
+					processor.cleanupCgi( it->second );
+				}
+			}
+
+			if ( _socketAddressMap.count( fd ) )
+				_socketAddressMap.erase( fd );
+
+			std::string msg( "Closing FD => " );
+			msg += to_str( fd );
+
+			Logs::log( ERROR, msg );
+			close( fd );
+
+			_clientManager.removeClient( fd );
+
+			_fds.erase( _fds.begin() + index );
+			--index;
 		}
+		// }
 	}
+
+	// void TcpServer::removeCgiDeadConnection( ClientEventProcessor &processor, ) {
+	// 	for ()
+	// }
 
 	void TcpServer::runLoop( int timeOut ) {
 		ClientEventProcessor processor( *this );
@@ -207,8 +220,11 @@ namespace http {
 
 				// Checking for new connections
 				acceptConnection();
-				removeDeadConnections( processor );
-				processor.processClientEvents();
+				int status = 0;
+				for ( int i = 1; i < _fds.size(); ++i ) {
+					removeDeadConnections( processor, i );
+					processor.processClientEvents( i );
+				}
 			}
 		} catch ( const TcpServerException &e ) {
 			std::cerr << "Error handling client connection => " << e.what() << std::endl;
@@ -219,7 +235,7 @@ namespace http {
 
 	void TcpServer::shutDownServer() {
 		// Close all CGI pipes before shutting down
-		closeAllCgiPipes();
+		cleanupAllCgis();
 
 		for ( int i = 0; i < _fds.size(); ++i ) {
 			close( _fds[ i ].fd );
@@ -227,8 +243,17 @@ namespace http {
 		}
 	}
 
-	void TcpServer::closeClientConnection( size_t index ) {
+	void TcpServer::closeClientConnection( size_t index ) { // TODO: [] Need to remove Cgi if it hass
 		SocketFD fd = _fds[ index ].fd;
+		Client *client = _clientManager.getClient( fd );
+
+		if ( client && client->getCgiPid() != -1 ) {
+			std::map< int, http::Cgi * >::iterator it = _cgiByFd.find( fd );
+			if ( it != _cgiByFd.end() ) {
+				delete it->second;
+				_cgiByFd.erase( it );
+			}
+		}
 
 		std::string msg( "Closing FD => " );
 		msg += to_str( fd );
@@ -236,24 +261,18 @@ namespace http {
 		Logs::log( ERROR, msg );
 
 		close( fd );
+
 		_socketAddressMap.erase( fd );
 		_clientManager.removeClient( fd );
 		_fds.erase( _fds.begin() + index );
 	}
 
-	void TcpServer::closeAllCgiPipes() {
-		for ( size_t i = 0; i < _cgiPipes.size(); ++i ) {
-			if ( _cgiPipes[ i ].inputPipe[ 0 ] >= 0 )
-				close( _cgiPipes[ i ].inputPipe[ 0 ] );
-			if ( _cgiPipes[ i ].inputPipe[ 1 ] >= 0 )
-				close( _cgiPipes[ i ].inputPipe[ 1 ] );
-			if ( _cgiPipes[ i ].outputPipe[ 0 ] >= 0 )
-				close( _cgiPipes[ i ].outputPipe[ 0 ] );
-			if ( _cgiPipes[ i ].outputPipe[ 1 ] >= 0 )
-				close( _cgiPipes[ i ].outputPipe[ 1 ] );
+	void TcpServer::cleanupAllCgis() {
+		for ( std::map< int, http::Cgi * >::iterator it = _cgiByFd.begin(); it != _cgiByFd.end(); ++it ) {
+			delete it->second; // Cgi destructor closes pipes
 		}
-		_cgiPipes.clear();
-		Logs::log( INFO, "Closed all CGI pipes" );
+		_cgiByFd.clear();
+		Logs::log( INFO, "Cleaned up all CGI processes" );
 	}
 
 } // namespace http

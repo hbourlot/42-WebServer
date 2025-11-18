@@ -54,84 +54,41 @@ VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerCon
 	return VALID_OK;
 }
 
-void http::Router::routeRequest( Client &client, const ServerConfig &server, ClientEventProcessor &processor ) {
+bool http::Router::routeCgiRequest( Client &client, const ServerConfig &server, const Location &location,
+                                    ClientEventProcessor &processor ) {
 
 	httpRequest &request = client.getRequest();
-	const Location &location = *( client.getRequest().urlMatchedLocation );
 
-	if ( isCgiRequest( request, location ) )
-		return handleCgiRequest( client, server, location, processor );
-
-	return handleStaticRequest( client, server, location ); // Static (GET, POST, DELETE)
-}
-
-bool http::Router::isCgiRequest( const httpRequest &request, const Location &location ) {
-
-	if ( location.cgi_extension.empty() ) { // Checking if location has CGI configured
+	if ( request.method == "GET" || request.method == "POST" ) {
+		launchCgi( client, server, location, processor );
 		return false;
-	}
 
-	// Extract file extension from the request path
-	std::string path = request.path;
-	size_t dotPos = path.find_last_of( '.' );
-
-	if ( dotPos == std::string::npos ) {
-		return false; // No extension found
-	}
-
-	std::string extension = path.substr( dotPos ); // Includes the dot (.py, .cgi, etc.)
-
-	// Check if the extension is in the location's CGI extensions
-	for ( size_t i = 0; i < location.cgi_extension.size(); ++i ) {
-		if ( location.cgi_extension[ i ] == extension ) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-void http::Router::handleCgiRequest( Client &client, const ServerConfig &server, const Location &location,
-                                     ClientEventProcessor &processor ) {
-
-	httpRequest &request = client.getRequest();
-
-	if ( ( request.method == "GET" || request.method == "POST" ) && client.getState() != CGI_IN_EXECUTION ) {
-		client.setState( CGI_IN_EXECUTION );
-
-		httpRequest &request = client.getRequest();
-		std::string path = location.path;
-		sockaddr_in socket;
-		Cgi myCgi( request, path, socket, server );
-
-		myCgi.executeCgi( client.getServer()._fds );
-
-		// Store CGI info in client
-		client.setCgiPid( myCgi.getPid() );
-		client.setCgiOutputFd( myCgi.getOutputPipe()[ 0 ] );
-
-		// Register CGI pipes for proper cleanup
-		processor.registerCgiPipes( myCgi.getInputPipe(), myCgi.getOutputPipe(), myCgi.getPid() );
-
-		// Map CGI fd to client for event loop lookup
-		processor.registerCgiForClient( client, client.getCgiOutputFd() );
-
-		// myCgi.readCgiOutput();
-		// std::cout << "\n\nmyCgi Response -------------\n\n";
-		// std::cout << myCgi.getResponse().buildResponseString() << std::endl;
-		// std::cout << "\n\nmyCgi Response END ----------\n\n";
-
-		// if ( myCgi.processCgiOut() ) {
-		// 	std::cout << "Inside 'if scoop' in ProcessCgiOut()\n";
-		// 	client.getResponse() = myCgi.getResponse();
-		// }
 	} else {
-		std::cout << "Else case in handleCgiRequest()\n";
 		client.getResponse().buildErrorResponse( HTTP_FORBID_METHOD, server );
 	}
+	return true;
 }
 
-void http::Router::handleStaticRequest( Client &client, const ServerConfig &server, const Location &location ) {
+void http::Router::launchCgi( Client &client, const ServerConfig &server, const Location &location,
+                              ClientEventProcessor &processor ) {
+	httpRequest &request = client.getRequest();
+	std::string path = location.path;
+	sockaddr_in socket;
+
+	// Create and execute CGI
+	http::Cgi *cgi = new http::Cgi( request, path, socket, server, &client );
+	cgi->executeCgi( client.getServer()._fds );
+
+	// Store CGI info in client
+	client.setCgiPid( cgi->getPid() );
+	client.setCgiOutputFd( cgi->getOutputPipe()[ 0 ] );
+
+	// Register CGI in map (takes ownership)
+	processor.registerCgi( cgi );
+	client.setState( CGI_JUST_STARTED );
+}
+
+void http::Router::routeStaticRequest( Client &client, const ServerConfig &server, const Location &location ) {
 
 	httpRequest &request = client.getRequest();
 
@@ -204,5 +161,3 @@ std::string parseContentType( std::string &contentType ) {
 
 	return ( parsedContentType );
 }
-
-

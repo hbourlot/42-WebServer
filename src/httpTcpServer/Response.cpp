@@ -140,6 +140,10 @@ void http::Response::setDefaultHeaders() {
 }
 
 std::string http::Response::buildResponseString() {
+
+	if ( _statusCode.empty() )
+		return "";
+
 	std::ostringstream responseString;
 	responseString << _protocol + " " << _statusCode << " " << _statusMsg << "\r\n";
 
@@ -323,25 +327,20 @@ std::string http::Response::getContentType( const std::string &filePath ) {
 	return "application/octet-stream";
 }
 
+bool httpRequest::shouldCloseConnection() {
+	std::map< std::string, std::string >::const_iterator it = headers.find( "Connection" );
 
-bool httpRequest::shouldCloseConnection()
-{
-	std::map<std::string, std::string>::const_iterator it = headers.find("Connection");
-
-	if (it != headers.end())
-	{
+	if ( it != headers.end() ) {
 		std::string val = it->second;
 
-		for (std::string::size_type i = 0; i < val.size(); ++i)
-			val[i] = std::tolower(val[i]);
+		for ( std::string::size_type i = 0; i < val.size(); ++i )
+			val[ i ] = std::tolower( val[ i ] );
 
-		return (val == "close");
-	}
-	else
-	{
-		if (serverProtocol == "HTTP/1.1")
-			return (false);
+		return ( val == "close" );
+	} else {
+		if ( serverProtocol == "HTTP/1.1" )
+			return ( false );
 		else
-			return (true);
+			return ( true );
 	}
 }
