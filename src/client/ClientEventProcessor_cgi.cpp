@@ -6,8 +6,7 @@
 void http::ClientEventProcessor::registerCgi( http::Cgi *cgi ) {
 	int outputFd = cgi->getOutputPipe()[ 0 ];
 
-	// Add CGI to map
-	_server._cgiByFd[ outputFd ] = cgi;
+	_server._cgiByFd[ outputFd ] = cgi; // Add CGI to map
 
 	std::string msg( "Registered CGI for PID " );
 	msg += to_str( cgi->getPid() );
@@ -20,8 +19,7 @@ void http::ClientEventProcessor::cleanupCgi( http::Cgi *cgi ) {
 	int outputFd = cgi->getOutputPipe()[ 0 ];
 	Client *client = cgi->getClient();
 
-	// Kill CGI process if still running
-	cgi->killProcess();
+	cgi->killProcess(); // Kill CGI process if still running
 
 	// Remove CGI pipe fd from poll array BEFORE deleting Cgi (which closes pipes)
 	for ( size_t i = 0; i < _server._fds.size(); ++i ) {
@@ -96,20 +94,18 @@ void http::ClientEventProcessor::processCgiOutput( http::Cgi *cgi, pollfd &pfd )
 			client->getResponse().buildErrorResponse( HTTP_SERVER_ERR, _server._serverInfo );
 			pfd.fd = -1;
 			cleanupCgi( cgi );
-			client->setState( CGI_COMPLETED );
+			// client->setState( CGI_COMPLETED );
 			return;
 		}
 	}
 
 	// Build response based on CGI exit status
 	if ( hasCgiSuccessfullyFinished( cgi ) ) {
-		std::cout << "hasCgiSuccessfullyFinished() inside processCgiOutput()\n";
 
 		if ( cgiOutput.empty() ) {
 			// CGI produced no output
 			client->getResponse().buildErrorResponse( HTTP_SERVER_ERR, _server._serverInfo );
 		} else {
-			std::cout << "hasCgiSuccessfullyFinished() not empty() case\n";
 			// Success - build response from CGI output
 			client->getResponse().buildCgiResponse( HTTP_OK, cgiOutput, _server._serverInfo );
 		}

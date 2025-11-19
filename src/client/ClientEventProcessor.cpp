@@ -1,6 +1,9 @@
 #include "Client/ClientEventProcessor.hpp"
 
 static bool isCgirequest( const httpRequest &request, const Location &location ) {
+
+	return true;
+
 	if ( location.cgi_extension.empty() ) { // Checking if location has CGI configured
 		return false;
 	}
@@ -17,6 +20,8 @@ static bool isCgirequest( const httpRequest &request, const Location &location )
 
 	// Check if the extension is in the location's CGI extensions
 	for ( size_t i = 0; i < location.cgi_extension.size(); ++i ) {
+		// if ( location.cgi_extension[ i ] == ".cgi" ) // Accept defaults cgi
+		// 	return true;
 		if ( location.cgi_extension[ i ] == extension ) {
 			return true;
 		}
@@ -46,7 +51,7 @@ void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 
 void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int index ) {
 
-	if (  client->getCgiPid() == -1 && client->getState() != CGI_COMPLETED  && !processRequest( *client ) ) {
+	if ( client->getCgiPid() == -1 && client->getState() != CGI_COMPLETED && !processRequest( *client ) ) {
 		return;
 	}
 
@@ -136,7 +141,6 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 	const Location &location = *( client.getRequest().urlMatchedLocation );
 
 	if ( isCgirequest( request, location ) ) {
-		std::cout << "IsCgirequest() \n";
 		return Router::routeCgiRequest( client, serverInfo, location, *this );
 	}
 
@@ -263,7 +267,6 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 			_server._clientManager.resetClientState( clientFd );
 			return 1; // Close connection
 		}
-		std::cout << "Am i setting as POLLIN again ???\n";
 		_server._clientManager.resetClientState( clientFd );
 		pfd.events = POLLIN; // Reset to read for next request
 		return 0;

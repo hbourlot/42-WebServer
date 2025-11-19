@@ -16,6 +16,7 @@ static std::string getPathInfo( std::string &requestPath, std::string scriptExt 
 
 	std::string pathInfo;
 	std::string::size_type extPos = requestPath.find( scriptExt );
+	std::cout << "scriptExt : " << scriptExt << std::endl;
 	if ( extPos != std::string::npos ) {
 		extPos += scriptExt.length();
 
@@ -38,24 +39,30 @@ static std::string getPathTranslated( const std::string &root, const std::string
 
 static void parsePath( httpRequest &request, const ServerConfig &serverInfo ) {
 	std::string &requestPath = request.path;
-	std::string pathInfo;
+	std::string pathInfo = "";
 
 	for ( size_t i = 0; i < serverInfo.locations.size(); ++i ) {
 		if ( !serverInfo.locations[ i ].cgi_extension.empty() ) {
 			std::vector< std::string > scriptExt = serverInfo.locations[ i ].cgi_extension;
-
 			for ( size_t j = 0; j < scriptExt.size(); ++j ) {
 				std::string &value = scriptExt[ j ];
 				std::string::size_type extPos = requestPath.find( value );
 
+				std::cout << "value => " << value << std::endl;
+				std::cout << "extPos => " << extPos << std::endl;
+				std::cout << "requestPath => " << requestPath << std::endl;
 				if ( requestPath.find( value ) != std::string::npos &&
 				     requestPath.find( value ) + value.length() <= requestPath.length() ) {
 
 					char nextChar = requestPath[ extPos + value.length() ];
-					if ( nextChar != '/' )
+					if ( nextChar != '/' ) {
+						std::cout << "continue" << std::endl;
 						continue;
+					}
 
+					std::cout << "requestPath => " << requestPath << " value => " << value << std::endl;
 					request.pathInfo = getPathInfo( requestPath, value );
+					std::cout << "parsePath => request.pathInfo => " << request.pathInfo << std::endl;
 					if ( !request.pathInfo.empty() ) {
 						requestPath.erase( requestPath.length() - request.pathInfo.length() );
 						request.pathTranslated = getPathTranslated( serverInfo.locations[ i ].root, request.pathInfo );

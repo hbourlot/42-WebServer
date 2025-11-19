@@ -55,7 +55,6 @@ Client *http::Cgi::getClient() const {
 void http::Cgi::registerPollFd( std::vector< pollfd > &fds ) const {
 	pollfd pfd;
 
-	std::cout << "Regintering _outputPipe[0] : " << _outputPipe[ 0 ] << std::endl;
 	pfd.fd = _outputPipe[ 0 ];
 	pfd.events = POLLIN;
 	pfd.revents = 0;
@@ -68,9 +67,6 @@ http::Cgi::Cgi( const httpRequest &request, std::string &filePath, const sockadd
       _filePath( filePath ), _clientAddress( clientAddress ), _bytesReceived(), _body(), _client( client ), _envp(),
       _argv(), _envStrings() {
 
-	// Cgi::createValidCgiExtensions();
-
-	// execve
 	buildEnvStrings();
 }
 

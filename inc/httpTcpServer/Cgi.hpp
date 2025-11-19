@@ -51,7 +51,6 @@ namespace http {
 		void killProcess();
 		Client *getClient() const;
 		void registerPollFd( std::vector< pollfd > &fds ) const;
-		bool readCgiOutput( void ( *updateStatusPtr )() = nullptr );
 		bool hasDataToRead();
 
 	  private:
@@ -133,7 +132,7 @@ namespace http {
 // The translated path of PATH_INFO (if any)
 
 // HTTP_ variables*
-// All HTTP headers from the request, uppercased, dashes replaced by
+// All HTTP headers from the request, upperCased, dashes replaced by
 // underscores, and prefixed with HTTP_ (e.g., HTTP_USER_AGENT, HTTP_COOKIE,
 // etc.)
 

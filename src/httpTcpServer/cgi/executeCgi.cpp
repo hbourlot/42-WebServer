@@ -30,39 +30,6 @@ void debugCgiExec( const char *filePath, char *const argv[], char *const envp[] 
 	std::cerr << "END DEBUG" << std::endl;
 }
 
-bool http::Cgi::readCgiOutput( void ( *updateStatusPtr )() ) {
-
-	char buffer[ http::BUFFER_SIZE + 1 ] = { 0 };
-	const int MAX_READS_PER_EVENT = 3;
-	int readCount = 0;
-
-	while ( readCount < MAX_READS_PER_EVENT ) {
-		ssize_t bytesReceived = read( this->_outputPipe[ 0 ], buffer, BUFFER_SIZE );
-
-		if ( bytesReceived > 0 ) {
-			_body.append( buffer, bytesReceived ); // Only append received bytes
-			readCount++;
-			std::memset( buffer, 0, BUFFER_SIZE + 1 );
-			continue;
-		}
-
-		if ( bytesReceived == 0 && readCount == 0 ) {
-			return true;
-		}
-
-		if ( errno == EAGAIN || errno == EWOULDBLOCK )
-			return true;
-
-		if ( bytesReceived == 0 && readCount != 0 )
-			break; // ! Need to make sure if makes sense
-
-		return false;
-	}
-	if ( updateStatusPtr )
-		updateStatusPtr();
-
-	return true;
-}
 
 void http::Cgi::handleChildProcess() {
 
@@ -84,11 +51,9 @@ void http::Cgi::handleChildProcess() {
 	}
 	this->_envp.push_back( NULL );
 
-	this->_filePath = "./webpage/cgi-bin/hello.py";
+	this->_filePath = "./webpage/cgi-bin/cgi_tester";
 
-	// Execute the actual CGI script with proper environment
 	execve( this->getFilePath().c_str(), argv.data(), this->_envp.data() );
-	// execve( this->getFilePath().c_str(), argv.data(), envp.data() );
 	std::cerr << "EXECUTE WRONG\n ";
 	_exit( 1 );
 }
@@ -108,26 +73,8 @@ void http::Cgi::executeCgi( std::vector< pollfd > &fds ) { // Working on
 	} else {
 		this->closeForOneWay();
 
-		// int status;
-		// waitpid( _pid, &status, 0 );
-
-		// Set both pipes to non-blocking if doing async I/O
-		// fcntl( _inputPipe[ 1 ], F_SETFL, O_NONBLOCK );
-		// std::cout << "_input[1] : " << _inputPipe[1] << std::endl;
+	
 		fcntl( _outputPipe[ 0 ], F_SETFL, O_NONBLOCK );
-
-		// this->readCgiOutput();
-
-		// char buffer[ BUFFER_SIZE ] = { 0 };
-		// ssize_t bytes = read( _outputPipe[ 0 ], buffer, BUFFER_SIZE );
-		// _body = buffer;
-
-		// // buffer[bytes] = '\0'; // Safely null-terminate
-		// std::cout << "[BUFFER]: " << buffer << std::endl;
-		// std::cout << "[BUFFER]: " << _body << std::endl;
-
-		// fcntl(_outputPipe[0], F_SETFL,
-		//       fcntl(_outputPipe[0], F_GETFL, 0) | O_NONBLOCK);
 		this->registerPollFd( fds );
 	}
 }

@@ -60,6 +60,9 @@ void http::Cgi::buildEnvStrings() {
 	newMap["GATEWAY_INTERFACE"] = "CGI/1.1";
 	newMap["PATH_INFO"] = _request.pathInfo;
 	newMap["PATH_TRANSLATED"] = _request.pathTranslated;
+	
+	std::cout << "[CGI ENV DEBUG] SCRIPT_NAME = \"" << _request.path << "\"" << std::endl;
+	
 	// newMap["REMOTE_PORT"] = std::to_string(_clientAddress.sin_port); // ! Function std::to_string not exist!
 	newMap["QUERY_STRING"] = _request.queryString;
 
@@ -70,7 +73,7 @@ void http::Cgi::buildEnvStrings() {
 		for (size_t i = 0; i < key.size(); ++i) {
 			if (key[i] == '-')
 				key[i] = '_';
-			else
+		else
 				key[i] = toupper(key[i]);
 		}
 		newMap["HTTP_" + key] = it->second;
