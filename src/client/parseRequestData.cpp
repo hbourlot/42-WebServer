@@ -48,9 +48,6 @@ static void parsePath( httpRequest &request, const ServerConfig &serverInfo ) {
 				std::string &value = scriptExt[ j ];
 				std::string::size_type extPos = requestPath.find( value );
 
-				std::cout << "value => " << value << std::endl;
-				std::cout << "extPos => " << extPos << std::endl;
-				std::cout << "requestPath => " << requestPath << std::endl;
 				if ( requestPath.find( value ) != std::string::npos &&
 				     requestPath.find( value ) + value.length() <= requestPath.length() ) {
 
@@ -60,7 +57,6 @@ static void parsePath( httpRequest &request, const ServerConfig &serverInfo ) {
 						continue;
 					}
 
-					std::cout << "requestPath => " << requestPath << " value => " << value << std::endl;
 					request.pathInfo = getPathInfo( requestPath, value );
 					std::cout << "parsePath => request.pathInfo => " << request.pathInfo << std::endl;
 					if ( !request.pathInfo.empty() ) {

@@ -2,8 +2,6 @@
 
 static bool isCgirequest( const httpRequest &request, const Location &location ) {
 
-	return true;
-
 	if ( location.cgi_extension.empty() ) { // Checking if location has CGI configured
 		return false;
 	}
