@@ -40,7 +40,7 @@ bool http::TcpServer::parseCgi(const Location loc, std::string &filePath,
 	// if (loc.methods.empty() || m_scriptName.empty()) {
 	// 	return false;
 	// }
-
+    
 	Cgi cgi(request, filePath, clientAddress, _serverInfo);
 	// Cgi cgi(_request, filePath, clientAddress, _serverInfo);
 

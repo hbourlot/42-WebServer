@@ -15,7 +15,7 @@ ServerConfig::ServerConfig()
 	maxRequest = 0;
 }
 
-// We get the location by the path
+// We get the location by the path URL
 Location* ServerConfig::GetLocationByPath(std::string path)
 {
 	for (int curLocationIdx = 0; curLocationIdx < locations.size(); curLocationIdx++)

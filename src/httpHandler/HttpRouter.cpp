@@ -1,17 +1,41 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
+#include <algorithm>
+
+// Used on 'getMatchLocation to check if we choosed the right path
+// For the cases with multiple cgi-bin paths for example
+std::string GetExtension(const std::string &path)
+{
+    std::string::size_type pos = path.rfind('.'); // Finds the last '.'
+    if (pos == std::string::npos)
+        return ""; // No extension on path
+
+    return path.substr(pos + 1);
+}
 
 const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations ) {
 
 	const Location *matchedLocation = NULL;
 	size_t matchLength = 0;
 
+	std::cout << "Path: " << path << std::endl;
 	for ( size_t i = 0; i < locations.size(); ++i ) {
 
 		const std::string &locPath = locations[ i ].path;
-
+		
 		if ( path.compare( 0, locPath.size(), locPath ) == 0 && locPath.size() > matchLength ) {
 			matchedLocation = &locations[ i ];
 			matchLength = locPath.size();
+		}
+
+		// Checks for the correct CGI location, if we don't find the right location, we return the last one found it
+		if (matchedLocation != NULL && matchedLocation->cgi.empty() == false)
+		{
+			// Loops into the vector until we find the Exension cgi, for example ".py"
+			std::vector<std::string> cgiExtensions = matchedLocation->cgi_extension;
+			if (std::find(cgiExtensions.begin(), cgiExtensions.end(), GetExtension(path)) != cgiExtensions.end())
+			{
+				return matchedLocation;
+			}
 		}
 	}
 	return ( matchedLocation );

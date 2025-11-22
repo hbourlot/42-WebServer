@@ -52,6 +52,8 @@ void http::Cgi::buildEnvStrings() {
 
 	std::map<std::string, std::string> newMap;
 
+	
+	
 	newMap["REQUEST_METHOD"] = _request.method;
 	newMap["FILE_NAME"] = _filePath;
 	newMap["SCRIPT_NAME"] = _request.path;

@@ -11,8 +11,10 @@ int main(int argc, char **argv, char **envp)
 
 	// Creates a config object
 	Configs configuration;
+
 	// Reads the configuration file
 	ReadConfig::setConfigs(argv[1], configuration);
+	// std::cout << configuration.servers[0].locations[2].root << std::endl;
 	// std::cout << dateString() << std::endl;
 	TcpServer server(configuration.servers[0]);
 
