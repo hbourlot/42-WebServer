@@ -17,7 +17,7 @@ const Location *getMatchLocation( const std::string &path, const std::vector< Lo
 	return ( matchedLocation );
 }
 
-static bool validateRequestMethod( const httpRequest &request, const Location &location ) {
+static bool validateRequestMethod( const http::Request &request, const Location &location ) {
 
 	if ( request.method != "GET" && request.method != "POST" && request.method != "DELETE" )
 		return false;
@@ -31,7 +31,7 @@ static bool validateRequestMethod( const httpRequest &request, const Location &l
 
 VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerConfig &server ) {
 
-	httpRequest &request = client.getRequest();
+	http::Request &request = client.getRequest();
 	http::Response &response = client.getResponse();
 
 	request.urlMatchedLocation = getMatchLocation( request.path, server.locations );
@@ -57,7 +57,7 @@ VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerCon
 bool http::Router::routeCgiRequest( Client &client, const ServerConfig &server, const Location &location,
                                     ClientEventProcessor &processor ) {
 
-	httpRequest &request = client.getRequest();
+	http::Request &request = client.getRequest();
 
 	if ( request.method == "GET" || request.method == "POST" ) {
 		launchCgi( client, server, location, processor );
@@ -71,7 +71,7 @@ bool http::Router::routeCgiRequest( Client &client, const ServerConfig &server, 
 
 void http::Router::launchCgi( Client &client, const ServerConfig &server, const Location &location,
                               ClientEventProcessor &processor ) {
-	httpRequest &request = client.getRequest();
+	http::Request &request = client.getRequest();
 	std::string path = location.path;
 	sockaddr_in socket;
 
@@ -90,7 +90,7 @@ void http::Router::launchCgi( Client &client, const ServerConfig &server, const 
 
 void http::Router::routeStaticRequest( Client &client, const ServerConfig &server, const Location &location ) {
 
-	httpRequest &request = client.getRequest();
+	http::Request &request = client.getRequest();
 
 	if ( request.method == "GET" ) {
 		return ( handleGet( client, server, location ) );
@@ -105,7 +105,7 @@ void http::Router::routeStaticRequest( Client &client, const ServerConfig &serve
 
 void http::Router::handleGet( Client &client, const ServerConfig &server, const Location &location ) {
 
-	httpRequest &request = client.getRequest();
+	http::Request &request = client.getRequest();
 	http::Response &response = client.getResponse();
 
 	std::string filePath = getFilePath( request.path, location );
@@ -125,7 +125,7 @@ void http::Router::handleGet( Client &client, const ServerConfig &server, const 
 
 void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, const Location &location ) {
 	http::Response &response = client.getResponse();
-	httpRequest &request = client.getRequest();
+	http::Request &request = client.getRequest();
 	std::string ContentType;
 
 	if ( location.uploadEnable ) {
@@ -139,7 +139,7 @@ void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, c
 
 void http::Router::handleDelete( Client &client, const ServerConfig &server, const Location &location ) {
 	http::Response &response = client.getResponse();
-	httpRequest &request = client.getRequest();
+	http::Request &request = client.getRequest();
 
 	std::string filePath = getFilePath( request.path, location );
 

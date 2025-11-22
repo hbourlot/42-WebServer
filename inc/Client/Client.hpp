@@ -46,7 +46,7 @@ class Client {
 	CLIENT_STATE getState() const;
 
 	// request-response structures
-	httpRequest &getRequest();
+	http::Request &getRequest();
 	http::Response &getResponse();
 	void resetRequest();
 	void resetResponse();
@@ -72,7 +72,7 @@ class Client {
 	std::string _readBuffer;
 	std::string _writeBuffer;
 
-	httpRequest _request;
+	http::Request _request;
 	http::Response _response;
 
 	bool _requestComplete;

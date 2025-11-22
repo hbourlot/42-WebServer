@@ -4,7 +4,7 @@
 #include "HttpStructs.hpp"
 
 std::string ft_strtrim( const std::string &str );
-void printHttpHeaders( const httpRequest &request );
+void printHttpHeaders( const http::Request &request );
 
 bool isDirectory( const std::string &filePath );
 std::string getFilePath(const std::string &path, const Location &location );

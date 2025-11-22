@@ -29,7 +29,7 @@ namespace http {
 	class Cgi {
 
 	  public:
-		Cgi( const httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
+		Cgi( const http::Request &request, std::string &filePath, const sockaddr_in &clientAddress,
 		     const ServerConfig &serverInfo, Client *client );
 
 		~Cgi();
@@ -38,7 +38,7 @@ namespace http {
 
 		void executeCgi( std::vector< pollfd > &fds );
 		Response getResponse() const;
-		httpRequest getRequest() const;
+		http::Request getRequest() const;
 		std::string getFilePath() const;
 		std::string getBody() const;
 		int &getStatus();
@@ -56,7 +56,7 @@ namespace http {
 	  private:
 		int _status;
 		SocketFD _clientFD;
-		httpRequest _request;
+		http::Request _request;
 		Response _response;
 		ServerConfig _serverInfo;
 		std::string _filePath;

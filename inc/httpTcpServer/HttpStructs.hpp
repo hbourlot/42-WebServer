@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpStructs.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hugobourlot <hugobourlot@student.42.fr>    +#+  +:+       +#+        */
+/*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/11/17 18:30:56 by hugobourlot      ###   ########.fr       */
+/*   Updated: 2025/11/22 16:04:41 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,18 +40,20 @@ enum headerKey {
 	UserAgent,
 };
 
+namespace http {
 
+	struct Request {
+		std::string method;
+		std::string path;
+		std::string serverProtocol; // For Cgi
+		std::string pathInfo;       // For Cgi
+		std::string pathTranslated;
+		std::map< std::string, std::string > headers;
+		std::string body;
+		bool shouldCloseConnection();
+		std::string rawRequestBuffer;
+		std::string queryString;
+		const Location *urlMatchedLocation; // ! Must Initialize as NULL;
+	};
 
-struct httpRequest {
-	std::string method;
-	std::string path;
-	std::string serverProtocol; // For Cgi
-	std::string pathInfo;       // For Cgi
-	std::string pathTranslated;
-	std::map< std::string, std::string > headers;
-	std::string body;
-	bool shouldCloseConnection();
-	std::string rawRequestBuffer;
-	std::string queryString;
-	const Location *urlMatchedLocation; // ! Must Initialize as NULL;
-};
+} // namespace http

@@ -28,7 +28,7 @@ namespace http {
 	  private:
 		static void launchCgi( Client &client, const ServerConfig &server, const Location &location,
 		                       ClientEventProcessor &processor );
-		// static bool isCgiRequest( const httpRequest &request, const Location &location );
+		// static bool isCgiRequest( const http::Request &request, const Location &location );
 		static void handleGet( Client &client, const ServerConfig &server, const Location &location );
 		static void handlePost( Client &client, const ServerConfig &server, const Location &location );
 		static void handleDelete( Client &client, const ServerConfig &server, const Location &location );

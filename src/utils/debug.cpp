@@ -1,7 +1,7 @@
 // #include "webserver.hpp"
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
-void printHttpHeaders(const httpRequest &request)
+void printHttpHeaders(const http::Request &request)
 {
 	std::map<std::string, std::string>::const_iterator it;
 	for (it = request.headers.begin(); it != request.headers.end(); ++it)

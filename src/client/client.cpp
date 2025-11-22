@@ -39,14 +39,14 @@ void Client::clearWriteBuffer() {
 	_writeBuffer.clear();
 }
 
-httpRequest &Client::getRequest() {
+http::Request &Client::getRequest() {
 	return ( _request );
 }
 http::Response &Client::getResponse() {
 	return ( _response );
 }
 void Client::resetRequest() {
-	_request = httpRequest();
+	_request = http::Request();
 }
 void Client::resetResponse() {
 	_response = http::Response();

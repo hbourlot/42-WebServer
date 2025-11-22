@@ -90,7 +90,7 @@ void http::ClientEventProcessor::processCgiOutput( http::Cgi *cgi, pollfd &pfd )
 			break;
 		} else {
 			// Read error
-			std::cerr << "Error reading from CGI pipe: " << strerror( errno ) << std::endl;
+			// std::cerr << "Error reading from CGI pipe: " << strerror( errno ) << std::endl;
 			client->getResponse().buildErrorResponse( HTTP_SERVER_ERR, _server._serverInfo );
 			pfd.fd = -1;
 			cleanupCgi( cgi );

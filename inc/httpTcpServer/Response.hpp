@@ -16,9 +16,9 @@
 
 #define CHUNK_SIZE 8192
 
-struct httpRequest;
-
 namespace http {
+	struct Request;
+
 	class Response {
 	  private:
 		std::string _protocol;
@@ -33,7 +33,7 @@ namespace http {
 
 	  public:
 		Response();
-		Response( const httpRequest &request );
+		Response( const http::Request &request );
 
 		Response &operator=( const Response &other );
 		~Response();

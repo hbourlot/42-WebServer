@@ -13,7 +13,7 @@ std::string http::Cgi::getFilePath() const {
 	return this->_filePath;
 }
 
-httpRequest http::Cgi::getRequest() const {
+http::Request http::Cgi::getRequest() const {
 	return _request;
 }
 
@@ -61,7 +61,7 @@ void http::Cgi::registerPollFd( std::vector< pollfd > &fds ) const {
 	fds.push_back( pfd );
 }
 
-http::Cgi::Cgi( const httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
+http::Cgi::Cgi( const http::Request &request, std::string &filePath, const sockaddr_in &clientAddress,
                 const ServerConfig &serverInfo, Client *client )
     : _status(), _clientFD(), _request( request ), _response( Response( request ) ), _serverInfo( serverInfo ),
       _filePath( filePath ), _clientAddress( clientAddress ), _bytesReceived(), _body(), _client( client ), _envp(),

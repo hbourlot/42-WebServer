@@ -3,7 +3,7 @@
 bool UploadManager::handleUpload( const Location &location, Client &client, const ServerConfig &serverInfo ) {
 	std::string contentType;
 
-	httpRequest &request = client.getRequest();
+	http::Request &request = client.getRequest();
 	http::Response &response = client.getResponse();
 
 	contentType = client.getRequest().headers.at( "Content-Type" );

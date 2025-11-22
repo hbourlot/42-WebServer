@@ -1,6 +1,6 @@
 #include "Client/ClientEventProcessor.hpp"
 
-static void parseRequestQueries( httpRequest &request ) {
+static void parseRequestQueries( http::Request &request ) {
 	std::string fullPath = request.path;
 	std::string::size_type qpos = fullPath.find( '?' );
 
@@ -37,7 +37,7 @@ static std::string getPathTranslated( const std::string &root, const std::string
 	return result + pathInfo;
 }
 
-static void parsePath( httpRequest &request, const ServerConfig &serverInfo ) {
+static void parsePath( http::Request &request, const ServerConfig &serverInfo ) {
 	std::string &requestPath = request.path;
 	std::string pathInfo = "";
 
@@ -74,7 +74,7 @@ static void parsePath( httpRequest &request, const ServerConfig &serverInfo ) {
 	}
 }
 
-static void parseRequestHeaders( httpRequest &request, std::istringstream &request_stream, std::string &line ) {
+static void parseRequestHeaders( http::Request &request, std::istringstream &request_stream, std::string &line ) {
 	size_t idx;
 
 	while ( std::getline( request_stream, line ) ) {
@@ -94,7 +94,7 @@ static void parseRequestHeaders( httpRequest &request, std::istringstream &reque
 
 bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerConfig &serverInfo ) {
 
-	httpRequest &clientRequest = client.getRequest();
+	http::Request &clientRequest = client.getRequest();
 	std::istringstream requestStream( client.getReadBuffer() );
 	std::string line;
 

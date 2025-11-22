@@ -1,6 +1,6 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
-static std::string extractBoundary( httpRequest &request ) {
+static std::string extractBoundary( http::Request &request ) {
 
 	std::string contentType = request.headers[ "Content-Type" ];
 	std::string boundaryPrefix = "boundary=";
@@ -13,7 +13,7 @@ static std::string extractBoundary( httpRequest &request ) {
 	return ( boundary );
 }
 
-static std::string extractFilePart( httpRequest &request, const std::string &boundary ) {
+static std::string extractFilePart( http::Request &request, const std::string &boundary ) {
 
 	std::string body = request.body;
 	size_t start = body.find( boundary );
@@ -76,7 +76,7 @@ static bool saveFile( const std::string &filename, const std::string &content, c
 //! Parts to imporve after
 bool UploadManager::parseMultipart( const Location &location, Client &client, const ServerConfig &serverInfo ) {
 	http::Response &response = client.getResponse();
-	httpRequest &request = client.getRequest();
+	http::Request &request = client.getRequest();
 
 	std::string boundary = extractBoundary( client.getRequest() );
 

@@ -1,6 +1,6 @@
 #include "Client/ClientEventProcessor.hpp"
 
-static bool isCgirequest( const httpRequest &request, const Location &location ) {
+static bool isCgirequest( const http::Request &request, const Location &location ) {
 
 	if ( location.cgi_extension.empty() ) { // Checking if location has CGI configured
 		return false;
@@ -135,7 +135,7 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 
 	// Treating execution of request - from here
 
-	httpRequest &request = client.getRequest();
+	http::Request &request = client.getRequest();
 	const Location &location = *( client.getRequest().urlMatchedLocation );
 
 	if ( isCgirequest( request, location ) ) {

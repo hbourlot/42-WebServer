@@ -86,7 +86,7 @@ void http::Response::buildCgiResponse( const HttpStatusCode &status, const std::
 	setDefaultHeaders();
 }
 
-http::Response::Response( const httpRequest &request ) : _protocol( request.serverProtocol ) {
+http::Response::Response( const http::Request &request ) : _protocol( request.serverProtocol ) {
 	std::map< std::string, std::string >::const_iterator it = request.headers.find( "Connection" );
 
 	if ( it != request.headers.end() ) {
@@ -327,7 +327,7 @@ std::string http::Response::getContentType( const std::string &filePath ) {
 	return "application/octet-stream";
 }
 
-bool httpRequest::shouldCloseConnection() {
+bool http::Request::shouldCloseConnection() {
 	std::map< std::string, std::string >::const_iterator it = headers.find( "Connection" );
 
 	if ( it != headers.end() ) {
