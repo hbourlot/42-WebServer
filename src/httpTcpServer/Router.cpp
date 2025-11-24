@@ -32,7 +32,6 @@ static bool validateRequestMethod( const http::Request &request, const Location 
 VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerConfig &server ) {
 
 	http::Request &request = client.getRequest();
-	http::Response &response = client.getResponse();
 
 	request.urlMatchedLocation = getMatchLocation( request.path, server.locations );
 
@@ -124,8 +123,6 @@ void http::Router::handleGet( Client &client, const ServerConfig &server, const 
 }
 
 void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, const Location &location ) {
-	http::Response &response = client.getResponse();
-	http::Request &request = client.getRequest();
 	std::string ContentType;
 
 	if ( location.uploadEnable ) {
@@ -140,17 +137,20 @@ void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, c
 void http::Router::handleDelete( Client &client, const ServerConfig &server, const Location &location ) {
 	http::Response &response = client.getResponse();
 	http::Request &request = client.getRequest();
-
+	(void)response;
+	(void)server;
 	std::string filePath = getFilePath( request.path, location );
 
 	std::cout << filePath << std::endl;
 	if ( isDirectory( filePath ) ) {
-		std::cout << "Is a dir cannot delete" << std::endl;
-		// return (false);
+		Logs::log( ERROR, "Cannot delete because its a folder" );
+		return;
 	}
-	if ( remove( filePath.c_str() ) )
-		std::cout << "Files not delete" << std::endl;
-	// return (true);
+	if ( remove( filePath.c_str() ) ) {
+		Logs::log( ERROR, "Failed to delete File: " + filePath );
+		return;
+	}
+	Logs::log( ERROR, "File deleted Sucessfully " + filePath );
 }
 
 // ! Did i make this?

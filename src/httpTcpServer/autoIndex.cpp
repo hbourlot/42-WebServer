@@ -22,7 +22,7 @@ static bool hasIndexFile( const std::string &path, const Location &location ) {
 	return ( std::ifstream( indexPath.c_str() ).is_open() );
 }
 
-static std::string generateAutoIndexPage( const std::string &dirPath, const Location &location, http::Request &request ) {
+static std::string generateAutoIndexPage( const std::string &dirPath, http::Request &request ) {
 	std::string html;
 	html += "<html>\n";
 	html += "  <body>\n";
@@ -72,7 +72,7 @@ void http::Router::handleDirectoryListing( Client &client, const ServerConfig &s
 		return;
 	}
 
-	std::string body = generateAutoIndexPage( filePath, location, request );
+	std::string body = generateAutoIndexPage( filePath, request );
 
 	response.buildResponse( HTTP_OK, body );
 	//"text/html"

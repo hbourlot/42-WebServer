@@ -66,6 +66,8 @@ class Client {
 	void storeCgiInfo( pid_t pid, int fd );
 
   private:
+	http::TcpServer &_server;
+
 	int _fd;
 	CLIENT_STATE _state;
 
@@ -80,6 +82,4 @@ class Client {
 
 	pid_t _cgiPid;
 	int _cgiOutputFd;
-
-	http::TcpServer &_server;
 };

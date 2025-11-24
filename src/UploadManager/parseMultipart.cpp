@@ -75,14 +75,12 @@ static bool saveFile( const std::string &filename, const std::string &content, c
 
 //! Parts to imporve after
 bool UploadManager::parseMultipart( const Location &location, Client &client, const ServerConfig &serverInfo ) {
-	http::Response &response = client.getResponse();
-	http::Request &request = client.getRequest();
 
 	std::string boundary = extractBoundary( client.getRequest() );
 
 	if ( boundary.empty() ) {
 		client.getResponse().buildErrorResponse( HTTP_BAD_REQ, serverInfo );
-		Logs::log(ERROR, "400 Bad Request: No boundary" );
+		Logs::log( ERROR, "400 Bad Request: No boundary" );
 
 		return ( false );
 	}
@@ -91,7 +89,7 @@ bool UploadManager::parseMultipart( const Location &location, Client &client, co
 
 	if ( filePart.empty() ) {
 		client.getResponse().buildErrorResponse( HTTP_BAD_REQ, serverInfo );
-		Logs::log(ERROR, "Bad Request: No boundary filePart" );
+		Logs::log( ERROR, "Bad Request: No boundary filePart" );
 
 		return ( false );
 	}
@@ -101,7 +99,7 @@ bool UploadManager::parseMultipart( const Location &location, Client &client, co
 
 	if ( !splitHeadersAndContent( filePart, headers, content ) ) {
 		client.getResponse().buildErrorResponse( HTTP_BAD_REQ, serverInfo );
-		Logs::log(ERROR, "Bad Request: Malformed multipart body" );
+		Logs::log( ERROR, "Bad Request: Malformed multipart body" );
 
 		return ( false );
 	}
@@ -110,13 +108,13 @@ bool UploadManager::parseMultipart( const Location &location, Client &client, co
 
 	if ( filename.empty() ) {
 		client.getResponse().buildErrorResponse( HTTP_BAD_REQ, serverInfo );
-		Logs::log(ERROR, "Bad Request: Filename not found" );
+		Logs::log( ERROR, "Bad Request: Filename not found" );
 		return ( false );
 	}
 
 	if ( !saveFile( filename, content, location ) ) {
 		client.getResponse().buildErrorResponse( HTTP_SERVER_ERR, serverInfo );
-		Logs::log(ERROR, "Internal Server Error: File not saved" );
+		Logs::log( ERROR, "Internal Server Error: File not saved" );
 		return ( false );
 	}
 	std::string msg = "File '" + filename + "' received";
