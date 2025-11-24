@@ -1,6 +1,6 @@
+#include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include "Client/ClientEventProcessor.hpp"
 #include "httpTcpServer/HttpStructs.hpp"
-#include "httpTcpServer/HttpTcpServerLinux.hpp"
 
 #include <arpa/inet.h>
 #include <cstddef>

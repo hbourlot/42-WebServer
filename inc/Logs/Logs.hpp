@@ -16,14 +16,8 @@
 #define DEBUG false
 #endif
 
-enum Level
-{
-	INFO,
-	WARN,
-	ERROR
-};
-class Logs
-{
+enum Level { INFO, WARN, ERROR };
+class Logs {
   public:
 	static void log( Level lvl, const std::string &msg );
 	static void logAcceptError( const sockaddr_in &socketAddress );

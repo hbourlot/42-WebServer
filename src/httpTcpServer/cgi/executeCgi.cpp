@@ -30,7 +30,6 @@ void debugCgiExec( const char *filePath, char *const argv[], char *const envp[] 
 	std::cerr << "END DEBUG" << std::endl;
 }
 
-
 void http::Cgi::handleChildProcess() {
 
 	doDupOneWay();
@@ -73,7 +72,6 @@ void http::Cgi::executeCgi( std::vector< pollfd > &fds ) { // Working on
 	} else {
 		this->closeForOneWay();
 
-	
 		fcntl( _outputPipe[ 0 ], F_SETFL, O_NONBLOCK );
 		this->registerPollFd( fds );
 	}
