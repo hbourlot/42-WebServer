@@ -1,6 +1,6 @@
-#include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include "Client/ClientEventProcessor.hpp"
 #include "httpTcpServer/HttpStructs.hpp"
+#include "httpTcpServer/HttpTcpServerLinux.hpp"
 
 #include <arpa/inet.h>
 #include <cstddef>
@@ -56,7 +56,7 @@ namespace http {
 		// For inactivate the time wait from OS that block bind again
 		int opt = 1;
 		if ( setsockopt( _serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof( opt ) ) < 0 ) {
-			log_prev( "setsockopt failed" );
+			Logs::log( ERROR, "setsockopt failed" );
 			close( _serverSocket );
 			exit( EXIT_FAILURE );
 		}

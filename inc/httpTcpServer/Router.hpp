@@ -2,7 +2,6 @@
 #include "Client/Client.hpp"
 #include "Client/ClientEventProcessor.hpp"
 #include "Config/Configs.hpp"
-#include "HttpUtils.hpp"
 
 enum VALIDATION_STATUS {
 
