@@ -51,6 +51,7 @@ namespace http {
 		std::map< std::string, std::string > headers;
 		std::string body;
 		bool shouldCloseConnection();
+		std::string GetFileName();
 		std::string rawRequestBuffer;
 		std::string queryString;
 		const Location *urlMatchedLocation; // ! Must Initialize as NULL;

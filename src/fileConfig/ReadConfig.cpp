@@ -14,6 +14,18 @@ ServerConfig::ServerConfig() {
 	maxRequest = 0;
 }
 
+Location* ServerConfig::GetLocationByPath(std::string path)
+{
+	for (int curLocationIdx = 0; curLocationIdx < locations.size(); curLocationIdx++)
+	{
+		if (locations[curLocationIdx].path == path)
+		{
+			return &locations[curLocationIdx];
+		}
+	}
+	return NULL;
+}
+
 void getErrorPage( std::string noSpaceLine, ServerConfig &server ) {
 	std::istringstream iss( noSpaceLine );
 	std::string directive;

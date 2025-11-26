@@ -92,6 +92,14 @@ static void parseRequestHeaders( http::Request &request, std::istringstream &req
 	}
 }
 
+std::string http::Request::GetFileName()
+{
+	std::string::size_type pos = path.rfind('/');
+    if (pos == std::string::npos)
+        return path;
+    return path.substr(pos + 1);
+}
+
 bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerConfig &serverInfo ) {
 
 	http::Request &clientRequest = client.getRequest();

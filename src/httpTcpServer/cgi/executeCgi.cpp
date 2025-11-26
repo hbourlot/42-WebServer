@@ -34,7 +34,6 @@ void http::Cgi::handleChildProcess() {
 
 	doDupOneWay();
 
-	this->_filePath = "." + this->_filePath;
 
 	// build argv
 	std::vector< char * > argv;
@@ -49,8 +48,6 @@ void http::Cgi::handleChildProcess() {
 		this->_envp.push_back( const_cast< char * >( _envStrings[ i ].c_str() ) );
 	}
 	this->_envp.push_back( NULL );
-
-	this->_filePath = "./webpage/cgi-bin/cgi_tester";
 
 	execve( this->getFilePath().c_str(), argv.data(), this->_envp.data() );
 	std::cerr << "EXECUTE WRONG\n ";
