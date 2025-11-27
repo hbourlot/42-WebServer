@@ -15,13 +15,13 @@ void Logs::error( const std::string &msg ) {
 
 void Logs::log( Level lvl, const std::string &msg ) {
 	switch ( lvl ) {
-	case INFO:
+	case LOGS_INFO:
 		info( msg );
 		break;
-	case WARN:
+	case LOGS_WARN:
 		warning( msg );
 		break;
-	case ERROR:
+	case LOGS_ERROR:
 		error( msg );
 		break;
 
@@ -35,5 +35,5 @@ void Logs::logAcceptError( const sockaddr_in &socketAddress ) {
 	ss << "Server failed to accept incoming connection from =>\n"
 	   << "[ADDRESS: " << inet_ntoa( socketAddress.sin_addr ) << "]\n"
 	   << "[PORT: " << ntohs( socketAddress.sin_port ) << "]\n";
-	log( ERROR, ss.str() );
+	log( LOGS_ERROR, ss.str() );
 }

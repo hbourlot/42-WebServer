@@ -16,7 +16,7 @@
 #define DEBUG false
 #endif
 
-enum Level { INFO, WARN, ERROR };
+enum Level { LOGS_INFO, LOGS_WARN, LOGS_ERROR };
 class Logs {
   public:
 	static void log( Level lvl, const std::string &msg );

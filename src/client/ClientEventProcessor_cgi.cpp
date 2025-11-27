@@ -12,7 +12,7 @@ void http::ClientEventProcessor::registerCgi( http::Cgi *cgi ) {
 	msg += to_str( cgi->getPid() );
 	msg += " with output fd ";
 	msg += to_str( outputFd );
-	Logs::log( INFO, msg );
+	Logs::log( LOGS_INFO, msg );
 }
 
 void http::ClientEventProcessor::cleanupCgi( http::Cgi *cgi ) {
@@ -43,7 +43,7 @@ void http::ClientEventProcessor::cleanupCgi( http::Cgi *cgi ) {
 
 	std::string msg( "Cleaned up CGI with output fd " );
 	msg += to_str( outputFd );
-	Logs::log( INFO, msg );
+	Logs::log( LOGS_INFO, msg );
 }
 
 bool http::ClientEventProcessor::hasCgiFinished( Cgi *cgi ) const {

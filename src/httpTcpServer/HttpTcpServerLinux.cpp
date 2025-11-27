@@ -28,7 +28,7 @@ namespace http {
 		std::string msg( "CREATED SERVER " );
 		msg = msg + _serverInfo.host + ":";
 		msg += to_str( _serverInfo.port );
-		Logs::log( INFO, msg );
+		Logs::log( LOGS_INFO, msg );
 	}
 
 	TcpServer::~TcpServer() {
@@ -56,7 +56,7 @@ namespace http {
 		// For inactivate the time wait from OS that block bind again
 		int opt = 1;
 		if ( setsockopt( _serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof( opt ) ) < 0 ) {
-			Logs::log( ERROR, "setsockopt failed" );
+			Logs::log( LOGS_ERROR, "setsockopt failed" );
 			close( _serverSocket );
 			exit( EXIT_FAILURE );
 		}
@@ -91,7 +91,7 @@ namespace http {
 		std::ostringstream ss; // Output string stream for logging
 		ss << "Listening on ADDRESS: " << inet_ntoa( _socketAddressMap[ _serverSocket ].sin_addr )
 		   << " PORT: " << ntohs( _socketAddressMap[ _serverSocket ].sin_port );
-		Logs::log( INFO, ss.str() );
+		Logs::log( LOGS_INFO, ss.str() );
 	}
 
 	void TcpServer::acceptConnection() {
@@ -127,7 +127,7 @@ namespace http {
 				// std::cout << "----- Connection Accepted 🟩\n\n";
 				std::string msg( "Connection Accepted 🟩 " );
 				msg += to_str( client_pollfd.fd );
-				Logs::log( INFO, msg );
+				Logs::log( LOGS_INFO, msg );
 			}
 		}
 	}
@@ -186,7 +186,7 @@ namespace http {
 			std::string msg( "Closing FD => " );
 			msg += to_str( fd );
 
-			Logs::log( ERROR, msg );
+			Logs::log( LOGS_ERROR, msg );
 			close( fd );
 
 			_clientManager.removeClient( fd );
@@ -258,7 +258,7 @@ namespace http {
 		std::string msg( "Closing FD => " );
 		msg += to_str( fd );
 
-		Logs::log( ERROR, msg );
+		Logs::log( LOGS_ERROR, msg );
 
 		close( fd );
 
@@ -272,7 +272,7 @@ namespace http {
 			delete it->second; // Cgi destructor closes pipes
 		}
 		_cgiByFd.clear();
-		Logs::log( INFO, "Cleaned up all CGI processes" );
+		Logs::log( LOGS_INFO, "Cleaned up all CGI processes" );
 	}
 
 } // namespace http

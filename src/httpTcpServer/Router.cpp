@@ -1,15 +1,14 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include <algorithm>
 
-// Used on 'getMatchLocation to check if we choosed the right path
+// Used on 'getMatchLocation to check if we choose the right path
 // For the cases with multiple cgi-bin paths for example
-std::string GetExtension(const std::string &path)
-{
-    std::string::size_type pos = path.rfind('.'); // Finds the last '.'
-    if (pos == std::string::npos)
-        return ""; // No extension on path
+std::string GetExtension( const std::string &path ) {
+	std::string::size_type pos = path.rfind( '.' ); // Finds the last '.'
+	if ( pos == std::string::npos )
+		return ""; // No extension on path
 
-    return path.substr(pos + 1);
+	return path.substr( pos + 1 );
 }
 
 const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations ) {
@@ -27,12 +26,11 @@ const Location *getMatchLocation( const std::string &path, const std::vector< Lo
 		}
 
 		// Checks for the correct CGI location, if we don't find the right location, we return the last one found it
-		if (matchedLocation != NULL && matchedLocation->cgi.empty() == false)
-		{
-			// Loops into the vector until we find the Exension cgi, for example ".py"
-			std::vector<std::string> cgiExtensions = matchedLocation->cgi_extension;
-			if (std::find(cgiExtensions.begin(), cgiExtensions.end(), GetExtension(path)) != cgiExtensions.end())
-			{
+		if ( matchedLocation != NULL && matchedLocation->cgi.empty() == false ) {
+			// Loops into the vector until we find the Extension cgi, for example ".py"
+			std::vector< std::string > cgiExtensions = matchedLocation->cgi_extension;
+			if ( std::find( cgiExtensions.begin(), cgiExtensions.end(), GetExtension( path ) ) !=
+			     cgiExtensions.end() ) {
 				return matchedLocation;
 			}
 		}
@@ -66,7 +64,6 @@ VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerCon
 	if ( !request.urlMatchedLocation->redirection.empty() ) // /redirect-me
 		return VALID_REDIRECT_REQUIRED;
 
-	// !!!!CGI
 	if ( !request.urlMatchedLocation->cgi_extension.empty() )
 		return VALID_IS_CGI;
 
@@ -166,21 +163,12 @@ void http::Router::handleDelete( Client &client, const ServerConfig &server, con
 
 	std::cout << filePath << std::endl;
 	if ( isDirectory( filePath ) ) {
-		Logs::log( ERROR, "Cannot delete because its a folder" );
+		Logs::log( LOGS_ERROR, "Cannot delete because its a folder" );
 		return;
 	}
 	if ( remove( filePath.c_str() ) ) {
-		Logs::log( ERROR, "Failed to delete File: " + filePath );
+		Logs::log( LOGS_ERROR, "Failed to delete File: " + filePath );
 		return;
 	}
-	Logs::log( ERROR, "File deleted Sucessfully " + filePath );
-}
-
-// ! Did i make this?
-std::string parseContentType( std::string &contentType ) {
-	std::string parsedContentType;
-
-	parsedContentType = contentType.substr( 0, contentType.find( ';' ) );
-
-	return ( parsedContentType );
+	Logs::log( LOGS_ERROR, "File deleted Successfully " + filePath );
 }

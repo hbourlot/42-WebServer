@@ -28,9 +28,9 @@ static bool isCgirequest( const http::Request &request, const Location &location
 	return false;
 }
 
-http::ClientEventProcessor::ClientEventProcessor( TcpServer &server ) : _server( server ){};
+http::ClientEventProcessor::ClientEventProcessor( TcpServer &server ) : _server( server ) {};
 
-http::ClientEventProcessor::~ClientEventProcessor(){};
+http::ClientEventProcessor::~ClientEventProcessor() {};
 
 void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 
@@ -96,7 +96,7 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 		}
 
 		// Fatal error
-		Logs::log( ERROR, "Error: recv()" );
+		Logs::log( LOGS_ERROR, "Error: recv()" );
 		client.setState( READ_ERROR );
 		return false;
 	}
@@ -120,21 +120,16 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 
 	// Handle error states first (build error responses)
 	if ( state != PARSE_OK ) {
-		std::cout << "client: " << client.getFd() << "clientState: " << client.getState() << std::endl;
 		this->buildErrorResponse( client, state );
-		std::cout << "buildErrorResponse() -> true\n";
 		return true;
 	}
 
 	// Handling SuccessfulRequest - from here
-
 	if ( this->handleRouteValidation( client ) ) {
-		std::cout << "handleRouteValidation() -> true\n";
 		return true;
 	}
 
 	// Treating execution of request - from here
-
 	http::Request &request = client.getRequest();
 	const Location &location = *( client.getRequest().urlMatchedLocation );
 
@@ -142,8 +137,7 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 		return Router::routeCgiRequest( client, serverInfo, location, *this );
 	}
 
-	Router::routeStaticRequest( client, serverInfo,
-	                            location ); // Todo: [] Maybe this can always return true and end here
+	Router::routeStaticRequest( client, serverInfo, location );
 	return true;
 }
 
@@ -210,7 +204,7 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 
 		return;
 	}
-
+	Logs::log( LOGS_ERROR, "Something bad happened, restart server." );
 	return; // Neither client nor CGI pipe - should not happen, skip
 }
 
@@ -246,8 +240,7 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 
 	if ( writeBuffer.empty() )
 		return 0;
-	// std::cout << "write buffer of client " << client.getFd() << ":) \n";
-	// std::cout << writeBuffer << std::endl;
+
 	if ( sendResponse( pfd, client ) )
 		return ( 1 );
 
@@ -256,10 +249,10 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 		std::string msg( "Server Response sent to client " );
 		msg += to_str( clientFd ) + " sessionID: " + client.getSessionId();
 		if ( DEBUG ) {
-			msg += " ";                      //! For Debug
-			msg += client.getRequest().path; //! For Debug
+			msg += " ";
+			msg += client.getRequest().path;
 		}
-		Logs::log( INFO, msg );
+		Logs::log( LOGS_INFO, msg );
 
 		if ( client.getRequest().shouldCloseConnection() ) {
 			_server._clientManager.resetClientState( clientFd );
@@ -282,10 +275,6 @@ bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
 	int sendCount = 0;
 	std::string &writeBuffer = client.getWriteBuffer();
 
-	// std::cout << client.getState() << std::endl;
-	// std::cout << "writeBuffer => " << writeBuffer << std::endl;
-	// exit(0);
-
 	// Send up to MAX_SENDS_PER_EVENT times per poll event
 	while ( sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty() ) {
 		ssize_t bytesSent = send( clientFd, writeBuffer.c_str(), writeBuffer.size(), MSG_NOSIGNAL );
@@ -294,13 +283,13 @@ bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
 			if ( errno == EAGAIN || errno == EWOULDBLOCK ) {
 				// Socket buffer full, will continue later
 				pfd.events |= POLLOUT;
-				return 1; // Keep connection alive, continue sending later
+				return 0; // Keep connection alive, continue sending later
 			}
 
 			if ( errno == EPIPE )
-				Logs::log( ERROR, "Client disconnected before response" );
+				Logs::log( LOGS_ERROR, "Client disconnected before response." );
 			else
-				Logs::log( ERROR, "Error sending response to client" );
+				Logs::log( LOGS_ERROR, "Error sending response to client." );
 			return 1; // Close connection
 		}
 

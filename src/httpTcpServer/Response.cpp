@@ -278,7 +278,7 @@ void http::Response::buildRangeResponse( const std::string &filePath, const Serv
 	std::ostringstream rangeHeader;
 	rangeHeader << "bytes " << start << "-" << end << "/" << st.st_size;
 	if ( DEBUG )
-		Logs::log( INFO, "Request for range: " + rangeHeader.str() );
+		Logs::log( LOGS_INFO, "Request for range: " + rangeHeader.str() );
 	addToHeader( "Content-Range", rangeHeader.str() );
 	addToHeader( "Content-Type", getContentType( filePath ) );
 	addToHeader( "Content-Length", to_str( end - start + 1 ) );
