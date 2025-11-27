@@ -254,7 +254,7 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 		}
 		Logs::log( LOGS_INFO, msg );
 
-		if ( client.getRequest().shouldCloseConnection() ) {
+		if ( client.getResponse().shouldCloseConnection() ) {
 			_server._clientManager.resetClientState( clientFd );
 			return 1; // Close connection
 		}

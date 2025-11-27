@@ -312,7 +312,7 @@ std::string http::Response::readFileContent( const std::string &filePath ) {
 std::string http::Response::getContentType( const std::string &filePath ) {
 	size_t dot = filePath.find_last_of( '.' );
 	if ( dot == std::string::npos )
-		return "application/octet-stream"; // binario genérico
+		return "application/octet-stream"; // generic Binary
 
 	std::string ext = filePath.substr( dot + 1 );
 	if ( ext == "html" || ext == "htm" )
@@ -336,20 +336,8 @@ std::string http::Response::getContentType( const std::string &filePath ) {
 	return "application/octet-stream";
 }
 
-bool http::Request::shouldCloseConnection() {
-	std::map< std::string, std::string >::const_iterator it = headers.find( "Connection" );
-
-	if ( it != headers.end() ) {
-		std::string val = it->second;
-
-		for ( std::string::size_type i = 0; i < val.size(); ++i )
-			val[ i ] = std::tolower( val[ i ] );
-
-		return ( val == "close" );
-	} else {
-		if ( serverProtocol == "HTTP/1.1" )
-			return ( false );
-		else
-			return ( true );
-	}
+bool http::Response::shouldCloseConnection() {
+	if ( _connectionType.second == "close" )
+		return ( true );
+	return ( false );
 }

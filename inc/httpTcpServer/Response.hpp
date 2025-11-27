@@ -38,6 +38,8 @@ namespace http {
 
 		// function Member
 		std::string buildResponseString();
+		
+		bool shouldCloseConnection();
 
 		/// @brief Sets default HTTP headers including Date, Content-Length, and Connection type
 		void setDefaultHeaders();
