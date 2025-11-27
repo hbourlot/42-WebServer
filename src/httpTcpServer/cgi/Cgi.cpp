@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <map>
 #include <netinet/in.h>
+#include <signal.h>
 #include <sstream>
 #include <string>
 #include <sys/poll.h>
@@ -12,55 +13,142 @@ std::string http::Cgi::getFilePath() const {
 	return this->_filePath;
 }
 
-httpRequest http::Cgi::getCgiRequest() const {
+http::Request http::Cgi::getRequest() const {
 	return _request;
 }
 
-httpResponse http::Cgi::getCgiResponse() const {
+http::Response http::Cgi::getResponse() const {
 	return _response;
 }
 
 int http::Cgi::getPollFd() const {
-	return _outputPipe[0];
-}
-
-http::Cgi::CgiStatus http::Cgi::getStatus() const {
-	return _status;
+	return _outputPipe[ 0 ];
 }
 
 std::string http::Cgi::getBody() const {
 	return _body;
 }
 
-void http::Cgi::registerPollFd(std::vector<pollfd> &fds) const {
+pid_t http::Cgi::getPid() const {
+	return _pid;
+}
+
+const int *http::Cgi::getInputPipe() const {
+	return _inputPipe;
+}
+
+int http::Cgi::getStatus() const {
+	return _status;
+}
+int &http::Cgi::getStatus() {
+	return _status;
+}
+
+const int *http::Cgi::getOutputPipe() const {
+	return _outputPipe;
+}
+
+Client *http::Cgi::getClient() const {
+	return _client;
+}
+
+void http::Cgi::registerPollFd( std::vector< pollfd > &fds ) const {
 	pollfd pfd;
 
-	pfd.fd = _outputPipe[0];
+	pfd.fd = _outputPipe[ 0 ];
 	pfd.events = POLLIN;
 	pfd.revents = 0;
-	fds.push_back(pfd);
+	fds.push_back( pfd );
 }
 
-void http::Cgi::markAsRunning() {
-	this->_status = RUNNING;
-}
+http::Cgi::Cgi( const http::Request &request, std::string &filePath, const sockaddr_in &clientAddress,
+                const ServerConfig &serverInfo, Client *client )
+    : _status(), _clientFD(), _request( request ), _response( Response( request ) ), _serverInfo( serverInfo ),
+      _clientAddress( clientAddress ), _bytesReceived(), _body(), _client( client ), _envp(), _argv(), _envStrings() {
 
-http::Cgi::Cgi(const httpRequest &request, std::string &filePath,
-               const sockaddr_in &clientAddress, const ServerConfig &serverInfo)
-    : _request(request), _filePath(filePath), _clientAddress(clientAddress),
-      _serverInfo(serverInfo), _envp(), _argv(), _envStrings(), _body(),
-      _inputPipe(), _outputPipe(), _clientFD() {
-
-	// Cgi::createValidCgiExtensions();
-
-	// execve
+	Location *cgiLocation = _serverInfo.GetLocationByPath( "/cgi-bin" );
+	_filePath = cgiLocation->root + "/" + _request.GetFileName();
 	buildEnvStrings();
-	_status = NOT_STARTED;
 }
 
 http::Cgi::~Cgi() {
-	close(_inputPipe[0]);
-	close(_inputPipe[1]);
-	close(_outputPipe[0]);
-	close(_outputPipe[1]);
+	// Close all pipe fds
+	if ( _inputPipe[ 0 ] >= 0 )
+		close( _inputPipe[ 0 ] );
+	if ( _inputPipe[ 1 ] >= 0 )
+		close( _inputPipe[ 1 ] );
+	if ( _outputPipe[ 0 ] >= 0 )
+		close( _outputPipe[ 0 ] );
+	if ( _outputPipe[ 1 ] >= 0 )
+		close( _outputPipe[ 1 ] );
+}
+
+bool http::Cgi::hasDataToRead() {
+
+	char testByte;
+
+	ssize_t result = recv( _outputPipe[ 0 ], &testByte, 1, MSG_PEEK );
+	//  | MSG_DONTWAIT
+
+	if ( result > 0 )
+		return true; // Data available
+
+	if ( result == 0 )
+		return false; // EOF - pipe closed
+
+	if ( errno == EAGAIN || errno == EWOULDBLOCK )
+		return false; // No data available
+
+	return false; // Any other error
+}
+
+void http::Cgi::doDupOneWay() {
+	// One-way: CGI writes to stdout only (no stdin from parent)
+	dup2( _outputPipe[ 1 ], STDOUT_FILENO );
+
+	// Close all pipe fds
+	close( _inputPipe[ 0 ] );
+	close( _inputPipe[ 1 ] );
+	close( _outputPipe[ 0 ] );
+	close( _outputPipe[ 1 ] );
+}
+
+void http::Cgi::doDupTwoWay() {
+	dup2( _inputPipe[ 0 ], STDIN_FILENO );
+	dup2( _outputPipe[ 1 ], STDOUT_FILENO );
+
+	// Close all pipe fds - we now use stdin/stdout
+	close( _inputPipe[ 0 ] );
+	close( _inputPipe[ 1 ] );
+	close( _outputPipe[ 0 ] );
+	close( _outputPipe[ 1 ] );
+}
+
+void http::Cgi::closeForOneWay() {
+	// One-way: parent only reads from CGI output
+	close( _inputPipe[ 0 ] );  // Not using stdin pipe
+	close( _inputPipe[ 1 ] );  // Not using stdin pipe
+	close( _outputPipe[ 1 ] ); // Child writes to stdout
+	                           // Keep _outputPipe[0] to read from CGI
+}
+
+void http::Cgi::closeForTwoWay() {
+	// Two-way: parent writes to CGI stdin and reads from stdout
+	close( _inputPipe[ 0 ] );  // Child reads from stdin
+	close( _outputPipe[ 1 ] ); // Child writes to stdout
+	                           // Keep _inputPipe[1] to write to CGI
+	                           // Keep _outputPipe[0] to read from CGI
+}
+
+void http::Cgi::killProcess() {
+	if ( _pid > 0 ) {
+		// Check if process is still running
+		int status;
+		pid_t result = waitpid( _pid, &status, WNOHANG );
+
+		if ( result == 0 ) { // Process still running - kill it
+			kill( _pid, SIGKILL );
+			waitpid( _pid, &status, 0 ); // Reap zombie
+		}
+	}
 }

@@ -19,11 +19,9 @@ AUTH_DIR		= auth/
 UTILS_DIR		= utils/
 
 CLIENT_DIR 		= client/
-HTTP_HANDLER_DIR = httpHandler/
-RESPONSE_BUILDER_DIR = responseBuilder/
+HTTP_RESPONSE_DIR = HttpResponse/
 HTTP_DIR		= httpTcpServer/
 REQUEST_DIR		= $(HTTP_DIR)request/
-RESPONSE_DIR	= $(HTTP_DIR)response/
 CGI_DIR			= $(HTTP_DIR)cgi/
 UPL_DIR			= UploadManager/
 
@@ -34,25 +32,22 @@ OBJ_DIR         = obj/
 COMPILED_FILES  = 0
 LEN             = 0
 
-CLIENT_FUNC		= client clientManager
+CLIENT_FUNC		= client clientManager ClientEventProcessor ClientEventProcessor_cgi parseRequestData cookies
 AUTH_FUNC		= loginHandler
-CGI_FUNC		= parseCgi executeCgi Cgi buildEnvStrings doDup
+CGI_FUNC		= executeCgi Cgi buildEnvStrings
 UTILS_FUNC		= utils getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
-HTTP_FUNC	    = HttpTcpServerLinux startServer startListen shutDownServer acceptConnection runServer runLoop processClientEvents
-REQUEST_FUNC	= readRequest parseRequest 
-HTTP_HANDLER_FUNC = HttpHandler autoindex
-RESPONSE_BUILDER_FUNC = ResponseBuilder setResponseAux sendResponse
+
+HTTP_FUNC	    = HttpTcpServerLinux Router autoIndex Response Logs
+# HTTP_HANDLER_FUNC = HttpRouter autoindex
+# RESPONSE_BUILDER_FUNC = ResponseBuilder setResponseAux
+# HTTP_FUNC	    = HttpTcpServerLinux startServer startListen shutDownServer acceptConnection runServer runLoop processClientEvents
 UPL_FUNC		= UploadManager parseMultipart
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CGI_DIR), $(CGI_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(REQUEST_DIR), $(REQUEST_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(RESPONSE_DIR), $(RESPONSE_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(HTTP_HANDLER_DIR), $(HTTP_HANDLER_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(RESPONSE_BUILDER_DIR), $(RESPONSE_BUILDER_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UPL_DIR), $(UPL_FUNC:=.cpp)) \
@@ -61,7 +56,8 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB             = libHttpTcpServerLinux.a
 CXX             = c++
-CXXFLAGS        = -std=c++98 -g
+CXXFLAGS        = -std=c++98 -g #-Wall -Wextra
+DEBUG_FLAGS		= -DDEBUG -g -O0
 NAME            = webserv
 TOTAL_FILES     = $(shell echo $$(($(words $(OBJS_SRC)))))
 VALGRIND        = valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
@@ -136,6 +132,14 @@ r:
 v:
 	@make -s
 	@$(VALGRIND) ./$(NAME) ./conf_files/good/webpage.conf
+
+debug: CXXFLAGS += $(DEBUG_FLAGS) -DDEBUG -g -O0
+debug: re
+	@echo "$(GREEN)Debug build complete!$(RESET)"
+
+d: debug
+	@make -s
+	@./$(NAME) ./conf_files/good/webpage.conf
 
 fc: fclean
 

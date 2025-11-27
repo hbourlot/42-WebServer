@@ -4,13 +4,13 @@
 #include "Client/ClientManager.hpp"
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
-#include "HttpHandler.hpp"
-#include "HttpLogs.hpp"
+// #include "Client/ClientEventProcessor.hpp"
 #include "HttpStatus.hpp"
 #include "HttpStructs.hpp"
-#include "HttpUtils.hpp"
-#include "ResponseBuilder.hpp"
+#include "Logs/Logs.hpp"
+#include "Router.hpp"
 #include "Upload/UploadManager.hpp"
+#include "utils.hpp"
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <dirent.h>
@@ -39,59 +39,53 @@
 
 class Cgi;
 
-namespace http
-{
+namespace http {
 
+	class ClientEventProcessor;
 	const int BUFFER_SIZE = 30720;
+	const int MAX_READS_PER_EVENT = 3;
 
-	class TcpServer
-	{
+	class TcpServer {
 	  public:
+		friend class ClientEventProcessor;
 		// Default Constructor
-		TcpServer(ServerConfig server);
+		TcpServer( ServerConfig server );
 		// Default Destructor
 		~TcpServer();
 
 		// Main member
 		int runServer();
 
-		class TcpServerException : public std::runtime_error
-		{
+		class TcpServerException : public std::runtime_error {
 		  public:
-			explicit TcpServerException(const std::string &message) : std::runtime_error(message)
-			{
+			explicit TcpServerException( const std::string &message ) : std::runtime_error( message ) {
 			}
 		};
+		std::vector< pollfd > &getVectorPollFds();
+
+		std::vector< pollfd > _fds;
 
 	  private:
-		// *Setted inside a server must know the fds it handles, and less passing by parameter
-		std::vector<pollfd> _fds;
-		ServerConfig _serverInfo;
 		SocketFD _serverSocket;
-		//! Still figuring where put it on  std::set<SocketFD> _toBeClosed;
 		ClientManager _clientManager;
+		ServerConfig _serverInfo;
 
-		std::map<SocketFD, sockaddr_in> _socketAddressMap;
+		std::map< SocketFD, sockaddr_in > _socketAddressMap;
 		unsigned int _socketAddress_len;
-		std::vector<Cgi> _cgi;
-		std::map<int, Cgi *> _cgiFdMap;
+
+		std::map< int, http::Cgi * > _cgiByFd; // CGI output fd → Cgi instance
 
 		int startServer();
-		void runLoop(int timeOut);
+		void runLoop( int timeOut );
 		void shutDownServer();
 		void startListen();
 		void acceptConnection();
-		void removeDeadConnections();
-		void processClientEvents();
-		void closeClientConnection(size_t index);
-		bool readRequest(int index);
-
-		bool handleCgiResponse(pollfd &socket);
-		int sendResponse(pollfd &socket);
-
-		bool parseCgi(const Location loc, std::string &filePath, sockaddr_in &clientAddress, httpRequest &request);
+		void removeDeadConnections( ClientEventProcessor &processor, int &index );
+		// void removeCgiDeadConnection( ClientEventProcessor &processor );
+		void closeClientConnection( size_t index );
+		void cleanupAllCgis();
 	};
 
-	std::string getLocationFieldAsString(const std::vector<Location> &locations, const std::string &field);
+	std::string getLocationFieldAsString( const std::vector< Location > &locations, const std::string &field );
 
 } // namespace http

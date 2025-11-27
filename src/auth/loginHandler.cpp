@@ -42,7 +42,7 @@
 // 	return (form);
 // }
 
-// static httpResponse formurldeconded(httpRequest request)
+// static httpResponse formurldeconded(http::Request request)
 // {
 // 	httpResponse result;
 // 	std::map<std::string, std::string> form = parseForm(request.body);
@@ -53,7 +53,7 @@
 // 	return (result);
 // }
 
-// httpResponse validateForm(httpRequest request)
+// httpResponse validateForm(http::Request request)
 // {
 // 	httpResponse result;
 // 	std::cout << request.headers["Content-Type"] << std::endl;

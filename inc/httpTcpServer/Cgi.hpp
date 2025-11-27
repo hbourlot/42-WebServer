@@ -4,73 +4,82 @@
 #include <netinet/in.h>
 #include <string>
 #include <sys/poll.h>
+#include <sys/wait.h>
 #include <vector>
 
-namespace http
-{
-	class Cgi
-	{
+class Client;
+
+namespace http {
+	const std::string CGI_NO_OUTPUT_PAGE =
+	    "<!DOCTYPE html>\n"
+	    "<html><head><title>CGI Error</title><style>\n"
+	    "body{font-family:Arial,sans-serif;background:#f4f4f4;display:flex;justify-content:center;align-items:"
+	    "center;"
+	    "height:100vh;margin:0}\n"
+	    ".container{background:white;padding:40px;border-radius:8px;box-shadow:0 2px 10px "
+	    "rgba(0,0,0,0.1);text-align:center;max-width:500px}\n"
+	    "h1{color:#e74c3c;margin-bottom:20px}p{color:#555;line-height:1.6}.error-code{font-size:72px;color:#e74c3c;"
+	    "font-weight:bold;margin:20px 0}\n"
+	    "</style></head><body>\n"
+	    "<div class='container'><div class='error-code'>⚠️</div>\n"
+	    "<h1>CGI Script Error</h1><p><strong>No Output Received</strong></p>\n"
+	    "<p>The CGI script executed but did not produce any output.</p>\n"
+	    "<p>This could indicate an issue with the script or missing output headers.</p>\n"
+	    "</div></body></html>";
+	class Cgi {
 
 	  public:
-		Cgi(const httpRequest &request, std::string &filePath, const sockaddr_in &clientAddress,
-		    const ServerConfig &serverInfo);
+		Cgi( const http::Request &request, std::string &filePath, const sockaddr_in &clientAddress,
+		     const ServerConfig &serverInfo, Client *client );
+
 		~Cgi();
 
-		enum CgiStatus
-		{
-			STILL_RUNNING,
-			NOT_STARTED,
-			RUNNING,
-			FINISHED,
-			ERROR = -1
-		};
+		// enum CgiStatus { CGI_NOT_STARTED, CGI_RUNNING, CGI_FINISHED, CGI_TOO_LARGE, CGI_ERROR = -1 };
 
-		// // CGI
-		static const std::set<std::string> validCgiExtensions;
-		static bool isValidCgiExtension(const std::string &ext);
-		static std::set<std::string> createValidCgiExtensions() // ! maybe must be outside
-		{
-			std::set<std::string> s;
-			s.insert(".py");
-			s.insert(".cgi");
-			return s;
-		}
-
-		void executeCgi(std::vector<pollfd> &fds);
-		httpResponse getCgiResponse() const;
-		httpRequest getCgiRequest() const;
+		void executeCgi( std::vector< pollfd > &fds );
+		Response getResponse() const;
+		http::Request getRequest() const;
 		std::string getFilePath() const;
 		std::string getBody() const;
-		CgiStatus getStatus() const;
-		std::vector<std::string> getArgv() const;
+		int &getStatus();
+		int getStatus() const;
+		std::vector< std::string > getArgv() const;
 		int getPollFd() const;
-		void registerPollFd(std::vector<pollfd> &fds) const;
-		void markAsRunning();
-		void readCgiOutput();
+		pid_t getPid() const;
+		const int *getInputPipe() const;
+		const int *getOutputPipe() const;
+		void killProcess();
+		Client *getClient() const;
+		void registerPollFd( std::vector< pollfd > &fds ) const;
+		bool hasDataToRead();
 
 	  private:
-		CgiStatus _status;
+		int _status;
 		SocketFD _clientFD;
-		httpRequest _request;
-		httpResponse _response;
+		http::Request _request;
+		Response _response;
 		ServerConfig _serverInfo;
 		std::string _filePath;
 		sockaddr_in _clientAddress;
 		int _bytesReceived;
 		std::string _body;
+		Client *_client; // Back-reference to client
 
-		std::vector<char *> _envp;
-		std::vector<char *> _argv;
-		std::vector<std::string> _envStrings;
+		std::vector< char * > _envp;
+		std::vector< char * > _argv;
+		std::vector< std::string > _envStrings;
 
 		// Pipe handling
-		int _pipefd[2];
-		int _inputPipe[2];
-		int _outputPipe[2];
+		int _pipefd[ 2 ];
+		int _inputPipe[ 2 ];
+		int _outputPipe[ 2 ];
 		pid_t _pid;
 
 		void buildEnvStrings();
-		void doDup();
+		void doDupOneWay();
+		void doDupTwoWay();
+		void closeForOneWay();
+		void closeForTwoWay();
 		void handleChildProcess();
 	};
 
@@ -123,7 +132,7 @@ namespace http
 // The translated path of PATH_INFO (if any)
 
 // HTTP_ variables*
-// All HTTP headers from the request, uppercased, dashes replaced by
+// All HTTP headers from the request, upperCased, dashes replaced by
 // underscores, and prefixed with HTTP_ (e.g., HTTP_USER_AGENT, HTTP_COOKIE,
 // etc.)
 
