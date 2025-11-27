@@ -29,8 +29,6 @@ namespace http {
 		std::string _body;
 		std::map< std::string, std::string > _headers;
 
-		void addToHeader( std::string key, std::string value );
-
 	  public:
 		Response();
 		Response( const http::Request &request );
@@ -43,6 +41,7 @@ namespace http {
 
 		/// @brief Sets default HTTP headers including Date, Content-Length, and Connection type
 		void setDefaultHeaders();
+		void addToHeader( std::string key, std::string value );
 
 		std::string getContentType( const std::string &filePath );
 		std::string readFileContent( const std::string &filePath );

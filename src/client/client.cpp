@@ -93,3 +93,11 @@ void Client::setState( CLIENT_STATE state ) {
 CLIENT_STATE Client::getState() const {
 	return _state;
 }
+
+void Client::setSessionId( std::string &sessionId ) {
+	_sessionId = sessionId;
+}
+
+std::string Client::getSessionId() const {
+	return ( _sessionId );
+}

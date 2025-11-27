@@ -254,7 +254,7 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 	// Check if all data was sent
 	if ( writeBuffer.empty() ) {
 		std::string msg( "Server Response sent to client " );
-		msg += to_str( clientFd );
+		msg += to_str( clientFd ) + " sessionID: " + client.getSessionId();
 		if ( DEBUG ) {
 			msg += " ";                      //! For Debug
 			msg += client.getRequest().path; //! For Debug

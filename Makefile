@@ -32,7 +32,7 @@ OBJ_DIR         = obj/
 COMPILED_FILES  = 0
 LEN             = 0
 
-CLIENT_FUNC		= client clientManager ClientEventProcessor ClientEventProcessor_cgi parseRequestData
+CLIENT_FUNC		= client clientManager ClientEventProcessor ClientEventProcessor_cgi parseRequestData cookies
 AUTH_FUNC		= loginHandler
 CGI_FUNC		= executeCgi Cgi buildEnvStrings
 UTILS_FUNC		= utils getLocationFieldAsString debug

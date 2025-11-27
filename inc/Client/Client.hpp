@@ -58,6 +58,10 @@ class Client {
 	bool isCgiInProgress() const;
 	void setCgiInProgress( bool value );
 
+	// SessionID Functions
+	std::string getSessionId() const;
+	void setSessionId( std::string &sessionId );
+
 	// CGI process tracking
 	pid_t getCgiPid() const;
 	void setCgiPid( pid_t pid );
@@ -82,4 +86,8 @@ class Client {
 
 	pid_t _cgiPid;
 	int _cgiOutputFd;
+
+	std::string _sessionId;
 };
+
+void ensureSessionId( Client &client );
