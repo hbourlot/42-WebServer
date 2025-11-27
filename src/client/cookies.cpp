@@ -1,7 +1,6 @@
 #include "Client/ClientEventProcessor.hpp"
-#include <iomanip>
 #include <ctime>
-
+#include <iomanip>
 
 static std::string getSessionIdFromCookies( std::string cookieHeader ) {
 	std::string sessionId;

@@ -34,7 +34,6 @@ void http::Cgi::handleChildProcess() {
 
 	doDupOneWay();
 
-
 	// build argv
 	std::vector< char * > argv;
 	argv.push_back( const_cast< char * >( _filePath.c_str() ) );

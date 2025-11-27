@@ -64,12 +64,11 @@ void http::Cgi::registerPollFd( std::vector< pollfd > &fds ) const {
 http::Cgi::Cgi( const http::Request &request, std::string &filePath, const sockaddr_in &clientAddress,
                 const ServerConfig &serverInfo, Client *client )
     : _status(), _clientFD(), _request( request ), _response( Response( request ) ), _serverInfo( serverInfo ),
-      _clientAddress( clientAddress ), _bytesReceived(), _body(), _client( client ), _envp(),
-      _argv(), _envStrings() {
+      _clientAddress( clientAddress ), _bytesReceived(), _body(), _client( client ), _envp(), _argv(), _envStrings() {
 
-		Location* cgiLocation = _serverInfo.GetLocationByPath("/cgi-bin");
-		_filePath = cgiLocation->root + "/" + _request.GetFileName();
-		buildEnvStrings();
+	Location *cgiLocation = _serverInfo.GetLocationByPath( "/cgi-bin" );
+	_filePath = cgiLocation->root + "/" + _request.GetFileName();
+	buildEnvStrings();
 }
 
 http::Cgi::~Cgi() {

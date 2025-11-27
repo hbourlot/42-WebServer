@@ -28,13 +28,13 @@ struct Location {
 struct ServerConfig {
 	ServerConfig();
 
-	std::string host;                       			// Stores the host IP
-	int port;                               			// Stores the port to listen
-	std::string serverName;                 			// Stores the name server
-	std::map< int, std::string > errorPage; 			// Stores the error pages
-	int maxRequest;                         			// Stores the maximum requests that the client can do
-	std::vector< Location > locations;      			// Stores the routes of the HTML pages
-		Location* GetLocationByPath(std::string path); 	// Get the "location '/"path"' "
+	std::string host;                                // Stores the host IP
+	int port;                                        // Stores the port to listen
+	std::string serverName;                          // Stores the name server
+	std::map< int, std::string > errorPage;          // Stores the error pages
+	int maxRequest;                                  // Stores the maximum requests that the client can do
+	std::vector< Location > locations;               // Stores the routes of the HTML pages
+	Location *GetLocationByPath( std::string path ); // Get the "location '/"path"' "
 };
 
 struct Configs {

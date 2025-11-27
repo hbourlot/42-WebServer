@@ -28,9 +28,9 @@ static bool isCgirequest( const http::Request &request, const Location &location
 	return false;
 }
 
-http::ClientEventProcessor::ClientEventProcessor( TcpServer &server ) : _server( server ) {};
+http::ClientEventProcessor::ClientEventProcessor( TcpServer &server ) : _server( server ){};
 
-http::ClientEventProcessor::~ClientEventProcessor() {};
+http::ClientEventProcessor::~ClientEventProcessor(){};
 
 void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 

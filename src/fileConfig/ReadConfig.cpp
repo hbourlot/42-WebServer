@@ -14,13 +14,10 @@ ServerConfig::ServerConfig() {
 	maxRequest = 0;
 }
 
-Location* ServerConfig::GetLocationByPath(std::string path)
-{
-	for (int curLocationIdx = 0; curLocationIdx < locations.size(); curLocationIdx++)
-	{
-		if (locations[curLocationIdx].path == path)
-		{
-			return &locations[curLocationIdx];
+Location *ServerConfig::GetLocationByPath( std::string path ) {
+	for ( int curLocationIdx = 0; curLocationIdx < locations.size(); curLocationIdx++ ) {
+		if ( locations[ curLocationIdx ].path == path ) {
+			return &locations[ curLocationIdx ];
 		}
 	}
 	return NULL;
