@@ -123,9 +123,9 @@ bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerC
 		body += line + "\n";
 	clientRequest.body = body;
 
-	if ( clientRequest.headers.count( "Content-length" ) ) {
-		size_t contentLength = std::strtoul( clientRequest.headers[ "Content-length" ].c_str(), NULL, 10 );
-		if ( contentLength > serverInfo.maxRequest ) {
+	if ( clientRequest.headers.count( "Content-Length" ) ) {
+		size_t contentLength = std::strtoul( clientRequest.headers[ "Content-Length" ].c_str(), NULL, 10 );
+		if ( contentLength > serverInfo.maxRequest * 1024 * 1024 ) {
 			client.setState( PARSE_TOO_LARGE );
 			return true;
 		}

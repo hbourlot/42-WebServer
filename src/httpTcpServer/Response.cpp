@@ -135,8 +135,8 @@ void http::Response::setDefaultHeaders() {
 	std::ostringstream oss;
 	oss << _body.size();
 	addToHeader( "Content-Length", oss.str() );
-
-	addToHeader( _connectionType.first, _connectionType.second );
+	if ( !_connectionType.first.empty() )
+		addToHeader( _connectionType.first, _connectionType.second );
 }
 
 std::string http::Response::buildResponseString() {
@@ -205,6 +205,7 @@ void http::Response::buildErrorResponse( const HttpStatusCode &status, const Ser
 	}
 	buildResponse( status, createErrorBody( status ) );
 	addToHeader( "Content-Type", "text/html" );
+	addToHeader( "Connection", "keep-alive" );
 }
 void http::Response::buildRedirect( const HttpStatusCode &status, const std::string &url ) {
 	buildResponse( status, "" );

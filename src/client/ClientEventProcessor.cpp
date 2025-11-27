@@ -143,7 +143,7 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 
 bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STATE state ) {
 	http::Response &response = client.getResponse();
-
+	std::cout << state << std::endl;
 	switch ( state ) {
 	case READ_ERROR:
 		response.buildErrorResponse( HTTP_SERVER_ERR, _server._serverInfo );
@@ -274,6 +274,7 @@ bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
 	const int MAX_SENDS_PER_EVENT = 3;
 	int sendCount = 0;
 	std::string &writeBuffer = client.getWriteBuffer();
+	// std::cout << "writeBuffer: " << writeBuffer << std::endl;
 
 	// Send up to MAX_SENDS_PER_EVENT times per poll event
 	while ( sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty() ) {
