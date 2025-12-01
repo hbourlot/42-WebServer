@@ -127,7 +127,7 @@ bonus: all
 # Shortcuts
 r:
 	@make -s
-	@./$(NAME) ./conf_files/good/webpage.conf
+	@./$(NAME) ./conf_files/good/chat2.conf
 
 v:
 	@make -s
@@ -144,3 +144,80 @@ d: debug
 fc: fclean
 
 c: clean
+
+# Testing bad config formats
+1:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/badExtension.xaml
+
+2:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/CheckingComment.conf
+
+3:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/doubleBracket.conf
+
+4:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/empty.conf.txt
+
+5:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/empty.txt.conf
+
+6:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/MissingInformation.conf
+
+7:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/no_dote
+
+8:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/no_type.
+
+9:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/noClosingBracket.conf
+
+10:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/NoErrorPage.conf
+
+11:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/NoLocation.conf
+
+12:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/NoOpenningLocation.conf
+
+13:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/notOpenningServer.conf
+
+14:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/noReadPermission.conf
+
+15:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/DoubleLocation.conf
+
+16:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/DoubleServer.conf
+
+17:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/LocationWithNoPath.conf
+
+18:
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/bad/LocationWithNoRoot.conf
+
+
+
+
