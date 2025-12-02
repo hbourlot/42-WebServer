@@ -91,12 +91,12 @@ http::Response::Response( const http::Request &request ) : _protocol( request.se
 
 	if ( it != request.headers.end() ) {
 		std::string val = it->second;
-		_connectionType = std::make_pair( "Connection", it->second );
+		_connectionType = std::make_pair( std::string( "Connection" ), it->second );
 	} else {
 		if ( _protocol == "HTTP/1.1" )
-			_connectionType = std::make_pair( "Connection", "keep-alive" );
+			_connectionType = std::make_pair( std::string( "Connection" ), std::string( "keep-alive" ) );
 		else
-			_connectionType = std::make_pair( "Connection", "close" );
+			_connectionType = std::make_pair( std::string( "Connection" ), std::string( "close" ) );
 	}
 
 	std::map< std::string, std::string >::const_iterator itRange = request.headers.find( "Range" );
@@ -205,7 +205,8 @@ void http::Response::buildErrorResponse( const HttpStatusCode &status, const Ser
 	}
 	buildResponse( status, createErrorBody( status ) );
 	addToHeader( "Content-Type", "text/html" );
-	addToHeader( "Connection", "keep-alive" );
+	if ( status.code.at( 0 ) == '4' || status.code.at( 0 ) == '5' )
+		addToHeader( "Connection", "close" );
 }
 void http::Response::buildRedirect( const HttpStatusCode &status, const std::string &url ) {
 	buildResponse( status, "" );
@@ -338,7 +339,11 @@ std::string http::Response::getContentType( const std::string &filePath ) {
 }
 
 bool http::Response::shouldCloseConnection() {
-	if ( _connectionType.second == "close" )
-		return ( true );
+	std::map< std::string, std::string >::const_iterator it = _headers.find( "Connection" );
+	if ( it != _headers.end() ) {
+		if ( it->second == "close" )
+			return true;
+		return false;
+	}
 	return ( false );
 }

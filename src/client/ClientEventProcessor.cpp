@@ -72,10 +72,11 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 
 		if ( bytesReceived > 0 ) {
 			// Check if we exceed max body size
-			if ( client.getReadBuffer().size() + bytesReceived > CLIENT_MAX_BODY_SIZE ) {
-				client.setState( PARSE_TOO_LARGE );
-				return false;
-			}
+			// if ( client.getReadBuffer().size() + bytesReceived > CLIENT_MAX_BODY_SIZE ) {
+			// 	client.setState( PARSE_TOO_LARGE );
+			// 	Logs::log( LOGS_ERROR, "readFromSocket Parse_Too_Large" );
+			// 	return false;
+			// }
 
 			client.appendToReadBuffer( std::string( buffer, static_cast< size_t >( bytesReceived ) ) );
 			dataReceived = true;
@@ -143,7 +144,7 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 
 bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STATE state ) {
 	http::Response &response = client.getResponse();
-	std::cout << state << std::endl;
+
 	switch ( state ) {
 	case READ_ERROR:
 		response.buildErrorResponse( HTTP_SERVER_ERR, _server._serverInfo );
