@@ -69,3 +69,30 @@ std::string to_str( int n ) {
 	ss << n;
 	return ss.str();
 }
+
+bool containBrackets(std::string &line, bool &state)
+{
+	if (line.find('#') != std::string::npos) // Check if it is a comment
+		return true;
+
+	if (line.find('{') != std::string::npos)
+	{
+		if (state != true)
+			state = true;
+		
+		else
+			return false; // Return false, if something is wrong in parsing
+	}
+	
+	else if (line.find('}' != std::string::npos))
+	{
+		if (state != false)
+			state = false;
+	
+		else
+			return false; // Return false, if something is wrong in parsing
+
+	}
+
+	return true;
+}

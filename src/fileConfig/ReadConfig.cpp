@@ -63,8 +63,10 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 	std::string trimedLine;  // Stores the atribute of the server
 	ServerConfig server;     // Variable to save all the information
 
+	bool IsServerOpen = false;
+	ContainBrackets(line, &IsServerOpen);
 	server.port = 0;
-	server.maxRequest = 10;                  // Set the max value by default
+	server.maxRequest = 10;	                 // Set the max value by default
 	while ( std::getline( confFd, line ) ) { // Finish the server config block
 		noSpaceLine = removeSpace( line );   // Removes the first spaces
 
@@ -133,7 +135,7 @@ bool ReadConfig::setConfigs( char *conf, Configs &configs ) {
 
 void ReadConfig::setDefaultServer( ServerConfig &server ) {
 	if ( server.host.empty() ) {
-		std::cout << "Setting default host 127.0.0.1 ✅" << std::cout;
+		std::cout << "Setting default host 127.0.0.1 ✅" << std::endl;
 		server.host = "127.0.0.1";
 	}
 
