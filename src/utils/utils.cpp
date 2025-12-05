@@ -70,27 +70,47 @@ std::string to_str( int n ) {
 	return ss.str();
 }
 
-bool containBrackets(std::string &line, bool &state)
+
+// Returns false, if the state is the same. Otherwise we return false
+bool containBrackets(std::string &line, bool &state, std::string extraStringToFind)
 {
+	// If we find the new string
+    if (!extraStringToFind.empty())
+        return (line.find(extraStringToFind) != std::string::npos);
+		
 	if (line.find('#') != std::string::npos) // Check if it is a comment
 		return true;
+		
+	int openCount = 0;
+	int closeCount = 0;
+	for (size_t i = 0; i < line.size(); ++i)
+    {
+        if (line[i] == '{') openCount++;
+        else if (line[i] == '}') closeCount++;
+    }
 
-	if (line.find('{') != std::string::npos)
+	if (openCount > 1 || closeCount > 1 // If we have something like "server {{{{{"
+		|| (openCount > 0 && closeCount > 0)) // If we have something like "server }{"
+		return false;
+		
+
+	if (closeCount > 0)
 	{
-		if (state != true)
+		if (state == true)
+			state = false;
+		
+		else
+		return false; // Return false, if something the state is the same
+	}
+	
+	
+	else if (openCount > 0)
+	{
+		if (state == false)
 			state = true;
 		
 		else
-			return false; // Return false, if something is wrong in parsing
-	}
-	
-	else if (line.find('}' != std::string::npos))
-	{
-		if (state != false)
-			state = false;
-	
-		else
-			return false; // Return false, if something is wrong in parsing
+			return false; // Return false, if something the state is the same
 
 	}
 

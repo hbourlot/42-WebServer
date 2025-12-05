@@ -1,6 +1,7 @@
 #include "Config/ReadConfig.hpp"
 #include "Config/SetLocations.hpp"
 #include <string>
+#include <utils.hpp>
 
 #define HOST 1
 #define PORT 2
@@ -61,13 +62,22 @@ int getTypeServer( std::string &trimedLine ) { // Return the type of information
 bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Configs &configs ) {
 	std::string noSpaceLine; // Gets the string without the initial spaces
 	std::string trimedLine;  // Stores the atribute of the server
+	std::string emptyString;  // Just an empty string
 	ServerConfig server;     // Variable to save all the information
 
 	bool IsServerOpen = false;
-	ContainBrackets(line, &IsServerOpen);
+
+	// Check if the first line opens the brackets or not
+	if (containBrackets(line, IsServerOpen, emptyString) == false)
+	{
+		return false; 
+	}	
+
 	server.port = 0;
 	server.maxRequest = 10;	                 // Set the max value by default
 	while ( std::getline( confFd, line ) ) { // Finish the server config block
+		containBrackets(line, IsServerOpen, emptyString);	// Check if the first line is 
+		
 		noSpaceLine = removeSpace( line );   // Removes the first spaces
 
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) )
@@ -122,8 +132,8 @@ bool ReadConfig::setConfigs( char *conf, Configs &configs ) {
 	confFd.open( conf ); // Open the config file.
 
 	while ( std::getline( confFd, line ) ) {
-		if ( removeSpace( line ) ==
-		     "server {" ) { // Removes the spaces before the name and return the value to check if it is a server
+		if ( containBrackets(line, inServer, "server") == true) 
+		{ // Removes the spaces before the name and return the value to check if it is a server
 			if ( !ReadConfig::setServerConfig(
 			         confFd, line, configs ) ) // Will check if everything is OK when we get the server config info
 				return ( false );
