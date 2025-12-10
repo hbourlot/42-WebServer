@@ -1,4 +1,5 @@
 #include "Config/SetLocations.hpp"
+#include <utils.hpp>
 
 #define METHODS 7
 #define ROOT 8
@@ -110,13 +111,26 @@ int getCgi( std::string noSpaceLine, Location &location, int cgiInfo ) {
 bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, ServerConfig &server ) {
 	std::string noSpaceLine; // Gets the string without the initial spaces
 	std::string trimedLine;  // Stores the atribute of the Location
+	std::string emptyString;
 	Location location;
+	bool IsServerOpen;
+
 
 	location.path = locationPath( line ); // Sets the Location path
 
 	int atIndexFlag = 0; // Setup a flag for autoIndex, to check for CGI
 
+	// if (containBrackets(line, IsServerOpen, emptyString) == false)
+	// {
+	// 	return false; 
+	// }	
+
 	while ( std::getline( confFd, line ) ) {
+		// if (containBrackets(line, IsServerOpen, emptyString) == false)
+		// {
+		// 	return false; 
+		// }	
+
 		noSpaceLine = removeSpace( line );
 
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) ) // Checks if have more information after the limitter

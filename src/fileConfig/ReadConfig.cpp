@@ -68,16 +68,22 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 	bool IsServerOpen = false;
 
 	// Check if the first line opens the brackets or not
-	if (containBrackets(line, IsServerOpen, emptyString) == false)
+	if (containBrackets(line, IsServerOpen, emptyString) == false )
 	{
+		std::cout << "Estamos aqui" << std::endl;
 		return false; 
 	}	
 
 	server.port = 0;
 	server.maxRequest = 10;	                 // Set the max value by default
 	while ( std::getline( confFd, line ) ) { // Finish the server config block
-		containBrackets(line, IsServerOpen, emptyString);	// Check if the first line is 
-		
+		if (containBrackets(line, IsServerOpen, emptyString) == false)	// Check if the first line is 
+		{
+			std::cout << "Estamos aqui 2 " << line << std::endl;
+
+			return false;
+		}
+
 		noSpaceLine = removeSpace( line );   // Removes the first spaces
 
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) )
@@ -136,7 +142,10 @@ bool ReadConfig::setConfigs( char *conf, Configs &configs ) {
 		{ // Removes the spaces before the name and return the value to check if it is a server
 			if ( !ReadConfig::setServerConfig(
 			         confFd, line, configs ) ) // Will check if everything is OK when we get the server config info
-				return ( false );
+				{
+					std::cout << "Estamos aqui 3" << std::endl;
+					return ( false );
+				}
 		}
 	}
 	confFd.close();

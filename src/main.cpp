@@ -15,7 +15,12 @@ int main( int argc, char **argv, char **envp ) {
 		
 		// Creates a config object
 		// Reads the configuration file
-		ReadConfig::setConfigs( argv[ 1 ], configuration );
+		if (ReadConfig::setConfigs( argv[ 1 ], configuration ) == false)
+		{
+			std::cout << "Failed to set the configs" << std::endl;
+			exit(-1);
+		}
+
 	} catch (const std::exception &exception)
 	{
 		std::cout << "Failed to set the configurations: " << exception.what() << std::endl;

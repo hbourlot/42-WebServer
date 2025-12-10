@@ -116,3 +116,20 @@ bool containBrackets(std::string &line, bool &state, std::string extraStringToFi
 
 	return true;
 }
+
+
+void split_by_string_no_sep(const std::string &s,
+                            const std::string &sep,
+                            std::string &left,
+                            std::string &right)
+{
+    left = "";
+    right = "";
+
+    std::size_t pos = s.find(sep);
+    if (pos == std::string::npos)
+        return;
+
+    left = s.substr(0, pos);
+    right = s.substr(pos + sep.size());
+}
