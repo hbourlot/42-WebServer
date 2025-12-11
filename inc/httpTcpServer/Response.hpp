@@ -38,6 +38,7 @@ namespace http {
 
 		// function Member
 		std::string buildResponseString();
+		const std::map< std::string, std::string > &getHeaders() const;
 
 		bool shouldCloseConnection();
 

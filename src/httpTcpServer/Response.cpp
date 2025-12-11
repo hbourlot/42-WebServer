@@ -157,6 +157,10 @@ std::string http::Response::buildResponseString() {
 	return responseString.str();
 }
 
+const std::map< std::string, std::string > &http::Response::getHeaders() const {
+	return ( _headers );
+}
+
 // Here function
 
 void http::Response::buildResponse( const HttpStatusCode &status, const std::string &body ) {

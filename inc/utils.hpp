@@ -1,10 +1,12 @@
 #pragma once
 #include <iostream>
+#include <map>
 
 struct Location;
 
 namespace http {
 	struct Request;
+	class Response;
 } // namespace http
 
 std::string dateString();
@@ -15,6 +17,6 @@ std::string getFilePath( const std::string &path, const Location &location );
 std::string joinPath( const std::string &base, const std::string &sub );
 
 // !DEBUG
-void printHttpHeaders( const http::Request &request );
+void printHttpHeaders( const std::map <std::string, std::string> &headers );
 
 void printLocation( const Location &location );
