@@ -42,15 +42,21 @@ void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 
 	if ( !readFromSocket( *client ) )
 		return;
-	if ( !parseRequestData( *client, _server._serverInfo ) )
+	if ( !parseRequestData( *client, _server._serverInfo ) ) {
+		if ( client->getState() == PARSE_TOO_LARGE ) {
+			pfd.events &= ~POLLIN;
+			pfd.events |= POLLOUT;
+		}
 		return;
+	}
 	pfd.events |= POLLOUT; // Setting to POLL OUT
 };
 
 void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int index ) {
 
-	if ( client->getCgiPid() == -1 && client->getState() != CGI_COMPLETED && !processRequest( *client ) ) {
-		return;
+	if ( client->getCgiPid() == -1 && client->getState() != CGI_COMPLETED ) {
+		if ( !processRequest( *client ) )
+			return;
 	}
 
 	if ( handleResponse( pfd, *client ) ) {
@@ -112,6 +118,7 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 }
 
 void http::ClientEventProcessor::closeConnection( size_t index ) {
+	sleep( 1 );
 	_server.closeClientConnection( index );
 }
 
@@ -226,6 +233,7 @@ void http::ClientEventProcessor::processClientEvents( int index ) {
 	}
 
 	if ( _server._fds[ index ].revents & POLLOUT ) {
+		std::cout << "ENters here processWrite\n";
 		processWrite( _server._fds[ index ], client, index );
 	}
 }
@@ -275,7 +283,7 @@ bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
 	const int MAX_SENDS_PER_EVENT = 3;
 	int sendCount = 0;
 	std::string &writeBuffer = client.getWriteBuffer();
-	// std::cout << "writeBuffer: " << writeBuffer << std::endl;
+	std::cout << "writeBuffer: " << writeBuffer << std::endl;
 
 	// Send up to MAX_SENDS_PER_EVENT times per poll event
 	while ( sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty() ) {

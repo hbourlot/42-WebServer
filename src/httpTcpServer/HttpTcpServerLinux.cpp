@@ -1,6 +1,6 @@
-#include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include "Client/ClientEventProcessor.hpp"
 #include "httpTcpServer/HttpStructs.hpp"
+#include "httpTcpServer/HttpTcpServerLinux.hpp"
 
 #include <arpa/inet.h>
 #include <cstddef>
@@ -259,6 +259,8 @@ namespace http {
 		msg += to_str( fd );
 
 		Logs::log( LOGS_ERROR, msg );
+
+		shutdown( fd, SHUT_WR );
 
 		close( fd );
 
