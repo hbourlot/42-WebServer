@@ -120,24 +120,31 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 
 	int atIndexFlag = 0; // Setup a flag for autoIndex, to check for CGI
 
-	// if (containBrackets(line, IsServerOpen, emptyString) == false)
-	// {
-	// 	return false; 
-	// }	
+	if (checkSplitString(line, "location", IsServerOpen) == false)
+	{
+		return false; 
+	}	
 
 	while ( std::getline( confFd, line ) ) {
-		// if (containBrackets(line, IsServerOpen, emptyString) == false)
-		// {
-		// 	return false; 
-		// }	
-
 		noSpaceLine = removeSpace( line );
 
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) ) // Checks if have more information after the limitter
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
 
 		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
+		
+		if (line.find("location") != std::string::npos)
+		{
+			if (containBrackets(line, IsServerOpen, emptyString) == false)
+				return false;
+		}
 
+		else
+		{
+			if (checkSplitString(line, "location", IsServerOpen) == false)
+				return false;
+		}
+		
 		if ( trimedLine[ 0 ] == '}' )
 			break;
 

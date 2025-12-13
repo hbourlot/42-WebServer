@@ -70,30 +70,32 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 	// Check if the first line opens the brackets or not
 	if (containBrackets(line, IsServerOpen, emptyString) == false )
 	{
-		std::cout << "Estamos aqui" << std::endl;
 		return false; 
 	}	
 
 	server.port = 0;
 	server.maxRequest = 10;	                 // Set the max value by default
 	while ( std::getline( confFd, line ) ) { // Finish the server config block
-		if (containBrackets(line, IsServerOpen, emptyString) == false)	// Check if the first line is 
-		{
-			std::cout << "Estamos aqui 2 " << line << std::endl;
-
-			return false;
-		}
-
+		
 		noSpaceLine = removeSpace( line );   // Removes the first spaces
-
+		
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) )
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
-
+		
 		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
-
+		
 		if ( trimedLine[ 0 ] == '}' ) // Finish the server info
 			break;
-
+		
+		// Check if we are going to location configs "location /upload"
+		// This serves to check if we have stuff like " } location /upload {"
+		// We close the last location config, and we open a new one
+		if (line.find("location") == std::string::npos)
+		{
+			if (containBrackets(line, IsServerOpen, emptyString) == false)
+				return false;
+		}
+		
 		switch ( getTypeServer( trimedLine ) ) {
 		case HOST:
 			server.host = getInfo( noSpaceLine ); // Get the information in string
@@ -136,19 +138,26 @@ bool ReadConfig::setConfigs( char *conf, Configs &configs ) {
 	std::ifstream confFd;
 	std::string line;
 	confFd.open( conf ); // Open the config file.
-
-	while ( std::getline( confFd, line ) ) {
-		if ( containBrackets(line, inServer, "server") == true) 
-		{ // Removes the spaces before the name and return the value to check if it is a server
-			if ( !ReadConfig::setServerConfig(
-			         confFd, line, configs ) ) // Will check if everything is OK when we get the server config info
-				{
-					std::cout << "Estamos aqui 3" << std::endl;
-					return ( false );
+	try
+	{
+		while ( std::getline( confFd, line ) ) {
+			if ( line.empty() == false && containBrackets(line, inServer, "server") == true) 
+			{ // Removes the spaces before the name and return the value to check if it is a server
+				if ( !ReadConfig::setServerConfig(
+					confFd, line, configs ) ) // Will check if everything is OK when we get the server config info
+					{
+						return ( false );
+					}
 				}
-		}
+			}
+	} catch (std::exception exception)
+	{
+		std::cerr << "Got an exception " << exception.what() << std::endl;
+		confFd.close();
 	}
 	confFd.close();
+	if (configs.servers.empty() == true)
+		return false;
 	return ( true );
 };
 

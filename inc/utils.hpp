@@ -19,3 +19,4 @@ bool containBrackets (std::string &line, bool &state, std::string extraWordToFin
 void printHttpHeaders( const http::Request &request );
 
 void printLocation( const Location &location );
+bool checkSplitString(const std::string &line, const std::string &sep, bool &isServerOpen);

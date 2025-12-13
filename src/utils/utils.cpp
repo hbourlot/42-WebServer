@@ -74,6 +74,7 @@ std::string to_str( int n ) {
 // Returns false, if the state is the same. Otherwise we return false
 bool containBrackets(std::string &line, bool &state, std::string extraStringToFind)
 {
+	return false;
 	// If we find the new string
     if (!extraStringToFind.empty())
         return (line.find(extraStringToFind) != std::string::npos);
@@ -117,19 +118,36 @@ bool containBrackets(std::string &line, bool &state, std::string extraStringToFi
 	return true;
 }
 
-
-void split_by_string_no_sep(const std::string &s,
-                            const std::string &sep,
-                            std::string &left,
-                            std::string &right)
+// This method is to check especific cases like " {{{ location / }}}"
+// This way we split the string by the location and see if we open him after
+// Only for location cases
+bool checkSplitString(const std::string &line,
+						const std::string &sep,
+						bool &isServerOpen)
 {
-    left = "";
-    right = "";
+    std::string left = "";
+    std::string right = "";
+	std::string empty = "";
 
-    std::size_t pos = s.find(sep);
+    std::size_t pos = line.find(sep);
     if (pos == std::string::npos)
-        return;
+        return true;
 
-    left = s.substr(0, pos);
-    right = s.substr(pos + sep.size());
+    left = line.substr(0, pos);
+    right = line.substr(pos + sep.size());
+
+	if (isServerOpen == true) // Since its already open, checks only the left 
+	{
+		if (containBrackets(left, isServerOpen, empty) == false)
+			return false;
+		return true;
+	}
+
+	if (isServerOpen == false) // Checks the right side if it is open in the same line " location /upload {"
+	{
+		if (containBrackets(right, isServerOpen, empty) == false)
+			return false;
+	}
+
+	return true;
 }
