@@ -113,18 +113,16 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 	std::string trimedLine;  // Stores the atribute of the Location
 	std::string emptyString;
 	Location location;
-	bool IsServerOpen;
+	bool IsLocationOpen = false;
 
 
 	location.path = locationPath( line ); // Sets the Location path
 
 	int atIndexFlag = 0; // Setup a flag for autoIndex, to check for CGI
-
-	if (checkSplitString(line, "location", IsServerOpen) == false)
+	if (containBrackets(line, IsLocationOpen, emptyString) == false)
 	{
 		return false; 
 	}	
-
 	while ( std::getline( confFd, line ) ) {
 		noSpaceLine = removeSpace( line );
 
@@ -133,16 +131,21 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 
 		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
 		
-		if (line.find("location") != std::string::npos)
+		if (line.find("location") == std::string::npos)
 		{
-			if (containBrackets(line, IsServerOpen, emptyString) == false)
+			if (containBrackets(line, IsLocationOpen, emptyString) == false)
+			{
 				return false;
+			}
 		}
-
+		
 		else
 		{
-			if (checkSplitString(line, "location", IsServerOpen) == false)
+			if (checkSplitString(line, "location", IsLocationOpen) == false)
+			{
 				return false;
+			}
+				
 		}
 		
 		if ( trimedLine[ 0 ] == '}' )

@@ -74,7 +74,6 @@ std::string to_str( int n ) {
 // Returns false, if the state is the same. Otherwise we return false
 bool containBrackets(std::string &line, bool &state, std::string extraStringToFind)
 {
-	return false;
 	// If we find the new string
     if (!extraStringToFind.empty())
         return (line.find(extraStringToFind) != std::string::npos);
@@ -92,7 +91,9 @@ bool containBrackets(std::string &line, bool &state, std::string extraStringToFi
 
 	if (openCount > 1 || closeCount > 1 // If we have something like "server {{{{{"
 		|| (openCount > 0 && closeCount > 0)) // If we have something like "server }{"
-		return false;
+		{
+			return false;
+		}
 		
 
 	if (closeCount > 0)
@@ -101,7 +102,9 @@ bool containBrackets(std::string &line, bool &state, std::string extraStringToFi
 			state = false;
 		
 		else
-		return false; // Return false, if something the state is the same
+		{
+			return false; // Return false, if something the state is the same
+		}
 	}
 	
 	
@@ -111,7 +114,9 @@ bool containBrackets(std::string &line, bool &state, std::string extraStringToFi
 			state = true;
 		
 		else
+		{
 			return false; // Return false, if something the state is the same
+		}
 
 	}
 

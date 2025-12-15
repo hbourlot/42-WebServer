@@ -76,7 +76,6 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 	server.port = 0;
 	server.maxRequest = 10;	                 // Set the max value by default
 	while ( std::getline( confFd, line ) ) { // Finish the server config block
-		
 		noSpaceLine = removeSpace( line );   // Removes the first spaces
 		
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) )
@@ -96,34 +95,44 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 				return false;
 		}
 		
-		switch ( getTypeServer( trimedLine ) ) {
-		case HOST:
-			server.host = getInfo( noSpaceLine ); // Get the information in string
-			break;
+		else
+		{
+			if (checkSplitString(line, "location", IsServerOpen) == false)
+				return false;
+		}
 
-		case PORT:
-			server.port = std::atoi( getInfo( noSpaceLine ).c_str() ); // Convert the string into a int
-			break;
-
-		case SERVER_NAME:
-			server.serverName = getInfo( noSpaceLine ); // Gets the server name
-			break;
-
-		case CLIENT_MAX_BDY:
-			if ( getInfo( noSpaceLine ) != "10M" ) // Verify if the value is valid
-				throw std::invalid_argument( "Error: Invalid client_max_body, the only one is 10\n" );
-			break;
-
-		case ERROR_PAGE:
-			getErrorPage( noSpaceLine, server );
-			break;
-
-		case LOCATION:
-			SetLocation::setLocationConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server );
-			break;
-
-		default:
-			break;
+		if (IsServerOpen == true)
+		{
+			switch ( getTypeServer( trimedLine ) ) {
+				case HOST:
+					server.host = getInfo( noSpaceLine ); // Get the information in string
+					break;
+				
+				case PORT:
+					server.port = std::atoi( getInfo( noSpaceLine ).c_str() ); // Convert the string into a int
+					break;
+				
+				case SERVER_NAME:
+					server.serverName = getInfo( noSpaceLine ); // Gets the server name
+					break;
+				
+				case CLIENT_MAX_BDY:
+					if ( getInfo( noSpaceLine ) != "10M" ) // Verify if the value is valid
+						throw std::invalid_argument( "Error: Invalid client_max_body, the only one is 10\n" );
+					break;
+				
+				case ERROR_PAGE:
+					getErrorPage( noSpaceLine, server );
+					break;
+				
+				case LOCATION:
+					if (SetLocation::setLocationConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server ) == false)
+						return false;
+						break;
+				
+				default:
+					break;
+			}
 		}
 		noSpaceLine = removeSpace( line );
 		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
