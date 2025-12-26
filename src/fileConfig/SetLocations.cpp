@@ -17,16 +17,21 @@ Location::Location() {
 	// String are automatically initialized;
 }
 
-std::string locationPath( const std::string &line ) {
-	size_t start = line.find_first_not_of( ' ' ); // Skips all the spaces
-	if ( start == std::string::npos )
-		return "";
+std::string locationPath(const std::string &line)
+{
+    size_t start = line.find('/'); // Start where we have to find the path
+    if (start == std::string::npos) // If doesn't find any start returns null
+        return "";
 
-	size_t end = line.find_first_of( " {", start ); // Will find the ' {'
-	if ( end == std::string::npos )
-		end = line.length();
+    size_t end = start;
+    while (end < line.size() && 
+           !std::isspace(line[end]) &&
+           line[end] != '{') // We count the end of the path until we find a 'space' or '{', for cases like "location /cgi bin/hello"
+    {
+        end++;
+    }
 
-	return line.substr( start, end - start );
+    return line.substr(start, end - start);
 }
 
 void getMethods( std::string noSpaceLine,
@@ -115,8 +120,10 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 	Location location;
 	bool IsLocationOpen = false;
 
-
 	location.path = locationPath( line ); // Sets the Location path
+
+	if (location.path.size() == 0)
+		return false;
 
 	int atIndexFlag = 0; // Setup a flag for autoIndex, to check for CGI
 	if (containBrackets(line, IsLocationOpen, emptyString) == false)

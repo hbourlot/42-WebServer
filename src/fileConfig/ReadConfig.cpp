@@ -77,7 +77,6 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 	server.maxRequest = 10;	                 // Set the max value by default
 	while ( std::getline( confFd, line ) ) { // Finish the server config block
 		noSpaceLine = removeSpace( line );   // Removes the first spaces
-		
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) )
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
 		
@@ -91,6 +90,7 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 		// We close the last location config, and we open a new one
 		if (line.find("location") == std::string::npos)
 		{
+
 			if (containBrackets(line, IsServerOpen, emptyString) == false)
 				return false;
 		}
@@ -117,8 +117,7 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 					break;
 				
 				case CLIENT_MAX_BDY:
-					if ( getInfo( noSpaceLine ) != "10M" ) // Verify if the value is valid
-						throw std::invalid_argument( "Error: Invalid client_max_body, the only one is 10\n" );
+					server.maxRequest = getMaxRequestBody( noSpaceLine);
 					break;
 				
 				case ERROR_PAGE:
@@ -166,7 +165,7 @@ bool ReadConfig::setConfigs( char *conf, Configs &configs ) {
 	}
 	confFd.close();
 	if (configs.servers.empty() == true)
-		return false;
+		return false;	
 	return ( true );
 };
 
