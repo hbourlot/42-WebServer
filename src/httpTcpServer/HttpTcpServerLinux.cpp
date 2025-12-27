@@ -159,7 +159,6 @@ namespace http {
 
 	void TcpServer::removeDeadConnections( ClientEventProcessor &processor, int &index ) {
 
-		// for ( size_t i = 1; i < _fds.size(); ++i ) {
 		if ( _fds[ index ].revents & ( POLLHUP | POLLERR | POLLNVAL ) ) {
 			SocketFD fd = _fds[ index ].fd;
 
@@ -194,12 +193,7 @@ namespace http {
 			_fds.erase( _fds.begin() + index );
 			--index;
 		}
-		// }
 	}
-
-	// void TcpServer::removeCgiDeadConnection( ClientEventProcessor &processor, ) {
-	// 	for ()
-	// }
 
 	void TcpServer::runLoop( int timeOut ) {
 		ClientEventProcessor processor( *this );
@@ -259,8 +253,6 @@ namespace http {
 		msg += to_str( fd );
 
 		Logs::log( LOGS_ERROR, msg );
-
-		shutdown( fd, SHUT_WR );
 
 		close( fd );
 

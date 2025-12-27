@@ -42,11 +42,29 @@ void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 
 	if ( !readFromSocket( *client ) )
 		return;
-	if ( !parseRequestData( *client, _server._serverInfo ) ) {
-		if ( client->getState() == PARSE_TOO_LARGE ) {
+
+	if ( client->_discardingBody ) {
+		size_t available = client->getReadBuffer().size();
+
+		if ( available >= client->_bytesToDiscard ) {
+			client->consumeReadBuffer( client->_bytesToDiscard );
+			client->_bytesToDiscard = 0;
+			client->_discardingBody = false;
+
+			client->getResponse() = Response( client->getRequest() );
+			ensureSessionId( *client );
+			client->setState( PARSE_TOO_LARGE );
+
 			pfd.events &= ~POLLIN;
 			pfd.events |= POLLOUT;
+		} else {
+			client->_bytesToDiscard -= available;
+			client->clearReadBuffer();
 		}
+		return;
+	}
+
+	if ( !parseRequestData( *client, _server._serverInfo ) ) {
 		return;
 	}
 	pfd.events |= POLLOUT; // Setting to POLL OUT
@@ -77,13 +95,6 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 		ssize_t bytesReceived = recv( fd, buffer, BUFFER_SIZE, 0 );
 
 		if ( bytesReceived > 0 ) {
-			// Check if we exceed max body size
-			// if ( client.getReadBuffer().size() + bytesReceived > CLIENT_MAX_BODY_SIZE ) {
-			// 	client.setState( PARSE_TOO_LARGE );
-			// 	Logs::log( LOGS_ERROR, "readFromSocket Parse_Too_Large" );
-			// 	return false;
-			// }
-
 			client.appendToReadBuffer( std::string( buffer, static_cast< size_t >( bytesReceived ) ) );
 			dataReceived = true;
 			readCount++;

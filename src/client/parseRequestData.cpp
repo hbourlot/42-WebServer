@@ -123,11 +123,12 @@ bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerC
 		contentLength = std::strtoul( clientRequest.headers[ "Content-Length" ].c_str(), NULL, 10 );
 
 		if ( contentLength > ( serverInfo.maxRequest * 1024 * 1024 ) ) {
-			client.setState( PARSE_TOO_LARGE );
-			client.getResponse() = Response( clientRequest );
-			ensureSessionId( client );
+			// client.setState( PARSE_TOO_LARGE );
+			// client.getResponse() = Response( clientRequest );
+			// ensureSessionId( client );
+			client._bytesToDiscard = contentLength;
+			client._discardingBody = true;
 
-			shutdown( client.getFd(), SHUT_RD );
 			Logs::log( LOGS_ERROR, "Body size it's above size allowed " + to_str( client.getFd() ) );
 			return false;
 		}

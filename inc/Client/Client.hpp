@@ -69,6 +69,11 @@ class Client {
 	void setCgiOutputFd( int fd );
 	void storeCgiInfo( pid_t pid, int fd );
 
+	void consumeReadBuffer( size_t n );
+
+	size_t _bytesToDiscard;
+	bool _discardingBody;
+
   private:
 	http::TcpServer &_server;
 
