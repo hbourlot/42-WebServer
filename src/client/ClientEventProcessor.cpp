@@ -244,7 +244,6 @@ void http::ClientEventProcessor::processClientEvents( int index ) {
 	}
 
 	if ( _server._fds[ index ].revents & POLLOUT ) {
-		std::cout << "ENters here processWrite\n";
 		processWrite( _server._fds[ index ], client, index );
 	}
 }
@@ -294,7 +293,6 @@ bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
 	const int MAX_SENDS_PER_EVENT = 3;
 	int sendCount = 0;
 	std::string &writeBuffer = client.getWriteBuffer();
-	std::cout << "writeBuffer: " << writeBuffer << std::endl;
 
 	// Send up to MAX_SENDS_PER_EVENT times per poll event
 	while ( sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty() ) {
