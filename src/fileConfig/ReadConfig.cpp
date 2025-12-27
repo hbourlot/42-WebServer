@@ -9,6 +9,7 @@
 #define CLIENT_MAX_BDY 4
 #define ERROR_PAGE 5
 #define LOCATION 6
+#define ROOT 7
 
 ServerConfig::ServerConfig() {
 	port = 0;
@@ -56,6 +57,8 @@ int getTypeServer( std::string &trimedLine ) { // Return the type of information
 		return ERROR_PAGE;
 	else if ( trimedLine == "location" )
 		return LOCATION;
+	else if ( trimedLine == "root")
+		return ROOT;
 	return 7;
 }
 
@@ -104,6 +107,9 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 		if (IsServerOpen == true)
 		{
 			switch ( getTypeServer( trimedLine ) ) {
+				case ROOT:
+					server.root = getInfo ( noSpaceLine ); // Get the root path
+					break;
 				case HOST:
 					server.host = getInfo( noSpaceLine ); // Get the information in string
 					break;

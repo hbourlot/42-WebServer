@@ -92,6 +92,7 @@ bool containBrackets(std::string &line, bool &state, std::string extraStringToFi
 	if (openCount > 1 || closeCount > 1 // If we have something like "server {{{{{"
 		|| (openCount > 0 && closeCount > 0)) // If we have something like "server }{"
 		{
+			std::cerr << "More than one bracket in the same line" << std::endl;
 			return false;
 		}
 		
@@ -103,6 +104,7 @@ bool containBrackets(std::string &line, bool &state, std::string extraStringToFi
 		
 		else
 		{
+			std::cerr << "In configuration, is trying to close when its already closed" << std::endl;
 			return false; // Return false, if something the state is the same
 		}
 	}
@@ -115,6 +117,7 @@ bool containBrackets(std::string &line, bool &state, std::string extraStringToFi
 		
 		else
 		{
+			std::cerr << "In configuration, is trying to open when its already open" << std::endl;
 			return false; // Return false, if something the state is the same
 		}
 
