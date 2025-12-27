@@ -147,74 +147,92 @@ c: clean
 
 # Testing bad config formats
 1:
+	@echo "Bad extension test"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/badExtension.xaml
 
 2:
+	@echo "Checking Comment"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/CheckingComment.conf
 
 3:
+	@echo "Double bracket"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/doubleBracket.conf
 
 4:
+	@echo "Empty file .txt"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/empty.conf.txt
 
 5:
+	@echo "Empty .conf"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/empty.txt.conf
 
 6:
+	@echo "Missing information"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/MissingInformation.conf
 
 7:
+	@echo "No dote"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/no_dote
 
 8:
+	@echo "No type ."
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/no_type.
 
 9:
+	@echo "No closing brackets"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/noClosingBracket.conf
 
 10:
+	@echo "No error page"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/NoErrorPage.conf
 
 11:
+	@echo "No location"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/NoLocation.conf
 
 12:
+	@echo "No openning location"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/NoOpenningLocation.conf
 
 13:
+	@echo "No openning server"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/notOpenningServer.conf
 
 14:
+	@echo "No read permission"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/noReadPermission.conf
 
 15:
+	@echo "Double location"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/DoubleLocation.conf
 
 16:
+	@echo "Double server"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/DoubleServer.conf
 
 17:
+	@echo "Location without path"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/LocationWithNoPath.conf
 
 18:
+	@echo "Location with no root"
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/LocationWithNoRoot.conf
 
