@@ -59,7 +59,7 @@ int getTypeServer( std::string &trimedLine ) { // Return the type of information
 		return LOCATION;
 	else if ( trimedLine == "root")
 		return ROOT;
-	return 7;
+	return 100;
 }
 
 bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Configs &configs ) {
@@ -157,8 +157,8 @@ bool ReadConfig::setConfigs( char *conf, Configs &configs ) {
 		while ( std::getline( confFd, line ) ) {
 			if ( line.empty() == false && containBrackets(line, inServer, "server") == true) 
 			{ // Removes the spaces before the name and return the value to check if it is a server
-				if ( !ReadConfig::setServerConfig(
-					confFd, line, configs ) ) // Will check if everything is OK when we get the server config info
+				if ( ReadConfig::setServerConfig(
+					confFd, line, configs ) == false ) // Will check if everything is OK when we get the server config info
 					{
 						return ( false );
 					}
