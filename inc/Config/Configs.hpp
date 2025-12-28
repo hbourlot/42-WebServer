@@ -28,6 +28,7 @@ struct Location {
 struct ServerConfig {
 	ServerConfig();
 
+	std::string root;								 // Stores the root path
 	std::string host;                                // Stores the host IP
 	int port;                                        // Stores the port to listen
 	std::string serverName;                          // Stores the name server

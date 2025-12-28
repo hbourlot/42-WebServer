@@ -52,10 +52,10 @@ std::string getInfo( std::string &noSpaceLine ) {
 	for ( i = noSpaceLine.find( ' ' ); noSpaceLine[ i ] == ' ';
 	      i++ ) // This will remove extra spaces after attribute ex: "port      8080"
 		continue;
-
+		
 	if ( noSpaceLine.find( ';' ) == std::string::npos ) // If don't find the ';' throw an error
 		throw std::invalid_argument( "Error: Invalid end of line, missing ';' at the end\n" );
-
+		
 	return noSpaceLine.substr( i, noSpaceLine.find( ';' ) - i ); // '- i' I have to discard the 'i' size
 }
 
