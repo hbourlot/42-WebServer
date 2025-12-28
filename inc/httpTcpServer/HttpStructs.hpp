@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpStructs.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hugobourlot <hugobourlot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2025/11/27 16:06:32 by joralves         ###   ########.fr       */
+/*   Updated: 2025/12/27 15:16:48 by hugobourlot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ namespace http {
 	struct Request {
 		std::string method;
 		std::string path;
-		std::string serverProtocol; // For Cgi
+		std::string serverProtocol;
 		std::string pathInfo;       // For Cgi
 		std::string pathTranslated;
 		std::map< std::string, std::string > headers;

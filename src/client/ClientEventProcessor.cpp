@@ -1,10 +1,15 @@
 #include "Client/ClientEventProcessor.hpp"
 
-static bool isCgirequest( const http::Request &request, const Location &location ) {
+static bool isCgirequest( const http::Request& request, const Location& location ) {
 
 	if ( location.cgi_extension.empty() ) { // Checking if location has CGI configured
 		return false;
 	}
+
+	for ( size_t i = 0; i < location.cgi_extension.size(); ++i )
+		if ( location.cgi_extension[ i ] == ".cgi" ) { // ".cgi" accept any kind of cgi
+			return true;
+		}
 
 	// Extract file extension from the request path
 	std::string path = request.path;
@@ -18,8 +23,7 @@ static bool isCgirequest( const http::Request &request, const Location &location
 
 	// Check if the extension is in the location's CGI extensions
 	for ( size_t i = 0; i < location.cgi_extension.size(); ++i ) {
-		// if ( location.cgi_extension[ i ] == ".cgi" ) // Accept defaults cgi
-		// 	return true;
+		std::cout << location.cgi_extension[ i ] << std::endl;
 		if ( location.cgi_extension[ i ] == extension ) {
 			return true;
 		}
@@ -28,11 +32,11 @@ static bool isCgirequest( const http::Request &request, const Location &location
 	return false;
 }
 
-http::ClientEventProcessor::ClientEventProcessor( TcpServer &server ) : _server( server ){};
+http::ClientEventProcessor::ClientEventProcessor( TcpServer& server ) : _server( server ) {};
 
-http::ClientEventProcessor::~ClientEventProcessor(){};
+http::ClientEventProcessor::~ClientEventProcessor() {};
 
-void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
+void http::ClientEventProcessor::processRead( pollfd& pfd, Client* client ) {
 
 	if ( client->getCgiPid() != -1 ) {
 		// std::cout << "CGI_IN_EXECUTION processRead()\n";
@@ -47,7 +51,7 @@ void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 	pfd.events |= POLLOUT; // Setting to POLL OUT
 };
 
-void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int index ) {
+void http::ClientEventProcessor::processWrite( pollfd& pfd, Client* client, int index ) {
 
 	if ( client->getCgiPid() == -1 && client->getState() != CGI_COMPLETED && !processRequest( *client ) ) {
 		return;
@@ -58,7 +62,7 @@ void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int 
 	}
 };
 
-bool http::ClientEventProcessor::readFromSocket( Client &client ) {
+bool http::ClientEventProcessor::readFromSocket( Client& client ) {
 
 	const size_t CLIENT_MAX_BODY_SIZE = _server._serverInfo.maxRequest * 1024 * 1024;
 	char buffer[ BUFFER_SIZE ];
@@ -114,9 +118,9 @@ void http::ClientEventProcessor::closeConnection( size_t index ) {
 	_server.closeClientConnection( index );
 }
 
-bool http::ClientEventProcessor::processRequest( Client &client ) {
+bool http::ClientEventProcessor::processRequest( Client& client ) {
 	CLIENT_STATE state = client.getState();
-	ServerConfig &serverInfo = _server._serverInfo;
+	ServerConfig& serverInfo = _server._serverInfo;
 
 	// Handle error states first (build error responses)
 	if ( state != PARSE_OK ) {
@@ -130,8 +134,8 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 	}
 
 	// Treating execution of request - from here
-	http::Request &request = client.getRequest();
-	const Location &location = *( client.getRequest().urlMatchedLocation );
+	http::Request& request = client.getRequest();
+	const Location& location = *( client.getRequest().urlMatchedLocation );
 
 	if ( isCgirequest( request, location ) ) {
 		return Router::routeCgiRequest( client, serverInfo, location, *this );
@@ -141,8 +145,8 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 	return true;
 }
 
-bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STATE state ) {
-	http::Response &response = client.getResponse();
+bool http::ClientEventProcessor::buildErrorResponse( Client& client, CLIENT_STATE state ) {
+	http::Response& response = client.getResponse();
 	std::cout << state << std::endl;
 	switch ( state ) {
 	case READ_ERROR:
@@ -160,9 +164,9 @@ bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STAT
 	}
 }
 
-bool http::ClientEventProcessor::handleRouteValidation( Client &client ) {
-	http::Response &response = client.getResponse();
-	ServerConfig &serverInfo = _server._serverInfo;
+bool http::ClientEventProcessor::handleRouteValidation( Client& client ) {
+	http::Response& response = client.getResponse();
+	ServerConfig& serverInfo = _server._serverInfo;
 
 	VALIDATION_STATUS validationStatus = Router::validateRequest( client, _server._serverInfo );
 
@@ -194,7 +198,7 @@ bool http::ClientEventProcessor::handleRouteValidation( Client &client ) {
 
 void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 
-	std::map< int, http::Cgi * >::iterator it = _server._cgiByFd.find( fd );
+	std::map< int, http::Cgi* >::iterator it = _server._cgiByFd.find( fd );
 
 	if ( it != _server._cgiByFd.end() ) {
 
@@ -204,7 +208,7 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 
 		return;
 	}
-	Logs::log( LOGS_ERROR, "Something bad happened, restart server." );
+	// Logs::log( LOGS_ERROR, "Something bad happened, restart server." );
 	return; // Neither client nor CGI pipe - should not happen, skip
 }
 
@@ -212,7 +216,7 @@ void http::ClientEventProcessor::processClientEvents( int index ) {
 
 	int status = 0;
 	int fd = _server._fds[ index ].fd;
-	Client *client = _server._clientManager.getClient( fd );
+	Client* client = _server._clientManager.getClient( fd );
 
 	// Check if this fd is a CGI pipe instead of a client socket
 	if ( !client ) {
@@ -229,14 +233,14 @@ void http::ClientEventProcessor::processClientEvents( int index ) {
 	}
 }
 
-bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
+bool http::ClientEventProcessor::handleResponse( pollfd& pfd, Client& client ) {
 	SocketFD clientFd = client.getFd();
 
 	// Build response if write buffer is empty
 	if ( client.getWriteBuffer().empty() )
 		client.appendToWriteBuffer( client.getResponse().buildResponseString() );
 
-	std::string &writeBuffer = client.getWriteBuffer();
+	std::string& writeBuffer = client.getWriteBuffer();
 
 	if ( writeBuffer.empty() )
 		return 0;
@@ -268,12 +272,12 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 	return 0; // Continue sending in next poll event
 }
 
-bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
+bool http::ClientEventProcessor::sendResponse( pollfd& pfd, Client& client ) {
 	SocketFD clientFd = client.getFd();
 
 	const int MAX_SENDS_PER_EVENT = 3;
 	int sendCount = 0;
-	std::string &writeBuffer = client.getWriteBuffer();
+	std::string& writeBuffer = client.getWriteBuffer();
 	// std::cout << "writeBuffer: " << writeBuffer << std::endl;
 
 	// Send up to MAX_SENDS_PER_EVENT times per poll event

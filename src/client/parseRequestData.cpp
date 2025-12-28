@@ -1,6 +1,6 @@
 #include "Client/ClientEventProcessor.hpp"
 
-static void parseRequestQueries( http::Request &request ) {
+static void parseRequestQueries( http::Request& request ) {
 	std::string fullPath = request.path;
 	std::string::size_type qpos = fullPath.find( '?' );
 
@@ -12,7 +12,7 @@ static void parseRequestQueries( http::Request &request ) {
 	}
 }
 
-static std::string getPathInfo( std::string &requestPath, std::string scriptExt ) {
+static std::string getPathInfo( std::string& requestPath, std::string scriptExt ) {
 
 	std::string pathInfo;
 	std::string::size_type extPos = requestPath.find( scriptExt );
@@ -28,7 +28,7 @@ static std::string getPathInfo( std::string &requestPath, std::string scriptExt 
 	return pathInfo.empty() ? "" : pathInfo;
 }
 
-static std::string getPathTranslated( const std::string &root, const std::string &pathInfo ) {
+static std::string getPathTranslated( const std::string& root, const std::string& pathInfo ) {
 
 	std::string result = root;
 	std::string::size_type idx = result.length() - 1;
@@ -37,15 +37,15 @@ static std::string getPathTranslated( const std::string &root, const std::string
 	return result + pathInfo;
 }
 
-static void parsePath( http::Request &request, const ServerConfig &serverInfo ) {
-	std::string &requestPath = request.path;
+static void parsePath( http::Request& request, const ServerConfig& serverInfo ) {
+	std::string& requestPath = request.path;
 	std::string pathInfo = "";
 
 	for ( size_t i = 0; i < serverInfo.locations.size(); ++i ) {
 		if ( !serverInfo.locations[ i ].cgi_extension.empty() ) {
 			std::vector< std::string > scriptExt = serverInfo.locations[ i ].cgi_extension;
 			for ( size_t j = 0; j < scriptExt.size(); ++j ) {
-				std::string &value = scriptExt[ j ];
+				std::string& value = scriptExt[ j ];
 				std::string::size_type extPos = requestPath.find( value );
 
 				if ( requestPath.find( value ) != std::string::npos &&
@@ -53,7 +53,6 @@ static void parsePath( http::Request &request, const ServerConfig &serverInfo ) 
 
 					char nextChar = requestPath[ extPos + value.length() ];
 					if ( nextChar != '/' ) {
-						std::cout << "continue" << std::endl;
 						continue;
 					}
 
@@ -74,7 +73,7 @@ static void parsePath( http::Request &request, const ServerConfig &serverInfo ) 
 	}
 }
 
-static void parseRequestHeaders( http::Request &request, std::istringstream &request_stream, std::string &line ) {
+static void parseRequestHeaders( http::Request& request, std::istringstream& request_stream, std::string& line ) {
 	size_t idx;
 
 	while ( std::getline( request_stream, line ) ) {
@@ -99,9 +98,9 @@ std::string http::Request::GetFileName() {
 	return path.substr( pos + 1 );
 }
 
-bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerConfig &serverInfo ) {
+bool http::ClientEventProcessor::parseRequestData( Client& client, const ServerConfig& serverInfo ) {
 
-	http::Request &clientRequest = client.getRequest();
+	http::Request& clientRequest = client.getRequest();
 	std::istringstream requestStream( client.getReadBuffer() );
 	std::string line;
 
