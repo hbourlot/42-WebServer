@@ -97,12 +97,6 @@ bool containBrackets( std::string& line, bool& state, std::string extraStringToF
 			return false;
 		}
 		
-
-	if (closeCount > 0)
-	{
-		return false;
-	}
-
 	if ( closeCount > 0 ) {
 		if ( state == true )
 			state = false;
@@ -164,9 +158,9 @@ std::string concatenatePath( const std::string& a, const std::string& b ) {
 		return b;
 	if ( b.empty() )
 		return a;
-	if ( a.back() == '/' && b.front() == '/' )
+	if ( a.length() - 1 == '/' && b[0] == '/' )
 		return a + b.substr( 1 );
-	if ( a.back() != '/' && b.front() != '/' )
+	if ( a.length() - 1 != '/' && b[0] != '/' )
 		return a + "/" + b;
 	return a + b;
 }
