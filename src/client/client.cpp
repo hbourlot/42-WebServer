@@ -2,7 +2,7 @@
 
 Client::Client( int fd, http::TcpServer &server )
     : _server( server ), _fd( fd ), _state(), _requestComplete( false ), _cgiInProgress( false ), _cgiPid( -1 ),
-      _cgiOutputFd( -1 ) {
+      _cgiOutputFd( -1 ), _bytesToDiscard( 0 ), _discardingBody( false ) {
 }
 
 Client::~Client() {
@@ -100,4 +100,11 @@ void Client::setSessionId( std::string &sessionId ) {
 
 std::string Client::getSessionId() const {
 	return ( _sessionId );
+}
+
+void Client::consumeReadBuffer( size_t n ) {
+	if ( n >= _readBuffer.size() )
+		_readBuffer.clear();
+	else
+		_readBuffer.erase( 0, n );
 }

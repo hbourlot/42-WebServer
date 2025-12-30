@@ -1,6 +1,7 @@
 #include "Client/ClientEventProcessor.hpp"
+// #include "Http/Response.hpp"
 
-static bool isCgirequest( const http::Request& request, const Location& location ) {
+static bool isCgirequest( const http::Request &request, const Location &location ) {
 
 	if ( location.cgi_extension.empty() ) { // Checking if location has CGI configured
 		return false;
@@ -32,11 +33,31 @@ static bool isCgirequest( const http::Request& request, const Location& location
 	return false;
 }
 
-http::ClientEventProcessor::ClientEventProcessor( TcpServer& server ) : _server( server ) {};
+http::ClientEventProcessor::ClientEventProcessor( TcpServer &server ) : _server( server ){};
 
-http::ClientEventProcessor::~ClientEventProcessor() {};
+http::ClientEventProcessor::~ClientEventProcessor(){};
 
-void http::ClientEventProcessor::processRead( pollfd& pfd, Client* client ) {
+static void discardingBody( Client &client, pollfd &pfd ) {
+	size_t available = client.getReadBuffer().size();
+
+	if ( available >= client._bytesToDiscard ) {
+		client.consumeReadBuffer( client._bytesToDiscard );
+		client._bytesToDiscard = 0;
+		client._discardingBody = false;
+
+		client.getResponse() = http::Response( client.getRequest() );
+		ensureSessionId( client );
+		client.setState( PARSE_TOO_LARGE );
+
+		pfd.events &= ~POLLIN;
+		pfd.events |= POLLOUT;
+	} else {
+		client._bytesToDiscard -= available;
+		client.clearReadBuffer();
+	}
+}
+
+void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 
 	if ( client->getCgiPid() != -1 ) {
 		// std::cout << "CGI_IN_EXECUTION processRead()\n";
@@ -46,15 +67,23 @@ void http::ClientEventProcessor::processRead( pollfd& pfd, Client* client ) {
 
 	if ( !readFromSocket( *client ) )
 		return;
-	if ( !parseRequestData( *client, _server._serverInfo ) )
+
+	if ( client->_discardingBody ) {
+		discardingBody( *client, pfd );
 		return;
+	}
+
+	if ( !parseRequestData( *client, _server._serverInfo ) ) {
+		return;
+	}
 	pfd.events |= POLLOUT; // Setting to POLL OUT
 };
 
-void http::ClientEventProcessor::processWrite( pollfd& pfd, Client* client, int index ) {
+void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int index ) {
 
-	if ( client->getCgiPid() == -1 && client->getState() != CGI_COMPLETED && !processRequest( *client ) ) {
-		return;
+	if ( client->getCgiPid() == -1 && client->getState() != CGI_COMPLETED ) {
+		if ( !processRequest( *client ) )
+			return;
 	}
 
 	if ( handleResponse( pfd, *client ) ) {
@@ -62,7 +91,7 @@ void http::ClientEventProcessor::processWrite( pollfd& pfd, Client* client, int 
 	}
 };
 
-bool http::ClientEventProcessor::readFromSocket( Client& client ) {
+bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 
 	const size_t CLIENT_MAX_BODY_SIZE = _server._serverInfo.maxRequest * 1024 * 1024;
 	char buffer[ BUFFER_SIZE ];
@@ -75,12 +104,6 @@ bool http::ClientEventProcessor::readFromSocket( Client& client ) {
 		ssize_t bytesReceived = recv( fd, buffer, BUFFER_SIZE, 0 );
 
 		if ( bytesReceived > 0 ) {
-			// Check if we exceed max body size
-			if ( client.getReadBuffer().size() + bytesReceived > CLIENT_MAX_BODY_SIZE ) {
-				client.setState( PARSE_TOO_LARGE );
-				return false;
-			}
-
 			client.appendToReadBuffer( std::string( buffer, static_cast< size_t >( bytesReceived ) ) );
 			dataReceived = true;
 			readCount++;
@@ -115,12 +138,13 @@ bool http::ClientEventProcessor::readFromSocket( Client& client ) {
 }
 
 void http::ClientEventProcessor::closeConnection( size_t index ) {
+	sleep( 1 );
 	_server.closeClientConnection( index );
 }
 
-bool http::ClientEventProcessor::processRequest( Client& client ) {
+bool http::ClientEventProcessor::processRequest( Client &client ) {
 	CLIENT_STATE state = client.getState();
-	ServerConfig& serverInfo = _server._serverInfo;
+	ServerConfig &serverInfo = _server._serverInfo;
 
 	// Handle error states first (build error responses)
 	if ( state != PARSE_OK ) {
@@ -134,8 +158,8 @@ bool http::ClientEventProcessor::processRequest( Client& client ) {
 	}
 
 	// Treating execution of request - from here
-	http::Request& request = client.getRequest();
-	const Location& location = *( client.getRequest().urlMatchedLocation );
+	http::Request &request = client.getRequest();
+	const Location &location = *( client.getRequest().urlMatchedLocation );
 
 	if ( isCgirequest( request, location ) ) {
 		return Router::routeCgiRequest( client, serverInfo, location, *this );
@@ -145,9 +169,9 @@ bool http::ClientEventProcessor::processRequest( Client& client ) {
 	return true;
 }
 
-bool http::ClientEventProcessor::buildErrorResponse( Client& client, CLIENT_STATE state ) {
-	http::Response& response = client.getResponse();
-	std::cout << state << std::endl;
+bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STATE state ) {
+	http::Response &response = client.getResponse();
+
 	switch ( state ) {
 	case READ_ERROR:
 		response.buildErrorResponse( HTTP_SERVER_ERR, _server._serverInfo );
@@ -164,9 +188,9 @@ bool http::ClientEventProcessor::buildErrorResponse( Client& client, CLIENT_STAT
 	}
 }
 
-bool http::ClientEventProcessor::handleRouteValidation( Client& client ) {
-	http::Response& response = client.getResponse();
-	ServerConfig& serverInfo = _server._serverInfo;
+bool http::ClientEventProcessor::handleRouteValidation( Client &client ) {
+	http::Response &response = client.getResponse();
+	ServerConfig &serverInfo = _server._serverInfo;
 
 	VALIDATION_STATUS validationStatus = Router::validateRequest( client, _server._serverInfo );
 
@@ -198,7 +222,7 @@ bool http::ClientEventProcessor::handleRouteValidation( Client& client ) {
 
 void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 
-	std::map< int, http::Cgi* >::iterator it = _server._cgiByFd.find( fd );
+	std::map< int, http::Cgi * >::iterator it = _server._cgiByFd.find( fd );
 
 	if ( it != _server._cgiByFd.end() ) {
 
@@ -216,7 +240,7 @@ void http::ClientEventProcessor::processClientEvents( int index ) {
 
 	int status = 0;
 	int fd = _server._fds[ index ].fd;
-	Client* client = _server._clientManager.getClient( fd );
+	Client *client = _server._clientManager.getClient( fd );
 
 	// Check if this fd is a CGI pipe instead of a client socket
 	if ( !client ) {
@@ -233,14 +257,14 @@ void http::ClientEventProcessor::processClientEvents( int index ) {
 	}
 }
 
-bool http::ClientEventProcessor::handleResponse( pollfd& pfd, Client& client ) {
+bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 	SocketFD clientFd = client.getFd();
 
 	// Build response if write buffer is empty
 	if ( client.getWriteBuffer().empty() )
 		client.appendToWriteBuffer( client.getResponse().buildResponseString() );
 
-	std::string& writeBuffer = client.getWriteBuffer();
+	std::string &writeBuffer = client.getWriteBuffer();
 
 	if ( writeBuffer.empty() )
 		return 0;
@@ -272,13 +296,12 @@ bool http::ClientEventProcessor::handleResponse( pollfd& pfd, Client& client ) {
 	return 0; // Continue sending in next poll event
 }
 
-bool http::ClientEventProcessor::sendResponse( pollfd& pfd, Client& client ) {
+bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
 	SocketFD clientFd = client.getFd();
 
 	const int MAX_SENDS_PER_EVENT = 3;
 	int sendCount = 0;
-	std::string& writeBuffer = client.getWriteBuffer();
-	// std::cout << "writeBuffer: " << writeBuffer << std::endl;
+	std::string &writeBuffer = client.getWriteBuffer();
 
 	// Send up to MAX_SENDS_PER_EVENT times per poll event
 	while ( sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty() ) {

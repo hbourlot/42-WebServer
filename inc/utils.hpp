@@ -2,11 +2,13 @@
 
 #pragma once
 #include <iostream>
+#include <map>
 
 struct Location;
 
 namespace http {
 	struct Request;
+	class Response;
 } // namespace http
 
 std::string dateString();
@@ -27,7 +29,7 @@ template < typename T > std::string ft_to_string( const T& value ) {
 };
 
 // !DEBUG
-void printHttpHeaders( const http::Request& request );
+void printHttpHeaders( const std::map <std::string, std::string> &headers );
 
 void printLocation( const Location& location );
 bool checkSplitString( const std::string& line, const std::string& sep, bool& isServerOpen );

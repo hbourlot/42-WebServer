@@ -1,13 +1,11 @@
 // #include "webserver.hpp"
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
-void printHttpHeaders( const http::Request &request ) {
-	std::map< std::string, std::string >::const_iterator it;
-	for ( it = request.headers.begin(); it != request.headers.end(); ++it ) {
+void printHttpHeaders( const std::map< std::string, std::string > &headers ) {
+	for ( std::map< std::string, std::string >::const_iterator it = headers.begin(); it != headers.end(); ++it ) {
 		std::cout << it->first << ": " << it->second << "\n";
 	}
 }
-
 void printLocation( const Location &location ) {
 	// std::cout << << std::endl;
 	std::cout << "location.path " << location.path << std::endl;

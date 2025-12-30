@@ -1,6 +1,6 @@
-#include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include "Client/ClientEventProcessor.hpp"
 #include "httpTcpServer/HttpStructs.hpp"
+#include "httpTcpServer/HttpTcpServerLinux.hpp"
 
 #include <arpa/inet.h>
 #include <cstddef>
@@ -159,7 +159,6 @@ namespace http {
 
 	void TcpServer::removeDeadConnections( ClientEventProcessor &processor, int &index ) {
 
-		// for ( size_t i = 1; i < _fds.size(); ++i ) {
 		if ( _fds[ index ].revents & ( POLLHUP | POLLERR | POLLNVAL ) ) {
 			SocketFD fd = _fds[ index ].fd;
 
@@ -167,8 +166,6 @@ namespace http {
 			if ( _cgiByFd.find( fd ) != _cgiByFd.end() ) {
 				return; // CGI pipes are managed separately
 			}
-
-			std::cout << "--- Removing CONNECTION\n";
 
 			// Clean up CGI resources if this is a client with active CGI
 			Client *client = _clientManager.getClient( fd );
@@ -183,7 +180,7 @@ namespace http {
 			if ( _socketAddressMap.count( fd ) )
 				_socketAddressMap.erase( fd );
 
-			std::string msg( "Closing FD => " );
+			std::string msg( "Closing Dead FD => " );
 			msg += to_str( fd );
 
 			Logs::log( LOGS_ERROR, msg );
@@ -194,12 +191,7 @@ namespace http {
 			_fds.erase( _fds.begin() + index );
 			--index;
 		}
-		// }
 	}
-
-	// void TcpServer::removeCgiDeadConnection( ClientEventProcessor &processor, ) {
-	// 	for ()
-	// }
 
 	void TcpServer::runLoop( int timeOut ) {
 		ClientEventProcessor processor( *this );
