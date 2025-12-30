@@ -117,6 +117,22 @@ bool http::ClientEventProcessor::parseRequestData( Client& client, const ServerC
 	parsePath( clientRequest, serverInfo );
 	parseRequestHeaders( clientRequest, requestStream, line );
 
+	size_t contentLength = 0;
+	if ( clientRequest.headers.count( "Content-Length" ) ) {
+		contentLength = std::strtoul( clientRequest.headers[ "Content-Length" ].c_str(), NULL, 10 );
+
+		if ( contentLength > ( serverInfo.maxRequest * 1024 * 1024 ) ) {
+			// client.setState( PARSE_TOO_LARGE );
+			// client.getResponse() = Response( clientRequest );
+			// ensureSessionId( client );
+			client._bytesToDiscard = contentLength;
+			client._discardingBody = true;
+
+			Logs::log( LOGS_ERROR, "Body size it's above size allowed " + to_str( client.getFd() ) );
+			return false;
+		}
+	}
+
 	std::string body;
 	while ( std::getline( requestStream, line ) )
 		body += line + "\n";
@@ -124,10 +140,6 @@ bool http::ClientEventProcessor::parseRequestData( Client& client, const ServerC
 
 	if ( clientRequest.headers.count( "Content-Length" ) ) {
 		size_t contentLength = std::strtoul( clientRequest.headers[ "Content-Length" ].c_str(), NULL, 10 );
-		if ( contentLength > serverInfo.maxRequest * 1024 * 1024 ) {
-			client.setState( PARSE_TOO_LARGE );
-			return true;
-		}
 		if ( clientRequest.body.size() < contentLength ) {
 			client.setState( PARSE_INCOMPLETE );
 			return false;
@@ -136,7 +148,7 @@ bool http::ClientEventProcessor::parseRequestData( Client& client, const ServerC
 
 	client.getResponse() = Response( clientRequest );
 	ensureSessionId( client );
-
+	Logs::log( LOGS_INFO, "Client: " + to_str( client.getFd() ) + " Made a Request" );
 	client.setState( PARSE_OK );
 
 	return true;
