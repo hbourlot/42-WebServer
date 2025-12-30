@@ -157,8 +157,7 @@ void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, c
 void http::Router::handleDelete( Client &client, const ServerConfig &server, const Location &location ) {
 	http::Response &response = client.getResponse();
 	http::Request &request = client.getRequest();
-	(void)response;
-	(void)server;
+
 	std::string filePath = getFilePath( request.path, location );
 
 	struct stat st;

@@ -1,4 +1,5 @@
 #include "Client/ClientEventProcessor.hpp"
+// #include "Http/Response.hpp"
 
 static bool isCgirequest( const http::Request &request, const Location &location ) {
 
@@ -32,6 +33,26 @@ http::ClientEventProcessor::ClientEventProcessor( TcpServer &server ) : _server(
 
 http::ClientEventProcessor::~ClientEventProcessor(){};
 
+static void discardingBody( Client &client, pollfd &pfd ) {
+	size_t available = client.getReadBuffer().size();
+
+	if ( available >= client._bytesToDiscard ) {
+		client.consumeReadBuffer( client._bytesToDiscard );
+		client._bytesToDiscard = 0;
+		client._discardingBody = false;
+
+		client.getResponse() = http::Response( client.getRequest() );
+		ensureSessionId( client );
+		client.setState( PARSE_TOO_LARGE );
+
+		pfd.events &= ~POLLIN;
+		pfd.events |= POLLOUT;
+	} else {
+		client._bytesToDiscard -= available;
+		client.clearReadBuffer();
+	}
+}
+
 void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 
 	if ( client->getCgiPid() != -1 ) {
@@ -44,23 +65,7 @@ void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 		return;
 
 	if ( client->_discardingBody ) {
-		size_t available = client->getReadBuffer().size();
-
-		if ( available >= client->_bytesToDiscard ) {
-			client->consumeReadBuffer( client->_bytesToDiscard );
-			client->_bytesToDiscard = 0;
-			client->_discardingBody = false;
-
-			client->getResponse() = Response( client->getRequest() );
-			ensureSessionId( *client );
-			client->setState( PARSE_TOO_LARGE );
-
-			pfd.events &= ~POLLIN;
-			pfd.events |= POLLOUT;
-		} else {
-			client->_bytesToDiscard -= available;
-			client->clearReadBuffer();
-		}
+		discardingBody( *client, pfd );
 		return;
 	}
 
