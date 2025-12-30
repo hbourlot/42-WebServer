@@ -44,27 +44,27 @@ void getErrorPage( std::string noSpaceLine, ServerConfig &server ) {
 	server.errorPage.insert( std::pair< int, std::string >( std::atoi( code.c_str() ), path ) );
 }
 
-int getTypeServer( std::string &trimedLine ) { // Return the type of information to use on switch
-	if ( trimedLine == "host" )
+int getTypeServer( std::string &trimmedLine ) { // Return the type of information to use on switch
+	if ( trimmedLine == "host" )
 		return HOST;
-	else if ( trimedLine == "port" )
+	else if ( trimmedLine == "port" )
 		return PORT;
-	else if ( trimedLine == "server_name" )
+	else if ( trimmedLine == "server_name" )
 		return SERVER_NAME;
-	else if ( trimedLine == "client_max_body_size" )
+	else if ( trimmedLine == "client_max_body_size" )
 		return CLIENT_MAX_BDY;
-	else if ( trimedLine == "error_page" )
+	else if ( trimmedLine == "error_page" )
 		return ERROR_PAGE;
-	else if ( trimedLine == "location" )
+	else if ( trimmedLine == "location" )
 		return LOCATION;
-	else if ( trimedLine == "root")
+	else if ( trimmedLine == "root")
 		return ROOT;
 	return 100;
 }
 
 bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Configs &configs ) {
 	std::string noSpaceLine; // Gets the string without the initial spaces
-	std::string trimedLine;  // Stores the atribute of the server
+	std::string trimmedLine;  // Stores the atribute of the server
 	std::string emptyString;  // Just an empty string
 	ServerConfig server;     // Variable to save all the information
 
@@ -83,9 +83,9 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) )
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
 		
-		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
+		trimmedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
 		
-		if ( trimedLine[ 0 ] == '}' ) // Finish the server info
+		if ( trimmedLine[ 0 ] == '}' ) // Finish the server info
 			break;
 		
 		// Check if we are going to location configs "location /upload"
@@ -106,7 +106,7 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 
 		if (IsServerOpen == true)
 		{
-			switch ( getTypeServer( trimedLine ) ) {
+			switch ( getTypeServer( trimmedLine ) ) {
 				case ROOT:
 					server.root = getInfo ( noSpaceLine ); // Get the root path
 					break;
@@ -140,7 +140,7 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 			}
 		}
 		noSpaceLine = removeSpace( line );
-		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
+		trimmedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
 	}
 	ReadConfig::setDefaultServer( server );
 	configs.servers.push_back( server ); // Send the information for the main config
