@@ -64,7 +64,7 @@ int getTypeServer( std::string &trimmedLine ) { // Return the type of informatio
 
 bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Configs &configs ) {
 	std::string noSpaceLine; // Gets the string without the initial spaces
-	std::string trimmedLine;  // Stores the atribute of the server
+	std::string trimmedLine;  // Stores the attribute of the server
 	std::string emptyString;  // Just an empty string
 	ServerConfig server;     // Variable to save all the information
 
@@ -197,7 +197,7 @@ void ReadConfig::setDefaultServer( ServerConfig &server ) {
 	}
 
 	if ( server.maxRequest == 0 ) {
-		std::cout << "Settig Max request to 10M ✅" << std::endl;
+		std::cout << "Setting Max request to 10M ✅" << std::endl;
 		server.maxRequest = 10;
 	}
 }
