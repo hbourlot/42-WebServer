@@ -9,10 +9,9 @@
 #include <sys/poll.h>
 #include <vector>
 
-http::Cgi::Cgi( const http::Request& request, std::string& filePath, const sockaddr_in& clientAddress,
-                const ServerConfig& serverInfo, Client* client )
+http::Cgi::Cgi( const http::Request& request, std::string& filePath, const ServerConfig& serverInfo, Client* client )
     : _status(), _clientFD(), _request( request ), _response( Response( request ) ), _serverInfo( serverInfo ),
-      _clientAddress( clientAddress ), _bytesReceived(), _body(), _client( client ), _envp(), _argv(), _envStrings() {
+      _clientAddress(), _bytesReceived(), _body(), _client( client ), _envp(), _argv(), _envStrings() {
 
 	Location* cgiLocation = _serverInfo.GetLocationByPath( "/cgi-bin" );
 	_filePath = concatenatePath( cgiLocation->root, _request.GetFileName() );
