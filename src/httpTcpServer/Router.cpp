@@ -178,6 +178,6 @@ void http::Router::handleDelete( Client &client, const ServerConfig &server, con
 		Logs::log( LOGS_ERROR, "Failed to delete File: " + filePath );
 		return;
 	}
-	response.buildResponse( HTTP_NO_CONTENT, nullptr );
+	response.buildResponse( HTTP_NO_CONTENT, "" );
 	Logs::log( LOGS_ERROR, "File deleted Successfully " + filePath );
 }
