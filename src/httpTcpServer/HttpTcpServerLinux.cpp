@@ -167,8 +167,6 @@ namespace http {
 				return; // CGI pipes are managed separately
 			}
 
-			std::cout << "--- Removing CONNECTION\n";
-
 			// Clean up CGI resources if this is a client with active CGI
 			Client *client = _clientManager.getClient( fd );
 			if ( client && client->getCgiOutputFd() != -1 ) {
@@ -182,7 +180,7 @@ namespace http {
 			if ( _socketAddressMap.count( fd ) )
 				_socketAddressMap.erase( fd );
 
-			std::string msg( "Closing FD => " );
+			std::string msg( "Closing Dead FD => " );
 			msg += to_str( fd );
 
 			Logs::log( LOGS_ERROR, msg );
