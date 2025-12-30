@@ -287,7 +287,7 @@ void http::Response::buildRangeResponse( const std::string &filePath, const Serv
 		Logs::log( LOGS_INFO, "Request for range: " + rangeHeader.str() );
 	addToHeader( "Content-Range", rangeHeader.str() );
 	addToHeader( "Content-Type", getContentType( filePath ) );
-	addToHeader( "Content-Length", to_str( end - start + 1 ) );
+	addToHeader( "Content-Length", ft_to_string( end - start + 1 ) );
 }
 void http::Response::buildFileResponse( const HttpStatusCode &status, const std::string &filePath,
                                         const ServerConfig &server ) {

@@ -7,10 +7,11 @@ static bool isCgirequest( const http::Request &request, const Location &location
 		return false;
 	}
 
-	for ( size_t i = 0; i < location.cgi_extension.size(); ++i )
+	for ( size_t i = 0; i < location.cgi_extension.size(); ++i ) {
 		if ( location.cgi_extension[ i ] == ".cgi" ) { // ".cgi" accept any kind of cgi
 			return true;
 		}
+	}
 
 	// Extract file extension from the request path
 	std::string path = request.path;
@@ -275,7 +276,7 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 	// Check if all data was sent
 	if ( writeBuffer.empty() ) {
 		std::string msg( "Server Response sent to client " );
-		msg += to_str( clientFd ) + " sessionID: " + client.getSessionId();
+		msg += ft_to_string( clientFd ) + " sessionID: " + client.getSessionId();
 		if ( DEBUG ) {
 			msg += " ";
 			msg += client.getRequest().path;

@@ -92,10 +92,6 @@ void http::Router::launchCgi( Client& client, const ServerConfig& server, const 
                               ClientEventProcessor& processor ) {
 	http::Request& request = client.getRequest();
 	std::string path = location.path;
-	// sockaddr_in socket;
-
-	if ( location.path.compare( 0, 1, "/" ) == 0 )
-		path = location.path.substr( 1 );
 
 	// Create and execute CGI
 	http::Cgi* cgi = new http::Cgi( request, path, server, &client );

@@ -66,11 +66,6 @@ std::string dateString() {
 	return ( date );
 }
 
-std::string to_str( int n ) {
-	std::stringstream ss;
-	ss << n;
-	return ss.str();
-}
 
 // Returns false, if the state is the same. Otherwise we return false
 bool containBrackets( std::string& line, bool& state, std::string extraStringToFind ) {
@@ -151,18 +146,6 @@ bool checkSplitString( const std::string& line, const std::string& sep, bool& is
 	}
 
 	return true;
-}
-
-std::string concatenatePath( const std::string& a, const std::string& b ) {
-	if ( a.empty() )
-		return b;
-	if ( b.empty() )
-		return a;
-	if ( a.length() - 1 == '/' && b[0] == '/' )
-		return a + b.substr( 1 );
-	if ( a.length() - 1 != '/' && b[0] != '/' )
-		return a + "/" + b;
-	return a + b;
 }
 
 void print( const char* src ) {

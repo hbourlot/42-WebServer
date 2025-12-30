@@ -129,6 +129,10 @@ r:
 	@make -s
 	@./$(NAME) ./conf_files/good/webpage.conf
 
+s:
+	@make -s
+	@./$(NAME) ./conf_files/good/scriptpage.conf
+
 v:
 	@make -s
 	@$(VALGRIND) ./$(NAME) ./conf_files/good/webpage.conf

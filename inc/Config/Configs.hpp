@@ -23,6 +23,7 @@ struct Location {
 	bool uploadEnable;
 	std::string uploadStore;
 	bool autoIndex;
+	std::vector<Location*> next;
 };
 
 struct ServerConfig {

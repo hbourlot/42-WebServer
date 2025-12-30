@@ -6,6 +6,13 @@
 #include <sys/poll.h>
 #include <sys/wait.h>
 #include <vector>
+#include <ios>
+#include <iostream>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <vector>
+#include <cstring>
+#include <fcntl.h>
 
 class Client;
 
@@ -77,7 +84,6 @@ namespace http {
 		void doDupTwoWay();
 		void closeForOneWay();
 		void closeForTwoWay();
-		void handleChildProcess();
 	};
 
 }; // namespace http

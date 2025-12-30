@@ -9,9 +9,9 @@ void http::ClientEventProcessor::registerCgi( http::Cgi *cgi ) {
 	_server._cgiByFd[ outputFd ] = cgi; // Add CGI to map
 
 	std::string msg( "Registered CGI for PID " );
-	msg += to_str( cgi->getPid() );
+	msg += ft_to_string( cgi->getPid() );
 	msg += " with output fd ";
-	msg += to_str( outputFd );
+	msg += ft_to_string( outputFd );
 	Logs::log( LOGS_INFO, msg );
 }
 
@@ -42,7 +42,7 @@ void http::ClientEventProcessor::cleanupCgi( http::Cgi *cgi ) {
 	delete cgi;
 
 	std::string msg( "Cleaned up CGI with output fd " );
-	msg += to_str( outputFd );
+	msg += ft_to_string( outputFd );
 	Logs::log( LOGS_INFO, msg );
 }
 
