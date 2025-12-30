@@ -148,7 +148,7 @@ void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, c
 	if ( location.uploadEnable ) {
 		UploadManager::handleUpload( location, client, serverInfo );
 	} else if ( !location.uploadEnable ) {
-		client.getResponse().buildErrorResponse( HTTP_UPLOAD_FORBID, serverInfo );
+		client.getResponse().buildErrorResponse( HTTP_FORBID, serverInfo );
 	} else {
 		client.getResponse().buildErrorResponse( HTTP_NOT_FOUND, serverInfo );
 	}
@@ -161,14 +161,24 @@ void http::Router::handleDelete( Client &client, const ServerConfig &server, con
 	(void)server;
 	std::string filePath = getFilePath( request.path, location );
 
-	std::cout << filePath << std::endl;
+	struct stat st;
+
+	if ( stat( filePath.c_str(), &st ) != 0 ) {
+		response.buildErrorResponse( HTTP_NOT_FOUND, server );
+		Logs::log( LOGS_ERROR, "File Not Found" );
+		return;
+	}
+
 	if ( isDirectory( filePath ) ) {
+		response.buildErrorResponse( HTTP_FORBID, server );
 		Logs::log( LOGS_ERROR, "Cannot delete because its a folder" );
 		return;
 	}
 	if ( remove( filePath.c_str() ) ) {
+		response.buildErrorResponse( HTTP_SERVER_ERR, server );
 		Logs::log( LOGS_ERROR, "Failed to delete File: " + filePath );
 		return;
 	}
+	response.buildResponse( HTTP_NO_CONTENT, nullptr );
 	Logs::log( LOGS_ERROR, "File deleted Successfully " + filePath );
 }
