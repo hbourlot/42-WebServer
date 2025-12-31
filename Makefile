@@ -127,7 +127,7 @@ bonus: all
 # Shortcuts
 r:
 	@make -s
-	@./$(NAME) ./conf_files/good/webpage.conf
+	@./$(NAME) ./conf_files/good/banane.conf
 
 v:
 	@make -s
@@ -139,7 +139,7 @@ debug: re
 
 d: debug
 	@make -s
-	@./$(NAME) ./conf_files/good/webpage.conf
+	@./$(NAME) ./conf_files/good/banane.conf
 
 fc: fclean
 
