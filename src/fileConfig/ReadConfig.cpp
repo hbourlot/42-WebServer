@@ -10,6 +10,7 @@
 #define ERROR_PAGE 5
 #define LOCATION 6
 #define ROOT 7
+#define FILE 8
 
 ServerConfig::ServerConfig() {
 	port = 0;
@@ -55,6 +56,11 @@ int getTypeServer( std::string &trimmedLine ) { // Return the type of informatio
 		return CLIENT_MAX_BDY;
 	else if ( trimmedLine == "error_page" )
 		return ERROR_PAGE;
+	else if ( trimmedLine == "location *." )
+	{
+		std::cout << "Encontramos uma locations especial" << std::endl;
+		return FILE;
+	}
 	else if ( trimmedLine == "location" )
 		return LOCATION;
 	else if ( trimmedLine == "root")
@@ -80,14 +86,17 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 	server.maxRequest = 10;	                 // Set the max value by default
 	while ( std::getline( confFd, line ) ) { // Finish the server config block
 		noSpaceLine = removeSpace( line );   // Removes the first spaces
+		
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) )
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
-		
+
+			
 		trimmedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
 		
 		if ( trimmedLine[ 0 ] == '}' ) // Finish the server info
 			break;
 		
+
 		// Check if we are going to location configs "location /upload"
 		// This serves to check if we have stuff like " } location /upload {"
 		// We close the last location config, and we open a new one
@@ -103,6 +112,7 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 			if (checkSplitString(line, "location", IsServerOpen) == false)
 				return false;
 		}
+
 
 		if (IsServerOpen == true)
 		{
@@ -130,10 +140,15 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 					getErrorPage( noSpaceLine, server );
 					break;
 				
+				case FILE:
+					if (SetLocation::setFileConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server ) == false)
+						return false;
+					break;
+
 				case LOCATION:
 					if (SetLocation::setLocationConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server ) == false)
 						return false;
-						break;
+					break;
 				
 				default:
 					break;

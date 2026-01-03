@@ -37,14 +37,11 @@ bool CheckConf::checkLineFinished( std::string &line ) {
 	if ( line[ 0 ] == '#' ) // Skips the comments
 		return true;
 
-	size_t lineSize = line.size(); // Gets the line size
-
+	size_t lineSize = line.size() - 1; // Gets the line size
 	size_t end = line.find_first_of( ';' ); // Gets the position of ';'
 	if ( end != std::string::npos ) {
 		if ( end + 1 != lineSize ) {
-			// std::cout << "Line: " << line << " | Comma: " << end << " | Line size: " << lineSize << std::endl;
-
-			std::cerr << "Its something wrong with 1: " << line << end << lineSize << std::endl;
+			std::cerr << "Its something wrong with: " << line << end << lineSize << std::endl;
 			return false;
 		}
 	}

@@ -240,6 +240,8 @@ c: clean
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/LocationWithNoRoot.conf
 
-
-
+19:
+	@echo "Location with specific file extension"
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/good/file.conf
 

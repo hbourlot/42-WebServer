@@ -9,6 +9,23 @@
 #include <string>
 #include <vector>
 
+struct File {
+	File();
+	std::string name;
+	std::string extension;
+	std::vector< std::string > methods; // method POST GET DELETE
+	std::string root;
+	std::string index;
+	std::string redirection; // http://example.com;
+	std::vector< std::string > cgi_extension;
+	std::vector< std::string > cgi_path;
+	std::map< std::string, std::string > cgi;
+	bool uploadEnable;
+	std::string uploadStore;
+	bool autoIndex;
+	std::vector<File*> next;
+};
+
 struct Location {
 	Location();
 	std::string name;
@@ -28,7 +45,6 @@ struct Location {
 
 struct ServerConfig {
 	ServerConfig();
-
 	std::string root;								 // Stores the root path
 	std::string host;                                // Stores the host IP
 	int port;                                        // Stores the port to listen
