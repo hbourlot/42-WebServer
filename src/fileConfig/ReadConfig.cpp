@@ -1,5 +1,6 @@
 #include "Config/ReadConfig.hpp"
 #include "Config/SetLocations.hpp"
+#include "Config/SetFile.hpp"
 #include <string>
 #include <utils.hpp>
 
@@ -11,10 +12,12 @@
 #define LOCATION 6
 #define ROOT 7
 #define FILE 8
+#define INDEX 9
+#define CGIPASS 10
 
 ServerConfig::ServerConfig() {
 	port = 0;
-	maxRequest = 0;
+	max_body_size = 0;
 }
 
 Location *ServerConfig::GetLocationByPath( std::string path ) {
@@ -56,15 +59,14 @@ int getTypeServer( std::string &trimmedLine ) { // Return the type of informatio
 		return CLIENT_MAX_BDY;
 	else if ( trimmedLine == "error_page" )
 		return ERROR_PAGE;
-	else if ( trimmedLine == "location *." )
-	{
-		std::cout << "Encontramos uma locations especial" << std::endl;
-		return FILE;
-	}
 	else if ( trimmedLine == "location" )
 		return LOCATION;
 	else if ( trimmedLine == "root")
 		return ROOT;
+	else if ( trimmedLine == "index")
+		return INDEX;
+	else if ( trimmedLine == "cgi_pass")
+		return CGIPASS;
 	return 100;
 }
 
@@ -81,15 +83,16 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 	{
 		return false; 
 	}	
-
+	
 	server.port = 0;
-	server.maxRequest = 10;	                 // Set the max value by default
+	server.max_body_size = 1024;	             // Set the max value by default
 	while ( std::getline( confFd, line ) ) { // Finish the server config block
+		
 		noSpaceLine = removeSpace( line );   // Removes the first spaces
 		
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) )
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
-
+		
 			
 		trimmedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
 		
@@ -123,7 +126,9 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 				case HOST:
 					server.host = getInfo( noSpaceLine ); // Get the information in string
 					break;
-				
+				case INDEX:
+					server.index = getInfo( noSpaceLine	);
+					break;
 				case PORT:
 					server.port = std::atoi( getInfo( noSpaceLine ).c_str() ); // Convert the string into a int
 					break;
@@ -133,23 +138,26 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 					break;
 				
 				case CLIENT_MAX_BDY:
-					server.maxRequest = getMaxRequestBody( noSpaceLine);
+					server.max_body_size = getMaxRequestBody( noSpaceLine);
 					break;
 				
 				case ERROR_PAGE:
 					getErrorPage( noSpaceLine, server );
 					break;
 				
-				case FILE:
-					if (SetLocation::setFileConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server ) == false)
-						return false;
-					break;
-
+				// case FILE:
+				// 	if (SetFile::setFileConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server ) == false)
+				// 		return false;
+				// 	break;
+				
 				case LOCATION:
 					if (SetLocation::setLocationConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server ) == false)
+					{	
 						return false;
+					}
 					break;
 				
+
 				default:
 					break;
 			}
@@ -211,8 +219,8 @@ void ReadConfig::setDefaultServer( ServerConfig &server ) {
 		server.errorPage.insert( std::pair< int, std::string >( 404, "../../content/defaultError.html" ) );
 	}
 
-	if ( server.maxRequest == 0 ) {
-		std::cout << "Setting Max request to 10M ✅" << std::endl;
-		server.maxRequest = 10;
+	if ( server.max_body_size == 0 ) {
+		std::cout << "Setting Max request to 1024 ✅" << std::endl;
+		server.max_body_size = 1024;
 	}
 }

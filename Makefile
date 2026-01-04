@@ -36,7 +36,7 @@ CLIENT_FUNC		= client clientManager ClientEventProcessor ClientEventProcessor_cg
 AUTH_FUNC		= loginHandler
 CGI_FUNC		= executeCgi Cgi buildEnvStrings
 UTILS_FUNC		= utils getLocationFieldAsString debug
-FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
+FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations SetFile
 
 HTTP_FUNC	    = HttpTcpServerLinux Router autoIndex Response Logs
 # HTTP_HANDLER_FUNC = HttpRouter autoindex
@@ -127,7 +127,7 @@ bonus: all
 # Shortcuts
 r:
 	@make -s
-	@./$(NAME) ./conf_files/good/webpage.conf
+	@./$(NAME) ./conf_files/good/file.conf
 
 s:
 	@make -s

@@ -1,4 +1,5 @@
 #include "Config/SetLocations.hpp"
+#include "Config/SetFile.hpp"
 #include <utils.hpp>
 
 #define METHODS 7
@@ -10,6 +11,9 @@
 #define UPLOAD_STORE 13
 #define AUTOINDEX 14
 #define INDEX 15
+#define CGIPASS 16
+
+class SetFile;
 
 Location::Location() {
 	uploadEnable = false;
@@ -34,7 +38,7 @@ std::string locationPath(const std::string &line)
     return line.substr(start, end - start);
 }
 
-void getMethods( std::string noSpaceLine,
+void SetLocation::getMethods( std::string noSpaceLine,
                  std::vector< std::string > &methods ) { // Function to get the Location methods
 	std::istringstream iss( noSpaceLine );
 	std::string method;
@@ -70,6 +74,8 @@ int getTypeLocation( std::string &trimedLine ) { // Function to check the inform
 		return AUTOINDEX;
 	if ( trimedLine == "index" )
 		return INDEX;
+	if ( trimedLine == "cgi_pass")
+		return CGIPASS;
 	return 100;
 }
 
@@ -120,6 +126,10 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 	Location location;
 	bool IsLocationOpen = false;
 
+	if (line.find("*.") != std::string::npos)
+	{
+		return SetFile::setFileConfig(confFd, line, server);
+	}
 	location.path = locationPath( line ); // Sets the Location path
 
 	if (location.path.size() == 0)
@@ -136,7 +146,7 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) ) // Checks if have more information after the limitter
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
 
-		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
+			trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
 		
 		if (line.find("location") == std::string::npos)
 		{
@@ -150,6 +160,7 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 		{
 			if (checkSplitString(line, "location", IsLocationOpen) == false)
 			{
+
 				return false;
 			}
 				
@@ -201,6 +212,10 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 			location.index = getInfo( noSpaceLine );
 			break;
 
+		case CGIPASS:
+			location.cgi_pass = getInfo( noSpaceLine );
+			break;
+
 		default:
 			break;
 		}
@@ -208,21 +223,34 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 
 	if ( location.name == "cgi" && atIndexFlag == 1 ) // Checks if exists a autoindex inside a CGI location
 		throw std::invalid_argument( "ERROR: Can't have autoindex inside a CGI location\n" );
+	setDefaultLocation(server, location); // We have to set some default values
 	server.locations.push_back( location );
 	return true;
 }
 
-void SetLocation::setDefaultLocation( Location &location ) {
+void SetLocation::setDefaultLocation( ServerConfig& server, Location& location ) {
+	if ( location.max_body_size = 0)
+	{
+		if ( server.max_body_size != 0)
+			location.max_body_size = server.max_body_size;
+		else
+			location.max_body_size = 1024;
+	}
+
 	if ( location.path.empty() )
 		throw std::invalid_argument( "Error: Missing path in one or more locations ❌\n" );
 
 	if ( location.methods.empty() ) {
-		std::cout << "No methods, so we will set the GET method ✅" << std::endl;
+		std::cerr << "No methods, so we will set the GET method ✅" << std::endl;
 		location.methods.push_back( "GET" );
 	}
 
 	if ( location.root.empty() ) {
-		std::cout << "No root defined. Setting /var/www + path ✅" << std::endl;
-		location.root = "/var/www" + location.path;
+		if (server.root.empty() == false)
+			location.root = server.root;
+		else{
+			std::cerr << "No root defined. Setting /var/www + path ✅" << std::endl;
+			location.root = "/var/www" + location.path;
+		}
 	}
 }

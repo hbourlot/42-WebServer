@@ -71,7 +71,7 @@ void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 
 	if ( client->_discardingBody ) {
 		discardingBody( *client, pfd );
-		return;
+	return;
 	}
 
 	if ( !parseRequestData( *client, _server._serverInfo ) ) {
@@ -94,7 +94,7 @@ void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int 
 
 bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 
-	const size_t CLIENT_MAX_BODY_SIZE = _server._serverInfo.maxRequest * 1024 * 1024;
+const size_t CLIENT_MAX_BODY_SIZE = _server._serverInfo.max_body_size * 1024 * 1024;
 	char buffer[ BUFFER_SIZE ];
 	int fd = client.getFd();
 	int readCount = 0;

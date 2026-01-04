@@ -121,7 +121,7 @@ bool http::ClientEventProcessor::parseRequestData( Client& client, const ServerC
 	if ( clientRequest.headers.count( "Content-Length" ) ) {
 		contentLength = std::strtoul( clientRequest.headers[ "Content-Length" ].c_str(), NULL, 10 );
 
-		if ( contentLength > ( serverInfo.maxRequest * 1024 * 1024 ) ) {
+		if ( contentLength > ( serverInfo.max_body_size* 1024 * 1024 ) ) {
 			// client.setState( PARSE_TOO_LARGE );
 			// client.getResponse() = Response( clientRequest );
 			// ensureSessionId( client );
