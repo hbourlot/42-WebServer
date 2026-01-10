@@ -3,7 +3,7 @@
 
 // Used on 'getMatchLocation to check if we choose the right path
 // For the cases with multiple cgi-bin paths for example
-std::string GetExtension( const std::string &path ) {
+std::string GetExtension( const std::string& path ) {
 	std::string::size_type pos = path.rfind( '.' ); // Finds the last '.'
 	if ( pos == std::string::npos )
 		return ""; // No extension on path
@@ -11,14 +11,14 @@ std::string GetExtension( const std::string &path ) {
 	return path.substr( pos + 1 );
 }
 
-const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations ) {
+const Location* getMatchLocation( const std::string& path, const std::vector< Location >& locations ) {
 
-	const Location *matchedLocation = NULL;
+	const Location* matchedLocation = NULL;
 	size_t matchLength = 0;
 
 	for ( size_t i = 0; i < locations.size(); ++i ) {
 
-		const std::string &locPath = locations[ i ].path;
+		const std::string& locPath = locations[ i ].path;
 
 		if ( path.compare( 0, locPath.size(), locPath ) == 0 && locPath.size() > matchLength ) {
 			matchedLocation = &locations[ i ];
@@ -38,7 +38,7 @@ const Location *getMatchLocation( const std::string &path, const std::vector< Lo
 	return ( matchedLocation );
 }
 
-static bool validateRequestMethod( const http::Request &request, const Location &location ) {
+static bool validateRequestMethod( const http::Request& request, const Location& location ) {
 
 	if ( request.method != "GET" && request.method != "POST" && request.method != "DELETE" )
 		return false;
@@ -50,16 +50,16 @@ static bool validateRequestMethod( const http::Request &request, const Location 
 	return false;
 }
 
-VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerConfig &server ) {
+VALIDATION_STATUS http::Router::validateRequest( Client& client, const ServerConfig& server ) {
 
-	http::Request &request = client.getRequest();
+	http::Request& request = client.getRequest();
 
 	request.urlMatchedLocation = getMatchLocation( request.path, server.locations );
 
 	if ( !request.urlMatchedLocation ) // URL NOT FOUND
 		return VALID_NOT_FOUND;
 
-	const Location &matchedLocation = *request.urlMatchedLocation;
+	const Location& matchedLocation = *request.urlMatchedLocation;
 
 	if ( !request.urlMatchedLocation->redirection.empty() ) // /redirect-me
 		return VALID_REDIRECT_REQUIRED;
@@ -73,10 +73,10 @@ VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerCon
 	return VALID_OK;
 }
 
-bool http::Router::routeCgiRequest( Client &client, const ServerConfig &server, const Location &location,
-                                    ClientEventProcessor &processor ) {
+bool http::Router::routeCgiRequest( Client& client, const ServerConfig& server, const Location& location,
+                                    ClientEventProcessor& processor ) {
 
-	http::Request &request = client.getRequest();
+	http::Request& request = client.getRequest();
 
 	if ( request.method == "GET" || request.method == "POST" ) {
 		launchCgi( client, server, location, processor );
@@ -88,14 +88,17 @@ bool http::Router::routeCgiRequest( Client &client, const ServerConfig &server, 
 	return true;
 }
 
-void http::Router::launchCgi( Client &client, const ServerConfig &server, const Location &location,
-                              ClientEventProcessor &processor ) {
-	http::Request &request = client.getRequest();
+void http::Router::launchCgi( Client& client, const ServerConfig& server, const Location& location,
+                              ClientEventProcessor& processor ) {
+	http::Request& request = client.getRequest();
 	std::string path = location.path;
 	sockaddr_in socket;
 
+	if ( location.path.compare( 0, 1, "/" ) == 0 )
+		path = location.path.substr( 1 );
+
 	// Create and execute CGI
-	http::Cgi *cgi = new http::Cgi( request, path, socket, server, &client );
+	http::Cgi* cgi = new http::Cgi( request, path, socket, server, &client );
 	cgi->executeCgi( client.getServer()._fds );
 
 	// Store CGI info in client
@@ -107,9 +110,9 @@ void http::Router::launchCgi( Client &client, const ServerConfig &server, const 
 	client.setState( CGI_JUST_STARTED );
 }
 
-void http::Router::routeStaticRequest( Client &client, const ServerConfig &server, const Location &location ) {
+void http::Router::routeStaticRequest( Client& client, const ServerConfig& server, const Location& location ) {
 
-	http::Request &request = client.getRequest();
+	http::Request& request = client.getRequest();
 
 	if ( request.method == "GET" ) {
 		return ( handleGet( client, server, location ) );
@@ -122,10 +125,10 @@ void http::Router::routeStaticRequest( Client &client, const ServerConfig &serve
 	}
 }
 
-void http::Router::handleGet( Client &client, const ServerConfig &server, const Location &location ) {
+void http::Router::handleGet( Client& client, const ServerConfig& server, const Location& location ) {
 
-	http::Request &request = client.getRequest();
-	http::Response &response = client.getResponse();
+	http::Request& request = client.getRequest();
+	http::Response& response = client.getResponse();
 
 	std::string filePath = getFilePath( request.path, location );
 
@@ -142,7 +145,7 @@ void http::Router::handleGet( Client &client, const ServerConfig &server, const 
 	response.buildFileResponse( HTTP_OK, filePath, server );
 }
 
-void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, const Location &location ) {
+void http::Router::handlePost( Client& client, const ServerConfig& serverInfo, const Location& location ) {
 	std::string ContentType;
 
 	if ( location.uploadEnable ) {

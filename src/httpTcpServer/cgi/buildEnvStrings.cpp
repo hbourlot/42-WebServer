@@ -6,7 +6,7 @@
 
 static bool isValidEnv( std::string key ) {
 
-	static const char *validCgiVars[] = { "AUTH_TYPE",
+	static const char* validCgiVars[] = { "AUTH_TYPE",
 	                                      "CONTENT_LENGTH",
 	                                      "CONTENT_TYPE",
 	                                      "DOCUMENT_ROOT",
@@ -52,20 +52,6 @@ void http::Cgi::buildEnvStrings() {
 
 	std::map< std::string, std::string > newMap;
 
-	newMap[ "REQUEST_METHOD" ] = _request.method;
-	newMap[ "FILE_NAME" ] = _filePath;
-	newMap[ "SCRIPT_NAME" ] = _request.path;
-	newMap[ "SERVER_PROTOCOL" ] = _request.serverProtocol;
-	newMap[ "SERVER_SOFTWARE" ] = "42WebServer/1.0";
-	newMap[ "GATEWAY_INTERFACE" ] = "CGI/1.1";
-	newMap[ "PATH_INFO" ] = _request.pathInfo;
-	newMap[ "PATH_TRANSLATED" ] = _request.pathTranslated;
-
-	std::cout << "[CGI ENV DEBUG] SCRIPT_NAME = \"" << _request.path << "\"" << std::endl;
-
-	// newMap["REMOTE_PORT"] = std::to_string(_clientAddress.sin_port); // ! Function std::to_string not exist!
-	newMap[ "QUERY_STRING" ] = _request.queryString;
-
 	for ( std::map< std::string, std::string >::const_iterator it = _request.headers.begin();
 	      it != _request.headers.end(); ++it ) {
 		std::string key = it->first;
@@ -77,9 +63,26 @@ void http::Cgi::buildEnvStrings() {
 		}
 		newMap[ "HTTP_" + key ] = it->second;
 	}
-	// _envp.clear();
+
+	newMap[ "REQUEST_METHOD" ] = _request.method;
+	newMap[ "FILE_NAME" ] = _filePath;
+	newMap[ "DOCUMENT_ROOT" ] = _request.urlMatchedLocation->root;
+
+	newMap[ "SERVER_PROTOCOL" ] = _request.serverProtocol;
+	newMap[ "SERVER_SOFTWARE" ] = "42WebServer/1.0";
+	newMap[ "GATEWAY_INTERFACE" ] = "CGI/1.1";
+	
+	
+	newMap[ "REQUEST_URI" ] = _request.path;
+	newMap[ "SCRIPT_NAME" ] = _request.path;
+	newMap[ "PATH_INFO" ] = _request.pathInfo;
+	newMap[ "PATH_TRANSLATED" ] =
+	    _request.urlMatchedLocation->root + ( newMap[ "PATH_INFO" ].empty() ? std::string( "/" ) : _request.pathInfo );
+		newMap[ "REMOTE_PORT" ] = ft_to_string( _clientAddress.sin_port );
+	newMap[ "QUERY_STRING" ] = _request.queryString;
+
 	for ( std::map< std::string, std::string >::const_iterator it = newMap.begin(); it != newMap.end(); ++it ) {
-		if ( !it->second.empty() && isValidEnv( it->first ) )
+		if ( /* !it->second.empty() && */ isValidEnv( it->first ) )
 			_envStrings.push_back( it->first + "=" + it->second );
 	}
-}
+};

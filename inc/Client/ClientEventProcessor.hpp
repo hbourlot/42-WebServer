@@ -1,6 +1,7 @@
 #pragma once
 
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
+#include "utils.hpp"
 // #include "httpTcpServer/HttpStructs.hpp"
 #include <iostream>
 #include <poll.h>

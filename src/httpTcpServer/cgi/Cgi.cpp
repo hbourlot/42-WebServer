@@ -9,6 +9,28 @@
 #include <sys/poll.h>
 #include <vector>
 
+http::Cgi::Cgi( const http::Request& request, std::string& filePath, const sockaddr_in& clientAddress,
+                const ServerConfig& serverInfo, Client* client )
+    : _status(), _clientFD(), _request( request ), _response( Response( request ) ), _serverInfo( serverInfo ),
+      _clientAddress( clientAddress ), _bytesReceived(), _body(), _client( client ), _envp(), _argv(), _envStrings() {
+
+	Location* cgiLocation = _serverInfo.GetLocationByPath( "/cgi-bin" );
+	_filePath = concatenatePath( cgiLocation->root, _request.GetFileName() );
+	buildEnvStrings();
+}
+
+http::Cgi::~Cgi() {
+	// Close all pipe fds
+	if ( _inputPipe[ 0 ] >= 0 )
+		close( _inputPipe[ 0 ] );
+	if ( _inputPipe[ 1 ] >= 0 )
+		close( _inputPipe[ 1 ] );
+	if ( _outputPipe[ 0 ] >= 0 )
+		close( _outputPipe[ 0 ] );
+	if ( _outputPipe[ 1 ] >= 0 )
+		close( _outputPipe[ 1 ] );
+}
+
 std::string http::Cgi::getFilePath() const {
 	return this->_filePath;
 }
@@ -33,54 +55,32 @@ pid_t http::Cgi::getPid() const {
 	return _pid;
 }
 
-const int *http::Cgi::getInputPipe() const {
+const int* http::Cgi::getInputPipe() const {
 	return _inputPipe;
 }
 
 int http::Cgi::getStatus() const {
 	return _status;
 }
-int &http::Cgi::getStatus() {
+int& http::Cgi::getStatus() {
 	return _status;
 }
 
-const int *http::Cgi::getOutputPipe() const {
+const int* http::Cgi::getOutputPipe() const {
 	return _outputPipe;
 }
 
-Client *http::Cgi::getClient() const {
+Client* http::Cgi::getClient() const {
 	return _client;
 }
 
-void http::Cgi::registerPollFd( std::vector< pollfd > &fds ) const {
+void http::Cgi::registerPollFd( std::vector< pollfd >& fds ) const {
 	pollfd pfd;
 
 	pfd.fd = _outputPipe[ 0 ];
 	pfd.events = POLLIN;
 	pfd.revents = 0;
 	fds.push_back( pfd );
-}
-
-http::Cgi::Cgi( const http::Request &request, std::string &filePath, const sockaddr_in &clientAddress,
-                const ServerConfig &serverInfo, Client *client )
-    : _status(), _clientFD(), _request( request ), _response( Response( request ) ), _serverInfo( serverInfo ),
-      _clientAddress( clientAddress ), _bytesReceived(), _body(), _client( client ), _envp(), _argv(), _envStrings() {
-
-	Location *cgiLocation = _serverInfo.GetLocationByPath( "/cgi-bin" );
-	_filePath = cgiLocation->root + "/" + _request.GetFileName();
-	buildEnvStrings();
-}
-
-http::Cgi::~Cgi() {
-	// Close all pipe fds
-	if ( _inputPipe[ 0 ] >= 0 )
-		close( _inputPipe[ 0 ] );
-	if ( _inputPipe[ 1 ] >= 0 )
-		close( _inputPipe[ 1 ] );
-	if ( _outputPipe[ 0 ] >= 0 )
-		close( _outputPipe[ 0 ] );
-	if ( _outputPipe[ 1 ] >= 0 )
-		close( _outputPipe[ 1 ] );
 }
 
 bool http::Cgi::hasDataToRead() {

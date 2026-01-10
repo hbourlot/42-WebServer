@@ -7,6 +7,11 @@ static bool isCgirequest( const http::Request &request, const Location &location
 		return false;
 	}
 
+	for ( size_t i = 0; i < location.cgi_extension.size(); ++i )
+		if ( location.cgi_extension[ i ] == ".cgi" ) { // ".cgi" accept any kind of cgi
+			return true;
+		}
+
 	// Extract file extension from the request path
 	std::string path = request.path;
 	size_t dotPos = path.find_last_of( '.' );
@@ -19,8 +24,7 @@ static bool isCgirequest( const http::Request &request, const Location &location
 
 	// Check if the extension is in the location's CGI extensions
 	for ( size_t i = 0; i < location.cgi_extension.size(); ++i ) {
-		// if ( location.cgi_extension[ i ] == ".cgi" ) // Accept defaults cgi
-		// 	return true;
+		std::cout << location.cgi_extension[ i ] << std::endl;
 		if ( location.cgi_extension[ i ] == extension ) {
 			return true;
 		}
@@ -228,7 +232,7 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 
 		return;
 	}
-	Logs::log( LOGS_ERROR, "Something bad happened, restart server." );
+	// Logs::log( LOGS_ERROR, "Something bad happened, restart server." );
 	return; // Neither client nor CGI pipe - should not happen, skip
 }
 

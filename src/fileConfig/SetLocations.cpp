@@ -1,4 +1,5 @@
 #include "Config/SetLocations.hpp"
+#include <utils.hpp>
 
 #define METHODS 7
 #define ROOT 8
@@ -16,16 +17,21 @@ Location::Location() {
 	// String are automatically initialized;
 }
 
-std::string locationPath( const std::string &line ) {
-	size_t start = line.find_first_not_of( ' ' ); // Skips all the spaces
-	if ( start == std::string::npos )
-		return "";
+std::string locationPath(const std::string &line)
+{
+    size_t start = line.find('/'); // Start where we have to find the path
+    if (start == std::string::npos) // If doesn't find any start returns null
+        return "";
 
-	size_t end = line.find_first_of( " {", start ); // Will find the ' {'
-	if ( end == std::string::npos )
-		end = line.length();
+    size_t end = start;
+    while (end < line.size() && 
+           !std::isspace(line[end]) &&
+           line[end] != '{') // We count the end of the path until we find a 'space' or '{', for cases like "location /cgi bin/hello"
+    {
+        end++;
+    }
 
-	return line.substr( start, end - start );
+    return line.substr(start, end - start);
 }
 
 void getMethods( std::string noSpaceLine,
@@ -110,12 +116,20 @@ int getCgi( std::string noSpaceLine, Location &location, int cgiInfo ) {
 bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, ServerConfig &server ) {
 	std::string noSpaceLine; // Gets the string without the initial spaces
 	std::string trimedLine;  // Stores the atribute of the Location
+	std::string emptyString;
 	Location location;
+	bool IsLocationOpen = false;
 
 	location.path = locationPath( line ); // Sets the Location path
 
-	int atIndexFlag = 0; // Setup a flag for autoIndex, to check for CGI
+	if (location.path.size() == 0)
+		return false;
 
+	int atIndexFlag = 0; // Setup a flag for autoIndex, to check for CGI
+	if (containBrackets(line, IsLocationOpen, emptyString) == false)
+	{
+		return false; 
+	}	
 	while ( std::getline( confFd, line ) ) {
 		noSpaceLine = removeSpace( line );
 
@@ -123,7 +137,24 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
 
 		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
-
+		
+		if (line.find("location") == std::string::npos)
+		{
+			if (containBrackets(line, IsLocationOpen, emptyString) == false)
+			{
+				return false;
+			}
+		}
+		
+		else
+		{
+			if (checkSplitString(line, "location", IsLocationOpen) == false)
+			{
+				return false;
+			}
+				
+		}
+		
 		if ( trimedLine[ 0 ] == '}' )
 			break;
 

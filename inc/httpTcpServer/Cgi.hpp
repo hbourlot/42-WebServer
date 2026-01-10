@@ -29,28 +29,26 @@ namespace http {
 	class Cgi {
 
 	  public:
-		Cgi( const http::Request &request, std::string &filePath, const sockaddr_in &clientAddress,
-		     const ServerConfig &serverInfo, Client *client );
+		Cgi( const http::Request& request, std::string& filePath, const sockaddr_in& clientAddress,
+		     const ServerConfig& serverInfo, Client* client );
 
 		~Cgi();
 
-		// enum CgiStatus { CGI_NOT_STARTED, CGI_RUNNING, CGI_FINISHED, CGI_TOO_LARGE, CGI_ERROR = -1 };
-
-		void executeCgi( std::vector< pollfd > &fds );
+		void executeCgi( std::vector< pollfd >& fds );
 		Response getResponse() const;
 		http::Request getRequest() const;
 		std::string getFilePath() const;
 		std::string getBody() const;
-		int &getStatus();
+		int& getStatus();
 		int getStatus() const;
 		std::vector< std::string > getArgv() const;
 		int getPollFd() const;
 		pid_t getPid() const;
-		const int *getInputPipe() const;
-		const int *getOutputPipe() const;
+		const int* getInputPipe() const;
+		const int* getOutputPipe() const;
 		void killProcess();
-		Client *getClient() const;
-		void registerPollFd( std::vector< pollfd > &fds ) const;
+		Client* getClient() const;
+		void registerPollFd( std::vector< pollfd >& fds ) const;
 		bool hasDataToRead();
 
 	  private:
@@ -63,10 +61,10 @@ namespace http {
 		sockaddr_in _clientAddress;
 		int _bytesReceived;
 		std::string _body;
-		Client *_client; // Back-reference to client
+		Client* _client; // Back-reference to client
 
-		std::vector< char * > _envp;
-		std::vector< char * > _argv;
+		std::vector< char* > _envp;
+		std::vector< char* > _argv;
 		std::vector< std::string > _envStrings;
 
 		// Pipe handling
