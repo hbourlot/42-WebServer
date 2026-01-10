@@ -66,7 +66,7 @@ void http::Cgi::buildEnvStrings() {
 
 	newMap[ "REQUEST_METHOD" ] = _request.method;
 	newMap[ "FILE_NAME" ] = _filePath;
-	newMap[ "DOCUMENT_ROOT" ] = _request.urlMatchedLocation->root;
+	newMap[ "DOCUMENT_ROOT" ] = _request.matchResult.location->root;
 
 	newMap[ "SERVER_PROTOCOL" ] = _request.serverProtocol;
 	newMap[ "SERVER_SOFTWARE" ] = "42WebServer/1.0";
@@ -77,7 +77,7 @@ void http::Cgi::buildEnvStrings() {
 	newMap[ "SCRIPT_NAME" ] = _request.path;
 	newMap[ "PATH_INFO" ] = _request.path;
 	newMap[ "PATH_TRANSLATED" ] =
-	    _request.urlMatchedLocation->root + ( newMap[ "PATH_INFO" ].empty() ? std::string( "/" ) : _request.pathInfo );
+	    _request.matchResult.location->root + ( newMap[ "PATH_INFO" ].empty() ? std::string( "/" ) : _request.pathInfo );
 	
 	newMap[ "REMOTE_PORT" ] = ft_to_string( _clientAddress.sin_port );
 	newMap[ "QUERY_STRING" ] = _request.queryString;

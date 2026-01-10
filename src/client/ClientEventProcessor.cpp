@@ -71,7 +71,7 @@ void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 
 	if ( client->_discardingBody ) {
 		discardingBody( *client, pfd );
-	return;
+		return;
 	}
 
 	if ( !parseRequestData( *client, _server._serverInfo ) ) {
@@ -94,7 +94,7 @@ void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int 
 
 bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 
-const size_t CLIENT_MAX_BODY_SIZE = _server._serverInfo.max_body_size * 1024 * 1024;
+	const size_t CLIENT_MAX_BODY_SIZE = _server._serverInfo.max_body_size * 1024 * 1024;
 	char buffer[ BUFFER_SIZE ];
 	int fd = client.getFd();
 	int readCount = 0;
@@ -160,13 +160,23 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 
 	// Treating execution of request - from here
 	http::Request &request = client.getRequest();
-	const Location &location = *( client.getRequest().urlMatchedLocation );
+	const MatchResult &res = client.getRequest().matchResult;
 
-	if ( isCgirequest( request, location ) ) {
-		return Router::routeCgiRequest( client, serverInfo, location, *this );
+	// ───────── FILE ─────────
+	if ( res.file ) {
+		const File &file = *res.file;
+		Router::routeStaticRequest( client, serverInfo, file );
+		return true;
 	}
 
-	Router::routeStaticRequest( client, serverInfo, location );
+	// ─────── LOCATION ───────
+	const Location &loc = *res.location;
+
+	if ( isCgirequest( request, loc ) ) {
+		return Router::routeCgiRequest( client, serverInfo, loc, *this );
+	}
+
+	Router::routeStaticRequest( client, serverInfo, loc );
 	return true;
 }
 
@@ -208,7 +218,7 @@ bool http::ClientEventProcessor::handleRouteValidation( Client &client ) {
 		return true;
 
 	case VALID_REDIRECT_REQUIRED:
-		response.buildRedirect( HTTP_MOVED, client.getRequest().urlMatchedLocation->redirection );
+		response.buildRedirect( HTTP_MOVED, client.getRequest().matchResult.location->redirection );
 		return true;
 
 	case VALID_METHOD_NOT_ALLOWED:

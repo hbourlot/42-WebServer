@@ -23,6 +23,7 @@ namespace http {
 		static bool routeCgiRequest( Client &client, const ServerConfig &server, const Location &location,
 		                             ClientEventProcessor &processor );
 		static void routeStaticRequest( Client &client, const ServerConfig &server, const Location &location );
+		static void routeStaticRequest( Client &client, const ServerConfig &server, const File &file );
 
 	  private:
 		static void launchCgi( Client &client, const ServerConfig &server, const Location &location,
@@ -33,6 +34,11 @@ namespace http {
 		static void handleDelete( Client &client, const ServerConfig &server, const Location &location );
 		static void handleDirectoryListing( Client &client, const ServerConfig &server, const std::string &filePath,
 		                                    const Location &location );
+
+		// Overload
+		static void handleGet( Client &client, const ServerConfig &server, const File &file );
+		static void handlePost( Client &client, const ServerConfig &server, const File &file );
+		static void handleDelete( Client &client, const ServerConfig &server, const File &file );
 
 		// Can add also other http methods here
 	};

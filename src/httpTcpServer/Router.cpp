@@ -197,31 +197,17 @@ std::string GetExtension( const std::string &path ) {
 	return path.substr( pos + 1 );
 }
 
-const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations ) {
+MatchResult getMatchResult( const std::string &path, const ServerConfig &server ) {
+	MatchResult result;
+	result.file = NULL;
+	result.location = NULL;
 
-	const Location *matchedLocation = NULL;
-	size_t matchLength = 0;
+	result.file = getMatchFile( path, server.files );
+	if ( result.file != NULL )
+		return result;
 
-	for ( size_t i = 0; i < locations.size(); ++i ) {
-
-		const std::string &locPath = locations[ i ].path;
-
-		if ( path.compare( 0, locPath.size(), locPath ) == 0 && locPath.size() > matchLength ) {
-			matchedLocation = &locations[ i ];
-			matchLength = locPath.size();
-		}
-
-		// Checks for the correct CGI location, if we don't find the right location, we return the last one found it
-		if ( matchedLocation != NULL && matchedLocation->cgi.empty() == false ) {
-			// Loops into the vector until we find the Extension cgi, for example ".py"
-			std::vector< std::string > cgiExtensions = matchedLocation->cgi_extension;
-			if ( std::find( cgiExtensions.begin(), cgiExtensions.end(), GetExtension( path ) ) !=
-			     cgiExtensions.end() ) {
-				return matchedLocation;
-			}
-		}
-	}
-	return ( matchedLocation );
+	result.location = getMatchLocation( path, server.locations );
+	return result;
 }
 
 static bool validateRequestMethod( const http::Request &request, const Location &location ) {
@@ -235,28 +221,46 @@ static bool validateRequestMethod( const http::Request &request, const Location 
 	}
 	return false;
 }
+static bool validateRequestMethod( const http::Request &request, const File &file ) {
+
+	if ( request.method != "GET" && request.method != "POST" && request.method != "DELETE" )
+		return false;
+
+	for ( size_t i = 0; i < file.methods.size(); ++i ) {
+		if ( request.method == file.methods[ i ] )
+			return true;
+	}
+	return false;
+}
 
 VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerConfig &server ) {
 
 	http::Request &request = client.getRequest();
 
-	request.urlMatchedLocation = getMatchLocation( request.path, server.locations );
+	request.matchResult = getMatchResult( request.path, server );
 
-	if ( !request.urlMatchedLocation ) // URL NOT FOUND
+	if ( !request.matchResult.file && !request.matchResult.location )
 		return VALID_NOT_FOUND;
 
-	const Location &matchedLocation = *request.urlMatchedLocation;
+	if ( request.matchResult.file ) {
+		if ( !validateRequestMethod( request, *request.matchResult.file ) )
+			return VALID_METHOD_NOT_ALLOWED;
 
-	if ( !request.urlMatchedLocation->redirection.empty() ) // /redirect-me
-		return VALID_REDIRECT_REQUIRED;
+		return VALID_OK;
+	}
+	    const Location &loc = *request.matchResult.location;
 
-	if ( !request.urlMatchedLocation->cgi_extension.empty() )
-		return VALID_IS_CGI;
+    if (!loc.redirection.empty())
+        return VALID_REDIRECT_REQUIRED;
 
-	if ( !validateRequestMethod( request, matchedLocation ) )
-		return VALID_METHOD_NOT_ALLOWED;
+    if (!loc.cgi_extension.empty())
+        return VALID_IS_CGI;
 
-	return VALID_OK;
+    if (!validateRequestMethod(request, loc))
+        return VALID_METHOD_NOT_ALLOWED;
+
+    return VALID_OK;
+
 }
 
 bool http::Router::routeCgiRequest( Client &client, const ServerConfig &server, const Location &location,
