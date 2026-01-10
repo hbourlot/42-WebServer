@@ -65,6 +65,11 @@ namespace http {
 
 		std::vector< pollfd > _fds;
 
+		ServerConfig &getServerInfo() {
+
+			return _serverInfo;
+		}
+
 	  private:
 		SocketFD _serverSocket;
 		ClientManager _clientManager;

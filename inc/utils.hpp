@@ -34,5 +34,5 @@ void printHttpHeaders( const std::map< std::string, std::string > &headers );
 void printLocation( const Location &location );
 bool checkSplitString( const std::string &line, const std::string &sep, bool &isServerOpen );
 
-const File *getMatchFile( const std::string &path, const std::vector< File > &files );
+ File *getMatchFile( const std::string &path,  std::vector< File > &files );
 const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations );

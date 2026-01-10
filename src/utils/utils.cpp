@@ -179,7 +179,7 @@ static std::string GetExtension(const std::string &path)
 
 	return path.substr(dotPos);
 }
-const File *getMatchFile(const std::string &path, const std::vector<File> &files)
+File *getMatchFile(const std::string &path,  std::vector<File> &files)
 {
 	std::string ext = GetExtension(path); // ".txt", ".py", etc.
 	if (ext.empty())
