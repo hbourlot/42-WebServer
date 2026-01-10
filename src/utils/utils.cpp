@@ -189,12 +189,9 @@ const File *getMatchFile(const std::string &path, const std::vector<File> &files
 	{
 		if (files[i].extension.find(ext) != std::string::npos)
 		{
-			std::cout << "file[i]: " << files[i].extension << std::endl;
-			std::cout << "ext: " << ext << std::endl;
 			return &files[i];
 		}
 	}
-	std::cout << "Return file" << std::endl;
 	return NULL;
 }
 
