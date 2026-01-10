@@ -16,6 +16,7 @@ struct File {
 	std::string root;
 	std::string index;
 	std::vector<File*> next;
+	std::string cgi_pass;
 };
 
 struct Location {

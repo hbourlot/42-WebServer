@@ -46,16 +46,15 @@ void http::Cgi::executeCgi( std::vector< pollfd >& fds ) {
 		std::vector< char* > argv;
 		argv.push_back( const_cast< char* >( _filePath.c_str() ) );
 		argv.push_back( NULL );
-
+		
 		// build envp
 		std::vector< char* > envp;
 		this->_envp.clear();
-
+		
 		for ( size_t i = 0; i < _envStrings.size(); ++i ) {
 			this->_envp.push_back( const_cast< char* >( _envStrings[ i ].c_str() ) );
 		}
 		this->_envp.push_back( NULL );
-
 		execve( this->getFilePath().c_str(), argv.data(), this->_envp.data() );
 		Logs::log(LOGS_ERROR, "CGI execution failed for script '" + this->getFilePath() + "': " + strerror(errno));
 		_exit( 1 );

@@ -24,7 +24,8 @@ namespace http {
 		                             ClientEventProcessor &processor );
 		static void routeStaticRequest( Client &client, const ServerConfig &server, const Location &location );
 		static void routeStaticRequest( Client &client, const ServerConfig &server, const File &file );
-
+		static bool routeCgiRequest( Client &client, const ServerConfig &server, const File &file,
+										ClientEventProcessor &processor );
 	  private:
 		static void launchCgi( Client &client, const ServerConfig &server, const Location &location,
 		                       ClientEventProcessor &processor );
@@ -39,7 +40,11 @@ namespace http {
 		static void handleGet( Client &client, const ServerConfig &server, const File &file );
 		static void handlePost( Client &client, const ServerConfig &server, const File &file );
 		static void handleDelete( Client &client, const ServerConfig &server, const File &file );
-
+		
+	
+		static void launchCgi( Client &client, const ServerConfig &server, const File &file,
+                              ClientEventProcessor &processor );
+	
 		// Can add also other http methods here
 	};
 

@@ -229,7 +229,7 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 }
 
 void SetLocation::setDefaultLocation( ServerConfig& server, Location& location ) {
-	if ( location.max_body_size = 0)
+	if ( location.max_body_size == 0)
 	{
 		if ( server.max_body_size != 0)
 			location.max_body_size = server.max_body_size;

@@ -29,6 +29,16 @@ Location *ServerConfig::GetLocationByPath( std::string path ) {
 	return NULL;
 }
 
+File *ServerConfig::GetFileByExtension( std::string extension) { // Get the file by extension ".bat" (For example)
+	for ( int curFileIdx = 0; curFileIdx < files.size(); curFileIdx++ ) {
+		if ( files[ curFileIdx ].extension == extension ) {
+			return &files[ curFileIdx ];
+		}
+	}
+	return NULL;
+} 
+
+
 void getErrorPage( std::string noSpaceLine, ServerConfig &server ) {
 	std::istringstream iss( noSpaceLine );
 	std::string directive;
@@ -145,10 +155,10 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 					getErrorPage( noSpaceLine, server );
 					break;
 				
-				// case FILE:
-				// 	if (SetFile::setFileConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server ) == false)
-				// 		return false;
-				// 	break;
+				case FILE:
+					if (SetFile::setFileConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server ) == false)
+						return false;
+					break;
 				
 				case LOCATION:
 					if (SetLocation::setLocationConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server ) == false)

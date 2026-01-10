@@ -131,7 +131,7 @@ r:
 
 s:
 	@make -s
-	@./$(NAME) ./conf_files/good/file.conf
+	@./$(NAME) ./conf_files/good/scriptpage.conf
 
 v:
 	@make -s

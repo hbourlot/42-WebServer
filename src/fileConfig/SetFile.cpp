@@ -11,6 +11,7 @@
 #define UPLOAD_STORE 13
 #define AUTOINDEX 14
 #define INDEX 15
+#define CGIPASS 16
 
 File::File() {
 	// String are automatically initialized;
@@ -18,7 +19,7 @@ File::File() {
 
 std::string fileExtension(const std::string &line)
 {
-    size_t start = line.find('*.'); // Start where we have to find the path
+    size_t start = line.find("*."); // Start where we have to find the path
     if (start == std::string::npos) // If doesn't find any start returns null
         return "";
 
@@ -40,6 +41,8 @@ int getTypeFile( std::string &trimedLine ) { // Function to check the informatio
 		return ROOT;
 	if ( trimedLine == "index" )
 		return INDEX;
+	if ( trimedLine == "cgi_pass")
+		return CGIPASS;
 	return 100;
 }
 
@@ -93,6 +96,9 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 			break;
 		case INDEX:
 			file.index = getInfo( noSpaceLine );
+			break;
+		case CGIPASS:
+			file.cgi_pass = getInfo( noSpaceLine );
 			break;
 
 		default:

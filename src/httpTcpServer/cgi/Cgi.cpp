@@ -13,8 +13,15 @@ http::Cgi::Cgi( const http::Request& request, std::string& filePath, const Serve
     : _status(), _clientFD(), _request( request ), _response( Response( request ) ), _serverInfo( serverInfo ),
       _clientAddress(), _bytesReceived(), _body(), _client( client ), _envp(), _argv(), _envStrings() {
 
-		  Location* cgiLocation = _serverInfo.GetLocationByPath( filePath );
-		  _filePath = joinPath( cgiLocation->root, _request.GetFileName() );
+		if (filePath.find('*') != std::string::npos){
+			File* cgiFile = _serverInfo.GetFileByExtension( filePath);
+			_filePath =  cgiFile->cgi_pass;
+	  	}
+		else{
+			Location* cgiLocation = _serverInfo.GetLocationByPath( filePath );
+			_filePath = joinPath( cgiLocation->root, _request.GetFileName() );
+		}
+		
 		// std::cout << _filePath << std::endl;
 		//   exit(0);
 	buildEnvStrings();
