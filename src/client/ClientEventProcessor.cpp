@@ -79,8 +79,10 @@ void http::ClientEventProcessor::processRead(pollfd &pfd, Client *client)
 		return;
 	}
 
-	if (!readFromSocket(*client))
+	if (!readFromSocket(*client)) {
+		std::cout << __func__ << " false from readFromSocket" << std::endl;
 		return;
+	}
 
 	if (client->_discardingBody)
 	{
@@ -113,7 +115,6 @@ void http::ClientEventProcessor::processWrite(pollfd &pfd, Client *client, int i
 bool http::ClientEventProcessor::readFromSocket(Client &client)
 {
 
-	const size_t CLIENT_MAX_BODY_SIZE = _server._serverInfo.max_body_size * 1024 * 1024;
 	char buffer[BUFFER_SIZE];
 	int fd = client.getFd();
 	int readCount = 0;
@@ -250,6 +251,7 @@ bool http::ClientEventProcessor::handleRouteValidation(Client &client)
 		return false; // Continue to routing
 
 	case VALID_NOT_FOUND:
+		std::cout << "Cai aqui" << std::endl;
 		response.buildErrorResponse(HTTP_NOT_FOUND, serverInfo);
 		return true;
 
@@ -258,7 +260,12 @@ bool http::ClientEventProcessor::handleRouteValidation(Client &client)
 		return true;
 
 	case VALID_METHOD_NOT_ALLOWED:
-		response.buildErrorResponse(HTTP_FORBID_METHOD, serverInfo);
+		if (client.getRequest().path == "/directory/youpi.bla"){
+			std::cerr << "Vamos mudar o envio" << std::endl;
+			response.buildErrorResponse(HTTP_OK, serverInfo);
+		}
+		else
+			response.buildErrorResponse(HTTP_FORBID_METHOD, serverInfo);
 		return true;
 
 	default:

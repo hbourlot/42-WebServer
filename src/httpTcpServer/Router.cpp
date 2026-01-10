@@ -19,8 +19,8 @@ MatchResult getMatchResult(const std::string &path, const ServerConfig &server)
 	result.location = NULL;
 
 	result.file = getMatchFile(path, server.files);
-	if (result.file != NULL)
-		return result;
+	// if (result.file != NULL)
+	// 	return result;
 	result.location = getMatchLocation(path, server.locations);
 	return result;
 }
@@ -60,6 +60,8 @@ VALIDATION_STATUS http::Router::validateRequest(Client &client, const ServerConf
 
 	request.matchResult = getMatchResult(request.path, server);
 
+	// if (request.matchResult.file && request.matchResult.location)
+	// 	request.matchResult.file->methods.push_back(request.matchResult.location->methods.at(0));
 	if (!request.matchResult.file && !request.matchResult.location)
 		return VALID_NOT_FOUND;
 

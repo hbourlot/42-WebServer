@@ -205,8 +205,8 @@ const Location *getMatchLocation(const std::string &path, const std::vector<Loca
 	{
 
 		const std::string &locPath = locations[i].path;
-
-		if (path.compare(0, locPath.size(), locPath) == 0 && locPath.size() > matchLength)
+		// if (path.compare(0, locPath.size(), locPath) == 0 && locPath.size() > matchLength)
+		if (path.find(locPath) != std::string::npos && locPath.size() > matchLength)
 		{
 			matchedLocation = &locations[i];
 			matchLength = locPath.size();
