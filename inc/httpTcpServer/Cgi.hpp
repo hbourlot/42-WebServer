@@ -6,6 +6,13 @@
 #include <sys/poll.h>
 #include <sys/wait.h>
 #include <vector>
+#include <ios>
+#include <iostream>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <vector>
+#include <cstring>
+#include <fcntl.h>
 
 class Client;
 
@@ -29,8 +36,7 @@ namespace http {
 	class Cgi {
 
 	  public:
-		Cgi( const http::Request& request, std::string& filePath, const sockaddr_in& clientAddress,
-		     const ServerConfig& serverInfo, Client* client );
+		Cgi( const http::Request& request, std::string& filePath, const ServerConfig& serverInfo, Client* client );
 
 		~Cgi();
 
@@ -58,7 +64,7 @@ namespace http {
 		Response _response;
 		ServerConfig _serverInfo;
 		std::string _filePath;
-		sockaddr_in _clientAddress;
+		const sockaddr_in _clientAddress;
 		int _bytesReceived;
 		std::string _body;
 		Client* _client; // Back-reference to client
@@ -78,7 +84,6 @@ namespace http {
 		void doDupTwoWay();
 		void closeForOneWay();
 		void closeForTwoWay();
-		void handleChildProcess();
 	};
 
 }; // namespace http

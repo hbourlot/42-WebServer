@@ -1,10 +1,5 @@
-#include "Config/Configs.hpp"
-#include "httpTcpServer/HttpTcpServerLinux.hpp"
-#include <ios>
-#include <iostream>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <vector>
+#include "httpTcpServer/Cgi.hpp"
+
 
 void printEnvStrings( std::vector< std::string >& _envStrings ) {
 	std::cerr << "ENVSTRINGS:" << std::endl;
@@ -30,28 +25,6 @@ void debugCgiExec( const char* filePath, char* const argv[], char* const envp[] 
 	std::cerr << "END DEBUG" << std::endl;
 }
 
-void http::Cgi::handleChildProcess() {
-
-	this->doDupOneWay();
-
-	// build argv
-	std::vector< char* > argv;
-	argv.push_back( const_cast< char* >( _filePath.c_str() ) );
-	argv.push_back( NULL );
-
-	// build envp
-	std::vector< char* > envp;
-	this->_envp.clear();
-
-	for ( size_t i = 0; i < _envStrings.size(); ++i ) {
-		this->_envp.push_back( const_cast< char* >( _envStrings[ i ].c_str() ) );
-	}
-	this->_envp.push_back( NULL );
-
-	execve( this->getFilePath().c_str(), argv.data(), this->_envp.data() );
-	std::cerr << "EXECUTE WRONG\n ";
-	_exit( 1 );
-}
 
 void http::Cgi::executeCgi( std::vector< pollfd >& fds ) {
 
@@ -66,7 +39,26 @@ void http::Cgi::executeCgi( std::vector< pollfd >& fds ) {
 		std::cerr << "Fork failed\n";
 		return;
 	} else if ( this->_pid == 0 ) {
-		this->handleChildProcess();
+
+		this->doDupOneWay();
+
+		// build argv
+		std::vector< char* > argv;
+		argv.push_back( const_cast< char* >( _filePath.c_str() ) );
+		argv.push_back( NULL );
+
+		// build envp
+		std::vector< char* > envp;
+		this->_envp.clear();
+
+		for ( size_t i = 0; i < _envStrings.size(); ++i ) {
+			this->_envp.push_back( const_cast< char* >( _envStrings[ i ].c_str() ) );
+		}
+		this->_envp.push_back( NULL );
+
+		execve( this->getFilePath().c_str(), argv.data(), this->_envp.data() );
+		Logs::log(LOGS_ERROR, "CGI execution failed for script '" + this->getFilePath() + "': " + strerror(errno));
+		_exit( 1 );
 	} else {
 		this->closeForOneWay();
 

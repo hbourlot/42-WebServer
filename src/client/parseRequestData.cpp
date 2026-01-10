@@ -121,14 +121,14 @@ bool http::ClientEventProcessor::parseRequestData( Client& client, const ServerC
 	if ( clientRequest.headers.count( "Content-Length" ) ) {
 		contentLength = std::strtoul( clientRequest.headers[ "Content-Length" ].c_str(), NULL, 10 );
 
-		if ( contentLength > ( serverInfo.maxRequest * 1024 * 1024 ) ) {
+		if ( contentLength > ( serverInfo.max_body_size* 1024 * 1024 ) ) {
 			// client.setState( PARSE_TOO_LARGE );
 			// client.getResponse() = Response( clientRequest );
 			// ensureSessionId( client );
 			client._bytesToDiscard = contentLength;
 			client._discardingBody = true;
 
-			Logs::log( LOGS_ERROR, "Body size it's above size allowed " + to_str( client.getFd() ) );
+			Logs::log( LOGS_ERROR, "Body size it's above size allowed " + ft_to_string( client.getFd() ) );
 			return false;
 		}
 	}
@@ -148,7 +148,7 @@ bool http::ClientEventProcessor::parseRequestData( Client& client, const ServerC
 
 	client.getResponse() = Response( clientRequest );
 	ensureSessionId( client );
-	Logs::log( LOGS_INFO, "Client: " + to_str( client.getFd() ) + " Made a Request" );
+	Logs::log( LOGS_INFO, "Client: " + ft_to_string( client.getFd() ) + " Made a Request" );
 	client.setState( PARSE_OK );
 
 	return true;

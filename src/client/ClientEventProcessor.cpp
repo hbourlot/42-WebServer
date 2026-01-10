@@ -7,10 +7,11 @@ static bool isCgirequest( const http::Request &request, const Location &location
 		return false;
 	}
 
-	for ( size_t i = 0; i < location.cgi_extension.size(); ++i )
+	for ( size_t i = 0; i < location.cgi_extension.size(); ++i ) {
 		if ( location.cgi_extension[ i ] == ".cgi" ) { // ".cgi" accept any kind of cgi
 			return true;
 		}
+	}
 
 	// Extract file extension from the request path
 	std::string path = request.path;
@@ -70,7 +71,7 @@ void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 
 	if ( client->_discardingBody ) {
 		discardingBody( *client, pfd );
-		return;
+	return;
 	}
 
 	if ( !parseRequestData( *client, _server._serverInfo ) ) {
@@ -93,7 +94,7 @@ void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int 
 
 bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 
-	const size_t CLIENT_MAX_BODY_SIZE = _server._serverInfo.maxRequest * 1024 * 1024;
+const size_t CLIENT_MAX_BODY_SIZE = _server._serverInfo.max_body_size * 1024 * 1024;
 	char buffer[ BUFFER_SIZE ];
 	int fd = client.getFd();
 	int readCount = 0;
@@ -275,7 +276,7 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 	// Check if all data was sent
 	if ( writeBuffer.empty() ) {
 		std::string msg( "Server Response sent to client " );
-		msg += to_str( clientFd ) + " sessionID: " + client.getSessionId();
+		msg += ft_to_string( clientFd ) + " sessionID: " + client.getSessionId();
 		if ( DEBUG ) {
 			msg += " ";
 			msg += client.getRequest().path;

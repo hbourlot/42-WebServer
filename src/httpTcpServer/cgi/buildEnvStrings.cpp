@@ -75,10 +75,11 @@ void http::Cgi::buildEnvStrings() {
 	
 	newMap[ "REQUEST_URI" ] = _request.path;
 	newMap[ "SCRIPT_NAME" ] = _request.path;
-	newMap[ "PATH_INFO" ] = _request.pathInfo;
+	newMap[ "PATH_INFO" ] = _request.path;
 	newMap[ "PATH_TRANSLATED" ] =
 	    _request.urlMatchedLocation->root + ( newMap[ "PATH_INFO" ].empty() ? std::string( "/" ) : _request.pathInfo );
-		newMap[ "REMOTE_PORT" ] = ft_to_string( _clientAddress.sin_port );
+	
+	newMap[ "REMOTE_PORT" ] = ft_to_string( _clientAddress.sin_port );
 	newMap[ "QUERY_STRING" ] = _request.queryString;
 
 	for ( std::map< std::string, std::string >::const_iterator it = newMap.begin(); it != newMap.end(); ++it ) {

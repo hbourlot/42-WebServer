@@ -1,5 +1,6 @@
 #include "Config/ReadConfig.hpp"
 #include "Config/SetLocations.hpp"
+#include "Config/SetFile.hpp"
 #include <string>
 #include <utils.hpp>
 
@@ -10,10 +11,13 @@
 #define ERROR_PAGE 5
 #define LOCATION 6
 #define ROOT 7
+#define FILE 8
+#define INDEX 9
+#define CGIPASS 10
 
 ServerConfig::ServerConfig() {
 	port = 0;
-	maxRequest = 0;
+	max_body_size = 0;
 }
 
 Location *ServerConfig::GetLocationByPath( std::string path ) {
@@ -44,27 +48,31 @@ void getErrorPage( std::string noSpaceLine, ServerConfig &server ) {
 	server.errorPage.insert( std::pair< int, std::string >( std::atoi( code.c_str() ), path ) );
 }
 
-int getTypeServer( std::string &trimedLine ) { // Return the type of information to use on switch
-	if ( trimedLine == "host" )
+int getTypeServer( std::string &trimmedLine ) { // Return the type of information to use on switch
+	if ( trimmedLine == "host" )
 		return HOST;
-	else if ( trimedLine == "port" )
+	else if ( trimmedLine == "port" )
 		return PORT;
-	else if ( trimedLine == "server_name" )
+	else if ( trimmedLine == "server_name" )
 		return SERVER_NAME;
-	else if ( trimedLine == "client_max_body_size" )
+	else if ( trimmedLine == "client_max_body_size" )
 		return CLIENT_MAX_BDY;
-	else if ( trimedLine == "error_page" )
+	else if ( trimmedLine == "error_page" )
 		return ERROR_PAGE;
-	else if ( trimedLine == "location" )
+	else if ( trimmedLine == "location" )
 		return LOCATION;
-	else if ( trimedLine == "root")
+	else if ( trimmedLine == "root")
 		return ROOT;
+	else if ( trimmedLine == "index")
+		return INDEX;
+	else if ( trimmedLine == "cgi_pass")
+		return CGIPASS;
 	return 100;
 }
 
 bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Configs &configs ) {
 	std::string noSpaceLine; // Gets the string without the initial spaces
-	std::string trimedLine;  // Stores the atribute of the server
+	std::string trimmedLine;  // Stores the attribute of the server
 	std::string emptyString;  // Just an empty string
 	ServerConfig server;     // Variable to save all the information
 
@@ -75,19 +83,23 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 	{
 		return false; 
 	}	
-
+	
 	server.port = 0;
-	server.maxRequest = 10;	                 // Set the max value by default
+	server.max_body_size = 1024;	             // Set the max value by default
 	while ( std::getline( confFd, line ) ) { // Finish the server config block
+		
 		noSpaceLine = removeSpace( line );   // Removes the first spaces
+		
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) )
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
 		
-		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
+			
+		trimmedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
 		
-		if ( trimedLine[ 0 ] == '}' ) // Finish the server info
+		if ( trimmedLine[ 0 ] == '}' ) // Finish the server info
 			break;
 		
+
 		// Check if we are going to location configs "location /upload"
 		// This serves to check if we have stuff like " } location /upload {"
 		// We close the last location config, and we open a new one
@@ -104,16 +116,19 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 				return false;
 		}
 
+
 		if (IsServerOpen == true)
 		{
-			switch ( getTypeServer( trimedLine ) ) {
+			switch ( getTypeServer( trimmedLine ) ) {
 				case ROOT:
 					server.root = getInfo ( noSpaceLine ); // Get the root path
 					break;
 				case HOST:
 					server.host = getInfo( noSpaceLine ); // Get the information in string
 					break;
-				
+				case INDEX:
+					server.index = getInfo( noSpaceLine	);
+					break;
 				case PORT:
 					server.port = std::atoi( getInfo( noSpaceLine ).c_str() ); // Convert the string into a int
 					break;
@@ -123,24 +138,32 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 					break;
 				
 				case CLIENT_MAX_BDY:
-					server.maxRequest = getMaxRequestBody( noSpaceLine);
+					server.max_body_size = getMaxRequestBody( noSpaceLine);
 					break;
 				
 				case ERROR_PAGE:
 					getErrorPage( noSpaceLine, server );
 					break;
 				
+				// case FILE:
+				// 	if (SetFile::setFileConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server ) == false)
+				// 		return false;
+				// 	break;
+				
 				case LOCATION:
 					if (SetLocation::setLocationConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server ) == false)
+					{	
 						return false;
-						break;
+					}
+					break;
 				
+
 				default:
 					break;
 			}
 		}
 		noSpaceLine = removeSpace( line );
-		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
+		trimmedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
 	}
 	ReadConfig::setDefaultServer( server );
 	configs.servers.push_back( server ); // Send the information for the main config
@@ -196,8 +219,8 @@ void ReadConfig::setDefaultServer( ServerConfig &server ) {
 		server.errorPage.insert( std::pair< int, std::string >( 404, "../../content/defaultError.html" ) );
 	}
 
-	if ( server.maxRequest == 0 ) {
-		std::cout << "Settig Max request to 10M ✅" << std::endl;
-		server.maxRequest = 10;
+	if ( server.max_body_size == 0 ) {
+		std::cout << "Setting Max request to 1024 ✅" << std::endl;
+		server.max_body_size = 1024;
 	}
 }

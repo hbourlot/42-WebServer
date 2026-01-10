@@ -27,7 +27,7 @@ namespace http {
 	    : _serverInfo( server ), _serverSocket(), _socketAddress_len( sizeof( sockaddr_in ) ) {
 		std::string msg( "CREATED SERVER " );
 		msg = msg + _serverInfo.host + ":";
-		msg += to_str( _serverInfo.port );
+		msg += ft_to_string( _serverInfo.port );
 		Logs::log( LOGS_INFO, msg );
 	}
 
@@ -126,7 +126,7 @@ namespace http {
 
 				// std::cout << "----- Connection Accepted 🟩\n\n";
 				std::string msg( "Connection Accepted 🟩 " );
-				msg += to_str( client_pollfd.fd );
+				msg += ft_to_string( client_pollfd.fd );
 				Logs::log( LOGS_INFO, msg );
 			}
 		}
@@ -181,7 +181,7 @@ namespace http {
 				_socketAddressMap.erase( fd );
 
 			std::string msg( "Closing Dead FD => " );
-			msg += to_str( fd );
+			msg += ft_to_string( fd );
 
 			Logs::log( LOGS_ERROR, msg );
 			close( fd );
@@ -248,7 +248,7 @@ namespace http {
 		}
 
 		std::string msg( "Closing FD => " );
-		msg += to_str( fd );
+		msg += ft_to_string( fd );
 
 		Logs::log( LOGS_ERROR, msg );
 

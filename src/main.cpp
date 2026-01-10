@@ -30,9 +30,21 @@ int main( int argc, char **argv, char **envp ) {
 	// Namespace to use on TCPServer
 	using namespace http;
 
-	TcpServer server( configuration.servers[ 0 ] );
+	
+	std::vector<TcpServer> servers;
+	
+	// for (size_t i = 0; i < configuration.servers.size(); i++) {
+		TcpServer server( configuration.servers[ 0 ] );
+		server.runServer();
+		// servers.push_back(server);
+	// }
 
-	server.runServer();
+	// for (size_t i = 0; i < servers.size(); i++) {
+		
+	// 	std::cout <<	configuration.servers.size() << std::endl;
+	// 	servers.at(i).runServer();
+	// }
+
 
 	return 0;
 }

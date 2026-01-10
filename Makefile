@@ -36,7 +36,7 @@ CLIENT_FUNC		= client clientManager ClientEventProcessor ClientEventProcessor_cg
 AUTH_FUNC		= loginHandler
 CGI_FUNC		= executeCgi Cgi buildEnvStrings
 UTILS_FUNC		= utils getLocationFieldAsString debug
-FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations
+FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations SetFile
 
 HTTP_FUNC	    = HttpTcpServerLinux Router autoIndex Response Logs
 # HTTP_HANDLER_FUNC = HttpRouter autoindex
@@ -128,6 +128,10 @@ bonus: all
 r:
 	@make -s
 	@./$(NAME) ./conf_files/good/webpage.conf
+
+s:
+	@make -s
+	@./$(NAME) ./conf_files/good/file.conf
 
 v:
 	@make -s
@@ -236,6 +240,8 @@ c: clean
 	@make -s
 	@valgrind ./$(NAME) ./conf_files/bad/LocationWithNoRoot.conf
 
-
-
+19:
+	@echo "Location with specific file extension"
+	@make -s
+	@valgrind ./$(NAME) ./conf_files/good/file.conf
 
