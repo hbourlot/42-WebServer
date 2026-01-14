@@ -1,5 +1,6 @@
 // #include "Config/Debug.hpp"
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
+#include "inc/utils.hpp"
 
 int main( int argc, char **argv, char **envp ) {
 
@@ -20,6 +21,7 @@ int main( int argc, char **argv, char **envp ) {
 			std::cout << "Failed to set the configs" << std::endl;
 			exit(-1);
 		}
+		std::set<std::string> testing = getAllMethods(configuration, "");
 
 	} catch (const std::exception &exception)
 	{

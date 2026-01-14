@@ -224,3 +224,52 @@ const Location *getMatchLocation(const std::string &path, const std::vector<Loca
 	}
 	return (matchedLocation);
 }
+
+std::vector<std::string> splitLocations(const std::string& path)
+{
+    std::vector<std::string> locations;
+    std::string current;
+    size_t i = 0;
+
+    while (i < path.length())
+    {
+        if (path[i] == '/')
+        {
+            size_t next = path.find('/', i + 1);
+            if (next == std::string::npos)
+                break;
+
+            current = path.substr(0, next);
+            locations.push_back(current);
+            i = next;
+        }
+        else
+            i++;
+    }
+
+    return locations;
+}
+
+/// @brief Search in every directory and gets every method (ex. /directory/alias/test)
+/// @param path Full directory
+/// @return vector with all getted methods
+std::set<std::string> getAllMethods(ServerConfig &server,std::string path)
+{
+	std::set<std::string> mergedMethods;
+	std::vector<std::string> splittedLocations;
+
+	splittedLocations = splitLocations(path);
+	for(size_t i = 0; i < splittedLocations.size(); i++)
+	{
+		Location *curLocation = server.GetLocationByPath(splittedLocations[i]);
+		
+		for (size_t x = 0; x < curLocation->methods.size(); x++)
+		{
+			mergedMethods.insert(curLocation->methods[x]);
+		}
+
+		if (mergedMethods.size() >= 3)
+			return mergedMethods;
+	}
+	return mergedMethods;
+}
