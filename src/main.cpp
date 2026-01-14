@@ -1,6 +1,8 @@
 // #include "Config/Debug.hpp"
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
-#include "inc/utils.hpp"
+#include "/home/mistery576/42-WebServer/inc/utils.hpp"
+
+class ServerConfig;
 
 int main( int argc, char **argv, char **envp ) {
 
@@ -21,8 +23,6 @@ int main( int argc, char **argv, char **envp ) {
 			std::cout << "Failed to set the configs" << std::endl;
 			exit(-1);
 		}
-		std::set<std::string> testing = getAllMethods(configuration, "");
-
 	} catch (const std::exception &exception)
 	{
 		std::cout << "Failed to set the configurations: " << exception.what() << std::endl;

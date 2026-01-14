@@ -225,35 +225,55 @@ const Location *getMatchLocation(const std::string &path, const std::vector<Loca
 	return (matchedLocation);
 }
 
+std::string getFileExtension(const std::string &path)
+{
+    size_t slashPos = path.find_last_of('/');
+    size_t dotPos = path.find_last_of('.');
+
+    if (dotPos == std::string::npos || (slashPos != std::string::npos && dotPos < slashPos))
+        return "";
+    return path.substr(dotPos);
+}
+
 std::vector<std::string> splitLocations(const std::string& path)
 {
-    std::vector<std::string> locations;
+    std::vector<std::string> result;
     std::string current;
     size_t i = 0;
 
+    // assumir que path começa com '/'
+    if (path.empty() || path[0] != '/')
+        return result;
+
+    i = 1; // saltar o '/'
+
     while (i < path.length())
     {
-        if (path[i] == '/')
-        {
-            size_t next = path.find('/', i + 1);
-            if (next == std::string::npos)
-                break;
+        size_t next = path.find('/', i);
 
-            current = path.substr(0, next);
-            locations.push_back(current);
-            i = next;
+        if (next == std::string::npos)
+        {
+            current += path.substr(i);
+            result.push_back("/" + current);
+            break;
         }
         else
-            i++;
+        {
+            current += path.substr(i, next - i);
+            result.push_back("/" + current);
+            current += "/";
+            i = next + 1;
+        }
     }
 
-    return locations;
+    return result;
 }
+
 
 /// @brief Search in every directory and gets every method (ex. /directory/alias/test)
 /// @param path Full directory
 /// @return vector with all getted methods
-std::set<std::string> getAllMethods(ServerConfig &server,std::string path)
+std::set<std::string> getAllMethods(ServerConfig server,std::string path)
 {
 	std::set<std::string> mergedMethods;
 	std::vector<std::string> splittedLocations;
@@ -263,13 +283,25 @@ std::set<std::string> getAllMethods(ServerConfig &server,std::string path)
 	{
 		Location *curLocation = server.GetLocationByPath(splittedLocations[i]);
 		
-		for (size_t x = 0; x < curLocation->methods.size(); x++)
+		if (curLocation != NULL)
 		{
-			mergedMethods.insert(curLocation->methods[x]);
+			for (size_t x = 0; x < curLocation->methods.size(); x++)
+			{
+				mergedMethods.insert(curLocation->methods[x]);
+			}
+			
+			if (mergedMethods.size() >= 3)
+				return mergedMethods;
 		}
+	}
 
-		if (mergedMethods.size() >= 3)
-			return mergedMethods;
+	File *curFile = server.GetFileByExtension("*" + getFileExtension(path));
+	if (curFile != NULL)
+	{
+		for (size_t x = 0; x < curFile->methods.size(); x++)
+		{
+			mergedMethods.insert(curFile->methods[x]);
+		}
 	}
 	return mergedMethods;
 }
