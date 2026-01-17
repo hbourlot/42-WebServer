@@ -269,15 +269,20 @@ std::vector<std::string> splitLocations(const std::string& path)
     return result;
 }
 
+void convertSetToVector(std::set<std::string> &setCtr, std::vector<std::string> &vecCtr)
+{
+	for (std::set<std::string>::iterator i = setCtr.begin() ; i != setCtr.end(); i++)
+		vecCtr.push_back(*i);
+}
 
 /// @brief Search in every directory and gets every method (ex. /directory/alias/test)
 /// @param path Full directory
 /// @return vector with all getted methods
-std::set<std::string> getAllMethods(ServerConfig server,std::string path)
+std::vector<std::string> getAllMethods(ServerConfig server,std::string path)
 {
-	std::set<std::string> mergedMethods;
+	std::vector<std::string> mergedMethods;
 	std::vector<std::string> splittedLocations;
-
+	std::set<std::string>	 noDupMethods;
 	splittedLocations = splitLocations(path);
 	for(size_t i = 0; i < splittedLocations.size(); i++)
 	{
@@ -286,12 +291,13 @@ std::set<std::string> getAllMethods(ServerConfig server,std::string path)
 		if (curLocation != NULL)
 		{
 			for (size_t x = 0; x < curLocation->methods.size(); x++)
-			{
-				mergedMethods.insert(curLocation->methods[x]);
-			}
+				noDupMethods.insert(curLocation->methods[x]);
 			
-			if (mergedMethods.size() >= 3)
+			if (noDupMethods.size() >= 3)
+			{
+				convertSetToVector(noDupMethods, mergedMethods);
 				return mergedMethods;
+			}
 		}
 	}
 
@@ -300,8 +306,11 @@ std::set<std::string> getAllMethods(ServerConfig server,std::string path)
 	{
 		for (size_t x = 0; x < curFile->methods.size(); x++)
 		{
-			mergedMethods.insert(curFile->methods[x]);
+			noDupMethods.insert(curFile->methods[x]);
 		}
 	}
+
+	// Send the "SET" info to the "VECTOR"
+	convertSetToVector(noDupMethods, mergedMethods);
 	return mergedMethods;
 }

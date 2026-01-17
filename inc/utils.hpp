@@ -38,4 +38,4 @@ bool checkSplitString( const std::string &line, const std::string &sep, bool &is
 
  File *getMatchFile( const std::string &path,  std::vector< File > &files );
 const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations );
-std::set<std::string> getAllMethods(ServerConfig server,std::string path);
+std::vector<std::string> getAllMethods(ServerConfig server,std::string path);

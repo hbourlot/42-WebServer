@@ -7,6 +7,7 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <set>
 #include <vector>
 
 struct File {

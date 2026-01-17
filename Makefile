@@ -135,7 +135,7 @@ s:
 
 v:
 	@make -s
-	@$(VALGRIND) ./$(NAME) ./conf_files/good/webpage.conf
+	@$(VALGRIND) ./$(NAME) ./conf_files/good/scriptpage.conf
 
 debug: CXXFLAGS += $(DEBUG_FLAGS) -DDEBUG -g -O0
 debug: re
@@ -143,7 +143,7 @@ debug: re
 
 d: debug
 	@make -s
-	@./$(NAME) ./conf_files/good/webpage.conf
+	@./$(NAME) ./conf_files/good/scriptpage.conf
 
 fc: fclean
 

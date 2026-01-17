@@ -80,7 +80,6 @@ void http::ClientEventProcessor::processRead(pollfd &pfd, Client *client)
 	}
 
 	if (!readFromSocket(*client)) {
-		std::cout << __func__ << " false from readFromSocket" << std::endl;
 		return;
 	}
 
