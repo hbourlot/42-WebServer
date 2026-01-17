@@ -83,11 +83,20 @@ void http::Cgi::buildEnvStrings()
 	newMap["REQUEST_URI"] = _request.path;
 	newMap["SCRIPT_NAME"] = _request.path;
 	newMap["PATH_INFO"] = _request.path;
+	if (_request.headers.count("Content-Length"))
+	{
+		newMap["CONTENT_LENGTH"] = _request.headers.at("Content-Length");
+	}
+	else
+	{
+		newMap["CONTENT_LENGTH"] = _request.body.size();
+	}
 
-	if (_request.matchResult.location != NULL){
+	if (_request.matchResult.location != NULL)
+	{
 
 		newMap["PATH_TRANSLATED"] =
-			_request.matchResult.location->root + (newMap["PATH_INFO"].empty() ? std::string("/") : _request.pathInfo);
+		    _request.matchResult.location->root + (newMap["PATH_INFO"].empty() ? std::string("/") : _request.pathInfo);
 	}
 	else
 		newMap["PATH_TRANSLATED"] =

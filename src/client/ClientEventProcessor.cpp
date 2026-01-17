@@ -192,26 +192,28 @@ bool http::ClientEventProcessor::processRequest(Client &client)
 	http::Request &request = client.getRequest();
 	const MatchResult &res = client.getRequest().matchResult;
 
-	// ───────── FILE ─────────
-	if (res.file)
+	// ─────── LOCATION ───────
+	const Location &loc = *res.location;
+	const File &file = *res.file;
+	if (res.location  && res.file)
 	{
-		const File &file = *res.file;
-		if (!res.file->cgi_pass.empty())
+		if (isCgirequest(request, loc))
+			return Router::routeCgiRequest(client, serverInfo, loc, *this);
+		else if (!res.file->cgi_pass.empty() && request.method != "GET")
 			return Router::routeCgiRequest(client, serverInfo, file, *this);
-		Router::routeStaticRequest(client, serverInfo, file);
+	}
+	if (res.location)
+	{
+		Router::routeStaticRequest(client, serverInfo, loc);
 		return true;
 	}
 
-	// ─────── LOCATION ───────
-	const Location &loc = *res.location;
-
-	if (isCgirequest(request, loc))
+	// ───────── FILE ─────────
+	if (res.file)
 	{
-		return Router::routeCgiRequest(client, serverInfo, loc, *this);
+		Router::routeStaticRequest(client, serverInfo, file);
+		return true;
 	}
-
-	Router::routeStaticRequest(client, serverInfo, loc);
-	return true;
 }
 
 bool http::ClientEventProcessor::buildErrorResponse(Client &client, CLIENT_STATE state)

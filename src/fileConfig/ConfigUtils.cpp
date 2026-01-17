@@ -18,14 +18,11 @@ int getMaxRequestBody(std::string &value) {
 	if (resultStr.empty() == false &&
 		resultStr[resultStr.size() - 1] == ';')
 		resultStr.erase(value.size() - 1);
-
 	// Lets parse the string
     size_t multiplier = 1;
-	char last = value[value.size() - 1];
+	char last = resultStr[resultStr.size() - 1];
     if (std::isalpha(last))
     {
-        resultStr = value.substr(0, value.size() - 1);
-
         if (last == 'K')
             multiplier = 1024;
         else if (last == 'M')
@@ -40,10 +37,7 @@ int getMaxRequestBody(std::string &value) {
     if (num < 0) {
 		throw std::runtime_error("invalid size number");
 	}
-	
     return static_cast<size_t>(num) * multiplier;
-
-	return result;
 }
 
 std::string getInfo( std::string &noSpaceLine ) {

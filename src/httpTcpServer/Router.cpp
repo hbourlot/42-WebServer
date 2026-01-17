@@ -29,7 +29,9 @@ static bool validateRequestMethod(const http::Request &request, const Location &
 {
 
 	if (request.method != "GET" && request.method != "POST" && request.method != "DELETE")
+	{
 		return false;
+	}
 
 	for (size_t i = 0; i < location.methods.size(); ++i)
 	{
@@ -75,7 +77,9 @@ VALIDATION_STATUS http::Router::validateRequest(Client &client, const ServerConf
 	if (request.matchResult.file != NULL)
 	{
 		if (!validateRequestMethod(request, *request.matchResult.file))
+		{
 			return VALID_METHOD_NOT_ALLOWED;
+		}
 
 		return VALID_OK;
 	}
@@ -85,10 +89,14 @@ VALIDATION_STATUS http::Router::validateRequest(Client &client, const ServerConf
 		return VALID_REDIRECT_REQUIRED;
 
 	if (!loc.cgi_extension.empty())
+	{
 		return VALID_IS_CGI;
+	}
 
 	if (!validateRequestMethod(request, loc))
+	{
 		return VALID_METHOD_NOT_ALLOWED;
+	}
 
 	return VALID_OK;
 }
@@ -139,6 +147,19 @@ void http::Router::launchCgi(Client &client, const ServerConfig &server, const L
 	http::Cgi *cgi = new http::Cgi(request, path, server, &client);
 	cgi->executeCgi(client.getServer()._fds);
 
+	// Send Body if has
+	write(cgi->getInputPipe()[1], request.body.c_str(), request.body.size());
+	int i = 0;
+	while (i < request.body.size())
+	{
+		if (!std::isprint(request.body.c_str()[i]))
+			printf(".");
+		else
+			printf("%c", request.body.c_str()[i]);
+		i++;
+	}
+	std::cout << "\n\n AFTER WRITE INTO CGI\n";
+
 	// Store CGI info in client
 	client.setCgiPid(cgi->getPid());
 	client.setCgiOutputFd(cgi->getOutputPipe()[0]);
@@ -158,6 +179,22 @@ void http::Router::launchCgi(Client &client, const ServerConfig &server, const F
 	http::Cgi *cgi = new http::Cgi(request, path, server, &client);
 	cgi->executeCgi(client.getServer()._fds);
 
+	// Send Body if has
+	std::cerr << "\n\n BEFORE WRITE INTO CGI\n" << "Body size " << request.body.size() << std::endl;
+	// close(cgi->getInputPipe()[1]);
+	// int i = 0;
+	// while (i < 100)
+	// {
+	// 	if (!std::isprint(request.body.c_str()[i]))
+	// 		printf(".");
+	// 	else
+	// 		printf("%c", request.body.c_str()[i]);
+	// 	i++;
+	// }
+	write(cgi->getInputPipe()[1], request.body.c_str(), request.body.size());
+	std::cout << "\n\n after/2 WRITE INTO CGI\n";
+
+	std::cout << "\n\n AFTER WRITE INTO CGI\n";
 	// Store CGI info in client
 	client.setCgiPid(cgi->getPid());
 	client.setCgiOutputFd(cgi->getOutputPipe()[0]);

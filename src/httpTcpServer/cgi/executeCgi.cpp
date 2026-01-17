@@ -40,7 +40,7 @@ void http::Cgi::executeCgi( std::vector< pollfd >& fds ) {
 		return;
 	} else if ( this->_pid == 0 ) {
 
-		this->doDupOneWay();
+		this->doDupTwoWay();
 
 		// build argv
 		std::vector< char* > argv;
@@ -59,7 +59,7 @@ void http::Cgi::executeCgi( std::vector< pollfd >& fds ) {
 		Logs::log(LOGS_ERROR, "CGI execution failed for script '" + this->getFilePath() + "': " + strerror(errno));
 		_exit( 1 );
 	} else {
-		this->closeForOneWay();
+		this->closeForTwoWay();
 
 		fcntl( _outputPipe[ 0 ], F_SETFL, O_NONBLOCK );
 		this->registerPollFd( fds );
