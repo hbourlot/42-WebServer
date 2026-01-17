@@ -5,7 +5,7 @@
 #include <map>
 #include <vector>
 #include <set>
-#include "/home/mistery576/42-WebServer/inc/Config/Configs.hpp"
+#include "Config/Configs.hpp"
 
 struct Location;
 struct File;
