@@ -79,7 +79,8 @@ void http::ClientEventProcessor::processRead(pollfd &pfd, Client *client)
 		return;
 	}
 
-	if (!readFromSocket(*client)) {
+	if (!readFromSocket(*client))
+	{
 		return;
 	}
 
@@ -93,6 +94,7 @@ void http::ClientEventProcessor::processRead(pollfd &pfd, Client *client)
 	{
 		return;
 	}
+	pfd.events = POLLIN;   // Setting to POLL OUT
 	pfd.events |= POLLOUT; // Setting to POLL OUT
 };
 
@@ -250,7 +252,6 @@ bool http::ClientEventProcessor::handleRouteValidation(Client &client)
 		return false; // Continue to routing
 
 	case VALID_NOT_FOUND:
-		std::cout << "Cai aqui" << std::endl;
 		response.buildErrorResponse(HTTP_NOT_FOUND, serverInfo);
 		return true;
 
@@ -259,12 +260,7 @@ bool http::ClientEventProcessor::handleRouteValidation(Client &client)
 		return true;
 
 	case VALID_METHOD_NOT_ALLOWED:
-		if (client.getRequest().path == "/directory/youpi.bla"){
-			std::cerr << "Vamos mudar o envio" << std::endl;
-			response.buildErrorResponse(HTTP_OK, serverInfo);
-		}
-		else
-			response.buildErrorResponse(HTTP_FORBID_METHOD, serverInfo);
+		response.buildErrorResponse(HTTP_FORBID_METHOD, serverInfo);
 		return true;
 
 	default:
@@ -275,16 +271,12 @@ bool http::ClientEventProcessor::handleRouteValidation(Client &client)
 
 void http::ClientEventProcessor::processCgiEvents(int fd, int index)
 {
-
 	std::map<int, http::Cgi *>::iterator it = _server._cgiByFd.find(fd);
 
 	if (it != _server._cgiByFd.end())
 	{
-
-		int status = 0;
 		if (this->hasCgiFinished(it->second) && _server._fds[index].revents & POLLIN)
 			processCgiOutput(it->second, _server._fds[index]);
-
 		return;
 	}
 	// Logs::log( LOGS_ERROR, "Something bad happened, restart server." );
@@ -301,7 +293,8 @@ void http::ClientEventProcessor::processClientEvents(int index)
 	// Check if this fd is a CGI pipe instead of a client socket
 	if (!client)
 	{
-		return processCgiEvents(fd, index);
+		processCgiEvents(fd, index);
+		return;
 	}
 
 	// Regular client socket handling
@@ -320,7 +313,7 @@ bool http::ClientEventProcessor::handleResponse(pollfd &pfd, Client &client)
 {
 	SocketFD clientFd = client.getFd();
 
-	// Build response if write buffer is empty
+	// Build response if write buffer is emptysendResponse
 	if (client.getWriteBuffer().empty())
 		client.appendToWriteBuffer(client.getResponse().buildResponseString());
 
@@ -330,7 +323,9 @@ bool http::ClientEventProcessor::handleResponse(pollfd &pfd, Client &client)
 		return 0;
 
 	if (sendResponse(pfd, client))
+	{
 		return (1);
+	}
 
 	// Check if all data was sent
 	if (writeBuffer.empty())
@@ -377,7 +372,7 @@ bool http::ClientEventProcessor::sendResponse(pollfd &pfd, Client &client)
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 			{
 				// Socket buffer full, will continue later
-				pfd.events |= POLLOUT;
+				pfd.events = POLLOUT;
 				return 0; // Keep connection alive, continue sending later
 			}
 

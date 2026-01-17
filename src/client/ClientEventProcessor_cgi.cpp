@@ -119,11 +119,9 @@ void http::ClientEventProcessor::processCgiOutput(http::Cgi *cgi, pollfd &pfd)
 	// Build response based on CGI exit status
 	if (hasCgiSuccessfullyFinished(cgi))
 	{
-
 		if (cgiOutput.empty())
 		{
 			// "CGI produced no output"
-
 			client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server._serverInfo);
 		}
 		else
@@ -134,7 +132,6 @@ void http::ClientEventProcessor::processCgiOutput(http::Cgi *cgi, pollfd &pfd)
 	}
 	else
 	{
-
 		// CGI failed (non-zero exit status)"
 		client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server._serverInfo);
 	}

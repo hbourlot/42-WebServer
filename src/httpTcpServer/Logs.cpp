@@ -9,7 +9,7 @@ void Logs::warning( const std::string &msg ) {
 	          << "[WARNING]: " << msg << NC << std::endl;
 }
 void Logs::error( const std::string &msg ) {
-	std::cout << RED << "[" << dateString() << "]"
+	std::cerr << RED << "[" << dateString() << "]"
 	          << "[ERROR]: " << msg << NC << std::endl;
 }
 

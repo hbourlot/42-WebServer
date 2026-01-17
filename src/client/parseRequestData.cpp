@@ -167,9 +167,20 @@ bool http::ClientEventProcessor::parseRequestData(Client &client, const ServerCo
 		size_t contentLength = std::strtoul(clientRequest.headers["Content-Length"].c_str(), NULL, 10);
 		if (clientRequest.body.size() < contentLength)
 		{
+			std::cout << "Creating body\n"<< std::endl;
 			client.setState(PARSE_INCOMPLETE);
 			return false;
 		}
+	}
+
+	if (clientRequest.headers.count("Transfer-Encoding")) {
+			index = client.getReadBuffer().find("0\r\n\r\n");
+
+			if (index == std::string::npos) {
+				client.setState(PARSE_INCOMPLETE);
+				return false;
+			}
+
 	}
 
 	client.getResponse() = Response(clientRequest);
