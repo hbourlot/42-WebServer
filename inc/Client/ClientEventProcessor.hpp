@@ -127,6 +127,6 @@ namespace http {
 		///
 		/// @param client Reference to the Client object containing the HTTP request to validate
 		/// @return true if the route validation succeeds, false otherwise
-		bool handleRouteValidation( Client &client );
+		bool handleRouteValidation( Client &client, VALIDATION_STATUS &validationStatus );
 	};
 } // namespace http

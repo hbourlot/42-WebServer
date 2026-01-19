@@ -3,16 +3,6 @@
 #include "Client/ClientEventProcessor.hpp"
 #include "Config/Configs.hpp"
 
-enum VALIDATION_STATUS {
-
-	VALID_OK = 1,
-	VALID_METHOD_NOT_ALLOWED,
-	VALID_NOT_FOUND,
-	VALID_FORBIDDEN,
-	VALID_REDIRECT_REQUIRED,
-	VALID_IS_CGI,
-
-};
 
 namespace http {
 

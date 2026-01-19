@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2026/01/19 13:44:56 by joralves         ###   ########.fr       */
+/*   Updated: 2026/01/19 14:22:57 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,17 @@ enum headerKey {
 struct MatchResult {
 	const Location *location;
 	const File *file;
+};
+
+enum VALIDATION_STATUS {
+
+	VALID_OK = 1,
+	VALID_METHOD_NOT_ALLOWED,
+	VALID_NOT_FOUND,
+	VALID_FORBIDDEN,
+	VALID_REDIRECT_REQUIRED,
+	VALID_IS_CGI,
+
 };
 
 namespace http {
