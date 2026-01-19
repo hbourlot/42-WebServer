@@ -159,10 +159,9 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 		return true;
 
 	http::Request &request = client.getRequest();
-	const MatchResult &res = client.getRequest().matchResult;
 
-	const Location &loc = *res.location;
-	const File &file = *res.file;
+	const Location &loc = *client.getRequest().matchResult.location;
+	const File &file = *client.getRequest().matchResult.file;
 	if ( validationStatus == VALID_IS_CGI ) {
 		if ( isCgirequest( request, loc ) ) {
 			Router::routeCgiRequest( client, serverInfo, loc, *this );
