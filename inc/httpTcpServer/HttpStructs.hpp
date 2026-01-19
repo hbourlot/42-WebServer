@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2026/01/10 22:58:29 by joralves         ###   ########.fr       */
+/*   Updated: 2026/01/19 13:44:56 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ enum headerKey {
 
 struct MatchResult {
 	const Location *location;
-	File *file;
+	const File *file;
 };
 
 namespace http {

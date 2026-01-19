@@ -1,11 +1,12 @@
 #include <sstream>
 
 #pragma once
+#include "Config/Configs.hpp"
 #include <iostream>
 #include <map>
-#include <vector>
 #include <set>
-#include "Config/Configs.hpp"
+#include <vector>
+
 
 struct Location;
 struct File;
@@ -36,6 +37,6 @@ void printHttpHeaders( const std::map< std::string, std::string > &headers );
 void printLocation( const Location &location );
 bool checkSplitString( const std::string &line, const std::string &sep, bool &isServerOpen );
 
- File *getMatchFile( const std::string &path,  std::vector< File > &files );
+const File *getMatchFile( const std::string &path, const std::vector< File > &files );
 const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations );
-std::vector<std::string> getAllMethods(ServerConfig server,std::string path);
+std::vector< std::string > getAllMethods( ServerConfig server, std::string path );
