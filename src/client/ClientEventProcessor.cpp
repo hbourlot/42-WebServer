@@ -160,25 +160,14 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 
 	http::Request &request = client.getRequest();
 
-	const Location &loc = *client.getRequest().matchResult.location;
-	const File &file = *client.getRequest().matchResult.file;
-	if ( validationStatus == VALID_IS_CGI ) {
-		if ( isCgirequest( request, loc ) ) {
-			Router::routeCgiRequest( client, serverInfo, loc, *this );
-		} else if ( request.matchResult.file ) {
-			Router::routeCgiRequest( client, serverInfo, file, *this );
-		}
-		return true;
-	}
+	RouteContext ctx = makeContext( request.matchResult, serverInfo, request, validationStatus );
 
-	if ( validationStatus == VALID_OK ) {
-		if ( request.matchResult.location ) {
-			Router::routeStaticRequest( client, serverInfo, loc );
-		} else if ( request.matchResult.file ) {
-			Router::routeStaticRequest( client, serverInfo, file );
-		}
-		return true;
-	}
+	if ( ctx.isCgi )
+		Router::routeCgiRequest( client, serverInfo, ctx, *this );
+	else
+		Router::routeStaticRequest( client, serverInfo, ctx );
+
+	return true;
 }
 
 bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STATE state ) {

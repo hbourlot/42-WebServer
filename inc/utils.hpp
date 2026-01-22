@@ -1,12 +1,12 @@
-#include <sstream>
 
 #pragma once
 #include "Config/Configs.hpp"
+#include "httpTcpServer/HttpStructs.hpp"
 #include <iostream>
 #include <map>
 #include <set>
+#include <sstream>
 #include <vector>
-
 
 struct Location;
 struct File;
@@ -19,7 +19,6 @@ namespace http {
 std::string dateString();
 std::string ft_strtrim( const std::string &str );
 bool isDirectory( const std::string &filePath );
-std::string getFilePath( const std::string &path, const Location &location );
 std::string joinPath( const std::string &base, const std::string &sub );
 bool containBrackets( std::string &line, bool &state,
                       std::string extraWordToFind ); // Track if the Server on config is open or closed;
@@ -40,3 +39,5 @@ bool checkSplitString( const std::string &line, const std::string &sep, bool &is
 const File *getMatchFile( const std::string &path, const std::vector< File > &files );
 const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations );
 std::vector< std::string > getAllMethods( ServerConfig server, std::string path );
+
+std::string getFileName( const std::string &path );

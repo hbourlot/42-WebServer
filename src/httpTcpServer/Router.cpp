@@ -60,13 +60,13 @@ VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerCon
 	return VALID_OK;
 }
 
-bool http::Router::routeCgiRequest( Client &client, const ServerConfig &server, const Location &location,
+bool http::Router::routeCgiRequest( Client &client, const ServerConfig &server, const RouteContext &ctx,
                                     ClientEventProcessor &processor ) {
 
 	http::Request &request = client.getRequest();
 
 	if ( request.method == "GET" || request.method == "POST" ) {
-		launchCgi( client, server, location, processor );
+		launchCgi( client, server, ctx, processor );
 		return false;
 	} else {
 		client.getResponse().buildErrorResponse( HTTP_FORBID_METHOD, server );
@@ -74,72 +74,18 @@ bool http::Router::routeCgiRequest( Client &client, const ServerConfig &server, 
 	return true;
 }
 
-bool http::Router::routeCgiRequest( Client &client, const ServerConfig &server, const File &file,
-                                    ClientEventProcessor &processor ) {
-
-	http::Request &request = client.getRequest();
-
-	if ( request.method == "GET" || request.method == "POST" ) {
-		launchCgi( client, server, file, processor );
-		return false;
-	} else {
-		client.getResponse().buildErrorResponse( HTTP_FORBID_METHOD, server );
-	}
-	return true;
-}
-
-void http::Router::launchCgi( Client &client, const ServerConfig &server, const Location &location,
+void http::Router::launchCgi( Client &client, const ServerConfig &server, const RouteContext &ctx,
                               ClientEventProcessor &processor ) {
 	http::Request &request = client.getRequest();
-	std::string path = location.path;
 
 	// Create and execute CGI
-	http::Cgi *cgi = new http::Cgi( request, path, server, &client );
-	cgi->executeCgi( client.getServer()._fds );
-
-	// Send Body if has
-	write( cgi->getInputPipe()[ 1 ], request.body.c_str(), request.body.size() );
-	int i = 0;
-	while ( i < request.body.size() ) {
-		if ( !std::isprint( request.body.c_str()[ i ] ) )
-			printf( "." );
-		else
-			printf( "%c", request.body.c_str()[ i ] );
-		i++;
-	}
-	std::cout << "\n\n AFTER WRITE INTO CGI\n";
-
-	// Store CGI info in client
-	client.setCgiPid( cgi->getPid() );
-	client.setCgiOutputFd( cgi->getOutputPipe()[ 0 ] );
-
-	// Register CGI in map (takes ownership)
-	processor.registerCgi( cgi );
-	client.setState( CGI_JUST_STARTED );
-}
-
-void http::Router::launchCgi( Client &client, const ServerConfig &server, const File &file,
-                              ClientEventProcessor &processor ) {
-	http::Request &request = client.getRequest();
-	std::string path = file.extension; // /cgi-bin --> *.bla
-
-	// Create and execute CGI
-	http::Cgi *cgi = new http::Cgi( request, path, server, &client );
+	http::Cgi *cgi = new http::Cgi( request, ctx.cgi_pass, server, &client );
 	cgi->executeCgi( client.getServer()._fds );
 
 	// Send Body if has
 	std::cerr << "\n\n BEFORE WRITE INTO CGI\n"
 	          << "Body size " << request.body.size() << std::endl;
-	// close(cgi->getInputPipe()[1]);
-	// int i = 0;
-	// while (i < 100)
-	// {
-	// 	if (!std::isprint(request.body.c_str()[i]))
-	// 		printf(".");
-	// 	else
-	// 		printf("%c", request.body.c_str()[i]);
-	// 	i++;
-	// }
+
 	write( cgi->getInputPipe()[ 1 ], request.body.c_str(), request.body.size() );
 	std::cout << "\n\n after/2 WRITE INTO CGI\n";
 
@@ -153,30 +99,29 @@ void http::Router::launchCgi( Client &client, const ServerConfig &server, const 
 	client.setState( CGI_JUST_STARTED );
 }
 
-void http::Router::routeStaticRequest( Client &client, const ServerConfig &server, const Location &location ) {
+void http::Router::routeStaticRequest( Client &client, const ServerConfig &server, const RouteContext &ctx ) {
 
 	http::Request &request = client.getRequest();
 
-	if ( request.method == "GET" ) {
-		return ( handleGet( client, server, location ) );
-	} else if ( request.method == "POST" )
-		return ( handlePost( client, server, location ) );
+	if ( request.method == "GET" )
+		return ( handleGet( client, server, ctx ) );
+	else if ( request.method == "POST" )
+		return ( handlePost( client, server, ctx ) );
 	else if ( request.method == "DELETE" )
-		return ( handleDelete( client, server, location ) );
-	else {
+		return ( handleDelete( client, server, ctx ) );
+	else
 		client.getResponse().buildErrorResponse( HTTP_FORBID_METHOD, server );
-	}
 }
 
-void http::Router::handleGet( Client &client, const ServerConfig &server, const Location &location ) {
+void http::Router::handleGet( Client &client, const ServerConfig &server, const RouteContext &ctx ) {
 
 	http::Request &request = client.getRequest();
 	http::Response &response = client.getResponse();
 
-	std::string filePath = getFilePath( request.path, location );
+	std::string filePath = getFilePath( request.path, ctx );
 
 	if ( isDirectory( filePath ) ) {
-		handleDirectoryListing( client, server, filePath, location );
+		handleDirectoryListing( client, server, filePath, ctx );
 		return;
 	}
 
@@ -188,23 +133,23 @@ void http::Router::handleGet( Client &client, const ServerConfig &server, const 
 	response.buildFileResponse( HTTP_OK, filePath, server );
 }
 
-void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, const Location &location ) {
+void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, const RouteContext &ctx ) {
 	std::string ContentType;
 
-	if ( location.uploadEnable ) {
-		UploadManager::handleUpload( location, client, serverInfo );
-	} else if ( !location.uploadEnable ) {
+	if ( ctx.uploadEnable ) {
+		UploadManager::handleUpload( ctx, client, serverInfo );
+	} else if ( !ctx.uploadEnable ) {
 		client.getResponse().buildErrorResponse( HTTP_FORBID, serverInfo );
 	} else {
 		client.getResponse().buildErrorResponse( HTTP_NOT_FOUND, serverInfo );
 	}
 }
 
-void http::Router::handleDelete( Client &client, const ServerConfig &server, const Location &location ) {
+void http::Router::handleDelete( Client &client, const ServerConfig &server, const RouteContext &ctx ) {
 	http::Response &response = client.getResponse();
 	http::Request &request = client.getRequest();
 
-	std::string filePath = getFilePath( request.path, location );
+	std::string filePath = getFilePath( request.path, ctx );
 
 	struct stat st;
 

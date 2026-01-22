@@ -60,9 +60,12 @@ static std::string extractFilename( const std::string &headers ) {
 	return ( headers.substr( start, end - start ) );
 }
 
-static bool saveFile( const std::string &filename, const std::string &content, const Location &location ) {
+static bool saveFile( const std::string &filename, const std::string &content, const RouteContext &ctx,
+                      const std::string &author ) {
 
-	std::string savePath = location.uploadStore + '/' + filename;
+	std::string savePath = ctx.uploadStore + '/' + author + "-" + filename;
+
+	std::cout << "savePath: " << savePath << std::endl;
 
 	std::ofstream newfile( savePath.c_str(), std::ios::binary );
 	if ( !newfile.is_open() )
@@ -73,8 +76,8 @@ static bool saveFile( const std::string &filename, const std::string &content, c
 	return ( true );
 }
 
-//! Parts to imporve after
-bool UploadManager::parseMultipart( const Location &location, Client &client, const ServerConfig &serverInfo ) {
+//! Parts to improve after
+bool UploadManager::parseMultipart( const RouteContext &ctx, Client &client, const ServerConfig &serverInfo ) {
 
 	std::string boundary = extractBoundary( client.getRequest() );
 
@@ -112,7 +115,7 @@ bool UploadManager::parseMultipart( const Location &location, Client &client, co
 		return ( false );
 	}
 
-	if ( !saveFile( filename, content, location ) ) {
+	if ( !saveFile( filename, content, ctx, client.getSessionId() ) ) {
 		client.getResponse().buildErrorResponse( HTTP_SERVER_ERR, serverInfo );
 		Logs::log( LOGS_ERROR, "Internal Server Error: File not saved." );
 		return ( false );

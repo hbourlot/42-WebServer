@@ -9,12 +9,9 @@ bool isDirectory( const std::string &filePath ) {
 	return ( S_ISDIR( s.st_mode ) );
 }
 
-std::string getFilePath( const std::string &path, const Location &location ) {
-	// std::cout << "path: " << path << std::endl;
-	std::string relativePath = path.substr( location.path.length() );
-	std::string filePath = joinPath( location.root, relativePath );
-
-	// std::cout << "filePath: " << filePath << std::endl;
+std::string getFilePath( const std::string &path, const RouteContext &ctx ) {
+	std::string relativePath = path.substr( ctx.path.length() );
+	std::string filePath = joinPath( ctx.root, relativePath );
 	return ( filePath );
 }
 
@@ -268,4 +265,60 @@ std::vector< std::string > getAllMethods( ServerConfig server, std::string path 
 	// Send the "SET" info to the "VECTOR"
 	convertSetToVector( noDupMethods, mergedMethods );
 	return mergedMethods;
+}
+
+RouteContext makeContext( const MatchResult &match, const ServerConfig &server,  http::Request &request,
+                          VALIDATION_STATUS status ) {
+	RouteContext ctx;
+
+	// 1️⃣ CGI FILE has priority?
+	if ( status == VALID_IS_CGI && match.file ) {
+		const File &file = *match.file;
+		ctx.methods = file.methods;
+		ctx.path = "";
+		ctx.root = file.root;
+		ctx.index = file.index;
+		ctx.autoIndex = false;
+		ctx.max_body_size = server.max_body_size;
+		ctx.cgi_pass = file.cgi_pass;
+		ctx.redirection = "";
+		ctx.uploadEnable = false;
+		ctx.uploadStore = "";
+	}
+	// 2️⃣ Location normal
+	else if ( match.location ) {
+		const Location &loc = *match.location;
+		ctx.methods = loc.methods;
+		ctx.path = loc.path;
+		ctx.root = loc.root;
+		ctx.index = loc.index;
+		ctx.autoIndex = loc.autoIndex;
+		ctx.max_body_size = loc.max_body_size;
+		if ( !loc.cgi_pass.empty() )
+			ctx.cgi_pass = loc.cgi_pass;
+		else
+			ctx.cgi_pass = joinPath( loc.root, request.GetFileName() );
+		ctx.redirection = loc.redirection;
+		ctx.uploadEnable = loc.uploadEnable;
+		ctx.uploadStore = loc.uploadStore;
+	}
+	// 3️⃣ File static
+	else if ( match.file ) {
+		const File &file = *match.file;
+		ctx.methods = file.methods;
+		ctx.path = "";
+		ctx.root = file.root;
+		ctx.index = file.index;
+		ctx.autoIndex = false;
+		ctx.max_body_size = server.max_body_size;
+		ctx.cgi_pass = file.cgi_pass;
+		ctx.redirection = "";
+		ctx.uploadEnable = false;
+		ctx.uploadStore = "";
+	}
+
+	ctx.isCgi = ( status == VALID_IS_CGI );
+	ctx.isRedirect = ( status == VALID_REDIRECT_REQUIRED );
+
+	return ctx;
 }
