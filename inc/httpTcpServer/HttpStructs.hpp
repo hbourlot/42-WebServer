@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2026/01/22 15:06:33 by joralves         ###   ########.fr       */
+/*   Updated: 2026/01/22 15:16:37 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,11 +98,11 @@ namespace http {
 		std::string rawRequestBuffer;
 		std::string queryString;
 		MatchResult matchResult;
-		// const Location *urlMatchedLocation; // ! Must Initialize as NULL;
 	};
 
 } // namespace http
 
 // For RouteContext
-RouteContext makeContext( const MatchResult &match, const ServerConfig &server,http::Request &request, VALIDATION_STATUS status );
+RouteContext makeContext( const MatchResult &match, const ServerConfig &server, http::Request &request,
+                          VALIDATION_STATUS status );
 std::string getFilePath( const std::string &path, const RouteContext &ctx );

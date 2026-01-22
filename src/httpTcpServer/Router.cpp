@@ -1,16 +1,6 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include <algorithm>
 
-// Used on 'getMatchLocation to check if we choose the right path
-// For the cases with multiple cgi-bin paths for example
-// std::string GetExtension( const std::string &path ) {
-// 	std::string::size_type pos = path.rfind( '.' ); // Finds the last '.'
-// 	if ( pos == std::string::npos )
-// 		return ""; // No extension on path
-
-// 	return path.substr( pos + 1 );
-// } // ! Have One overload on utils
-
 static bool validateRequestMethod( const http::Request &request, const std::vector< std::string > &methods ) {
 	if ( request.method != "GET" && request.method != "POST" && request.method != "DELETE" )
 		return false;

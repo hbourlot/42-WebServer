@@ -21,28 +21,28 @@ std::string joinPath( const std::string &base, const std::string &sub ) {
 	return ( base + "/" + sub );
 }
 
-std::string getContentType( const std::string &path ) {
-	size_t dot = path.find_last_of( '.' );
-	if ( dot == std::string::npos )
-		return "application/octet-stream"; // generic Binary
+// std::string getContentType( const std::string &path ) {
+// 	size_t dot = path.find_last_of( '.' );
+// 	if ( dot == std::string::npos )
+// 		return "application/octet-stream"; // generic Binary
 
-	std::string ext = path.substr( dot + 1 );
-	if ( ext == "html" || ext == "htm" )
-		return "text/html";
-	if ( ext == "css" )
-		return "text/css";
-	if ( ext == "png" )
-		return "image/png";
-	if ( ext == "jpg" || ext == "jpeg" )
-		return "image/jpeg";
-	if ( ext == "gif" )
-		return "image/gif";
-	if ( ext == "txt" )
-		return "text/plain";
-	if ( ext == "pdf" )
-		return "application/pdf";
-	return "application/octet-stream";
-}
+// 	std::string ext = path.substr( dot + 1 );
+// 	if ( ext == "html" || ext == "htm" )
+// 		return "text/html";
+// 	if ( ext == "css" )
+// 		return "text/css";
+// 	if ( ext == "png" )
+// 		return "image/png";
+// 	if ( ext == "jpg" || ext == "jpeg" )
+// 		return "image/jpeg";
+// 	if ( ext == "gif" )
+// 		return "image/gif";
+// 	if ( ext == "txt" )
+// 		return "text/plain";
+// 	if ( ext == "pdf" )
+// 		return "application/pdf";
+// 	return "application/octet-stream";
+// }
 
 std::string ft_strtrim( const std::string &str ) {
 	unsigned int start = 0;
@@ -161,6 +161,7 @@ static std::string GetExtension( const std::string &path ) {
 
 	return path.substr( dotPos );
 }
+
 const File *getMatchFile( const std::string &path, const std::vector< File > &files ) {
 	std::string ext = GetExtension( path ); // ".txt", ".py", etc.
 	if ( ext.empty() )
@@ -190,82 +191,82 @@ const Location *getMatchLocation( const std::string &path, const std::vector< Lo
 	return ( matchedLocation );
 }
 
-std::string getFileExtension( const std::string &path ) {
-	size_t slashPos = path.find_last_of( '/' );
-	size_t dotPos = path.find_last_of( '.' );
+// std::string getFileExtension( const std::string &path ) {
+// 	size_t slashPos = path.find_last_of( '/' );
+// 	size_t dotPos = path.find_last_of( '.' );
 
-	if ( dotPos == std::string::npos || ( slashPos != std::string::npos && dotPos < slashPos ) )
-		return "";
-	return path.substr( dotPos );
-}
+// 	if ( dotPos == std::string::npos || ( slashPos != std::string::npos && dotPos < slashPos ) )
+// 		return "";
+// 	return path.substr( dotPos );
+// }
 
-std::vector< std::string > splitLocations( const std::string &path ) {
-	std::vector< std::string > result;
-	std::string current;
-	size_t i = 0;
+// std::vector< std::string > splitLocations( const std::string &path ) {
+// 	std::vector< std::string > result;
+// 	std::string current;
+// 	size_t i = 0;
 
-	// assumir que path começa com '/'
-	if ( path.empty() || path[ 0 ] != '/' )
-		return result;
+// 	// assumir que path começa com '/'
+// 	if ( path.empty() || path[ 0 ] != '/' )
+// 		return result;
 
-	i = 1; // saltar o '/'
+// 	i = 1; // saltar o '/'
 
-	while ( i < path.length() ) {
-		size_t next = path.find( '/', i );
+// 	while ( i < path.length() ) {
+// 		size_t next = path.find( '/', i );
 
-		if ( next == std::string::npos ) {
-			current += path.substr( i );
-			result.push_back( "/" + current );
-			break;
-		} else {
-			current += path.substr( i, next - i );
-			result.push_back( "/" + current );
-			current += "/";
-			i = next + 1;
-		}
-	}
+// 		if ( next == std::string::npos ) {
+// 			current += path.substr( i );
+// 			result.push_back( "/" + current );
+// 			break;
+// 		} else {
+// 			current += path.substr( i, next - i );
+// 			result.push_back( "/" + current );
+// 			current += "/";
+// 			i = next + 1;
+// 		}
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
-void convertSetToVector( std::set< std::string > &setCtr, std::vector< std::string > &vecCtr ) {
-	for ( std::set< std::string >::iterator i = setCtr.begin(); i != setCtr.end(); i++ )
-		vecCtr.push_back( *i );
-}
+// void convertSetToVector( std::set< std::string > &setCtr, std::vector< std::string > &vecCtr ) {
+// 	for ( std::set< std::string >::iterator i = setCtr.begin(); i != setCtr.end(); i++ )
+// 		vecCtr.push_back( *i );
+// }
 
-/// @brief Search in every directory and gets every method (ex. /directory/alias/test)
-/// @param path Full directory
-/// @return vector with all getted methods
-std::vector< std::string > getAllMethods( ServerConfig server, std::string path ) {
-	std::vector< std::string > mergedMethods;
-	std::vector< std::string > splittedLocations;
-	std::set< std::string > noDupMethods;
-	splittedLocations = splitLocations( path );
-	for ( size_t i = 0; i < splittedLocations.size(); i++ ) {
-		Location *curLocation = server.GetLocationByPath( splittedLocations[ i ] );
+// /// @brief Search in every directory and gets every method (ex. /directory/alias/test)
+// /// @param path Full directory
+// /// @return vector with all getted methods
+// std::vector< std::string > getAllMethods( ServerConfig server, std::string path ) {
+// 	std::vector< std::string > mergedMethods;
+// 	std::vector< std::string > splittedLocations;
+// 	std::set< std::string > noDupMethods;
+// 	splittedLocations = splitLocations( path );
+// 	for ( size_t i = 0; i < splittedLocations.size(); i++ ) {
+// 		Location *curLocation = server.GetLocationByPath( splittedLocations[ i ] );
 
-		if ( curLocation != NULL ) {
-			for ( size_t x = 0; x < curLocation->methods.size(); x++ )
-				noDupMethods.insert( curLocation->methods[ x ] );
+// 		if ( curLocation != NULL ) {
+// 			for ( size_t x = 0; x < curLocation->methods.size(); x++ )
+// 				noDupMethods.insert( curLocation->methods[ x ] );
 
-			if ( noDupMethods.size() >= 3 ) {
-				convertSetToVector( noDupMethods, mergedMethods );
-				return mergedMethods;
-			}
-		}
-	}
+// 			if ( noDupMethods.size() >= 3 ) {
+// 				convertSetToVector( noDupMethods, mergedMethods );
+// 				return mergedMethods;
+// 			}
+// 		}
+// 	}
 
-	File *curFile = server.GetFileByExtension( "*" + getFileExtension( path ) );
-	if ( curFile != NULL ) {
-		for ( size_t x = 0; x < curFile->methods.size(); x++ ) {
-			noDupMethods.insert( curFile->methods[ x ] );
-		}
-	}
+// 	File *curFile = server.GetFileByExtension( "*" + getFileExtension( path ) );
+// 	if ( curFile != NULL ) {
+// 		for ( size_t x = 0; x < curFile->methods.size(); x++ ) {
+// 			noDupMethods.insert( curFile->methods[ x ] );
+// 		}
+// 	}
 
-	// Send the "SET" info to the "VECTOR"
-	convertSetToVector( noDupMethods, mergedMethods );
-	return mergedMethods;
-}
+// 	// Send the "SET" info to the "VECTOR"
+// 	convertSetToVector( noDupMethods, mergedMethods );
+// 	return mergedMethods;
+// }
 
 RouteContext makeContext( const MatchResult &match, const ServerConfig &server,  http::Request &request,
                           VALIDATION_STATUS status ) {
