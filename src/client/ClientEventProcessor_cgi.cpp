@@ -69,16 +69,10 @@ bool http::ClientEventProcessor::hasCgiSuccessfullyFinished(Cgi *cgi) const
 	return false;
 }
 
-void http::ClientEventProcessor::processCgiOutput(http::Cgi *cgi, pollfd &pfd)
+int http::ClientEventProcessor::readCgiPipeAndBuildResponse(http::Cgi *cgi, pollfd &pfd)
 {
 
 	Client *client = cgi->getClient();
-	if (!client)
-	{
-		//  "Error: CGI has no associated client\n";
-		cleanupCgi(cgi);
-		return;
-	}
 
 	// Read all available data from CGI pipe (non-blocking)
 	char buffer[BUFFER_SIZE];
@@ -111,33 +105,14 @@ void http::ClientEventProcessor::processCgiOutput(http::Cgi *cgi, pollfd &pfd)
 			client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server._serverInfo);
 			pfd.fd = -1;
 			cleanupCgi(cgi);
-			// client->setState( CGI_COMPLETED );
-			return;
+			client->setState( CGI_COMPLETED );
+			return -1;
 		}
 	}
-
-	// Build response based on CGI exit status
-	if (hasCgiSuccessfullyFinished(cgi))
-	{
-		if (cgiOutput.empty())
-		{
-			// "CGI produced no output"
-			client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server._serverInfo);
-		}
-		else
-		{
-			// Success - build response from CGI output
-			client->getResponse().buildCgiResponse(HTTP_OK, cgiOutput, _server._serverInfo);
-		}
-	}
-	else
-	{
-		// CGI failed (non-zero exit status)"
-		client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server._serverInfo);
-	}
-
-	// Mark pipe fd for removal and cleanup
-	pfd.fd = -1;
-	cleanupCgi(cgi);
-	client->setState(CGI_COMPLETED);
+	if (pfd.revents & POLLIN && readCount == MAX_READS_PER_EVENT)
+		return 1;
+	
+	client->getResponse().buildCgiResponse(HTTP_OK, cgiOutput, _server._serverInfo);
+	
+	return 0;
 }
