@@ -44,8 +44,10 @@ void http::Cgi::executeCgi( std::vector< pollfd >& fds ) {
 
 		// build argv
 		std::vector< char* > argv;
-		argv.push_back( const_cast< char* >( _filePath.c_str() ) );
-		argv.push_back( NULL );
+		argv.push_back(const_cast<char*>(_filePath.c_str()));
+		argv.push_back(const_cast<char*>("http://localhost:8001/directory/youpi.bla"));
+		argv.push_back(NULL);
+
 		
 		// build envp
 		std::vector< char* > envp;
@@ -55,6 +57,8 @@ void http::Cgi::executeCgi( std::vector< pollfd >& fds ) {
 			this->_envp.push_back( const_cast< char* >( _envStrings[ i ].c_str() ) );
 		}
 		this->_envp.push_back( NULL );
+
+
 		execve( this->getFilePath().c_str(), argv.data(), this->_envp.data() );
 		Logs::log(LOGS_ERROR, "CGI execution failed for script '" + this->getFilePath() + "': " + strerror(errno));
 		_exit( 1 );
@@ -62,6 +66,7 @@ void http::Cgi::executeCgi( std::vector< pollfd >& fds ) {
 		this->closeForTwoWay();
 
 		fcntl( _outputPipe[ 0 ], F_SETFL, O_NONBLOCK );
+		fcntl( _outputPipe[ 1 ], F_SETFL, O_NONBLOCK );
 		this->registerPollFd( fds );
 	}
 };

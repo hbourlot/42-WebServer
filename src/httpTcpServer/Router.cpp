@@ -118,39 +118,55 @@ void http::Router::launchCgi( Client &client, const ServerConfig &server, const 
 	client.setState( CGI_JUST_STARTED );
 }
 
-void http::Router::launchCgi( Client &client, const ServerConfig &server, const File &file,
-                              ClientEventProcessor &processor ) {
-	http::Request &request = client.getRequest();
-	std::string path = file.extension; // /cgi-bin --> *.bla
+void http::Router::launchCgi(Client &client, const ServerConfig &server, const File &file,
+                             ClientEventProcessor &processor) {
+    http::Request &request = client.getRequest();
+    std::string path = file.extension;
 
-	// Create and execute CGI
-	http::Cgi *cgi = new http::Cgi( request, path, server, &client );
-	cgi->executeCgi( client.getServer()._fds );
+    // Create and execute CGI
+    http::Cgi *cgi = new http::Cgi(request, path, server, &client);
+    cgi->executeCgi(client.getServer()._fds);
 
-	// Send Body if has
-	std::cerr << "\n\n BEFORE WRITE INTO CGI\n"
-	          << "Body size " << request.body.size() << std::endl;
-	// close(cgi->getInputPipe()[1]);
-	// int i = 0;
-	// while (i < 100)
-	// {
-	// 	if (!std::isprint(request.body.c_str()[i]))
-	// 		printf(".");
-	// 	else
-	// 		printf("%c", request.body.c_str()[i]);
-	// 	i++;
-	// }
-	write( cgi->getInputPipe()[ 1 ], request.body.c_str(), request.body.size() );
-	std::cout << "\n\n after/2 WRITE INTO CGI\n";
+    // Send Body if exists
+    std::cerr << "\n\nBEFORE WRITE INTO CGI\n"
+              << "Body size: " << request.body.size() << std::endl;
 
-	std::cout << "\n\n AFTER WRITE INTO CGI\n";
-	// Store CGI info in client
-	client.setCgiPid( cgi->getPid() );
-	client.setCgiOutputFd( cgi->getOutputPipe()[ 0 ] );
+    size_t len = request.body.size();
+    const char* buf = request.body.data();
+    int fd = cgi->getInputPipe()[1]; // parent writes to this
 
-	// Register CGI in map (takes ownership)
-	processor.registerCgi( cgi );
-	client.setState( CGI_JUST_STARTED );
+    size_t total = 0;
+    while (total < len) {
+
+        ssize_t n = write(fd, buf + total, len - total);
+        if (n < 0) {
+            if (errno == EINTR) continue;
+            if (errno == EPIPE) {
+                std::cerr << "CGI closed stdin, stopping write.\n";
+                break;
+            }
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                // Non-blocking fd: wait until writable
+                // Here we just spin, but ideally use poll/select/epoll
+                continue;
+            }
+            perror("write");
+            break;
+        }
+        total += n;
+    }
+
+    close(fd);
+
+    std::cout << "\n\nAFTER WRITE INTO CGI\n";
+
+    // Store CGI info in client
+    client.setCgiPid(cgi->getPid());
+    client.setCgiOutputFd(cgi->getOutputPipe()[0]);
+
+    // Register CGI in map (takes ownership)
+    processor.registerCgi(cgi);
+    client.setState(CGI_JUST_STARTED);
 }
 
 void http::Router::routeStaticRequest( Client &client, const ServerConfig &server, const Location &location ) {

@@ -179,6 +179,8 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 		}
 		return true;
 	}
+
+	return false;
 }
 
 bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STATE state ) {
@@ -238,6 +240,12 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 	if ( it != _server._cgiByFd.end() ) {
 		if ( this->hasCgiFinished( it->second ) && _server._fds[ index ].revents & POLLIN )
 			processCgiOutput( it->second, _server._fds[ index ] );
+		else {
+			Client *client = it->second->getClient();
+
+			client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server._serverInfo);
+
+		}
 		return;
 	}
 	// Logs::log( LOGS_ERROR, "Something bad happened, restart server." );

@@ -119,6 +119,9 @@ void http::ClientEventProcessor::processCgiOutput(http::Cgi *cgi, pollfd &pfd)
 	// Build response based on CGI exit status
 	if (hasCgiSuccessfullyFinished(cgi))
 	{
+
+		std::cout << "OVER HERE\n";
+
 		if (cgiOutput.empty())
 		{
 			// "CGI produced no output"
@@ -132,6 +135,7 @@ void http::ClientEventProcessor::processCgiOutput(http::Cgi *cgi, pollfd &pfd)
 	}
 	else
 	{
+		std::cout << "OVER HERE2222222\n";
 		// CGI failed (non-zero exit status)"
 		client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server._serverInfo);
 	}

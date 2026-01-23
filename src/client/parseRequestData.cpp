@@ -146,8 +146,6 @@ bool http::ClientEventProcessor::parseRequestData(Client &client, const ServerCo
 	if (clientRequest.headers.count("Content-Length"))
 	{
 		contentLength = std::strtoul(clientRequest.headers["Content-Length"].c_str(), NULL, 10);
-		std::cout << "contentLength: " << contentLength << "serverInfo.max_body_size: " << serverInfo.max_body_size
-		          << std::endl;
 		if (contentLength > (serverInfo.max_body_size))
 		{
 			client._bytesToDiscard = contentLength;
@@ -168,7 +166,6 @@ bool http::ClientEventProcessor::parseRequestData(Client &client, const ServerCo
 		size_t contentLength = std::strtoul(clientRequest.headers["Content-Length"].c_str(), NULL, 10);
 		if (clientRequest.body.size() < contentLength)
 		{
-			std::cout << "Creating body\n" << std::endl;
 			client.setState(PARSE_INCOMPLETE);
 			return false;
 		}
