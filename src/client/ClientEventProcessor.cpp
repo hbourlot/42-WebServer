@@ -113,10 +113,12 @@ void http::ClientEventProcessor::closeConnection( size_t index ) {
 
 bool http::ClientEventProcessor::processRequest( Client &client ) {
 	CLIENT_STATE state = client.getState();
-	ServerConfig &serverInfo = _server._serverInfo;
 
+	ServerConfig &serverInfo = _server._serverInfo;
+	std::cout << "processRequest" << std::endl;
 	// Handle error states first (build error responses)
 	if ( state != PARSE_OK ) {
+		std::cout << "Here parse != ok" << state << std::endl;
 		this->buildErrorResponse( client, state );
 		return true;
 	}
@@ -128,7 +130,7 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 	http::Request &request = client.getRequest();
 
 	RouteContext ctx = makeContext( request.matchResult, serverInfo, request, validationStatus );
-
+	std::cout << validationStatus << std::endl;
 	if ( ctx.isCgi )
 		Router::routeCgiRequest( client, serverInfo, ctx, *this );
 	else
@@ -159,7 +161,7 @@ bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STAT
 bool http::ClientEventProcessor::handleRouteValidation( Client &client, VALIDATION_STATUS &validationStatus ) {
 	http::Response &response = client.getResponse();
 	ServerConfig &serverInfo = _server._serverInfo;
-
+	std::cout << "handleRouteValidation" << std::endl;
 	validationStatus = Router::validateRequest( client, _server._serverInfo );
 
 	switch ( validationStatus ) {
@@ -193,39 +195,38 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 
 	if ( it != _server._cgiByFd.end() ) {
 
-		http::Cgi* cgi = it->second;
+		http::Cgi *cgi = it->second;
 		Client *client = cgi->getClient();
 
-		if (!client) {
-			cleanupCgi(cgi);
+		if ( !client ) {
+			cleanupCgi( cgi );
 			return;
 		}
 
-		if (hasCgiFinished(cgi)) {
+		if ( hasCgiFinished( cgi ) ) {
 
 			// Case finished properly and has data to read from CGI
-			if (hasCgiSuccessfullyFinished(cgi) && _server._fds[index].revents & POLLIN) {
-				
-				   switch (readCgiPipeAndBuildResponse(cgi, _server._fds[index]))
-				   {
-					   case 1: // There's still data to read
-						   return;
-					   case -1: // Failed the read function
-						   return;
-						case 0: // Response built
-							break;
-					   default:
-						   return;
-				   }
+			if ( hasCgiSuccessfullyFinished( cgi ) && _server._fds[ index ].revents & POLLIN ) {
 
-			} else if (!hasCgiSuccessfullyFinished(cgi)) { // Cgi has failed the execution
-				std::cout << "NOT HERE\n"; 
-				client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server._serverInfo);
+				switch ( readCgiPipeAndBuildResponse( cgi, _server._fds[ index ] ) ) {
+				case 1: // There's still data to read
+					return;
+				case -1: // Failed the read function
+					return;
+				case 0: // Response built
+					break;
+				default:
+					return;
+				}
+
+			} else if ( !hasCgiSuccessfullyFinished( cgi ) ) { // Cgi has failed the execution
+				std::cout << "NOT HERE\n";
+				client->getResponse().buildErrorResponse( HTTP_SERVER_ERR, _server._serverInfo );
 			}
 
-			_server._fds[index].fd = -1;
-			cleanupCgi(cgi);
-			client->setState(CGI_COMPLETED);
+			_server._fds[ index ].fd = -1;
+			cleanupCgi( cgi );
+			client->setState( CGI_COMPLETED );
 		}
 
 		return;
@@ -267,7 +268,7 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 
 	if ( writeBuffer.empty() )
 		return 0;
-
+	// std::cout << writeBuffer << std::endl;
 	if ( sendResponse( pfd, client ) ) {
 		return ( 1 );
 	}

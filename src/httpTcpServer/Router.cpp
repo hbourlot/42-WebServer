@@ -25,8 +25,9 @@ VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerCon
 
 	request.matchResult.location = getMatchLocation( request.path, server.locations );
 	request.matchResult.file = getMatchFile( request.path, server.files );
-
+	std::cout << "request.path:" << request.path << std::endl;
 	if ( request.matchResult.file ) {
+		std::cout << "request.matchResult.file exist" << std::endl;
 		if ( !request.matchResult.file->cgi_pass.empty() &&
 		     validateRequestMethod( request, request.matchResult.file->methods ) )
 			return VALID_IS_CGI;
@@ -54,7 +55,7 @@ bool http::Router::routeCgiRequest( Client &client, const ServerConfig &server, 
                                     ClientEventProcessor &processor ) {
 
 	http::Request &request = client.getRequest();
-
+	std::cout << "routeCgiRequest" << std::endl;
 	if ( request.method == "GET" || request.method == "POST" ) {
 		launchCgi( client, server, ctx, processor );
 		return false;
@@ -69,6 +70,7 @@ void http::Router::launchCgi( Client &client, const ServerConfig &server, const 
 	http::Request &request = client.getRequest();
 
 	// Create and execute CGI
+	std::cout << "launchCgi" << std::endl;
 	http::Cgi *cgi = new http::Cgi( request, ctx.cgi_pass, server, &client );
 	cgi->executeCgi( client.getServer()._fds );
 

@@ -2,6 +2,13 @@
 
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
+std::string http::Request::GetFileName() {
+	std::string::size_type pos = path.rfind( '/' );
+	if ( pos == std::string::npos )
+		return path;
+	return path.substr( pos + 1 );
+}
+
 bool isDirectory( const std::string &filePath ) {
 	struct stat s;
 	if ( stat( filePath.c_str(), &s ) != 0 )
@@ -20,29 +27,6 @@ std::string joinPath( const std::string &base, const std::string &sub ) {
 		return ( base + sub );
 	return ( base + "/" + sub );
 }
-
-// std::string getContentType( const std::string &path ) {
-// 	size_t dot = path.find_last_of( '.' );
-// 	if ( dot == std::string::npos )
-// 		return "application/octet-stream"; // generic Binary
-
-// 	std::string ext = path.substr( dot + 1 );
-// 	if ( ext == "html" || ext == "htm" )
-// 		return "text/html";
-// 	if ( ext == "css" )
-// 		return "text/css";
-// 	if ( ext == "png" )
-// 		return "image/png";
-// 	if ( ext == "jpg" || ext == "jpeg" )
-// 		return "image/jpeg";
-// 	if ( ext == "gif" )
-// 		return "image/gif";
-// 	if ( ext == "txt" )
-// 		return "text/plain";
-// 	if ( ext == "pdf" )
-// 		return "application/pdf";
-// 	return "application/octet-stream";
-// }
 
 std::string ft_strtrim( const std::string &str ) {
 	unsigned int start = 0;
@@ -191,6 +175,62 @@ const Location *getMatchLocation( const std::string &path, const std::vector< Lo
 	return ( matchedLocation );
 }
 
+RouteContext makeContext( const MatchResult &match, const ServerConfig &server, http::Request &request,
+                          VALIDATION_STATUS status ) {
+	RouteContext ctx;
+
+	// 1️⃣ CGI FILE has priority?
+	if ( status == VALID_IS_CGI && match.file ) {
+		const File &file = *match.file;
+		ctx.methods = file.methods;
+		ctx.path = "";
+		ctx.root = file.root;
+		ctx.index = file.index;
+		ctx.autoIndex = false;
+		ctx.max_body_size = server.max_body_size;
+		ctx.cgi_pass = file.cgi_pass;
+		ctx.redirection = "";
+		ctx.uploadEnable = false;
+		ctx.uploadStore = "";
+	}
+	// 2️⃣ Location normal
+	else if ( match.location ) {
+		const Location &loc = *match.location;
+		ctx.methods = loc.methods;
+		ctx.path = loc.path;
+		ctx.root = loc.root;
+		ctx.index = loc.index;
+		ctx.autoIndex = loc.autoIndex;
+		ctx.max_body_size = loc.max_body_size;
+		if ( !loc.cgi_pass.empty() )
+			ctx.cgi_pass = loc.cgi_pass;
+		else
+			ctx.cgi_pass = joinPath( loc.root, request.GetFileName() );
+		ctx.redirection = loc.redirection;
+		ctx.uploadEnable = loc.uploadEnable;
+		ctx.uploadStore = loc.uploadStore;
+	}
+	// 3️⃣ File static
+	else if ( match.file ) {
+		const File &file = *match.file;
+		ctx.methods = file.methods;
+		ctx.path = "";
+		ctx.root = file.root;
+		ctx.index = file.index;
+		ctx.autoIndex = false;
+		ctx.max_body_size = server.max_body_size;
+		ctx.cgi_pass = file.cgi_pass;
+		ctx.redirection = "";
+		ctx.uploadEnable = false;
+		ctx.uploadStore = "";
+	}
+
+	ctx.isCgi = ( status == VALID_IS_CGI );
+	ctx.isRedirect = ( status == VALID_REDIRECT_REQUIRED );
+
+	return ctx;
+}
+
 // std::string getFileExtension( const std::string &path ) {
 // 	size_t slashPos = path.find_last_of( '/' );
 // 	size_t dotPos = path.find_last_of( '.' );
@@ -268,58 +308,25 @@ const Location *getMatchLocation( const std::string &path, const std::vector< Lo
 // 	return mergedMethods;
 // }
 
-RouteContext makeContext( const MatchResult &match, const ServerConfig &server,  http::Request &request,
-                          VALIDATION_STATUS status ) {
-	RouteContext ctx;
+// std::string getContentType( const std::string &path ) {
+// 	size_t dot = path.find_last_of( '.' );
+// 	if ( dot == std::string::npos )
+// 		return "application/octet-stream"; // generic Binary
 
-	// 1️⃣ CGI FILE has priority?
-	if ( status == VALID_IS_CGI && match.file ) {
-		const File &file = *match.file;
-		ctx.methods = file.methods;
-		ctx.path = "";
-		ctx.root = file.root;
-		ctx.index = file.index;
-		ctx.autoIndex = false;
-		ctx.max_body_size = server.max_body_size;
-		ctx.cgi_pass = file.cgi_pass;
-		ctx.redirection = "";
-		ctx.uploadEnable = false;
-		ctx.uploadStore = "";
-	}
-	// 2️⃣ Location normal
-	else if ( match.location ) {
-		const Location &loc = *match.location;
-		ctx.methods = loc.methods;
-		ctx.path = loc.path;
-		ctx.root = loc.root;
-		ctx.index = loc.index;
-		ctx.autoIndex = loc.autoIndex;
-		ctx.max_body_size = loc.max_body_size;
-		if ( !loc.cgi_pass.empty() )
-			ctx.cgi_pass = loc.cgi_pass;
-		else
-			ctx.cgi_pass = joinPath( loc.root, request.GetFileName() );
-		ctx.redirection = loc.redirection;
-		ctx.uploadEnable = loc.uploadEnable;
-		ctx.uploadStore = loc.uploadStore;
-	}
-	// 3️⃣ File static
-	else if ( match.file ) {
-		const File &file = *match.file;
-		ctx.methods = file.methods;
-		ctx.path = "";
-		ctx.root = file.root;
-		ctx.index = file.index;
-		ctx.autoIndex = false;
-		ctx.max_body_size = server.max_body_size;
-		ctx.cgi_pass = file.cgi_pass;
-		ctx.redirection = "";
-		ctx.uploadEnable = false;
-		ctx.uploadStore = "";
-	}
-
-	ctx.isCgi = ( status == VALID_IS_CGI );
-	ctx.isRedirect = ( status == VALID_REDIRECT_REQUIRED );
-
-	return ctx;
-}
+// 	std::string ext = path.substr( dot + 1 );
+// 	if ( ext == "html" || ext == "htm" )
+// 		return "text/html";
+// 	if ( ext == "css" )
+// 		return "text/css";
+// 	if ( ext == "png" )
+// 		return "image/png";
+// 	if ( ext == "jpg" || ext == "jpeg" )
+// 		return "image/jpeg";
+// 	if ( ext == "gif" )
+// 		return "image/gif";
+// 	if ( ext == "txt" )
+// 		return "text/plain";
+// 	if ( ext == "pdf" )
+// 		return "application/pdf";
+// 	return "application/octet-stream";
+// }

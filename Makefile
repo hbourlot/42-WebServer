@@ -139,7 +139,7 @@ debug: re
 
 d: debug
 	@make -s
-	@./$(NAME) ./conf_files/good/webpage.conf
+	@./$(NAME) ./conf_files/good/scriptpage.conf
 
 fc: fclean
 
