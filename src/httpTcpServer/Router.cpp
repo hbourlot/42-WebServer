@@ -135,28 +135,55 @@ void http::Router::launchCgi(Client &client, const ServerConfig &server, const F
     const char* buf = request.body.data();
     int fd = cgi->getInputPipe()[1]; // parent writes to this
 
-    size_t total = 0;
-    while (total < len) {
 
-        ssize_t n = write(fd, buf + total, len - total);
-        if (n < 0) {
-            if (errno == EINTR) continue;
-            if (errno == EPIPE) {
-                std::cerr << "CGI closed stdin, stopping write.\n";
-                break;
-            }
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                // Non-blocking fd: wait until writable
-                // Here we just spin, but ideally use poll/select/epoll
-                continue;
-            }
-            perror("write");
-            break;
-        }
-        total += n;
-    }
 
-    close(fd);
+	// const size_t CHUNK_SIZE = 8192;
+	size_t total = 0;
+	while (total < len) {
+		struct pollfd pfd;
+		pfd.fd = fd;
+		pfd.events = POLLOUT;
+		int poll_res = poll(&pfd, 1, 1000); // 1 second timeout
+		if (poll_res < 0) {
+			perror("poll");
+			break;
+		} else if (poll_res == 0) {
+			std::cerr << "Timeout waiting for CGI pipe to be writable.\n";
+			continue;
+		}
+		if (pfd.revents & POLLERR) {
+			std::cerr << "Error on CGI pipe fd during poll.\n";
+			break;
+		}
+		if (pfd.revents & POLLHUP) {
+			std::cerr << "CGI pipe closed (POLLHUP).\n";
+			break;
+		}
+		if (pfd.revents & POLLOUT) {
+			std::cout << "IS POLL OUT AND GOING TO WRITE NOW\n\n";
+			size_t to_write = (len - total > CHUNK_SIZE) ? CHUNK_SIZE : (len - total);
+			ssize_t n = write(fd, buf + total, to_write);
+			std::cout << "DID WRITE A CHUNK\n\n";
+			if (n < 0) {
+				if (errno == EINTR) {
+					std::cout << "OVER HERE\n";
+					continue;
+				}
+				if (errno == EPIPE) {
+					std::cerr << "CGI closed stdin, stopping write.\n";
+					break;
+				}
+				if (errno == EAGAIN || errno == EWOULDBLOCK) {
+					continue;
+				}
+				perror("write");
+				break;
+			}
+			total += n;
+		}
+	}
+
+	close(fd);
 
     std::cout << "\n\nAFTER WRITE INTO CGI\n";
 

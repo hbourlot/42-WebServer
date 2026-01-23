@@ -79,7 +79,7 @@ int http::ClientEventProcessor::readCgiPipeAndBuildResponse(http::Cgi *cgi, poll
 	std::string cgiOutput;
 	int readCount = 0;
 
-	while (readCount < MAX_READS_PER_EVENT)
+	while (readCount < (MAX_READS_PER_EVENT))
 	{
 		ssize_t bytesRead = read(pfd.fd, buffer, BUFFER_SIZE);
 

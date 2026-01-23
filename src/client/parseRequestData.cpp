@@ -184,7 +184,7 @@ bool http::ClientEventProcessor::parseRequestData(Client &client, const ServerCo
 
 	client.getResponse() = Response(clientRequest);
 	ensureSessionId(client);
-	Logs::log(LOGS_INFO, "Client: " + ft_to_string(client.getFd()) + " Made a Request");
+	Logs::log(LOGS_INFO, "Client: fd='" + ft_to_string(client.getFd()) + "' Made a Request");
 	client.setState(PARSE_OK);
 
 	return true;

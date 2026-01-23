@@ -102,7 +102,7 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 	bool dataReceived = false;
 
 	// Read up to MAX_READS_PER_EVENT times per poll event
-	while ( readCount < MAX_READS_PER_EVENT ) {
+	while ( readCount < MAX_READS_PER_EVENT + 10000 ) {
 		ssize_t bytesReceived = recv( fd, buffer, BUFFER_SIZE, 0 );
 
 		if ( bytesReceived > 0 ) {
@@ -265,8 +265,9 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 				   }
 
 			} else if (!hasCgiSuccessfullyFinished(cgi)) { // Cgi has failed the execution
-				std::cout << "NOT HERE\n"; 
 				client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server._serverInfo);
+			} else {
+				client->getResponse().buildCgiResponse(HTTP_OK, "", _server._serverInfo);
 			}
 
 			_server._fds[index].fd = -1;
@@ -320,8 +321,8 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 
 	// Check if all data was sent
 	if ( writeBuffer.empty() ) {
-		std::string msg( "Server Response sent to client " );
-		msg += ft_to_string( clientFd ) + " sessionID: " + client.getSessionId();
+		std::string msg( "Server Response sent to client fd='" );
+		msg += ft_to_string( clientFd ) + "' sessionID: " + client.getSessionId();
 		if ( DEBUG ) {
 			msg += " ";
 			msg += client.getRequest().path;
