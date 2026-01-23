@@ -54,14 +54,24 @@ namespace http {
 		/// @brief Registers a CGI object in the server's map for tracking and event processing.
 		/// @param cgi Pointer to the Cgi object to register (ownership transferred).
 		void registerCgi( http::Cgi *cgi );
+		
 		/// @brief Cleans up CGI resources - kills process, closes pipes, removes from poll array and map.
 		/// @param cgi Pointer to the Cgi object to cleanup (will be deleted).
 		void cleanupCgi( http::Cgi *cgi );
-		/// @brief Reads CGI output from pipe and builds HTTP response based on exit status.
-		/// @param cgi Pointer to the Cgi object to read output from.
-		/// @param pfd Poll file descriptor structure for the CGI pipe.
-		/// @note Should only be called after hasCgiFinished() returns true.
-		void processCgiOutput( http::Cgi *cgi, pollfd &pfd );
+
+		///@brief Reads CGI output from pipe and builds HTTP response based on exit status.
+		///
+		///Reads all available data from the CGI process's output pipe (non-blocking), handles errors, and constructs the HTTP response.
+		///
+		///@param cgi Pointer to the Cgi object to read output from.
+		///@param pfd Poll file descriptor structure for the CGI pipe.
+		///@note Should only be called after hasCgiFinished() returns true.
+		///
+		///@return int
+		///  ->  1: More data may be available (hit MAX_READS_PER_EVENT, POLLIN still set)
+		///  ->  0: Successfully read all data and built the CGI response
+		///  -> -1: Read error occurred, error response built and cleanup performed
+		int readCgiPipeAndBuildResponse( http::Cgi *cgi, pollfd &pfd );
 
 		/// @brief Checks if a CGI process completed with exit status 0.
 		/// @param cgi Pointer to the Cgi object to check.

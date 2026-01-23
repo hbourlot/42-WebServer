@@ -238,14 +238,42 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 	std::map< int, http::Cgi * >::iterator it = _server._cgiByFd.find( fd );
 
 	if ( it != _server._cgiByFd.end() ) {
-		if ( this->hasCgiFinished( it->second ) && _server._fds[ index ].revents & POLLIN )
-			processCgiOutput( it->second, _server._fds[ index ] );
-		else {
-			Client *client = it->second->getClient();
 
-			client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server._serverInfo);
+		http::Cgi* cgi = it->second;
+		Client *client = cgi->getClient();
 
+		if (!client) {
+			cleanupCgi(cgi);
+			return;
 		}
+
+		if (hasCgiFinished(cgi)) {
+
+			// Case finished properly and has data to read from CGI
+			if (hasCgiSuccessfullyFinished(cgi) && _server._fds[index].revents & POLLIN) {
+				
+				   switch (readCgiPipeAndBuildResponse(cgi, _server._fds[index]))
+				   {
+					   case 1: // There's still data to read
+						   return;
+					   case -1: // Failed the read function
+						   return;
+						case 0: // Response built
+							break;
+					   default:
+						   return;
+				   }
+
+			} else if (!hasCgiSuccessfullyFinished(cgi)) { // Cgi has failed the execution
+				std::cout << "NOT HERE\n"; 
+				client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server._serverInfo);
+			}
+
+			_server._fds[index].fd = -1;
+			cleanupCgi(cgi);
+			client->setState(CGI_COMPLETED);
+		}
+
 		return;
 	}
 	// Logs::log( LOGS_ERROR, "Something bad happened, restart server." );
