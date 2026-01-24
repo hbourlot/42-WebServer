@@ -108,3 +108,22 @@ void Client::consumeReadBuffer( size_t n ) {
 	else
 		_readBuffer.erase( 0, n );
 }
+
+size_t Client::getBytesToDiscard() {
+	return ( _bytesToDiscard );
+}
+void Client::setBytesToDiscard( size_t bytesToDiscard ) {
+	_bytesToDiscard = bytesToDiscard;
+}
+bool Client::getDiscardingBody() {
+	return ( _discardingBody );
+}
+void Client::setDiscardingBody( bool discardingBody ) {
+	_discardingBody = discardingBody;
+}
+REQUEST_PHASE Client::getRequestPhase() {
+	return ( _requestPhase );
+}
+void Client::setRequestPhase( REQUEST_PHASE requestPhase ) {
+	_requestPhase = requestPhase;
+}

@@ -80,7 +80,7 @@ namespace http {
 	void TcpServer::startListen() {
 		int listen_fd;
 
-		// TODO: Need to implement a properly valid max number of padding \
+		// TODO: Need to implement a properly valid max number of padding 
 		// TODO: connections
 		listen_fd = listen( _serverSocket, 10 );
 
@@ -212,7 +212,6 @@ namespace http {
 
 				// Checking for new connections
 				acceptConnection();
-				int status = 0;
 				for ( int i = 1; i < _fds.size(); ++i ) {
 					removeDeadConnections( processor, i );
 					processor.processClientEvents( i );
@@ -229,7 +228,7 @@ namespace http {
 		// Close all CGI pipes before shutting down
 		cleanupAllCgis();
 
-		for ( int i = 0; i < _fds.size(); ++i ) {
+		for ( size_t i = 0; i < _fds.size(); ++i ) {
 			close( _fds[ i ].fd );
 			_fds.erase( _fds.begin() + i );
 		}

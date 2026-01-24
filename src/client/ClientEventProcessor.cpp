@@ -7,11 +7,12 @@ http::ClientEventProcessor::~ClientEventProcessor(){};
 
 static void discardingBody( Client &client, pollfd &pfd ) {
 	size_t available = client.getReadBuffer().size();
+	size_t bytesToDiscard = client.getBytesToDiscard();
 
-	if ( available >= client._bytesToDiscard ) {
-		client.consumeReadBuffer( client._bytesToDiscard );
-		client._bytesToDiscard = 0;
-		client._discardingBody = false;
+	if ( available >= bytesToDiscard ) {
+		client.consumeReadBuffer( bytesToDiscard );
+		client.setBytesToDiscard( 0 );
+		client.setDiscardingBody( false );
 
 		client.getResponse() = http::Response( client.getRequest() );
 		ensureSessionId( client );
@@ -20,7 +21,7 @@ static void discardingBody( Client &client, pollfd &pfd ) {
 		pfd.events &= ~POLLIN;
 		pfd.events |= POLLOUT;
 	} else {
-		client._bytesToDiscard -= available;
+		client.setBytesToDiscard( bytesToDiscard - available );
 		client.clearReadBuffer();
 	}
 }
@@ -37,7 +38,7 @@ void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 		return;
 	}
 
-	if ( client->_discardingBody ) {
+	if ( client->getDiscardingBody() ) {
 		discardingBody( *client, pfd );
 		return;
 	}
@@ -234,7 +235,6 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 			cleanupCgi( cgi );
 			client->setState( CGI_COMPLETED );
 		} else {
-
 		}
 
 		return;
@@ -245,7 +245,6 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 
 void http::ClientEventProcessor::processClientEvents( int index ) {
 
-	int status = 0;
 	int fd = _server._fds[ index ].fd;
 	Client *client = _server._clientManager.getClient( fd );
 

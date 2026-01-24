@@ -23,12 +23,7 @@ enum CLIENT_STATE {
 	CGI_COMPLETED,
 };
 
-enum REQUEST_PHASE {
-	START,
-	HEADER,
-	BODY,
-	FINISHED
-};
+enum REQUEST_PHASE { START, HEADER, BODY, FINISHED };
 
 class Client {
 
@@ -78,10 +73,14 @@ class Client {
 
 	void consumeReadBuffer( size_t n );
 
-	size_t _bytesToDiscard;
-	bool _discardingBody;
+	size_t getBytesToDiscard();
+	void setBytesToDiscard( size_t bytesToDiscard );
 
-	REQUEST_PHASE _requestPhase;
+	bool getDiscardingBody();
+	void setDiscardingBody( bool discardingBody );
+
+	REQUEST_PHASE getRequestPhase();
+	void setRequestPhase( REQUEST_PHASE requestPhase );
 
   private:
 	http::TcpServer &_server;
@@ -102,6 +101,11 @@ class Client {
 	int _cgiOutputFd;
 
 	std::string _sessionId;
+
+	size_t _bytesToDiscard;
+	bool _discardingBody;
+
+	REQUEST_PHASE _requestPhase;
 };
 
 void ensureSessionId( Client &client );

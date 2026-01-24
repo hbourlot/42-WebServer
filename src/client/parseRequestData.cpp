@@ -94,7 +94,7 @@ static void parseRequestHeaders( http::Request &req, const std::string &readBuff
 	}
 }
 
-static bool parseRequestBody( http::Request &req, const std::string &readBuffer, Client &client ) {
+static bool parseRequestBody( http::Request &req, const std::string &readBuffer ) {
 	size_t bpos = 0;
 	std::string decoded;
 	const size_t bufferSize = readBuffer.size();
@@ -112,7 +112,6 @@ static bool parseRequestBody( http::Request &req, const std::string &readBuffer,
 			bpos = lineEnd + 2;
 
 			if ( chunkSize == 0 ) {
-				std::cout << "chunkSize: " << chunkSize << std::endl;
 				if ( bufferSize < bpos + 2 )
 					return false;
 				if ( readBuffer.substr( bpos, 2 ) != "\r\n" )
@@ -149,7 +148,7 @@ bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerC
 	std::string &readBuffer = client.getReadBuffer();
 	http::Request &clientRequest = client.getRequest();
 
-	if ( client._requestPhase == START ) {
+	if ( client.getRequestPhase() == START ) {
 		size_t lineEnd = readBuffer.find( "\r\n" );
 		if ( lineEnd == std::string::npos ) {
 			client.setState( PARSE_INCOMPLETE );
@@ -164,10 +163,10 @@ bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerC
 		parseRequestQueries( clientRequest );
 		parsePath( clientRequest, serverInfo );
 		readBuffer.erase( 0, lineEnd + 2 );
-		client._requestPhase = HEADER;
+		client.setRequestPhase( HEADER );
 	}
 
-	if ( client._requestPhase == HEADER ) {
+	if ( client.getRequestPhase() == HEADER ) {
 		size_t headerEnd = readBuffer.find( "\r\n\r\n" );
 		if ( headerEnd == std::string::npos ) {
 			client.setState( PARSE_INCOMPLETE );
@@ -176,28 +175,29 @@ bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerC
 
 		parseRequestHeaders( clientRequest, readBuffer, headerEnd );
 		readBuffer.erase( 0, headerEnd + 4 );
-		client._requestPhase = BODY;
+		client.setRequestPhase( BODY );
 	}
 
-	if ( client._requestPhase == BODY ) {
+	if ( client.getRequestPhase() == BODY ) {
 
-		size_t bodyStart = 0;
-		if ( !parseRequestBody( clientRequest, readBuffer, client ) ) {
+		if ( !parseRequestBody( clientRequest, readBuffer ) ) {
 			client.setState( PARSE_INCOMPLETE );
 			return false;
 		}
 
 		readBuffer.erase();
-		client._requestPhase = FINISHED;
+		client.setRequestPhase( FINISHED );
 	}
 
-	if ( client._requestPhase == FINISHED ) {
+	if ( client.getRequestPhase() == FINISHED ) {
 
 		client.getResponse() = Response( clientRequest );
 		ensureSessionId( client );
 		Logs::log( LOGS_INFO, "Client: " + ft_to_string( client.getFd() ) + " Made a Request" );
 		client.setState( PARSE_OK );
-		client._requestPhase = START;
+		client.setRequestPhase( START );
+
 		return true;
 	}
+	return false;
 }
