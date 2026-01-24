@@ -123,10 +123,8 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 	CLIENT_STATE state = client.getState();
 
 	ServerConfig &serverInfo = _server._serverInfo;
-	std::cout << "processRequest" << std::endl;
 	// Handle error states first (build error responses)
 	if ( state != PARSE_OK ) {
-		std::cout << "Here parse != ok" << state << std::endl;
 		this->buildErrorResponse( client, state );
 		return true;
 	}
@@ -169,7 +167,6 @@ bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STAT
 bool http::ClientEventProcessor::handleRouteValidation( Client &client, VALIDATION_STATUS &validationStatus ) {
 	http::Response &response = client.getResponse();
 	ServerConfig &serverInfo = _server._serverInfo;
-	std::cout << "handleRouteValidation" << std::endl;
 	validationStatus = Router::validateRequest( client, _server._serverInfo );
 
 	switch ( validationStatus ) {
@@ -211,6 +208,16 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 			return;
 		}
 
+		if ( _server._fds[ index ].revents & POLLOUT ) {
+			cgi->writeToCgi();
+			if ( cgi->getBodyBytesWritten() >= cgi->getRequest().body.size() ) {
+				close( cgi->getInputPipe()[ 1 ] );
+				_server._fds.erase( _server._fds.begin() + index );
+				_server._cgiByFd.erase( fd );
+			}
+			return;
+		}
+
 		if ( hasCgiFinished( cgi ) ) {
 
 			// Case finished properly and has data to read from CGI
@@ -235,6 +242,8 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 			_server._fds[ index ].fd = -1;
 			cleanupCgi( cgi );
 			client->setState( CGI_COMPLETED );
+		} else {
+
 		}
 
 		return;

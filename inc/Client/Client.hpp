@@ -23,6 +23,13 @@ enum CLIENT_STATE {
 	CGI_COMPLETED,
 };
 
+enum REQUEST_PHASE {
+	START,
+	HEADER,
+	BODY,
+	FINISHED
+};
+
 class Client {
 
   public:
@@ -73,6 +80,8 @@ class Client {
 
 	size_t _bytesToDiscard;
 	bool _discardingBody;
+
+	REQUEST_PHASE _requestPhase;
 
   private:
 	http::TcpServer &_server;

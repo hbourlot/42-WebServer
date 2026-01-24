@@ -9,6 +9,23 @@ void http::ClientEventProcessor::registerCgi(http::Cgi *cgi)
 
 	_server._cgiByFd[outputFd] = cgi; // Add CGI to map
 
+	// Handle Input Pipe (Writing to CGI)
+	if (!cgi->getRequest().body.empty())
+	{
+		int inputFd = cgi->getInputPipe()[1];
+		_server._cgiByFd[inputFd] = cgi;
+
+		pollfd pfd;
+		pfd.fd = inputFd;
+		pfd.events = POLLOUT;
+		pfd.revents = 0;
+		_server._fds.push_back(pfd); // Add to polling
+	}
+	else
+	{
+		close(cgi->getInputPipe()[1]); // No body, close write end immediately
+	}
+
 	std::string msg("Registered CGI for PID ");
 	msg += ft_to_string(cgi->getPid());
 	msg += " with output fd ";

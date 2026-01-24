@@ -12,7 +12,8 @@
 http::Cgi::Cgi( const http::Request &request, const std::string &scriptPath, const ServerConfig &serverInfo,
                 Client *client )
     : _status(), _clientFD(), _request( request ), _response( Response( request ) ), _serverInfo( serverInfo ),
-      _clientAddress(), _bytesReceived(), _body(), _client( client ), _envp(), _argv(), _envStrings() {
+      _clientAddress(), _bytesReceived(), _bodyBytesWritten( 0 ), _body(), _client( client ), _envp(), _argv(),
+      _envStrings() {
 
 	_filePath = scriptPath;
 
@@ -152,4 +153,20 @@ void http::Cgi::killProcess() {
 			waitpid( _pid, &status, 0 ); // Reap zombie
 		}
 	}
+}
+
+void http::Cgi::writeToCgi() {
+	if ( _bodyBytesWritten >= _request.body.size() )
+		return;
+
+	size_t remaining = _request.body.size() - _bodyBytesWritten;
+	ssize_t written = write( _inputPipe[ 1 ], _request.body.c_str() + _bodyBytesWritten, remaining );
+
+	if ( written > 0 ) {
+		_bodyBytesWritten += written;
+	}
+}
+
+size_t http::Cgi::getBodyBytesWritten() const {
+	return _bodyBytesWritten;
 }

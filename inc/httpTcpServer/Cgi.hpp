@@ -56,6 +56,8 @@ namespace http {
 		Client* getClient() const;
 		void registerPollFd( std::vector< pollfd >& fds ) const;
 		bool hasDataToRead();
+		void writeToCgi();
+		size_t getBodyBytesWritten() const;
 
 	  private:
 		int _status;
@@ -66,6 +68,7 @@ namespace http {
 		std::string _filePath;
 		const sockaddr_in _clientAddress;
 		int _bytesReceived;
+		size_t _bodyBytesWritten;
 		std::string _body;
 		Client* _client; // Back-reference to client
 

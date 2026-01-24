@@ -25,9 +25,7 @@ VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerCon
 
 	request.matchResult.location = getMatchLocation( request.path, server.locations );
 	request.matchResult.file = getMatchFile( request.path, server.files );
-	std::cout << "request.path:" << request.path << std::endl;
 	if ( request.matchResult.file ) {
-		std::cout << "request.matchResult.file exist" << std::endl;
 		if ( !request.matchResult.file->cgi_pass.empty() &&
 		     validateRequestMethod( request, request.matchResult.file->methods ) )
 			return VALID_IS_CGI;
@@ -55,7 +53,6 @@ bool http::Router::routeCgiRequest( Client &client, const ServerConfig &server, 
                                     ClientEventProcessor &processor ) {
 
 	http::Request &request = client.getRequest();
-	std::cout << "routeCgiRequest" << std::endl;
 	if ( request.method == "GET" || request.method == "POST" ) {
 		launchCgi( client, server, ctx, processor );
 		return false;
@@ -70,65 +67,9 @@ void http::Router::launchCgi( Client &client, const ServerConfig &server, const 
 	http::Request &request = client.getRequest();
 
 	// Create and execute CGI
-	std::cout << "launchCgi" << std::endl;
 	http::Cgi *cgi = new http::Cgi( request, ctx.cgi_pass, server, &client );
 	cgi->executeCgi( client.getServer()._fds );
 
-	    size_t len = request.body.size();
-    const char* buf = request.body.data();
-    int fd = cgi->getInputPipe()[1]; // parent writes to this
-
-
-size_t total = 0;
-	while (total < len) {
-		struct pollfd pfd;
-		pfd.fd = fd;
-		pfd.events = POLLOUT;
-		int poll_res = poll(&pfd, 1, 1000); // 1 second timeout
-		if (poll_res < 0) {
-			perror("poll");
-			break;
-		} else if (poll_res == 0) {
-			std::cerr << "Timeout waiting for CGI pipe to be writable.\n";
-			if (processor.hasCgiFinished(cgi))
-				std::cout << "LAELE\n";
-			break;
-		}
-		if (pfd.revents & POLLERR) {
-			std::cerr << "Error on CGI pipe fd during poll.\n";
-			break;
-		}
-		if (pfd.revents & POLLHUP) {
-			std::cerr << "CGI pipe closed (POLLHUP).\n";
-			break;
-		}
-		if (pfd.revents & POLLOUT) {
-			std::cout << "IS POLL OUT AND GOING TO WRITE NOW\n\n";
-			size_t to_write = (len - total > CHUNK_SIZE) ? CHUNK_SIZE : (len - total);
-			ssize_t n = write(fd, buf + total, to_write);
-			std::cout << "DID WRITE A CHUNK\n\n";
-			if (n < 0) {
-				if (errno == EINTR) {
-					std::cout << "OVER HERE\n";
-					continue;
-				}
-				if (errno == EPIPE) {
-					std::cerr << "CGI closed stdin, stopping write.\n";
-					break;
-				}
-				if (errno == EAGAIN || errno == EWOULDBLOCK) {
-					continue;
-				}
-				perror("write");
-				break;
-			}
-			total += n;
-		}
-	}
-
-	close(fd);
-
-    std::cout << "\n\nAFTER WRITE INTO CGI\n";
 	// Store CGI info in client
 	client.setCgiPid( cgi->getPid() );
 	client.setCgiOutputFd( cgi->getOutputPipe()[ 0 ] );

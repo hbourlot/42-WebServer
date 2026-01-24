@@ -2,7 +2,7 @@
 
 Client::Client( int fd, http::TcpServer &server )
     : _server( server ), _fd( fd ), _state(), _requestComplete( false ), _cgiInProgress( false ), _cgiPid( -1 ),
-      _cgiOutputFd( -1 ), _bytesToDiscard( 0 ), _discardingBody( false ) {
+      _cgiOutputFd( -1 ), _bytesToDiscard( 0 ), _discardingBody( false ), _requestPhase( START ) {
 }
 
 Client::~Client() {
