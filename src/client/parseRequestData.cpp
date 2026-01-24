@@ -98,16 +98,26 @@ static bool parseRequestBody( http::Request &req, const std::string &buffer, con
 	if ( req.headers.count( "Transfer-Encoding" ) && req.headers[ "Transfer-Encoding" ] == "chunked" ) {
 		size_t bpos = bodyStart;
 		std::string decoded;
+
+
 		while ( true ) {
 			size_t lineEnd = buffer.find( "\r\n", bpos );
-			if ( lineEnd == std::string::npos )
-				break;
-
+			if ( lineEnd == std::string::npos ) {
+				// std::cout << "HERE\n";
+				// std::cout << buffer.substr(0, bpos);
+				// sleep(2);
+				return false;
+			}
+			
 			std::string sizeStr( data + bpos, lineEnd - bpos );
 			size_t chunkSize = strtoul( sizeStr.c_str(), NULL, 16 );
-			if ( chunkSize == 0 )
+			if ( chunkSize == 0 ) {
+				std::cout << "HERE2\n";
+				
 				break;
+			}
 			if ( bpos + chunkSize + 2 > bufferSize ) {
+				// std::cout << "BPOS " << bpos << std::endl;
 				client.setState( PARSE_INCOMPLETE );
 				return false;
 			}
@@ -116,12 +126,13 @@ static bool parseRequestBody( http::Request &req, const std::string &buffer, con
 			decoded.append( data + bpos, chunkSize );
 			bpos += chunkSize + 2;
 		}
-		req.body = decoded;
+		req.body.append(decoded);
 	} else if ( req.headers.count( "Content-Length" ) ) {
 		size_t len = strtoul( req.headers[ "Content-Length" ].c_str(), NULL, 10 );
 		if ( bodyStart + len <= bufferSize )
 			req.body.assign( data + bodyStart, len );
 		else {
+			std::cout << "SETTING 5 on parseRequestBody second\n";
 			client.setState( PARSE_INCOMPLETE );
 			return false;
 		}
@@ -132,6 +143,7 @@ static bool parseRequestBody( http::Request &req, const std::string &buffer, con
 }
 
 bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerConfig &serverInfo ) {
+	
 	std::string &readBuffer = client.getReadBuffer();
 	size_t bufferSize = readBuffer.size();
 
@@ -147,6 +159,7 @@ bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerC
 
 	if ( !parseRequestLine( clientRequest, data, pos, headerEnd ) ) {
 		client.setState( PARSE_INCOMPLETE );
+
 		return false;
 	}
 
@@ -166,6 +179,7 @@ bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerC
 	std::cout << clientRequest.method << " " << clientRequest.path << " " << clientRequest.serverProtocol << std::endl;
 	printHttpHeaders( clientRequest.headers );
 	std::cout << "client.getState()" << client.getState() << std::endl;
+
 	return true;
 }
 

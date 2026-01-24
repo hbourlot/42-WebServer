@@ -25,10 +25,13 @@ static void discardingBody( Client &client, pollfd &pfd ) {
 	}
 }
 
+
+
 void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 
+
+
 	if ( client->getCgiPid() != -1 ) {
-		// std::cout << "CGI_IN_EXECUTION processRead()\n";
 		// exit( 0 );
 		return;
 	}
@@ -42,11 +45,11 @@ void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 		return;
 	}
 
-	if ( !parseRequestData( *client, _server._serverInfo ) ) {
+	
+	if (!parseRequestData( *client, _server._serverInfo ) ) {
 		return;
 	}
-	// pfd.events = POLLIN;   // Setting to POLL OUT
-	pfd.events |= POLLOUT; // Setting to POLL OUT
+	pfd.events = POLLOUT; // Setting to POLL OUT
 };
 
 void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int index ) {
@@ -62,15 +65,17 @@ void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int 
 };
 
 bool http::ClientEventProcessor::readFromSocket( Client &client ) {
-
+	
 	char buffer[ BUFFER_SIZE ];
 	int fd = client.getFd();
 	int readCount = 0;
 	bool dataReceived = false;
+	
+	std::memset(buffer, 0, BUFFER_SIZE);
 
 	// Read up to MAX_READS_PER_EVENT times per poll event
-	while ( readCount < MAX_READS_PER_EVENT ) {
-		ssize_t bytesReceived = recv( fd, buffer, BUFFER_SIZE, 0 );
+	while ( readCount < MAX_READS_PER_EVENT) {
+		ssize_t bytesReceived = recv( fd, buffer, BUFFER_SIZE - 1, 0 );
 
 		if ( bytesReceived > 0 ) {
 			client.appendToReadBuffer( std::string( buffer, static_cast< size_t >( bytesReceived ) ) );
@@ -78,6 +83,10 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 			readCount++;
 			continue; // Try to read more data
 		}
+
+		if (bytesReceived == 0 && readCount == 0 && errno == EWOULDBLOCK)
+			return true;
+
 
 		if ( bytesReceived == 0 && readCount == 0 ) {
 			// Peer closed connection
@@ -97,7 +106,7 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 		return false;
 	}
 
-	if ( dataReceived ) {
+	if ( dataReceived) {
 		client.setState( READ_SUCCESS );
 		return true;
 	}
@@ -107,7 +116,6 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 }
 
 void http::ClientEventProcessor::closeConnection( size_t index ) {
-	sleep( 1 );
 	_server.closeClientConnection( index );
 }
 

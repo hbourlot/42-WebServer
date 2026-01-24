@@ -89,7 +89,7 @@ void http::Cgi::buildEnvStrings()
 	}
 	else
 	{
-		newMap["CONTENT_LENGTH"] = _request.body.size();
+		newMap["CONTENT_LENGTH"] = ft_to_string(_request.body.size());
 	}
 
 	if (_request.matchResult.location != NULL)

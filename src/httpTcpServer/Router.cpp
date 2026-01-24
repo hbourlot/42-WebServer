@@ -74,14 +74,61 @@ void http::Router::launchCgi( Client &client, const ServerConfig &server, const 
 	http::Cgi *cgi = new http::Cgi( request, ctx.cgi_pass, server, &client );
 	cgi->executeCgi( client.getServer()._fds );
 
-	// Send Body if has
-	std::cerr << "\n\n BEFORE WRITE INTO CGI\n"
-	          << "Body size " << request.body.size() << std::endl;
+	    size_t len = request.body.size();
+    const char* buf = request.body.data();
+    int fd = cgi->getInputPipe()[1]; // parent writes to this
 
-	write( cgi->getInputPipe()[ 1 ], request.body.c_str(), request.body.size() );
-	std::cout << "\n\n after/2 WRITE INTO CGI\n";
 
-	std::cout << "\n\n AFTER WRITE INTO CGI\n";
+size_t total = 0;
+	while (total < len) {
+		struct pollfd pfd;
+		pfd.fd = fd;
+		pfd.events = POLLOUT;
+		int poll_res = poll(&pfd, 1, 1000); // 1 second timeout
+		if (poll_res < 0) {
+			perror("poll");
+			break;
+		} else if (poll_res == 0) {
+			std::cerr << "Timeout waiting for CGI pipe to be writable.\n";
+			if (processor.hasCgiFinished(cgi))
+				std::cout << "LAELE\n";
+			break;
+		}
+		if (pfd.revents & POLLERR) {
+			std::cerr << "Error on CGI pipe fd during poll.\n";
+			break;
+		}
+		if (pfd.revents & POLLHUP) {
+			std::cerr << "CGI pipe closed (POLLHUP).\n";
+			break;
+		}
+		if (pfd.revents & POLLOUT) {
+			std::cout << "IS POLL OUT AND GOING TO WRITE NOW\n\n";
+			size_t to_write = (len - total > CHUNK_SIZE) ? CHUNK_SIZE : (len - total);
+			ssize_t n = write(fd, buf + total, to_write);
+			std::cout << "DID WRITE A CHUNK\n\n";
+			if (n < 0) {
+				if (errno == EINTR) {
+					std::cout << "OVER HERE\n";
+					continue;
+				}
+				if (errno == EPIPE) {
+					std::cerr << "CGI closed stdin, stopping write.\n";
+					break;
+				}
+				if (errno == EAGAIN || errno == EWOULDBLOCK) {
+					continue;
+				}
+				perror("write");
+				break;
+			}
+			total += n;
+		}
+	}
+
+	close(fd);
+
+    std::cout << "\n\nAFTER WRITE INTO CGI\n";
 	// Store CGI info in client
 	client.setCgiPid( cgi->getPid() );
 	client.setCgiOutputFd( cgi->getOutputPipe()[ 0 ] );

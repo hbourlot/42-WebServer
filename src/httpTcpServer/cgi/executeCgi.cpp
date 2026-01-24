@@ -45,6 +45,7 @@ void http::Cgi::executeCgi( std::vector< pollfd >& fds ) {
 		// build argv
 		std::vector< char* > argv;
 		argv.push_back( const_cast< char* >( _filePath.c_str() ) );
+		argv.push_back(const_cast<char*>("http://localhost:8001/directory/youpi.bla")); // !
 		argv.push_back( NULL );
 		
 		// build envp
@@ -62,6 +63,7 @@ void http::Cgi::executeCgi( std::vector< pollfd >& fds ) {
 		this->closeForTwoWay();
 
 		fcntl( _outputPipe[ 0 ], F_SETFL, O_NONBLOCK );
+		fcntl( _inputPipe[ 1 ], F_SETFL, O_NONBLOCK );
 		this->registerPollFd( fds );
 	}
 };
