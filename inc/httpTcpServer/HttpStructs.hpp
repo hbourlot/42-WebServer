@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2026/01/19 14:22:57 by joralves         ###   ########.fr       */
+/*   Updated: 2026/01/22 15:16:37 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,34 @@ struct MatchResult {
 	const File *file;
 };
 
+struct RouteContext {
+	// 🔹 Permissions
+	std::vector< std::string > methods;
+
+	// 🔹 resourse
+	std::string path;
+	std::string root;
+	std::string index;
+
+	// 🔹 CGI
+	bool isCgi;
+	std::string cgi_pass;
+
+	// 🔹 Redirection
+	bool isRedirect;
+	std::string redirection;
+
+	// 🔹 Request limits
+	size_t max_body_size;
+
+	// 🔹 Directory handling
+	bool autoIndex;
+
+	// 🔹 Upload
+	bool uploadEnable;
+	std::string uploadStore;
+};
+
 enum VALIDATION_STATUS {
 
 	VALID_OK = 1,
@@ -70,7 +98,11 @@ namespace http {
 		std::string rawRequestBuffer;
 		std::string queryString;
 		MatchResult matchResult;
-		// const Location *urlMatchedLocation; // ! Must Initialize as NULL;
 	};
 
 } // namespace http
+
+// For RouteContext
+RouteContext makeContext( const MatchResult &match, const ServerConfig &server, http::Request &request,
+                          VALIDATION_STATUS status );
+std::string getFilePath( const std::string &path, const RouteContext &ctx );

@@ -58,7 +58,11 @@ namespace http {
 		/// @brief Cleans up CGI resources - kills process, closes pipes, removes from poll array and map.
 		/// @param cgi Pointer to the Cgi object to cleanup (will be deleted).
 		void cleanupCgi( http::Cgi *cgi );
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> 8c37ee677577c1d2196763d0d08532f497dfbebc
 		///@brief Reads CGI output from pipe and builds HTTP response based on exit status.
 		///
 		///Reads all available data from the CGI process's output pipe (non-blocking), handles errors, and constructs the HTTP response.

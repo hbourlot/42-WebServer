@@ -3,41 +3,28 @@
 #include "Client/ClientEventProcessor.hpp"
 #include "Config/Configs.hpp"
 
-
 namespace http {
 
 	class ClientEventProcessor;
 	class Router {
 	  public:
 		static VALIDATION_STATUS validateRequest( Client &client, const ServerConfig &server );
-		static bool routeCgiRequest( Client &client, const ServerConfig &server, const Location &location,
+		static bool routeCgiRequest( Client &client, const ServerConfig &server, const RouteContext &ctx,
 		                             ClientEventProcessor &processor );
-		static void routeStaticRequest( Client &client, const ServerConfig &server, const Location &location );
-		static void routeStaticRequest( Client &client, const ServerConfig &server, const File &file );
-		static bool routeCgiRequest( Client &client, const ServerConfig &server, const File &file,
-										ClientEventProcessor &processor );
-	  private:
-		static void launchCgi( Client &client, const ServerConfig &server, const Location &location,
-		                       ClientEventProcessor &processor );
-		// static bool isCgiRequest( const http::Request &request, const Location &location );
-		static void handleGet( Client &client, const ServerConfig &server, const Location &location );
-		static void handlePost( Client &client, const ServerConfig &server, const Location &location );
-		static void handleDelete( Client &client, const ServerConfig &server, const Location &location );
-		static void handleDirectoryListing( Client &client, const ServerConfig &server, const std::string &filePath,
-		                                    const Location &location );
+		static void routeStaticRequest( Client &client, const ServerConfig &server, const RouteContext &ctx );
 
-		// Overload
-		static void handleGet( Client &client, const ServerConfig &server, const File &file );
-		static void handlePost( Client &client, const ServerConfig &server, const File &file );
-		static void handleDelete( Client &client, const ServerConfig &server, const File &file );
-		
-	
-		static void launchCgi( Client &client, const ServerConfig &server, const File &file,
-                              ClientEventProcessor &processor );
-	
+	  private:
+		static void launchCgi( Client &client, const ServerConfig &server, const RouteContext &ctx,
+		                       ClientEventProcessor &processor );
+		static void handleGet( Client &client, const ServerConfig &server, const RouteContext &ctx );
+		static void handlePost( Client &client, const ServerConfig &server, const RouteContext &ctx );
+		static void handleDelete( Client &client, const ServerConfig &server, const RouteContext &ctx );
+		static void handleDirectoryListing( Client &client, const ServerConfig &server, const std::string &filePath,
+		                                    const RouteContext &ctx );
+
 		// Can add also other http methods here
 	};
 
 } // namespace http
 
-const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations );
+// const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations );

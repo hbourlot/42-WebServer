@@ -13,12 +13,12 @@ static std::string getParentPath( const std::string &path ) {
 	return ( "/" );
 }
 
-static bool hasIndexFile( const std::string &path, const Location &location ) {
+static bool hasIndexFile( const std::string &path, const RouteContext &ctx ) {
 
-	if ( location.index.empty() )
+	if ( ctx.index.empty() )
 		return false;
 
-	std::string indexPath = joinPath( path, location.index );
+	std::string indexPath = joinPath( path, ctx.index );
 	return ( std::ifstream( indexPath.c_str() ).is_open() );
 }
 
@@ -57,17 +57,17 @@ static std::string generateAutoIndexPage( const std::string &dirPath, http::Requ
 }
 
 void http::Router::handleDirectoryListing( Client &client, const ServerConfig &server, const std::string &filePath,
-                                           const Location &location ) {
+                                           const RouteContext &ctx ) {
 	http::Request &request = client.getRequest();
 	http::Response &response = client.getResponse();
 
-	if ( hasIndexFile( filePath, location ) ) {
-		std::string indexPath = joinPath( filePath, location.index );
+	if ( hasIndexFile( filePath, ctx ) ) {
+		std::string indexPath = joinPath( filePath, ctx.index );
 		response.buildFileResponse( HTTP_OK, indexPath, server );
 		return;
 	}
 
-	if ( !location.autoIndex ) {
+	if ( !ctx.autoIndex ) {
 		response.buildErrorResponse( HTTP_NOT_FOUND, server );
 		return;
 	}
@@ -75,7 +75,6 @@ void http::Router::handleDirectoryListing( Client &client, const ServerConfig &s
 	std::string body = generateAutoIndexPage( filePath, request );
 
 	response.buildResponse( HTTP_OK, body );
-	//"text/html"
 
 	return;
 }
