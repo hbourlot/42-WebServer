@@ -115,10 +115,8 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 	CLIENT_STATE state = client.getState();
 
 	ServerConfig &serverInfo = _server._serverInfo;
-	std::cout << "processRequest" << std::endl;
 	// Handle error states first (build error responses)
 	if ( state != PARSE_OK ) {
-		std::cout << "Here parse != ok" << state << std::endl;
 		this->buildErrorResponse( client, state );
 		return true;
 	}
@@ -161,7 +159,6 @@ bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STAT
 bool http::ClientEventProcessor::handleRouteValidation( Client &client, VALIDATION_STATUS &validationStatus ) {
 	http::Response &response = client.getResponse();
 	ServerConfig &serverInfo = _server._serverInfo;
-	std::cout << "handleRouteValidation" << std::endl;
 	validationStatus = Router::validateRequest( client, _server._serverInfo );
 
 	switch ( validationStatus ) {
