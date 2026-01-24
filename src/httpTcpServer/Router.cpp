@@ -70,14 +70,6 @@ void http::Router::launchCgi( Client &client, const ServerConfig &server, const 
 	http::Cgi *cgi = new http::Cgi( request, ctx.cgi_pass, server, &client );
 	cgi->executeCgi( client.getServer()._fds );
 
-	// Send Body if has
-	std::cerr << "\n\n BEFORE WRITE INTO CGI\n"
-	          << "Body size " << request.body.size() << std::endl;
-
-	write( cgi->getInputPipe()[ 1 ], request.body.c_str(), request.body.size() );
-	std::cout << "\n\n after/2 WRITE INTO CGI\n";
-
-	std::cout << "\n\n AFTER WRITE INTO CGI\n";
 	// Store CGI info in client
 	client.setCgiPid( cgi->getPid() );
 	client.setCgiOutputFd( cgi->getOutputPipe()[ 0 ] );

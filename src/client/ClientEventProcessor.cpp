@@ -107,7 +107,6 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 }
 
 void http::ClientEventProcessor::closeConnection( size_t index ) {
-	sleep( 1 );
 	_server.closeClientConnection( index );
 }
 
@@ -200,6 +199,16 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 			return;
 		}
 
+		if ( _server._fds[ index ].revents & POLLOUT ) {
+			cgi->writeToCgi();
+			if ( cgi->getBodyBytesWritten() >= cgi->getRequest().body.size() ) {
+				close( cgi->getInputPipe()[ 1 ] );
+				_server._fds.erase( _server._fds.begin() + index );
+				_server._cgiByFd.erase( fd );
+			}
+			return;
+		}
+
 		if ( hasCgiFinished( cgi ) ) {
 
 			// Case finished properly and has data to read from CGI
@@ -224,6 +233,8 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 			_server._fds[ index ].fd = -1;
 			cleanupCgi( cgi );
 			client->setState( CGI_COMPLETED );
+		} else {
+
 		}
 
 		return;
