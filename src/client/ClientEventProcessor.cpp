@@ -180,6 +180,9 @@ bool http::ClientEventProcessor::handleRouteValidation( Client &client, VALIDATI
 	case VALID_METHOD_NOT_ALLOWED:
 		response.buildErrorResponse( HTTP_FORBID_METHOD, serverInfo );
 		return true;
+	case VALID_FORBIDDEN:
+		response.buildErrorResponse( HTTP_FORBID, serverInfo );
+		return true;
 
 	default:
 		response.buildErrorResponse( HTTP_SERVER_ERR, serverInfo );

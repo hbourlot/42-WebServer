@@ -19,6 +19,33 @@ static std::vector< std::string > resolveMethods( const Location *loc, const Fil
 	return std::vector< std::string >();
 }
 
+static bool isCgirequest( const http::Request &request, const Location &location ) {
+
+	for ( size_t i = 0; i < location.cgi_extension.size(); ++i )
+		if ( location.cgi_extension[ i ] == ".*" ) { // ".cgi" accept any kind of cgi
+			return true;
+		}
+
+	// Extract file extension from the request path
+	std::string path = request.path;
+	size_t dotPos = path.find_last_of( '.' );
+
+	if ( dotPos == std::string::npos ) {
+		return false; // No extension found
+	}
+
+	std::string extension = path.substr( dotPos ); // Includes the dot (.py, .cgi, etc.)
+
+	// Check if the extension is in the location's CGI extensions
+	for ( size_t i = 0; i < location.cgi_extension.size(); ++i ) {
+		if ( location.cgi_extension[ i ] == extension ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerConfig &server ) {
 
 	http::Request &request = client.getRequest();
@@ -38,11 +65,16 @@ VALIDATION_STATUS http::Router::validateRequest( Client &client, const ServerCon
 
 		std::vector< std::string > methods = resolveMethods( request.matchResult.location, request.matchResult.file );
 
-		if ( !validateRequestMethod( request, methods ) )
+		if ( !validateRequestMethod( request, methods ) ) {
 			return VALID_METHOD_NOT_ALLOWED;
+		}
 
-		if ( !request.matchResult.location->cgi_extension.empty() )
-			return VALID_IS_CGI;
+		if ( !request.matchResult.location->cgi_extension.empty() ) {
+			if ( isCgirequest( request, *request.matchResult.location ) )
+				return VALID_IS_CGI;
+			else
+				return VALID_FORBIDDEN;
+		}
 
 		return VALID_OK;
 	}
