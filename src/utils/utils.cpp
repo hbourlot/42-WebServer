@@ -201,9 +201,7 @@ RouteContext makeContext( const MatchResult &match, const ServerConfig &server, 
 		ctx.root = loc.root;
 		ctx.index = loc.index;
 		ctx.autoIndex = loc.autoIndex;
-		std::cout << "loc.max_body_size: " << loc.max_body_size << std::endl;
 		ctx.max_body_size = loc.max_body_size;
-		// ctx.max_body_size = 100; //! Brute code for the script that works
 		if ( !loc.cgi_pass.empty() )
 			ctx.cgi_pass = loc.cgi_pass;
 		else
