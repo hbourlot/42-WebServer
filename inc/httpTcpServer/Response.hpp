@@ -31,14 +31,14 @@ namespace http {
 
 	  public:
 		Response();
-		Response( const http::Request &request );
+		Response( const http::Request& request );
 
-		Response &operator=( const Response &other );
+		Response& operator=( const Response& other );
 		~Response();
 
 		// function Member
-		std::string buildResponseString();
-		const std::map< std::string, std::string > &getHeaders() const;
+		std::string buildResponseString( void );
+		const std::map< std::string, std::string >& getHeaders() const;
 
 		bool shouldCloseConnection();
 
@@ -46,15 +46,15 @@ namespace http {
 		void setDefaultHeaders();
 		void addToHeader( std::string key, std::string value );
 
-		std::string getContentType( const std::string &filePath );
-		std::string readFileContent( const std::string &filePath );
+		std::string getContentType( const std::string& filePath );
+		std::string readFileContent( const std::string& filePath );
 
-		void buildCgiResponse( const HttpStatusCode &status, const std::string &body, const ServerConfig &server );
-		void buildResponse( const HttpStatusCode &status, const std::string &body );
-		void buildErrorResponse( const HttpStatusCode &status, const ServerConfig &server );
-		void buildRedirect( const HttpStatusCode &status, const std::string &url );
-		void buildFileResponse( const HttpStatusCode &status, const std::string &filePath, const ServerConfig &server );
-		void buildRangeResponse( const std::string &filePath, const ServerConfig &server, struct ::stat &st );
+		void buildCgiResponse( const HttpStatusCode& status, const std::string& body, const ServerConfig& server );
+		void buildResponse( const HttpStatusCode& status, const std::string& body );
+		void buildErrorResponse( const HttpStatusCode& status, const ServerConfig& server );
+		void buildRedirect( const HttpStatusCode& status, const std::string& url );
+		void buildFileResponse( const HttpStatusCode& status, const std::string& filePath, const ServerConfig& server );
+		void buildRangeResponse( const std::string& filePath, const ServerConfig& server, struct ::stat& st );
 	};
 
 } // namespace http

@@ -42,8 +42,9 @@ std::map< int, Client * > &ClientManager::getClients() {
 }
 
 void ClientManager::resetClientState( int fd ) {
-	if ( !hasClient( fd ) )
+	if ( !hasClient( fd ) ) {
 		return;
+	}
 	Client *client = _clients[ fd ];
 	client->setState( RESET );
 	client->clearBuffers();

@@ -145,6 +145,7 @@ static bool parseRequestBody( http::Request &req, const std::string &readBuffer 
 }
 
 bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerConfig &serverInfo ) {
+	
 	std::string &readBuffer = client.getReadBuffer();
 	http::Request &clientRequest = client.getRequest();
 
