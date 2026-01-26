@@ -120,7 +120,7 @@ bool UploadManager::parseMultipart( const RouteContext &ctx, Client &client, con
 		Logs::log( LOGS_ERROR, "Internal Server Error: File not saved." );
 		return ( false );
 	}
-	std::string msg = "File '" + filename + "' received";
-	client.getResponse().buildResponse( HTTP_OK, msg );
+	// std::string msg = "File '" + filename + "' received";
+	client.getResponse().buildResponse( HTTP_OK, createUploadBody() );
 	return ( true );
 }
