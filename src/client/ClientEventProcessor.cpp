@@ -1,11 +1,11 @@
 #include "Client/ClientEventProcessor.hpp"
 // #include "Http/Response.hpp"
 
-http::ClientEventProcessor::ClientEventProcessor( TcpServer &server ) : _server( server ){};
+http::ClientEventProcessor::ClientEventProcessor( TcpServer& server ) : _server( server ) {};
 
-http::ClientEventProcessor::~ClientEventProcessor(){};
+http::ClientEventProcessor::~ClientEventProcessor() {};
 
-static void discardingBody( Client &client, pollfd &pfd ) {
+static void discardingBody( Client& client, pollfd& pfd ) {
 	size_t available = client.getReadBuffer().size();
 
 	if ( available >= client._bytesToDiscard ) {
@@ -25,11 +25,7 @@ static void discardingBody( Client &client, pollfd &pfd ) {
 	}
 }
 
-
-
-void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
-
-
+void http::ClientEventProcessor::processRead( pollfd& pfd, Client* client ) {
 
 	if ( client->getCgiPid() != -1 ) {
 		// exit( 0 );
@@ -45,14 +41,13 @@ void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client ) {
 		return;
 	}
 
-	
-	if (!parseRequestData( *client, _server._serverInfo ) ) {
+	if ( !parseRequestData( *client, _server._serverInfo ) ) {
 		return;
 	}
 	pfd.events = POLLOUT; // Setting to POLL OUT
 };
 
-void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int index ) {
+void http::ClientEventProcessor::processWrite( pollfd& pfd, Client* client, int index ) {
 
 	if ( client->getCgiPid() == -1 && client->getState() != CGI_COMPLETED ) {
 		if ( !processRequest( *client ) )
@@ -64,17 +59,17 @@ void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int 
 	}
 };
 
-bool http::ClientEventProcessor::readFromSocket( Client &client ) {
-	
+bool http::ClientEventProcessor::readFromSocket( Client& client ) {
+
 	char buffer[ BUFFER_SIZE ];
 	int fd = client.getFd();
 	int readCount = 0;
 	bool dataReceived = false;
-	
-	std::memset(buffer, 0, BUFFER_SIZE);
+
+	std::memset( buffer, 0, BUFFER_SIZE );
 
 	// Read up to MAX_READS_PER_EVENT times per poll event
-	while ( readCount < MAX_READS_PER_EVENT) {
+	while ( readCount < MAX_READS_PER_EVENT ) {
 		ssize_t bytesReceived = recv( fd, buffer, BUFFER_SIZE - 1, 0 );
 
 		if ( bytesReceived > 0 ) {
@@ -84,9 +79,8 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 			continue; // Try to read more data
 		}
 
-		if (bytesReceived == 0 && readCount == 0 && errno == EWOULDBLOCK)
+		if ( bytesReceived == 0 && readCount == 0 && errno == EWOULDBLOCK )
 			return true;
-
 
 		if ( bytesReceived == 0 && readCount == 0 ) {
 			// Peer closed connection
@@ -106,7 +100,7 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 		return false;
 	}
 
-	if ( dataReceived) {
+	if ( dataReceived ) {
 		client.setState( READ_SUCCESS );
 		return true;
 	}
@@ -119,10 +113,11 @@ void http::ClientEventProcessor::closeConnection( size_t index ) {
 	_server.closeClientConnection( index );
 }
 
-bool http::ClientEventProcessor::processRequest( Client &client ) {
+bool http::ClientEventProcessor::processRequest( Client& client ) {
+	
 	CLIENT_STATE state = client.getState();
 
-	ServerConfig &serverInfo = _server._serverInfo;
+	ServerConfig& serverInfo = _server._serverInfo;
 	// Handle error states first (build error responses)
 	if ( state != PARSE_OK ) {
 		this->buildErrorResponse( client, state );
@@ -133,10 +128,9 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 	if ( this->handleRouteValidation( client, validationStatus ) )
 		return true;
 
-	http::Request &request = client.getRequest();
+	http::Request& request = client.getRequest();
 
 	RouteContext ctx = makeContext( request.matchResult, serverInfo, request, validationStatus );
-	std::cout << validationStatus << std::endl;
 	if ( ctx.isCgi )
 		Router::routeCgiRequest( client, serverInfo, ctx, *this );
 	else
@@ -145,8 +139,8 @@ bool http::ClientEventProcessor::processRequest( Client &client ) {
 	return true;
 }
 
-bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STATE state ) {
-	http::Response &response = client.getResponse();
+bool http::ClientEventProcessor::buildErrorResponse( Client& client, CLIENT_STATE state ) {
+	http::Response& response = client.getResponse();
 
 	switch ( state ) {
 	case READ_ERROR:
@@ -164,9 +158,9 @@ bool http::ClientEventProcessor::buildErrorResponse( Client &client, CLIENT_STAT
 	}
 }
 
-bool http::ClientEventProcessor::handleRouteValidation( Client &client, VALIDATION_STATUS &validationStatus ) {
-	http::Response &response = client.getResponse();
-	ServerConfig &serverInfo = _server._serverInfo;
+bool http::ClientEventProcessor::handleRouteValidation( Client& client, VALIDATION_STATUS& validationStatus ) {
+	http::Response& response = client.getResponse();
+	ServerConfig& serverInfo = _server._serverInfo;
 	validationStatus = Router::validateRequest( client, _server._serverInfo );
 
 	switch ( validationStatus ) {
@@ -196,54 +190,38 @@ bool http::ClientEventProcessor::handleRouteValidation( Client &client, VALIDATI
 }
 
 void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
-	std::map< int, http::Cgi * >::iterator it = _server._cgiByFd.find( fd );
+	std::map< int, http::Cgi* >::iterator it = _server._cgiByFd.find( fd );
 
 	if ( it != _server._cgiByFd.end() ) {
 
-		http::Cgi *cgi = it->second;
-		Client *client = cgi->getClient();
+		http::Cgi* cgi = it->second;
+		Client* client = cgi->getClient();
 
 		if ( !client ) {
 			cleanupCgi( cgi );
 			return;
 		}
 
-		if ( _server._fds[ index ].revents & POLLOUT ) {
-			cgi->writeToCgi();
-			if ( cgi->getBodyBytesWritten() >= cgi->getRequest().body.size() ) {
-				close( cgi->getInputPipe()[ 1 ] );
-				_server._fds.erase( _server._fds.begin() + index );
-				_server._cgiByFd.erase( fd );
+		if ( _server._fds[ index ].revents & POLLIN ) {
+			int r = readCgiPipeAndBuildResponse( cgi, _server._fds[ index ] );
+			if ( r == 1 ) { // Still data to read; keep polling
+				return;
 			}
-			return;
+			if ( r == -1 ) { // Read failed; clean up this CGI
+				_server._fds[ index ].fd = -1;
+				cleanupCgi( cgi );
+				return;
+			}
+			// r == 0 -> drained chunk; continue to finish check
 		}
 
 		if ( hasCgiFinished( cgi ) ) {
-
-			// Case finished properly and has data to read from CGI
-			if ( hasCgiSuccessfullyFinished( cgi ) && _server._fds[ index ].revents & POLLIN ) {
-
-				switch ( readCgiPipeAndBuildResponse( cgi, _server._fds[ index ] ) ) {
-				case 1: // There's still data to read
-					return;
-				case -1: // Failed the read function
-					return;
-				case 0: // Response built
-					break;
-				default:
-					return;
-				}
-
-			} else if ( !hasCgiSuccessfullyFinished( cgi ) ) { // Cgi has failed the execution
-				std::cout << "NOT HERE\n";
-				client->getResponse().buildErrorResponse( HTTP_SERVER_ERR, _server._serverInfo );
-			}
-
+			// Build final response from accumulated buffer
+			client->getResponse().buildCgiResponse( HTTP_OK, cgi->getOutputBuffer(), _server._serverInfo );
 			_server._fds[ index ].fd = -1;
 			cleanupCgi( cgi );
 			client->setState( CGI_COMPLETED );
-		} else {
-
+			return;
 		}
 
 		return;
@@ -256,7 +234,7 @@ void http::ClientEventProcessor::processClientEvents( int index ) {
 
 	int status = 0;
 	int fd = _server._fds[ index ].fd;
-	Client *client = _server._clientManager.getClient( fd );
+	Client* client = _server._clientManager.getClient( fd );
 
 	// Check if this fd is a CGI pipe instead of a client socket
 	if ( !client ) {
@@ -274,18 +252,17 @@ void http::ClientEventProcessor::processClientEvents( int index ) {
 	}
 }
 
-bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
+bool http::ClientEventProcessor::handleResponse( pollfd& pfd, Client& client ) {
 	SocketFD clientFd = client.getFd();
 
 	// Build response if write buffer is emptysendResponse
 	if ( client.getWriteBuffer().empty() )
 		client.appendToWriteBuffer( client.getResponse().buildResponseString() );
 
-	std::string &writeBuffer = client.getWriteBuffer();
+	std::string& writeBuffer = client.getWriteBuffer();
 
 	if ( writeBuffer.empty() )
 		return 0;
-	// std::cout << writeBuffer << std::endl;
 	if ( sendResponse( pfd, client ) ) {
 		return ( 1 );
 	}
@@ -314,12 +291,12 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 	return 0; // Continue sending in next poll event
 }
 
-bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
+bool http::ClientEventProcessor::sendResponse( pollfd& pfd, Client& client ) {
 	SocketFD clientFd = client.getFd();
 
 	const int MAX_SENDS_PER_EVENT = 3;
 	int sendCount = 0;
-	std::string &writeBuffer = client.getWriteBuffer();
+	std::string& writeBuffer = client.getWriteBuffer();
 
 	// Send up to MAX_SENDS_PER_EVENT times per poll event
 	while ( sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty() ) {

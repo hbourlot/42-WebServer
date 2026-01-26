@@ -9,15 +9,14 @@
 #include <sys/poll.h>
 #include <vector>
 
-http::Cgi::Cgi( const http::Request &request, const std::string &scriptPath, const ServerConfig &serverInfo,
-                Client *client )
+http::Cgi::Cgi( const http::Request& request, const std::string& scriptPath, const ServerConfig& serverInfo,
+                Client* client )
     : _status(), _clientFD(), _request( request ), _response( Response( request ) ), _serverInfo( serverInfo ),
       _clientAddress(), _bytesReceived(), _bodyBytesWritten( 0 ), _body(), _client( client ), _envp(), _argv(),
       _envStrings() {
 
 	_filePath = scriptPath;
 
-	std::cout << "_filePath: " << _filePath << std::endl;
 	buildEnvStrings();
 }
 
@@ -31,6 +30,8 @@ http::Cgi::~Cgi() {
 		close( _outputPipe[ 0 ] );
 	if ( _outputPipe[ 1 ] >= 0 )
 		close( _outputPipe[ 1 ] );
+
+	remove( _bodyFileName.c_str() );
 }
 
 std::string http::Cgi::getFilePath() const {
@@ -57,32 +58,23 @@ pid_t http::Cgi::getPid() const {
 	return _pid;
 }
 
-const int *http::Cgi::getInputPipe() const {
+const int* http::Cgi::getInputPipe() const {
 	return _inputPipe;
 }
 
 int http::Cgi::getStatus() const {
 	return _status;
 }
-int &http::Cgi::getStatus() {
+int& http::Cgi::getStatus() {
 	return _status;
 }
 
-const int *http::Cgi::getOutputPipe() const {
+const int* http::Cgi::getOutputPipe() const {
 	return _outputPipe;
 }
 
-Client *http::Cgi::getClient() const {
+Client* http::Cgi::getClient() const {
 	return _client;
-}
-
-void http::Cgi::registerPollFd( std::vector< pollfd > &fds ) const {
-	pollfd pfd;
-
-	pfd.fd = _outputPipe[ 0 ];
-	pfd.events = POLLIN;
-	pfd.revents = 0;
-	fds.push_back( pfd );
 }
 
 bool http::Cgi::hasDataToRead() {

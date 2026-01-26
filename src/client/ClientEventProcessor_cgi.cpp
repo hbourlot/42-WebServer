@@ -3,133 +3,105 @@
 #include "utils.hpp"
 #include <unistd.h>
 
-void http::ClientEventProcessor::registerCgi(http::Cgi *cgi)
-{
-	int outputFd = cgi->getOutputPipe()[0];
+void http::ClientEventProcessor::registerCgi( http::Cgi* cgi ) {
+	int outputFd = cgi->getOutputPipe()[ 0 ];
 
-	_server._cgiByFd[outputFd] = cgi; // Add CGI to map
+	_server._cgiByFd[ outputFd ] = cgi; // Add CGI to map
 
-	// Handle Input Pipe (Writing to CGI)
-	if (!cgi->getRequest().body.empty())
-	{
-		int inputFd = cgi->getInputPipe()[1];
-		_server._cgiByFd[inputFd] = cgi;
+	// Handling Output Pipe (Reading from CGI)
+	pollfd pfd;
 
-		pollfd pfd;
-		pfd.fd = inputFd;
-		pfd.events = POLLOUT;
-		pfd.revents = 0;
-		_server._fds.push_back(pfd); // Add to polling
-	}
-	else
-	{
-		close(cgi->getInputPipe()[1]); // No body, close write end immediately
-	}
+	pfd.fd = cgi->getOutputPipe()[ 0 ];
+	pfd.events = POLLIN;
+	pfd.revents = 0;
+	_server._fds.push_back( pfd );
 
-	std::string msg("Registered CGI for PID ");
-	msg += ft_to_string(cgi->getPid());
+	std::string msg( "Registered CGI for PID " );
+	msg += ft_to_string( cgi->getPid() );
 	msg += " with output fd ";
-	msg += ft_to_string(outputFd);
-	Logs::log(LOGS_INFO, msg);
+	msg += ft_to_string( outputFd );
+	Logs::log( LOGS_INFO, msg );
 }
 
-void http::ClientEventProcessor::cleanupCgi(http::Cgi *cgi)
-{
-	int outputFd = cgi->getOutputPipe()[0];
-	Client *client = cgi->getClient();
+void http::ClientEventProcessor::cleanupCgi( http::Cgi* cgi ) {
+	int outputFd = cgi->getOutputPipe()[ 0 ];
+	Client* client = cgi->getClient();
 
 	cgi->killProcess(); // Kill CGI process if still running
 
 	// Remove CGI pipe fd from poll array BEFORE deleting Cgi (which closes pipes)
-	for (size_t i = 0; i < _server._fds.size(); ++i)
-	{
-		if (_server._fds[i].fd == outputFd)
-		{
-			_server._fds.erase(_server._fds.begin() + i);
+	for ( size_t i = 0; i < _server._fds.size(); ++i ) {
+		if ( _server._fds[ i ].fd == outputFd ) {
+			_server._fds.erase( _server._fds.begin() + i );
 			break;
 		}
 	}
 
 	// Remove from map
-	_server._cgiByFd.erase(outputFd);
+	_server._cgiByFd.erase( outputFd );
 
 	// Reset client CGI state
-	if (client)
-	{
-		client->setCgiPid(-1);
-		client->setCgiOutputFd(-1);
+	if ( client ) {
+		client->setCgiPid( -1 );
+		client->setCgiOutputFd( -1 );
 	}
 
 	// Delete Cgi object (destructor closes pipes)
 	delete cgi;
 
-	std::string msg("Cleaned up CGI with output fd ");
-	msg += ft_to_string(outputFd);
-	Logs::log(LOGS_INFO, msg);
+	std::string msg( "Cleaned up CGI with output fd " );
+	msg += ft_to_string( outputFd );
+	Logs::log( LOGS_INFO, msg );
 }
 
-bool http::ClientEventProcessor::hasCgiFinished(Cgi *cgi) const
-{
+bool http::ClientEventProcessor::hasCgiFinished( Cgi* cgi ) const {
 
-	pid_t result = waitpid(cgi->getPid(), &cgi->getStatus(), WNOHANG);
-	if (result > 0)
+	pid_t result = waitpid( cgi->getPid(), &cgi->getStatus(), WNOHANG );
+	if ( result > 0 )
 		return true;
 	return false;
 };
 
-bool http::ClientEventProcessor::hasCgiSuccessfullyFinished(Cgi *cgi) const
-{
-	int &status = cgi->getStatus();
+bool http::ClientEventProcessor::hasCgiSuccessfullyFinished( Cgi* cgi ) const {
+	int& status = cgi->getStatus();
 
-	if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
+	if ( WIFEXITED( status ) && WEXITSTATUS( status ) == 0 )
 		return true;
 	return false;
 }
 
-int http::ClientEventProcessor::readCgiPipeAndBuildResponse(http::Cgi *cgi, pollfd &pfd)
-{
+int http::ClientEventProcessor::readCgiPipeAndBuildResponse( http::Cgi* cgi, pollfd& pfd ) {
 
-	Client *client = cgi->getClient();
+	Client* client = cgi->getClient();
 
-	// Read all available data from CGI pipe (non-blocking)
-	char buffer[BUFFER_SIZE];
-	std::string cgiOutput;
+	// Read available data from CGI pipe (non-blocking), up to per-event cap
+	char buffer[ BUFFER_SIZE ];
 	int readCount = 0;
 
-	while (readCount < (MAX_READS_PER_EVENT))
-	{
-		ssize_t bytesRead = read(pfd.fd, buffer, BUFFER_SIZE);
+	while ( readCount < MAX_READS_PER_EVENT ) {
+		ssize_t bytesRead = read( pfd.fd, buffer, BUFFER_SIZE );
 
-		if (bytesRead > 0)
-		{
-			cgiOutput.append(buffer, bytesRead);
+		if ( bytesRead > 0 ) {
+			cgi->getOutputBuffer().append( buffer, bytesRead );
 			readCount++;
-		}
-		else if (bytesRead == 0)
-		{
+		} else if ( bytesRead == 0 ) {
 			// EOF - finished reading
 			break;
-		}
-		else if (errno == EAGAIN || errno == EWOULDBLOCK)
-		{
+		} else if ( errno == EAGAIN || errno == EWOULDBLOCK ) {
 			// No more data available right now
 			break;
-		}
-		else
-		{
+		} else {
 			// Read error
-			std::cerr << "Error reading from CGI pipe: " << strerror(errno) << std::endl;
-			client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server._serverInfo);
+			std::cerr << "Error reading from CGI pipe: " << strerror( errno ) << std::endl;
+			client->getResponse().buildErrorResponse( HTTP_SERVER_ERR, _server._serverInfo );
 			pfd.fd = -1;
-			cleanupCgi(cgi);
+			cleanupCgi( cgi );
 			client->setState( CGI_COMPLETED );
 			return -1;
 		}
 	}
-	if (pfd.revents & POLLIN && readCount == MAX_READS_PER_EVENT)
+	if ( readCount >= MAX_READS_PER_EVENT )
 		return 1;
-	
-	client->getResponse().buildCgiResponse(HTTP_OK, cgiOutput, _server._serverInfo);
-	
+
 	return 0;
 }

@@ -40,7 +40,7 @@ namespace http {
 
 		~Cgi();
 
-		void executeCgi( std::vector< pollfd >& fds );
+		void executeCgi( void );
 		Response getResponse() const;
 		http::Request getRequest() const;
 		std::string getFilePath() const;
@@ -54,10 +54,11 @@ namespace http {
 		const int* getOutputPipe() const;
 		void killProcess();
 		Client* getClient() const;
-		void registerPollFd( std::vector< pollfd >& fds ) const;
 		bool hasDataToRead();
 		void writeToCgi();
 		size_t getBodyBytesWritten() const;
+
+		std::string& getOutputBuffer() { return _outputBuffer; };
 
 	  private:
 		int _status;
@@ -71,10 +72,14 @@ namespace http {
 		size_t _bodyBytesWritten;
 		std::string _body;
 		Client* _client; // Back-reference to client
+		std::string _bodyFileName;
 
 		std::vector< char* > _envp;
 		std::vector< char* > _argv;
 		std::vector< std::string > _envStrings;
+
+		// Accumulate CGI stdout across poll cycles
+		std::string _outputBuffer;
 
 		// Pipe handling
 		int _pipefd[ 2 ];

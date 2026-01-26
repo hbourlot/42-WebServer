@@ -112,7 +112,6 @@ static bool parseRequestBody( http::Request &req, const std::string &readBuffer,
 			bpos = lineEnd + 2;
 
 			if ( chunkSize == 0 ) {
-				std::cout << "chunkSize: " << chunkSize << std::endl;
 				if ( bufferSize < bpos + 2 )
 					return false;
 				if ( readBuffer.substr( bpos, 2 ) != "\r\n" )

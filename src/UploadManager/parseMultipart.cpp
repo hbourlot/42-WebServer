@@ -65,7 +65,6 @@ static bool saveFile( const std::string &filename, const std::string &content, c
 
 	std::string savePath = ctx.uploadStore + '/' + author + "-" + filename;
 
-	std::cout << "savePath: " << savePath << std::endl;
 
 	std::ofstream newfile( savePath.c_str(), std::ios::binary );
 	if ( !newfile.is_open() )

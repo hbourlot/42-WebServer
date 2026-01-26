@@ -68,7 +68,7 @@ void http::Router::launchCgi( Client &client, const ServerConfig &server, const 
 
 	// Create and execute CGI
 	http::Cgi *cgi = new http::Cgi( request, ctx.cgi_pass, server, &client );
-	cgi->executeCgi( client.getServer()._fds );
+	cgi->executeCgi();
 
 	// Store CGI info in client
 	client.setCgiPid( cgi->getPid() );
@@ -117,10 +117,13 @@ void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, c
 	std::string ContentType;
 
 	if ( ctx.uploadEnable ) {
+		std::cout << "ctx.uploadEnable\n";
 		UploadManager::handleUpload( ctx, client, serverInfo );
 	} else if ( !ctx.uploadEnable ) {
+		std::cout << "!ctx.uploadEnable\n";
 		client.getResponse().buildErrorResponse( HTTP_FORBID, serverInfo );
 	} else {
+		std::cout << "else case\n";
 		client.getResponse().buildErrorResponse( HTTP_NOT_FOUND, serverInfo );
 	}
 }

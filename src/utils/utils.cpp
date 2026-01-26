@@ -251,12 +251,6 @@ RouteContext makeContext( const MatchResult &match, const ServerConfig &server, 
 
 // 	i = 1; // saltar o '/'
 
-<<<<<<< HEAD
-	// Send the "SET" info to the "VECTOR"
-	convertSetToVector( noDupMethods, mergedMethods );
-	return mergedMethods;
-}
-=======
 // 	while ( i < path.length() ) {
 // 		size_t next = path.find( '/', i );
 
@@ -336,4 +330,3 @@ RouteContext makeContext( const MatchResult &match, const ServerConfig &server, 
 // 		return "application/pdf";
 // 	return "application/octet-stream";
 // }
->>>>>>> 8c37ee677577c1d2196763d0d08532f497dfbebc
