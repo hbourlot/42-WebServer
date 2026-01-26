@@ -149,6 +149,11 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 				
 				case CLIENT_MAX_BDY:
 					server.max_body_size = getMaxRequestBody( noSpaceLine);
+					if (server.max_body_size == -1)
+					{
+						std::cerr << "Invalid sufix of max body size" << std::endl;
+						return false;
+					}
 					break;
 				
 				case ERROR_PAGE:

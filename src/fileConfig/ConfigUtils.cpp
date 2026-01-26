@@ -23,12 +23,12 @@ int getMaxRequestBody(std::string &value) {
 	char last = resultStr[resultStr.size() - 1];
     if (std::isalpha(last))
     {
-        if (last == 'K')
-            multiplier = 1024;
-        else if (last == 'M')
-            multiplier = 1024 * 1024;
-        else
-            throw std::runtime_error("invalid size suffix");
+		if (last == 'K')
+			multiplier = 1024;
+		else if (last == 'M')
+			multiplier = 1024 * 1024;
+		else
+			return -1;
     }
 	
 	
@@ -44,7 +44,7 @@ std::string getInfo( std::string &noSpaceLine ) {
 	int i;
 
 	for ( i = noSpaceLine.find( ' ' ); noSpaceLine[ i ] == ' ';
-	      i++ ) // This will remove extra spaces after attribute ex: "port      8080"
+	      i++ ) // This will remove extra spaces after attribute ex: "port 8080"
 		continue;
 		
 	if ( noSpaceLine.find( ';' ) == std::string::npos ) // If don't find the ';' throw an error

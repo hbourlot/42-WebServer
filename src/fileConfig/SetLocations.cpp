@@ -12,12 +12,14 @@
 #define AUTOINDEX 14
 #define INDEX 15
 #define CGIPASS 16
+#define CLIENT_MAX_BDY 17
 
 class SetFile;
 
 Location::Location() {
 	uploadEnable = false;
 	autoIndex = false;
+	max_body_size = 0;
 	// String are automatically initialized;
 }
 
@@ -76,6 +78,8 @@ int getTypeLocation( std::string &trimedLine ) { // Function to check the inform
 		return INDEX;
 	if ( trimedLine == "cgi_pass")
 		return CGIPASS;
+	if ( trimedLine == "client_max_body_size")
+		return CLIENT_MAX_BDY;
 	return 100;
 }
 
@@ -215,6 +219,16 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 		case CGIPASS:
 			location.cgi_pass = getInfo( noSpaceLine );
 			break;
+		
+		case CLIENT_MAX_BDY:
+					std::cout << "A location foi para o max body size" << std::endl;
+				location.max_body_size = getMaxRequestBody( noSpaceLine);
+				if (location.max_body_size == -1)
+				{
+					std::cerr << "Invalid sufix of max body size" << std::endl;
+					return false;
+				}
+		break;
 
 		default:
 			break;
