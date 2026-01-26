@@ -149,15 +149,16 @@ void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, c
 	std::string ContentType;
 
 	if ( ctx.uploadEnable ) {
-		std::cout << "ctx.uploadEnable\n";
 		UploadManager::handleUpload( ctx, client, serverInfo );
-	} else if ( !ctx.uploadEnable ) {
-		std::cout << "!ctx.uploadEnable\n";
-		client.getResponse().buildErrorResponse( HTTP_FORBID, serverInfo );
-	} else {
-		std::cout << "else case\n";
-		client.getResponse().buildErrorResponse( HTTP_NOT_FOUND, serverInfo );
+		return;
 	}
+	std::cout << ctx.max_body_size << std::endl;
+	if ( client.getRequest().body.size() > ctx.max_body_size ) {
+		client.getResponse().buildErrorResponse( HTTP_PAYLOAD, serverInfo );
+		return;
+	}
+
+	client.getResponse().buildResponse( HTTP_OK, "" );
 }
 
 void http::Router::handleDelete( Client &client, const ServerConfig &server, const RouteContext &ctx ) {
