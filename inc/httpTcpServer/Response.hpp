@@ -14,7 +14,7 @@
 #include <unistd.h>
 #include <vector>
 
-#define CHUNK_SIZE 8192
+#define RANGE_SIZE 8192
 
 namespace http {
 	struct Request;

@@ -94,58 +94,88 @@ static void parseRequestHeaders( http::Request &req, const std::string &readBuff
 	}
 }
 
-static bool parseRequestBody( http::Request &req, const std::string &readBuffer ) {
-	size_t bpos = 0;
-	std::string decoded;
-	const size_t bufferSize = readBuffer.size();
+static bool parseContentLengthBody( Client &client ) {
+	http::Request &req = client.getRequest();
+	std::string &buffer = client.getReadBuffer();
 
-	if ( req.headers.count( "Transfer-Encoding" ) && req.headers[ "Transfer-Encoding" ] == "chunked" ) {
+	size_t len = strtoul( req.headers[ "Content-Length" ].c_str(), NULL, 10 );
+	if ( len > buffer.size() )
+		return false;
+	req.body.assign( buffer, 0, len );
+	buffer.erase( 0, len );
+	return true;
+}
 
-		while ( true ) {
-			size_t lineEnd = readBuffer.find( "\r\n", bpos );
+static bool parseChunkBody( Client &client ) {
+	std::string &buffer = client.getReadBuffer();
+	ChunkParser &chunk = client.getChunkParser();
+	http::Request &request = client.getRequest();
+	while ( !buffer.empty() ) {
+		switch ( chunk.state ) {
+		case CHUNK_SIZE: {
+			size_t lineEnd = buffer.find( "\r\n" );
 			if ( lineEnd == std::string::npos )
 				return false;
 
-			std::string sizeStr = readBuffer.substr( bpos, lineEnd - bpos );
-			size_t chunkSize = strtoul( sizeStr.c_str(), NULL, 16 );
-
-			bpos = lineEnd + 2;
-
-			if ( chunkSize == 0 ) {
-				if ( bufferSize < bpos + 2 )
-					return false;
-				if ( readBuffer.substr( bpos, 2 ) != "\r\n" )
-					return false;
-				bpos += 2;
-				break;
+			std::string sizeStr = buffer.substr( 0, lineEnd );
+			chunk.currentChunkSize = strtoul( sizeStr.c_str(), NULL, 16 );
+			buffer.erase( 0, lineEnd + 2 );
+			if ( chunk.currentChunkSize == 0 )
+				chunk.state = CHUNK_DONE;
+			else {
+				chunk.state = CHUNK_DATA;
+				chunk.bytesReadInChunk = 0;
 			}
-
-			if ( bufferSize < bpos + chunkSize + 2 )
-				return false;
-
-			decoded.append( readBuffer, bpos, chunkSize );
-
-			if ( readBuffer.substr( bpos + chunkSize, 2 ) != "\r\n" )
-				return false;
-
-			bpos += chunkSize + 2;
+			break;
 		}
+		case CHUNK_DATA: {
+			size_t remaining = chunk.currentChunkSize - chunk.bytesReadInChunk;
+			size_t canRead = std::min( remaining, buffer.size() );
 
-		req.body = decoded;
-	} else if ( req.headers.count( "Content-Length" ) ) {
-		size_t len = strtoul( req.headers[ "Content-Length" ].c_str(), NULL, 10 );
-		if ( len > bufferSize )
-			return false;
-		req.body.assign( readBuffer, 0, len );
-	} else {
-		req.body.clear();
+			request.body.append( buffer, 0, canRead );
+			chunk.bytesReadInChunk += canRead;
+			buffer.erase( 0, canRead );
+			if ( chunk.bytesReadInChunk == chunk.currentChunkSize )
+				chunk.state = CHUNK_CRLF;
+			else
+				return false;
+			break;
+		}
+		case CHUNK_CRLF: {
+			if ( buffer.size() < 2 )
+				return false;
+			buffer.erase( 0, 2 );
+			chunk.state = CHUNK_SIZE;
+			break;
+		}
+		case CHUNK_DONE: {
+			if ( buffer.size() < 2 )
+				return false;
+			buffer.erase( 0, 2 );
+			return ( true );
+		}
+		}
 	}
+	return false;
+}
+
+static bool parseRequestBody( Client &client ) {
+
+	http::Request &req = client.getRequest();
+
+	if ( req.headers.count( "Transfer-Encoding" ) && req.headers[ "Transfer-Encoding" ] == "chunked" )
+		return parseChunkBody( client );
+
+	if ( req.headers.count( "Content-Length" ) )
+		return ( parseContentLengthBody( client ) );
+
+	req.body.clear();
 
 	return true;
 }
 
 bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerConfig &serverInfo ) {
-	
+
 	std::string &readBuffer = client.getReadBuffer();
 	http::Request &clientRequest = client.getRequest();
 
@@ -181,7 +211,7 @@ bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerC
 
 	if ( client.getRequestPhase() == BODY ) {
 
-		if ( !parseRequestBody( clientRequest, readBuffer ) ) {
+		if ( !parseRequestBody( client ) ) {
 			client.setState( PARSE_INCOMPLETE );
 			return false;
 		}
@@ -194,6 +224,9 @@ bool http::ClientEventProcessor::parseRequestData( Client &client, const ServerC
 
 		client.getResponse() = Response( clientRequest );
 		ensureSessionId( client );
+
+		client.resetChunkParser();
+
 		Logs::log( LOGS_INFO, "Client: " + ft_to_string( client.getFd() ) + " Made a Request" );
 		client.setState( PARSE_OK );
 		client.setRequestPhase( START );

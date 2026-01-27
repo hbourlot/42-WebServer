@@ -6,6 +6,17 @@ namespace http {
 	class TcpServer;
 };
 
+enum ChunkState { CHUNK_SIZE, CHUNK_DATA, CHUNK_CRLF, CHUNK_DONE };
+
+struct ChunkParser {
+	ChunkState state;
+	size_t currentChunkSize;
+	size_t bytesReadInChunk;
+
+	ChunkParser() : state( CHUNK_SIZE ), currentChunkSize( 0 ), bytesReadInChunk( 0 ) {
+	}
+};
+
 enum CLIENT_STATE {
 	RESET,
 	READ_SUCCESS = 1,
@@ -82,6 +93,13 @@ class Client {
 	REQUEST_PHASE getRequestPhase();
 	void setRequestPhase( REQUEST_PHASE requestPhase );
 
+	ChunkParser &getChunkParser() {
+		return _chunk;
+	}
+	void resetChunkParser() {
+		_chunk = ChunkParser();
+	}
+
   private:
 	http::TcpServer &_server;
 
@@ -106,6 +124,8 @@ class Client {
 	bool _discardingBody;
 
 	REQUEST_PHASE _requestPhase;
+
+	ChunkParser _chunk;
 };
 
 void ensureSessionId( Client &client );
