@@ -1,6 +1,6 @@
 #include "httpTcpServer/Cgi.hpp"
 
-void printEnvStrings( std::vector< std::string >& _envStrings ) {
+void printEnvStrings( std::vector< std::string > &_envStrings ) {
 	std::cerr << "ENVSTRINGS:" << std::endl;
 	for ( size_t i = 0; i < _envStrings.size(); ++i ) {
 		std::cerr << "  [" << i << "]: " << _envStrings[ i ] << std::endl;
@@ -8,7 +8,7 @@ void printEnvStrings( std::vector< std::string >& _envStrings ) {
 	std::cerr << "END ENVSTRINGS" << std::endl;
 }
 
-void debugCgiExec( const char* filePath, char* const argv[], char* const envp[] ) {
+void debugCgiExec( const char *filePath, char *const argv[], char *const envp[] ) {
 	std::cerr << "CGI EXEC DEBUG" << std::endl;
 	std::cerr << "File path: " << ( filePath ? filePath : "NULL" ) << std::endl;
 
@@ -33,14 +33,15 @@ void http::Cgi::executeCgi() {
 
 	pid_t pid;
 
-	_bodyFileName = _filePath + "_body.txt";
+	_bodyFileName = _filePath + "_" + _client->getSessionId() + "_body.txt";
+	std::cout <<"_bodyFileName: "<< _bodyFileName << std::endl;
 	_inputPipe[ 1 ] = open( _bodyFileName.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644 );
 	if ( _inputPipe[ 1 ] < 0 )
 		return; // !!! manage error
 
 	_response.buildResponse( HTTP_OK, _request.body );
-	const std::string& response = _response.buildResponseString();
-	write(_inputPipe[1], response.c_str(), response.size());
+	const std::string &response = _response.buildResponseString();
+	write( _inputPipe[ 1 ], response.c_str(), response.size() );
 	close( _inputPipe[ 1 ] );
 
 	_inputPipe[ 0 ] = open( _bodyFileName.c_str(), O_RDONLY );
@@ -57,17 +58,17 @@ void http::Cgi::executeCgi() {
 		this->doDupTwoWay();
 
 		// build argv
-		std::vector< char* > argv;
-		argv.push_back( const_cast< char* >( _filePath.c_str() ) );
+		std::vector< char * > argv;
+		argv.push_back( const_cast< char * >( _filePath.c_str() ) );
 		// argv.push_back( const_cast< char* >( "http://localhost:8001/directory/youpi.bla" ) ); // !
 		argv.push_back( NULL );
 
 		// build envp
-		std::vector< char* > envp;
+		std::vector< char * > envp;
 		this->_envp.clear();
 
 		for ( size_t i = 0; i < _envStrings.size(); ++i ) {
-			this->_envp.push_back( const_cast< char* >( _envStrings[ i ].c_str() ) );
+			this->_envp.push_back( const_cast< char * >( _envStrings[ i ].c_str() ) );
 		}
 		this->_envp.push_back( NULL );
 

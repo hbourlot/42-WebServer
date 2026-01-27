@@ -80,7 +80,7 @@ namespace http {
 	void TcpServer::startListen() {
 		int listen_fd;
 
-		// TODO: Need to implement a properly valid max number of padding 
+		// TODO: Need to implement a properly valid max number of padding
 		// TODO: connections
 		listen_fd = listen( _serverSocket, 10 );
 
@@ -184,12 +184,12 @@ namespace http {
 			msg += ft_to_string( fd );
 
 			Logs::log( LOGS_ERROR, msg );
-			close( fd );
-
+			
 			_clientManager.removeClient( fd );
-
+			
 			_fds.erase( _fds.begin() + index );
 			--index;
+			close( fd );
 		}
 	}
 
@@ -251,11 +251,10 @@ namespace http {
 
 		Logs::log( LOGS_ERROR, msg );
 
-		close( fd );
-
 		_socketAddressMap.erase( fd );
 		_clientManager.removeClient( fd );
 		_fds.erase( _fds.begin() + index );
+		close( fd );
 	}
 
 	void TcpServer::cleanupAllCgis() {

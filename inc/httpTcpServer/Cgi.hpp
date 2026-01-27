@@ -1,18 +1,17 @@
 #pragma once
 #include "Config/Configs.hpp"
+#include "Client/Client.hpp"
 #include "HttpStructs.hpp"
+#include <cstring>
+#include <fcntl.h>
+#include <ios>
+#include <iostream>
 #include <netinet/in.h>
 #include <string>
 #include <sys/poll.h>
 #include <sys/wait.h>
-#include <vector>
-#include <ios>
-#include <iostream>
-#include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
-#include <cstring>
-#include <fcntl.h>
 
 class Client;
 
@@ -36,7 +35,8 @@ namespace http {
 	class Cgi {
 
 	  public:
-		Cgi( const http::Request& request, const std::string& scriptPath, const ServerConfig& serverInfo, Client* client );
+		Cgi( const http::Request &request, const std::string &scriptPath, const ServerConfig &serverInfo,
+		     Client *client );
 
 		~Cgi();
 
@@ -45,20 +45,22 @@ namespace http {
 		http::Request getRequest() const;
 		std::string getFilePath() const;
 		std::string getBody() const;
-		int& getStatus();
+		int &getStatus();
 		int getStatus() const;
 		std::vector< std::string > getArgv() const;
 		int getPollFd() const;
 		pid_t getPid() const;
-		const int* getInputPipe() const;
-		const int* getOutputPipe() const;
+		const int *getInputPipe() const;
+		const int *getOutputPipe() const;
 		void killProcess();
-		Client* getClient() const;
+		Client *getClient() const;
 		bool hasDataToRead();
 		void writeToCgi();
 		size_t getBodyBytesWritten() const;
 
-		std::string& getOutputBuffer() { return _outputBuffer; };
+		std::string &getOutputBuffer() {
+			return _outputBuffer;
+		};
 
 	  private:
 		int _status;
@@ -71,11 +73,11 @@ namespace http {
 		int _bytesReceived;
 		size_t _bodyBytesWritten;
 		std::string _body;
-		Client* _client; // Back-reference to client
+		Client *_client; // Back-reference to client
 		std::string _bodyFileName;
 
-		std::vector< char* > _envp;
-		std::vector< char* > _argv;
+		std::vector< char * > _envp;
+		std::vector< char * > _argv;
 		std::vector< std::string > _envStrings;
 
 		// Accumulate CGI stdout across poll cycles
