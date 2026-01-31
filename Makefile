@@ -34,7 +34,7 @@ LEN             = 0
 
 CLIENT_FUNC		= client clientManager ClientEventProcessor ClientEventProcessor_cgi parseRequestData cookies
 AUTH_FUNC		= loginHandler
-CGI_FUNC		= executeCgi Cgi buildEnvStrings
+CGI_FUNC		= Cgi buildEnvStrings
 UTILS_FUNC		= utils getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations SetFile
 HTTP_FUNC	    = HttpTcpServerLinux Router autoIndex Response Logs
@@ -131,7 +131,7 @@ s:
 
 v:
 	@make -s
-	@$(VALGRIND) ./$(NAME) ./conf_files/good/scriptpage.conf
+	@$(VALGRIND) ./$(NAME) ./conf_files/good/webpage.conf
 
 debug: CXXFLAGS += $(DEBUG_FLAGS) -DDEBUG -g -O0
 debug: re

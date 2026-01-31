@@ -94,6 +94,7 @@ namespace http {
 		void doDupTwoWay();
 		void closeForOneWay();
 		void closeForTwoWay();
+		int prepareCgiInputFile();
 	};
 
 }; // namespace http

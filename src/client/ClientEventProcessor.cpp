@@ -67,11 +67,12 @@ bool http::ClientEventProcessor::readFromSocket( Client &client ) {
 	int readCount = 0;
 	bool dataReceived = false;
 
-	std::memset( buffer, 0, BUFFER_SIZE );
-
+	
 	// Read up to MAX_READS_PER_EVENT times per poll event
 	while ( readCount < MAX_READS_PER_EVENT ) {
-		ssize_t bytesReceived = recv( fd, buffer, BUFFER_SIZE - 1, 0 );
+		
+		std::memset( buffer, 0, BUFFER_SIZE );
+		ssize_t bytesReceived = recv( fd, buffer, BUFFER_SIZE - 1, MSG_NOFLAGS);
 
 		if ( bytesReceived > 0 ) {
 			client.appendToReadBuffer( std::string( buffer, static_cast< size_t >( bytesReceived ) ) );
@@ -222,7 +223,7 @@ void http::ClientEventProcessor::processCgiEvents( int fd, int index ) {
 		if ( hasCgiFinished( cgi ) ) {
 			// Build final response from accumulated buffer
 			client->getResponse().buildCgiResponse( HTTP_OK, cgi->getOutputBuffer(), _server._serverInfo );
-			_server._fds[ index ].fd = -1;
+			// _server._fds[ index ].fd = -1;
 			cleanupCgi( cgi );
 			client->setState( CGI_COMPLETED );
 		} else {

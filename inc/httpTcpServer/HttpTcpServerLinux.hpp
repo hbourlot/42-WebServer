@@ -37,12 +37,17 @@
 #define nullptr NULL
 #endif
 
+// No flag for recv function
+#ifndef MSG_NOFLAGS
+#define MSG_NOFLAGS 0
+#endif
+
 class Cgi;
 
 namespace http {
 
 	class ClientEventProcessor;
-	const int BUFFER_SIZE = 30720;
+	const int BUFFER_SIZE = 65536;
 	const int MAX_READS_PER_EVENT = 3;
 
 	class TcpServer {

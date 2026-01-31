@@ -134,7 +134,9 @@ namespace http {
 
 	int TcpServer::runServer() {
 
-		int timeOut = 3 * 60 * 1000;
+		// int timeOut = 1 * 60 * 1000;
+		int timeOut = 1 * 10 * 1000;
+
 
 		if ( startServer() )
 			return -1;
@@ -203,10 +205,8 @@ namespace http {
 
 				if ( ret < 0 ) {
 					std::cerr << "poll() failed" << std::endl;
-					shutDownServer();
 				} else if ( ret == 0 ) {
 					std::cerr << "poll() timeOut. Closing Server." << std::endl;
-					shutDownServer();
 					return;
 				}
 
@@ -225,12 +225,23 @@ namespace http {
 	}
 
 	void TcpServer::shutDownServer() {
+
+		Logs::log(LOGS_INFO, "===== Shutting down Server =====");
+
 		// Close all CGI pipes before shutting down
 		cleanupAllCgis();
 
 		for ( size_t i = 0; i < _fds.size(); ++i ) {
-			close( _fds[ i ].fd );
+			std::string msg = "Removing from poll vector at idx '" + ft_to_string(i);
+			msg += "' fd='";
+			msg += ft_to_string(_fds[i].fd);
+			msg+= "'";
+			Logs::log(LOGS_INFO, msg);
+		
+			if (_fds[i].fd != -1)
+				close( _fds[ i ].fd );
 			_fds.erase( _fds.begin() + i );
+			--i;
 		}
 	}
 
@@ -259,6 +270,7 @@ namespace http {
 
 	void TcpServer::cleanupAllCgis() {
 		for ( std::map< int, http::Cgi * >::iterator it = _cgiByFd.begin(); it != _cgiByFd.end(); ++it ) {
+			it->second->killProcess();
 			delete it->second; // Cgi destructor closes pipes
 		}
 		_cgiByFd.clear();
