@@ -6,12 +6,13 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2026/01/22 15:16:37 by joralves         ###   ########.fr       */
+/*   Updated: 2026/02/04 23:08:27 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 #include "httpTcpServer/HttpStatus.hpp"
+#include "httpTcpServer/Request.hpp"
 #include "httpTcpServer/Response.hpp"
 #include <map>
 #include <set>
@@ -38,11 +39,6 @@ enum headerKey {
 	SecFetchSite,
 	UpgradeInsecureRequests,
 	UserAgent,
-};
-
-struct MatchResult {
-	const Location *location;
-	const File *file;
 };
 
 struct RouteContext {
@@ -84,25 +80,7 @@ enum VALIDATION_STATUS {
 
 };
 
-namespace http {
-
-	struct Request {
-		std::string method;
-		std::string path;
-		std::string serverProtocol;
-		std::string pathInfo; // For Cgi
-		std::string pathTranslated;
-		std::map< std::string, std::string > headers;
-		std::string body;
-		std::string GetFileName();
-		std::string rawRequestBuffer;
-		std::string queryString;
-		MatchResult matchResult;
-	};
-
-} // namespace http
-
 // For RouteContext
-RouteContext makeContext( const MatchResult &match, const ServerConfig &server, http::Request &request,
-                          VALIDATION_STATUS status );
-std::string getFilePath( const std::string &path, const RouteContext &ctx );
+RouteContext makeContext(const MatchResult &match, const ServerConfig &server, http::Request &request,
+                         VALIDATION_STATUS status);
+std::string getFilePath(const std::string &path, const RouteContext &ctx);

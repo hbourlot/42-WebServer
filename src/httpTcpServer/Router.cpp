@@ -152,7 +152,6 @@ void http::Router::handlePost( Client &client, const ServerConfig &serverInfo, c
 		UploadManager::handleUpload( ctx, client, serverInfo );
 		return;
 	}
-	std::cout << ctx.max_body_size << std::endl;
 	if ( client.getRequest().body.size() > ctx.max_body_size ) {
 		client.getResponse().buildErrorResponse( HTTP_PAYLOAD, serverInfo );
 		return;
