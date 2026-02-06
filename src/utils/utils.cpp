@@ -2,79 +2,79 @@
 
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
-std::string http::Request::GetFileName() {
-	std::string::size_type pos = path.rfind( '/' );
-	if ( pos == std::string::npos )
+std::string http::Request::getFileName() {
+	std::string::size_type pos = path.rfind('/');
+	if (pos == std::string::npos)
 		return path;
-	return path.substr( pos + 1 );
+	return path.substr(pos + 1);
 }
 
-bool isDirectory( const std::string &filePath ) {
+bool isDirectory(const std::string &filePath) {
 	struct stat s;
-	if ( stat( filePath.c_str(), &s ) != 0 )
-		return ( false );
-	return ( S_ISDIR( s.st_mode ) );
+	if (stat(filePath.c_str(), &s) != 0)
+		return (false);
+	return (S_ISDIR(s.st_mode));
 }
 
-std::string getFilePath( const std::string &path, const RouteContext &ctx ) {
-	std::string relativePath = path.substr( ctx.path.length() );
-	std::string filePath = joinPath( ctx.root, relativePath );
-	return ( filePath );
+std::string getFilePath(const std::string &path, const RouteContext &ctx) {
+	std::string relativePath = path.substr(ctx.path.length());
+	std::string filePath = joinPath(ctx.root, relativePath);
+	return (filePath);
 }
 
-std::string joinPath( const std::string &base, const std::string &sub ) {
-	if ( !base.empty() && ( base[ base.length() - 1 ] == '/' || sub[ 0 ] == '/' ) )
-		return ( base + sub );
-	return ( base + "/" + sub );
+std::string joinPath(const std::string &base, const std::string &sub) {
+	if (!base.empty() && (base[base.length() - 1] == '/' || sub[0] == '/'))
+		return (base + sub);
+	return (base + "/" + sub);
 }
 
-std::string ft_strtrim( const std::string &str ) {
+std::string ft_strtrim(const std::string &str) {
 	unsigned int start = 0;
 	unsigned int end = str.length();
 
-	while ( start < str.length() && std::isspace( str[ start ] ) )
+	while (start < str.length() && std::isspace(str[start]))
 		start++;
-	while ( end > start && std::isspace( str[ end - 1 ] ) )
+	while (end > start && std::isspace(str[end - 1]))
 		end--;
-	return ( str.substr( start, end - start ) );
+	return (str.substr(start, end - start));
 }
 
 std::string dateString() {
 	time_t timestamp;
-	time( &timestamp );
-	std::string date = ctime( &timestamp );
-	if ( !date.empty() && date[ date.length() - 1 ] == '\n' )
-		date.erase( date.length() - 1 );
-	return ( date );
+	time(&timestamp);
+	std::string date = ctime(&timestamp);
+	if (!date.empty() && date[date.length() - 1] == '\n')
+		date.erase(date.length() - 1);
+	return (date);
 }
 
 // Returns false, if the state is the same. Otherwise we return false
-bool containBrackets( std::string &line, bool &state, std::string extraStringToFind ) {
+bool containBrackets(std::string &line, bool &state, std::string extraStringToFind) {
 	// If we find the new string
-	if ( !extraStringToFind.empty() )
-		return ( line.find( extraStringToFind ) != std::string::npos );
+	if (!extraStringToFind.empty())
+		return (line.find(extraStringToFind) != std::string::npos);
 
-	if ( line.find( '#' ) != std::string::npos ) // Check if it is a comment
+	if (line.find('#') != std::string::npos) // Check if it is a comment
 		return true;
 
 	int openCount = 0;
 	int closeCount = 0;
-	for ( size_t i = 0; i < line.size(); ++i ) {
-		if ( line[ i ] == '{' )
+	for (size_t i = 0; i < line.size(); ++i) {
+		if (line[i] == '{')
 			openCount++;
-		else if ( line[ i ] == '}' )
+		else if (line[i] == '}')
 			closeCount++;
 	}
 
-	if ( openCount > 1 || closeCount > 1          // If we have something like "server {{{{{"
-	     || ( openCount > 0 && closeCount > 0 ) ) // If we have something like "server }{"
+	if (openCount > 1 || closeCount > 1       // If we have something like "server {{{{{"
+	    || (openCount > 0 && closeCount > 0)) // If we have something like "server }{"
 	{
 		std::cerr << "More than one bracket in the same line" << std::endl;
 		return false;
 	}
 
-	if ( closeCount > 0 ) {
-		if ( state == true )
+	if (closeCount > 0) {
+		if (state == true)
 			state = false;
 
 		else {
@@ -83,8 +83,8 @@ bool containBrackets( std::string &line, bool &state, std::string extraStringToF
 		}
 	}
 
-	else if ( openCount > 0 ) {
-		if ( state == false )
+	else if (openCount > 0) {
+		if (state == false)
 			state = true;
 
 		else {
@@ -99,88 +99,88 @@ bool containBrackets( std::string &line, bool &state, std::string extraStringToF
 // This method is to check especific cases like " {{{ location / }}}"
 // This way we split the string by the location and see if we open him after
 // Only for location cases
-bool checkSplitString( const std::string &line, const std::string &sep, bool &isServerOpen ) {
+bool checkSplitString(const std::string &line, const std::string &sep, bool &isServerOpen) {
 	std::string left = "";
 	std::string right = "";
 	std::string empty = "";
 
-	std::size_t pos = line.find( sep );
-	if ( pos == std::string::npos )
+	std::size_t pos = line.find(sep);
+	if (pos == std::string::npos)
 		return true;
 
-	left = line.substr( 0, pos );
-	right = line.substr( pos + sep.size() );
+	left = line.substr(0, pos);
+	right = line.substr(pos + sep.size());
 
-	if ( isServerOpen == true ) // Since its already open, checks only the left
+	if (isServerOpen == true) // Since its already open, checks only the left
 	{
-		if ( containBrackets( left, isServerOpen, empty ) == false )
+		if (containBrackets(left, isServerOpen, empty) == false)
 			return false;
 		return true;
 	}
 
-	if ( isServerOpen == false ) // Checks the right side if it is open in the same line " location /upload {"
+	if (isServerOpen == false) // Checks the right side if it is open in the same line " location /upload {"
 	{
-		if ( containBrackets( right, isServerOpen, empty ) == false )
+		if (containBrackets(right, isServerOpen, empty) == false)
 			return false;
 	}
 
 	return true;
 }
 
-void print( const char *src ) {
+void print(const char *src) {
 
-	std::string a( src );
+	std::string a(src);
 	std::cout << a << std::endl;
 };
 
-static std::string GetExtension( const std::string &path ) {
-	size_t slashPos = path.find_last_of( '/' );
-	size_t dotPos = path.find_last_of( '.' );
+static std::string GetExtension(const std::string &path) {
+	size_t slashPos = path.find_last_of('/');
+	size_t dotPos = path.find_last_of('.');
 
-	if ( dotPos == std::string::npos )
+	if (dotPos == std::string::npos)
 		return "";
 
-	if ( slashPos != std::string::npos && dotPos < slashPos )
+	if (slashPos != std::string::npos && dotPos < slashPos)
 		return "";
 
-	return path.substr( dotPos );
+	return path.substr(dotPos);
 }
 
-const File *getMatchFile( const std::string &path, const std::vector< File > &files ) {
-	std::string ext = GetExtension( path ); // ".txt", ".py", etc.
-	if ( ext.empty() )
+const File *getMatchFile(const std::string &path, const std::vector< File > &files) {
+	std::string ext = GetExtension(path); // ".txt", ".py", etc.
+	if (ext.empty())
 		return NULL;
 
-	for ( size_t i = 0; i < files.size(); ++i ) {
-		if ( files[ i ].extension.find( ext ) != std::string::npos ) {
-			return &files[ i ];
+	for (size_t i = 0; i < files.size(); ++i) {
+		if (files[i].extension.find(ext) != std::string::npos) {
+			return &files[i];
 		}
 	}
 	return NULL;
 }
 
-const Location *getMatchLocation( const std::string &path, const std::vector< Location > &locations ) {
+const Location *getMatchLocation(const std::string &path, const std::vector< Location > &locations) {
 
 	const Location *matchedLocation = NULL;
 	size_t matchLength = 0;
 
-	for ( size_t i = 0; i < locations.size(); ++i ) {
+	for (size_t i = 0; i < locations.size(); ++i) {
 
-		const std::string &locPath = locations[ i ].path;
-		if ( path.find( locPath ) != std::string::npos && locPath.size() > matchLength ) {
-			matchedLocation = &locations[ i ];
+		const std::string &locPath = locations[i].path;
+		if (path.find(locPath) != std::string::npos && locPath.size() > matchLength) {
+			matchedLocation = &locations[i];
 			matchLength = locPath.size();
 		}
 	}
-	return ( matchedLocation );
+	return (matchedLocation);
 }
 
-RouteContext makeContext( const MatchResult &match, const ServerConfig &server, http::Request &request,
-                          VALIDATION_STATUS status ) {
+RouteContext makeContext(const MatchResult &match, const ServerConfig &server, http::Request &request,
+                         VALIDATION_STATUS status) {
 	RouteContext ctx;
 
 	// 1️⃣ CGI FILE has priority?
-	if ( status == VALID_IS_CGI && match.file ) {
+	if (status == VALID_IS_CGI && match.file) {
 		const File &file = *match.file;
 		ctx.methods = file.methods;
 		ctx.path = "";
@@ -194,7 +194,7 @@ RouteContext makeContext( const MatchResult &match, const ServerConfig &server, 
 		ctx.uploadStore = "";
 	}
 	// 2️⃣ Location normal
-	else if ( match.location ) {
+	else if (match.location) {
 		const Location &loc = *match.location;
 		ctx.methods = loc.methods;
 		ctx.path = loc.path;
@@ -202,16 +202,16 @@ RouteContext makeContext( const MatchResult &match, const ServerConfig &server, 
 		ctx.index = loc.index;
 		ctx.autoIndex = loc.autoIndex;
 		ctx.max_body_size = loc.max_body_size;
-		if ( !loc.cgi_pass.empty() )
+		if (!loc.cgi_pass.empty())
 			ctx.cgi_pass = loc.cgi_pass;
 		else
-			ctx.cgi_pass = joinPath( loc.root, request.GetFileName() );
+			ctx.cgi_pass = joinPath(loc.root, request.getFileName());
 		ctx.redirection = loc.redirection;
 		ctx.uploadEnable = loc.uploadEnable;
 		ctx.uploadStore = loc.uploadStore;
 	}
 	// 3️⃣ File static
-	else if ( match.file ) {
+	else if (match.file) {
 		const File &file = *match.file;
 		ctx.methods = file.methods;
 		ctx.path = "";
@@ -225,8 +225,8 @@ RouteContext makeContext( const MatchResult &match, const ServerConfig &server, 
 		ctx.uploadStore = "";
 	}
 
-	ctx.isCgi = ( status == VALID_IS_CGI );
-	ctx.isRedirect = ( status == VALID_REDIRECT_REQUIRED );
+	ctx.isCgi = (status == VALID_IS_CGI);
+	ctx.isRedirect = (status == VALID_REDIRECT_REQUIRED);
 
 	return ctx;
 }

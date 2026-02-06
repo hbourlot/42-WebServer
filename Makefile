@@ -37,7 +37,7 @@ AUTH_FUNC		= loginHandler
 CGI_FUNC		= Cgi buildEnvStrings
 UTILS_FUNC		= utils getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations SetFile
-HTTP_FUNC	    = HttpTcpServerLinux Router autoIndex Response Logs
+HTTP_FUNC	    = HttpTcpServerLinux Router autoIndex Request Response Logs
 UPL_FUNC		= UploadManager parseMultipart
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \

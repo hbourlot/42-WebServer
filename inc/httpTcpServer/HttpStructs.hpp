@@ -6,7 +6,7 @@
 /*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2026/02/04 23:08:27 by joralves         ###   ########.fr       */
+/*   Updated: 2026/02/06 14:19:26 by joralves         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@
 typedef int SocketFD;
 
 struct Location;
+
+struct MatchResult;
 
 // Only interface propose
 enum headerKey {
