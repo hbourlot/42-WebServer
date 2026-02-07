@@ -29,8 +29,10 @@ void Client::appendToWriteBuffer(const std::string &data) {
 	_writeBuffer += data;
 }
 void Client::clearBuffers() {
-	_readBuffer.clear();
-	_writeBuffer.clear();
+	// _readBuffer.clear();
+	// _writeBuffer.clear();
+    std::string().swap(_readBuffer);
+    std::string().swap(_writeBuffer);
 }
 void Client::clearReadBuffer() {
 	_readBuffer.clear();

@@ -217,7 +217,6 @@ bool http::ClientEventProcessor::parseRequestData(Client &client, const ServerCo
 			return false;
 		}
 
-		readBuffer.erase();
 		clientRequest.setRequestPhase(FINISHED);
 	}
 
