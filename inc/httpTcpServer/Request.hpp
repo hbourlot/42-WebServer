@@ -35,7 +35,7 @@ namespace http {
 		std::string serverProtocol;
 		std::string pathInfo; // For Cgi
 		std::string pathTranslated;
-		std::map< std::string, std::string > headers;
+		std::map<std::string, std::string> headers;
 
 		std::string body;
 		bool bodyInDisk; // !New
@@ -50,7 +50,7 @@ namespace http {
 		ChunkParser _chunk;
 
 		std::string getFileName();
-		void appendBody(const char *buf, size_t len);
+		int appendBody(const char *buf, size_t len);
 		int createTempFile();
 		void cleanup();
 		bool writeBodyToFd(int outFd);

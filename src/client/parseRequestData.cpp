@@ -102,7 +102,10 @@ static bool parseContentLengthBody(Client &client) {
 	if (len > buffer.size())
 		return false;
 
-	request.appendBody(buffer.c_str(), len);
+	if (request.appendBody(buffer.c_str(), len)) {
+		client.setState(PARSE_ERROR);
+		return true;
+	}
 	buffer.erase(0, len);
 	return true;
 }
@@ -133,7 +136,10 @@ static bool parseChunkBody(Client &client) {
 			size_t remaining = chunk.currentChunkSize - chunk.bytesReadInChunk;
 			size_t canRead = std::min(remaining, buffer.size());
 
-			request.appendBody(buffer.c_str(), canRead);
+			if (request.appendBody(buffer.c_str(), canRead)) {
+				client.setState(PARSE_ERROR);
+				return true;
+			}
 			chunk.bytesReadInChunk += canRead;
 			buffer.erase(0, canRead);
 			if (chunk.bytesReadInChunk == chunk.currentChunkSize)
@@ -228,7 +234,8 @@ bool http::ClientEventProcessor::parseRequestData(Client &client, const ServerCo
 		clientRequest.resetChunkParser();
 
 		Logs::log(LOGS_INFO, "Client: " + ft_to_string(client.getFd()) + " Made a Request");
-		client.setState(PARSE_OK);
+		if (client.getState() != PARSE_ERROR) // ! Here for now because line 140
+			client.setState(PARSE_OK);
 		clientRequest.setRequestPhase(START);
 
 		return true;

@@ -146,7 +146,7 @@ static std::string GetExtension(const std::string &path) {
 	return path.substr(dotPos);
 }
 
-const File *getMatchFile(const std::string &path, const std::vector< File > &files) {
+const File *getMatchFile(const std::string &path, const std::vector<File> &files) {
 	std::string ext = GetExtension(path); // ".txt", ".py", etc.
 	if (ext.empty())
 		return NULL;
@@ -159,7 +159,7 @@ const File *getMatchFile(const std::string &path, const std::vector< File > &fil
 	return NULL;
 }
 
-const Location *getMatchLocation(const std::string &path, const std::vector< Location > &locations) {
+const Location *getMatchLocation(const std::string &path, const std::vector<Location> &locations) {
 
 	const Location *matchedLocation = NULL;
 	size_t matchLength = 0;
@@ -255,6 +255,23 @@ std::string createUploadBody() {
 	html += "</body>\n</html>\n";
 
 	return html;
+}
+
+ssize_t writeAll(int fd, const char *buf, size_t len) {
+	size_t total = 0;
+
+	while (total < len) {
+		ssize_t ret = write(fd, buf + total, len - total);
+
+		if (ret < 0) {
+			if (errno == EINTR)
+				continue; // retry
+			Logs::log(LOGS_ERROR, "Write on fd failed");
+			return -1; // error
+		}
+		total += ret;
+	}
+	return total;
 }
 
 // std::string getFileExtension( const std::string &path ) {

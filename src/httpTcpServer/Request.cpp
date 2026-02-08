@@ -19,33 +19,34 @@ void http::Request::cleanup() {
 	}
 }
 
-void http::Request::appendBody(const char *buf, size_t len) {
-	if (!bodyInDisk && body.size() + len > MAX_BODY_IN_MEMORY) {
+int http::Request::appendBody(const char *buf, size_t len) {
+	if (!bodyInDisk && body.size() > MAX_BODY_IN_MEMORY - len) {
 		bodyInDisk = true;
-		if (createTempFile()) {
-			return;
-			//! Send 500 error server;
-		}
-		std::cout << "Created body fd" << std::endl;
-		write(bodyFd, body.c_str(), body.size());
+		if (createTempFile())
+			return (-1);
+
+		if (writeAll(bodyFd, body.c_str(), body.size()) < 0)
+			return (-1);
+
 		bodyFdSize = body.size();
 		body.clear();
 	}
 	if (bodyInDisk) {
-		write(bodyFd, buf, len);
+		if (writeAll(bodyFd, buf, len) < 0)
+			return (-1);
 		bodyFdSize += len;
-	}
-
-	else
+	} else
 		body.append(buf, len);
+
+	return (0);
 }
 
 int http::Request::createTempFile() {
 	static long requestNbr = 0;
 	bodyPath = "./tmp/webserv_body_" + ft_to_string(requestNbr);
 	requestNbr = (requestNbr < 2000) ? requestNbr + 1 : 0;
-	bodyFd = open(bodyPath.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0644);
 
+	bodyFd = open(bodyPath.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0644);
 	if (bodyFd < 0) {
 		Logs::log(LOGS_ERROR, "Couldn't create body temp file");
 		return -1;
