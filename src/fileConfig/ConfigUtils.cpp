@@ -12,7 +12,6 @@ std::string removeSpace( std::string &line ) {
 }
 
 int getMaxRequestBody(std::string &value) {
-	int 		result = 2048; // Default value
 	std::string resultStr = getInfo(value);
 	
 	if (resultStr.empty() == false &&

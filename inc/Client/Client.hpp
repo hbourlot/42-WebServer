@@ -88,25 +88,21 @@ class Client {
 
 	int _fd;
 	CLIENT_STATE _state;
-
-	std::string _readBuffer;
-	std::string _writeBuffer;
-
-	http::Request _request;
-	http::Response _response;
-
+	
 	bool _requestComplete;
 	bool _cgiInProgress;
-
 	pid_t _cgiPid;
 	int _cgiOutputFd;
-
-	std::string _sessionId;
-
 	size_t _bytesToDiscard;
 	bool _discardingBody;
+	
+	http::Request _request;
+	
+	std::string _readBuffer;
+	std::string _writeBuffer;
+	http::Response _response;
 
-
+	std::string _sessionId;
 };
 
 void ensureSessionId(Client &client);

@@ -13,6 +13,7 @@
 #define INDEX 15
 #define CGIPASS 16
 #define CLIENT_MAX_BDY 17
+#define BODY_BUFFER 18
 
 class SetFile;
 
@@ -80,6 +81,8 @@ int getTypeLocation( std::string &trimedLine ) { // Function to check the inform
 		return CGIPASS;
 	if ( trimedLine == "client_max_body_size")
 		return CLIENT_MAX_BDY;
+	if ( trimedLine == "client_body_buffer_size")
+		return BODY_BUFFER;
 	return 100;
 }
 
@@ -90,7 +93,7 @@ void buildCgi( Location &location ) {
 	if ( sizeCgiExtension != sizeCgiPath ) // Check the size of each containers to see if they match
 		throw std::invalid_argument( "Error: Not the same number as CGI paths and extensions\n" );
 
-	for ( int i = 0; sizeCgiExtension > i && sizeCgiPath > i; i++ ) // Insert the information on the map
+	for ( size_t i = 0; sizeCgiExtension > i && sizeCgiPath > i; i++ ) // Insert the information on the map
 		location.cgi.insert(
 		    std::make_pair( location.cgi_extension[ i ], location.cgi_path[ i ] ) ); // I have to make a pair to accept
 
@@ -150,7 +153,7 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) ) // Checks if have more information after the limitter
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
 
-			trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
+		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
 		
 		if (line.find("location") == std::string::npos)
 		{
@@ -221,14 +224,22 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 			break;
 		
 		case CLIENT_MAX_BDY:
-					std::cout << "A location foi para o max body size" << std::endl;
-				location.max_body_size = getMaxRequestBody( noSpaceLine);
-				if (location.max_body_size == -1)
-				{
-					std::cerr << "Invalid sufix of max body size" << std::endl;
-					return false;
-				}
-		break;
+			location.max_body_size = getMaxRequestBody( noSpaceLine);
+			if (location.max_body_size == -1)
+			{
+				std::cerr << "Invalid sufix of max body size" << std::endl;
+				return false;
+			}
+			break;
+
+		case BODY_BUFFER:
+			location.max_buffer_size = getMaxRequestBody ( noSpaceLine );
+			if (location.max_body_size == -1)
+			{
+				std::cerr << "Invalid sufix of max body size" << std::endl;
+				return false;
+			}
+			break;
 
 		default:
 			break;
@@ -249,6 +260,14 @@ void SetLocation::setDefaultLocation( ServerConfig& server, Location& location )
 			location.max_body_size = server.max_body_size;
 		else
 			location.max_body_size = 1024;
+	}
+
+	if ( location.max_buffer_size != 0)
+	{
+		if ( server.max_buffer_size != 0)
+			location.max_buffer_size = server.max_buffer_size;
+		else
+			location.max_buffer_size = 1024 * 1024;
 	}
 
 	if ( location.path.empty() )

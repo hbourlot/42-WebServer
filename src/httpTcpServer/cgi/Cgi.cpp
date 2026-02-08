@@ -167,30 +167,6 @@ size_t http::Cgi::getBodyBytesWritten() const {
 	return _bodyBytesWritten;
 }
 
-static void printEnvStrings(std::vector< std::string > &_envStrings) {
-	std::cerr << "ENVSTRINGS:" << std::endl;
-	for (size_t i = 0; i < _envStrings.size(); ++i) {
-		std::cerr << "  [" << i << "]: " << _envStrings[i] << std::endl;
-	}
-	std::cerr << "END ENVSTRINGS" << std::endl;
-}
-
-static void debugCgiExec(const char *filePath, char *const argv[], char *const envp[]) {
-	std::cerr << "CGI EXEC DEBUG" << std::endl;
-	std::cerr << "File path: " << (filePath ? filePath : "NULL") << std::endl;
-
-	std::cerr << "ARGV:" << std::endl;
-	for (int i = 0; argv && argv[i]; ++i) {
-		std::cerr << "  argv[" << i << "]: " << argv[i] << std::endl;
-	}
-
-	std::cerr << "ENVP:" << std::endl;
-	for (int i = 0; envp && envp[i]; ++i) {
-		std::cerr << "  envp[" << i << "]: " << envp[i] << std::endl;
-	}
-	std::cerr << "END DEBUG" << std::endl;
-}
-
 int http::Cgi::prepareCgiInputFile() {
 
 	_bodyFileName = _filePath + "_" + _client->getSessionId() + "_content.txt";
@@ -238,8 +214,6 @@ void http::Cgi::executeCgi() {
 		std::cerr << "Pipe creating failed\n";
 		return;
 	}
-
-	pid_t pid;
 
 	if (prepareCgiInputFile() != 0) {
 		// Close pipes on prepare failure

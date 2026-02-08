@@ -4,7 +4,7 @@
 
 class ServerConfig;
 
-int main( int argc, char **argv, char **envp ) {
+int main( int argc, char **argv) {
 
 	Configs configuration;
 	try {

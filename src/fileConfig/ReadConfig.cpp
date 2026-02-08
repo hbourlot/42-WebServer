@@ -14,6 +14,8 @@
 #define FILE 8
 #define INDEX 9
 #define CGIPASS 10
+#define TEMP_PATH 11
+#define BODY_BUFFER 12
 
 ServerConfig::ServerConfig() {
 	port = 0;
@@ -21,7 +23,7 @@ ServerConfig::ServerConfig() {
 }
 
 Location *ServerConfig::GetLocationByPath( std::string path ) {
-	for ( int curLocationIdx = 0; curLocationIdx < locations.size(); curLocationIdx++ ) {
+	for ( size_t curLocationIdx = 0; curLocationIdx < locations.size(); curLocationIdx++ ) {
 		if ( locations[ curLocationIdx ].path == path ) {
 			return &locations[ curLocationIdx ];
 		}
@@ -30,7 +32,7 @@ Location *ServerConfig::GetLocationByPath( std::string path ) {
 }
 
 File *ServerConfig::GetFileByExtension( std::string extension) { // Get the file by extension ".bat" (For example)
-	for ( int curFileIdx = 0; curFileIdx < files.size(); curFileIdx++ ) {
+	for ( size_t curFileIdx = 0; curFileIdx < files.size(); curFileIdx++ ) {
 		if ( files[ curFileIdx ].extension == extension ) {
 			return &files[ curFileIdx ];
 		}
@@ -77,6 +79,10 @@ int getTypeServer( std::string &trimmedLine ) { // Return the type of informatio
 		return INDEX;
 	else if ( trimmedLine == "cgi_pass")
 		return CGIPASS;
+	else if ( trimmedLine == "client_body_temp_path")
+		return TEMP_PATH;
+	else if ( trimmedLine == "client_body_buffer_size")
+		return BODY_BUFFER;
 	return 100;
 }
 
@@ -95,7 +101,8 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 	}	
 	
 	server.port = 0;
-	server.max_body_size = 1024;	             // Set the max value by default
+	server.max_body_size = 0;	             // Set the max value by default
+	server.max_buffer_size = 0;
 	while ( std::getline( confFd, line ) ) { // Finish the server config block
 		
 		noSpaceLine = removeSpace( line );   // Removes the first spaces
@@ -165,6 +172,20 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 						return false;
 					break;
 				
+				case TEMP_PATH:
+					server.temp_path = getInfo( noSpaceLine );
+					std::cout << "Temp path " << server.temp_path << std::endl;
+					break;
+
+				case BODY_BUFFER:
+					server.max_buffer_size = getMaxRequestBody( noSpaceLine );
+					if (server.max_body_size == -1)
+					{
+						std::cerr << "Invalid sufix of max body size" << std::endl;
+						return false;
+					}
+					std::cout << "Buffer size " << server.max_buffer_size << std::endl;
+					break;
 				case LOCATION:
 					if (SetLocation::setLocationConfig( confFd, noSpaceLine.substr( noSpaceLine.find( ' ' ) ), server ) == false)
 					{	
@@ -172,7 +193,6 @@ bool ReadConfig::setServerConfig( std::ifstream &confFd, std::string &line, Conf
 					}
 					break;
 				
-
 				default:
 					break;
 			}
@@ -202,7 +222,7 @@ bool ReadConfig::setConfigs( char *conf, Configs &configs ) {
 					}
 				}
 			}
-	} catch (std::exception exception)
+	} catch (const std::exception& exception)
 	{
 		std::cerr << "Got an exception " << exception.what() << std::endl;
 		confFd.close();
@@ -237,5 +257,15 @@ void ReadConfig::setDefaultServer( ServerConfig &server ) {
 	if ( server.max_body_size == 0 ) {
 		std::cout << "Setting Max request to 1024 ✅" << std::endl;
 		server.max_body_size = 1024;
+	}
+
+	if ( server.max_buffer_size == 0) {
+		std::cout << "Setting max buffer size to 1MB ✅" << std::endl;
+		server.max_buffer_size =  1024 * 1024;
+	}
+
+	if ( server.temp_path.empty()){
+		std::cout << "Setting the temp path to project root ✅" << std::endl;
+		server.temp_path = "./"; 
 	}
 }

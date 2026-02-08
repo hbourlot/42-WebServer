@@ -76,9 +76,9 @@ namespace http {
 		}
 
 	  private:
+	  	ServerConfig _serverInfo;
 		SocketFD _serverSocket;
 		ClientManager _clientManager;
-		ServerConfig _serverInfo;
 
 		std::map< SocketFD, sockaddr_in > _socketAddressMap;
 		unsigned int _socketAddress_len;
@@ -90,7 +90,7 @@ namespace http {
 		void shutDownServer();
 		void startListen();
 		void acceptConnection();
-		void removeDeadConnections( ClientEventProcessor &processor, int &index );
+		void removeDeadConnections( ClientEventProcessor &processor, size_t &index );
 		// void removeCgiDeadConnection( ClientEventProcessor &processor );
 		void closeClientConnection( size_t index );
 		void cleanupAllCgis();

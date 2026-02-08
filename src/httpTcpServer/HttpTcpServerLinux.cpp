@@ -159,7 +159,7 @@ namespace http {
 		return 0;
 	}
 
-	void TcpServer::removeDeadConnections( ClientEventProcessor &processor, int &index ) {
+	void TcpServer::removeDeadConnections( ClientEventProcessor &processor, size_t &index ) {
 
 		if ( _fds[ index ].revents & ( POLLHUP | POLLERR | POLLNVAL ) ) {
 			SocketFD fd = _fds[ index ].fd;
@@ -212,7 +212,7 @@ namespace http {
 
 				// Checking for new connections
 				acceptConnection();
-				for ( int i = 1; i < _fds.size(); ++i ) {
+				for ( size_t i = 1; i < _fds.size(); ++i ) {
 					removeDeadConnections( processor, i );
 					processor.processClientEvents( i );
 				}

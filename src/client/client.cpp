@@ -86,9 +86,6 @@ void Client::setCgiOutputFd(int fd) {
 	_cgiOutputFd = fd;
 }
 
-void Client::storeCgiInfo(pid_t pid, int fd) {
-}
-
 void Client::setState(CLIENT_STATE state) {
 	_state = state;
 }

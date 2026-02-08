@@ -12,6 +12,7 @@
 #define AUTOINDEX 14
 #define INDEX 15
 #define CGIPASS 16
+#define BODY_BUFFER 17
 
 File::File() {
 	// String are automatically initialized;
@@ -55,7 +56,6 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 
 	file.extension = fileExtension( line ); // Gets the file extension
 
-	int atIndexFlag = 0; // Setup a flag for autoIndex, to check for CGI
 	if (containBrackets(line, IsFileOpen, emptyString) == false)
 	{
 		return false; 
@@ -100,11 +100,11 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 		case CGIPASS:
 			file.cgi_pass = getInfo( noSpaceLine );
 			break;
-
 		default:
 			break;
 		}
 	}
+	setDefaultFile(file);
 	server.files.push_back( file );
 	return true;
 }
