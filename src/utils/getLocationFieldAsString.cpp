@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-std::string http::getLocationFieldAsString( const std::vector< Location > &locations, const std::string &field ) {
+std::string http::getLocationFieldAsString( const std::vector< Directory > &locations, const std::string &field ) {
 	std::ostringstream oss;
 	bool first = true;
 	for ( size_t i = 0; i < locations.size(); ++i ) {

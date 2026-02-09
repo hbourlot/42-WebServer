@@ -4,8 +4,8 @@
 #include <unistd.h>
 
 struct MatchResult {
-	const Location *location;
-	const File *file;
+	const Directory* location;
+	const File* file;
 };
 enum REQUEST_PHASE { START, HEADER, BODY, FINISHED };
 
@@ -16,7 +16,7 @@ struct ChunkParser {
 	size_t currentChunkSize;
 	size_t bytesReadInChunk;
 
-	ChunkParser() : state(CHUNK_SIZE), currentChunkSize(0), bytesReadInChunk(0) {
+	ChunkParser() : state( CHUNK_SIZE ), currentChunkSize( 0 ), bytesReadInChunk( 0 ) {
 	}
 };
 
@@ -35,7 +35,7 @@ namespace http {
 		std::string serverProtocol;
 		std::string pathInfo; // For Cgi
 		std::string pathTranslated;
-		std::map<std::string, std::string> headers;
+		std::map< std::string, std::string > headers;
 
 		std::string body;
 		bool bodyInDisk; // !New
@@ -50,15 +50,15 @@ namespace http {
 		ChunkParser _chunk;
 
 		std::string getFileName();
-		int appendBody(const char *buf, size_t len);
+		int appendBody( const char* buf, size_t len );
 		int createTempFile();
 		void cleanup();
-		bool writeBodyToFd(int outFd);
+		bool writeBodyToFd( int outFd );
 
 		REQUEST_PHASE getRequestPhase();
-		void setRequestPhase(REQUEST_PHASE requestPhase);
+		void setRequestPhase( REQUEST_PHASE requestPhase );
 
-		ChunkParser &getChunkParser();
+		ChunkParser& getChunkParser();
 		void resetChunkParser();
 	};
 

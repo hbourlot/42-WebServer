@@ -2,11 +2,10 @@
 
 struct Configs;
 struct ServerConfig;
-struct Location;
+struct Directory;
 
 struct SetLocation {
-	static bool setLocationConfig( std::ifstream &confFd, std::string line, ServerConfig &server );
-	static void setDefaultLocation( ServerConfig& server, Location& location );
-	static void getMethods( std::string noSpaceLine,
-                 std::vector< std::string > &methods );
+	static bool setLocationConfig( std::ifstream& confFd, std::string line, ServerConfig& server );
+	static void setDefaultLocation( ServerConfig& server, Directory& location );
+	static void getMethods( std::string noSpaceLine, std::vector< std::string >& methods );
 };

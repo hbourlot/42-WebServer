@@ -17,32 +17,31 @@
 
 class SetFile;
 
-Location::Location() {
+Directory::Directory() {
 	uploadEnable = false;
 	autoIndex = false;
 	max_body_size = 0;
 	// String are automatically initialized;
 }
 
-std::string locationPath(const std::string &line)
-{
-    size_t start = line.find('/'); // Start where we have to find the path
-    if (start == std::string::npos) // If doesn't find any start returns null
-        return "";
+std::string locationPath( const std::string& line ) {
+	size_t start = line.find( '/' );  // Start where we have to find the path
+	if ( start == std::string::npos ) // If doesn't find any start returns null
+		return "";
 
-    size_t end = start;
-    while (end < line.size() && 
-           !std::isspace(line[end]) &&
-           line[end] != '{') // We count the end of the path until we find a 'space' or '{', for cases like "location /cgi bin/hello"
-    {
-        end++;
-    }
+	size_t end = start;
+	while ( end < line.size() && !std::isspace( line[ end ] ) &&
+	        line[ end ] != '{' ) // We count the end of the path until we find a 'space' or '{', for cases like
+	                             // "location /cgi bin/hello"
+	{
+		end++;
+	}
 
-    return line.substr(start, end - start);
+	return line.substr( start, end - start );
 }
 
 void SetLocation::getMethods( std::string noSpaceLine,
-                 std::vector< std::string > &methods ) { // Function to get the Location methods
+                              std::vector< std::string >& methods ) { // Function to get the Location methods
 	std::istringstream iss( noSpaceLine );
 	std::string method;
 
@@ -58,7 +57,7 @@ void SetLocation::getMethods( std::string noSpaceLine,
 	}
 }
 
-int getTypeLocation( std::string &trimedLine ) { // Function to check the information to set
+int getTypeLocation( std::string& trimedLine ) { // Function to check the information to set
 	if ( trimedLine == "methods" )
 		return METHODS;
 	if ( trimedLine == "root" )
@@ -77,16 +76,16 @@ int getTypeLocation( std::string &trimedLine ) { // Function to check the inform
 		return AUTOINDEX;
 	if ( trimedLine == "index" )
 		return INDEX;
-	if ( trimedLine == "cgi_pass")
+	if ( trimedLine == "cgi_pass" )
 		return CGIPASS;
-	if ( trimedLine == "client_max_body_size")
+	if ( trimedLine == "client_max_body_size" )
 		return CLIENT_MAX_BDY;
-	if ( trimedLine == "client_body_buffer_size")
+	if ( trimedLine == "client_body_buffer_size" )
 		return BODY_BUFFER;
 	return 100;
 }
 
-void buildCgi( Location &location ) {
+void buildCgi( Directory& location ) {
 	size_t sizeCgiPath = location.cgi_extension.size(); // Get the size of the cgi paths vector
 	size_t sizeCgiExtension = location.cgi_path.size(); // Get the size of the cgi extensions vector
 
@@ -100,7 +99,7 @@ void buildCgi( Location &location ) {
 	// Check for dup information maybe
 }
 
-int getCgi( std::string noSpaceLine, Location &location, int cgiInfo ) {
+int getCgi( std::string noSpaceLine, Directory& location, int cgiInfo ) {
 	std::istringstream iss( noSpaceLine );
 	std::string info;
 
@@ -126,27 +125,25 @@ int getCgi( std::string noSpaceLine, Location &location, int cgiInfo ) {
 	return ready; // If 0, not enough information | If 1, ready to build the map
 }
 
-bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, ServerConfig &server ) {
+bool SetLocation::setLocationConfig( std::ifstream& confFd, std::string line, ServerConfig& server ) {
 	std::string noSpaceLine; // Gets the string without the initial spaces
 	std::string trimedLine;  // Stores the atribute of the Location
 	std::string emptyString;
-	Location location;
+	Directory location;
 	bool IsLocationOpen = false;
 
-	if (line.find("*.") != std::string::npos)
-	{
-		return SetFile::setFileConfig(confFd, line, server);
+	if ( line.find( "*." ) != std::string::npos ) {
+		return SetFile::setFileConfig( confFd, line, server );
 	}
 	location.path = locationPath( line ); // Sets the Location path
 
-	if (location.path.size() == 0)
+	if ( location.path.size() == 0 )
 		return false;
 
 	int atIndexFlag = 0; // Setup a flag for autoIndex, to check for CGI
-	if (containBrackets(line, IsLocationOpen, emptyString) == false)
-	{
-		return false; 
-	}	
+	if ( containBrackets( line, IsLocationOpen, emptyString ) == false ) {
+		return false;
+	}
 	while ( std::getline( confFd, line ) ) {
 		noSpaceLine = removeSpace( line );
 
@@ -154,25 +151,20 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
 
 		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
-		
-		if (line.find("location") == std::string::npos)
-		{
-			if (containBrackets(line, IsLocationOpen, emptyString) == false)
-			{
+
+		if ( line.find( "location" ) == std::string::npos ) {
+			if ( containBrackets( line, IsLocationOpen, emptyString ) == false ) {
 				return false;
 			}
 		}
-		
-		else
-		{
-			if (checkSplitString(line, "location", IsLocationOpen) == false)
-			{
+
+		else {
+			if ( checkSplitString( line, "location", IsLocationOpen ) == false ) {
 
 				return false;
 			}
-				
 		}
-		
+
 		if ( trimedLine[ 0 ] == '}' )
 			break;
 
@@ -222,20 +214,18 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 		case CGIPASS:
 			location.cgi_pass = getInfo( noSpaceLine );
 			break;
-		
+
 		case CLIENT_MAX_BDY:
-			location.max_body_size = getMaxRequestBody( noSpaceLine);
-			if (location.max_body_size == -1)
-			{
+			location.max_body_size = getMaxRequestBody( noSpaceLine );
+			if ( location.max_body_size == -1 ) {
 				std::cerr << "Invalid sufix of max body size" << std::endl;
 				return false;
 			}
 			break;
 
 		case BODY_BUFFER:
-			location.max_buffer_size = getMaxRequestBody ( noSpaceLine );
-			if (location.max_body_size == -1)
-			{
+			location.max_buffer_size = getMaxRequestBody( noSpaceLine );
+			if ( location.max_body_size == -1 ) {
 				std::cerr << "Invalid sufix of max body size" << std::endl;
 				return false;
 			}
@@ -248,23 +238,21 @@ bool SetLocation::setLocationConfig( std::ifstream &confFd, std::string line, Se
 
 	if ( location.name == "cgi" && atIndexFlag == 1 ) // Checks if exists a autoindex inside a CGI location
 		throw std::invalid_argument( "ERROR: Can't have autoindex inside a CGI location\n" );
-	setDefaultLocation(server, location); // We have to set some default values
-	server.locations.push_back( location );
+	setDefaultLocation( server, location ); // We have to set some default values
+	server.directories.push_back( location );
 	return true;
 }
 
-void SetLocation::setDefaultLocation( ServerConfig& server, Location& location ) {
-	if ( location.max_body_size == 0)
-	{
-		if ( server.max_body_size != 0)
+void SetLocation::setDefaultLocation( ServerConfig& server, Directory& location ) {
+	if ( location.max_body_size == 0 ) {
+		if ( server.max_body_size != 0 )
 			location.max_body_size = server.max_body_size;
 		else
 			location.max_body_size = 1024;
 	}
 
-	if ( location.max_buffer_size != 0)
-	{
-		if ( server.max_buffer_size != 0)
+	if ( location.max_buffer_size != 0 ) {
+		if ( server.max_buffer_size != 0 )
 			location.max_buffer_size = server.max_buffer_size;
 		else
 			location.max_buffer_size = 1024 * 1024;
@@ -279,9 +267,9 @@ void SetLocation::setDefaultLocation( ServerConfig& server, Location& location )
 	}
 
 	if ( location.root.empty() ) {
-		if (server.root.empty() == false)
+		if ( server.root.empty() == false )
 			location.root = server.root;
-		else{
+		else {
 			std::cerr << "No root defined. Setting /var/www + path ✅" << std::endl;
 			location.root = "/var/www" + location.path;
 		}

@@ -3,9 +3,9 @@
 #include <string>
 
 struct ServerConfig;
-struct Location;
+struct Directory;
 
 std::string removeSpace( std::string &line );
 int getMaxRequestBody(std::string &noSpaceLine);
 std::string getInfo( std::string &noSpaceLine );
-Location &findPath( ServerConfig server, std::string path );
+Directory &findPath( ServerConfig server, std::string path );

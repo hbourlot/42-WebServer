@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpStructs.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hugobourlot <hugobourlot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2026/02/06 14:19:26 by joralves         ###   ########.fr       */
+/*   Updated: 2026/02/09 15:47:09 by hugobourlot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 
 typedef int SocketFD;
 
-struct Location;
+struct Directory;
 
 struct MatchResult;
 
@@ -83,6 +83,6 @@ enum VALIDATION_STATUS {
 };
 
 // For RouteContext
-RouteContext makeContext(const MatchResult &match, const ServerConfig &server, http::Request &request,
-                         VALIDATION_STATUS status);
-std::string getFilePath(const std::string &path, const RouteContext &ctx);
+RouteContext makeContext( const MatchResult& match, const ServerConfig& server, http::Request& request,
+                          VALIDATION_STATUS status );
+std::string getFilePath( const std::string& path, const RouteContext& ctx );

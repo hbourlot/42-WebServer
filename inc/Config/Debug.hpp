@@ -2,9 +2,7 @@
 #include "Configs.hpp"
 #include <iostream>
 
-
-
-void debugLocation( const Location &loc ) {
+void debugLocation( const Directory& loc ) {
 	std::cout << "--- START DEBUG\n";
 	std::cout << "Location:" << std::endl;
 	std::cout << "  path: " << loc.path << std::endl;

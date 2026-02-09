@@ -5,9 +5,9 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <set>
 #include <sstream>
 #include <string>
-#include <set>
 #include <vector>
 
 struct File {
@@ -16,14 +16,13 @@ struct File {
 	std::vector< std::string > methods; // method POST GET DELETE
 	std::string root;
 	std::string index;
-	std::vector<File*> next;
 	std::string cgi_pass;
-	int max_buffer_size;							  // Buffer size to write on temp files
-
+	int max_buffer_size; // Buffer size to write on temp files
+	std::vector< File* > next; // ! Still or not gonna use at all ??
 };
 
-struct Location {
-	Location();
+struct Directory {
+	Directory();
 	std::string name;
 	std::string path;                   // location --> /upload <--
 	std::vector< std::string > methods; // method POST GET DELETE
@@ -34,29 +33,91 @@ struct Location {
 	std::vector< std::string > cgi_path;
 	std::map< std::string, std::string > cgi;
 	std::string cgi_pass;
-	int max_body_size;                                   // Stores the maximum requests that the client can do
-	int max_buffer_size;							  // Buffer size to write on temp files
+	int max_body_size;   // Stores the maximum requests that the client can do
+	int max_buffer_size; // Buffer size to write on temp files
 	bool uploadEnable;
 	std::string uploadStore;
 	bool autoIndex;
-	std::vector<Location*> next;
+	std::vector< Directory* > next; // ! Still or not gonna use at all ??
+};
+
+enum LocationType {
+	LOCATION_DIR = 1,
+	LOCATION_FILE = 2,
+	LOCATION_CGI = 4,
+	LOCATION_REDIRECT = 8,
+	LOCATION_UPLOAD = 16,
+};
+
+struct Location {
+
+	Location() {
+		std::memset( this, 0, sizeof( *this ) );
+	};
+
+	int type;
+
+	// Core routing
+	std::string extension;
+	std::string path;
+	std::vector< std::string > methods;
+
+	// Serving
+	std::string root;
+	std::string index;
+	bool autoIndex;
+
+	// Redirects
+	std::string redirection;
+
+	// CGI
+	std::string cgi_pass;
+	std::vector< std::string > cgi_extension;
+	std::vector< std::string > cgi_path;
+	std::map< std::string, std::string > cgi;
+
+	// Upload
+	bool uploadEnable;
+	std::string uploadStore;
+
+	// Limits
+	int max_body_size;
+	int max_buffer_size;
+
+	// Helper methods
+	bool isDir() const {
+		return type & LOCATION_DIR;
+	}
+	bool isFile() const {
+		return type & LOCATION_FILE;
+	}
+	bool isCgi() const {
+		return type & LOCATION_CGI;
+	}
+	bool isRedirect() const {
+		return type & LOCATION_REDIRECT;
+	}
+	bool isUpload() const {
+		return type & LOCATION_UPLOAD;
+	}
 };
 
 struct ServerConfig {
 	ServerConfig();
-	std::string root;								  // Stores the root path
-	std::string index;								  // Stores the index
-	std::string host;                                 // Stores the host IP
-	std::string temp_path;							  // Stores the temp path for temp files							
-	int port;                                         // Stores the port to listen
-	std::string serverName;                           // Stores the name server
-	std::map< int, std::string > errorPage;           // Stores the error pages
-	int max_body_size;                                // Stores the maximum requests that the client can do
-	int max_buffer_size;							  // Buffer size to write on temp files
-	std::vector< Location > locations;                // Stores the routes of the HTML pages
-	std::vector< File > files;						  // Stores the specific files
-	File *GetFileByExtension( std::string extension); // Get the file by extension ".bat" (For example)
-	Location *GetLocationByPath( std::string path );  // Get the "location '/"path"' "
+	std::string root;                       // Stores the root path
+	std::string index;                      // Stores the index
+	std::string host;                       // Stores the host IP
+	std::string temp_path;                  // Stores the temp path for temp files
+	int port;                               // Stores the port to listen
+	std::string serverName;                 // Stores the name server
+	std::map< int, std::string > errorPage; // Stores the error pages
+	int max_body_size;                      // Stores the maximum requests that the client can do
+	int max_buffer_size;                    // Buffer size to write on temp files
+	std::vector< Directory > directories;   // Stores the routes of the HTML pages
+	std::vector< File > files;              // Stores the specific files
+	std::vector<Location> locations;
+	File* GetFileByExtension( std::string extension ); // Get the file by extension ".bat" (For example)
+	Directory* GetLocationByPath( std::string path );  // Get the "location '/"path"' "
 };
 
 struct Configs {
