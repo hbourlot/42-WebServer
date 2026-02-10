@@ -99,7 +99,7 @@ static void parseRequestHeaders(http::Request &req, const std::string &readBuffe
 	}
 }
 
-static bool parseContentLengthBody(Client &client) {
+static bool parseContentLengthBody(Client &client, const ServerConfig &configs) {
 	http::Request &request = client.getRequest();
 	std::string &buffer = client.getReadBuffer();
 
@@ -107,7 +107,7 @@ static bool parseContentLengthBody(Client &client) {
 	if (len > buffer.size())
 		return false;
 
-	if (request.appendBody(buffer.c_str(), len)) {
+	if (request.appendBody(buffer.c_str(), len, configs)) {
 		client.setState(PARSE_ERROR);
 		return true;
 	}
@@ -115,7 +115,7 @@ static bool parseContentLengthBody(Client &client) {
 	return true;
 }
 
-static bool parseChunkBody(Client &client) {
+static bool parseChunkBody(Client &client, const ServerConfig &configs) {
 	std::string &buffer = client.getReadBuffer();
 	ChunkParser &chunk = client.getRequest().getChunkParser();
 	http::Request &request = client.getRequest();
@@ -141,7 +141,7 @@ static bool parseChunkBody(Client &client) {
 			size_t remaining = chunk.currentChunkSize - chunk.bytesReadInChunk;
 			size_t canRead = std::min(remaining, buffer.size());
 
-			if (request.appendBody(buffer.c_str(), canRead)) {
+			if (request.appendBody(buffer.c_str(), canRead, configs)) {
 				client.setState(PARSE_ERROR);
 				return true;
 			}
@@ -171,15 +171,15 @@ static bool parseChunkBody(Client &client) {
 	return false;
 }
 
-static bool parseRequestBody(Client &client) {
+static bool parseRequestBody(Client &client, const ServerConfig &configs) {
 
 	http::Request &req = client.getRequest();
 
 	if (req.headers.count("Transfer-Encoding") && req.headers["Transfer-Encoding"] == "chunked")
-		return parseChunkBody(client);
+		return parseChunkBody(client, configs);
 
 	if (req.headers.count("Content-Length"))
-		return (parseContentLengthBody(client));
+		return (parseContentLengthBody(client, configs));
 
 	req.body.clear();
 
@@ -223,7 +223,7 @@ bool http::ClientEventProcessor::parseRequestData(Client &client, const ServerCo
 
 	if (clientRequest.getRequestPhase() == BODY) {
 
-		if (!parseRequestBody(client)) {
+		if (!parseRequestBody(client, serverInfo)) {
 			client.setState(PARSE_INCOMPLETE);
 			return false;
 		}

@@ -22,10 +22,8 @@ namespace http {
 	  private:
 	  public:
 		Request();
-		// Request(ServerConfig &config); // ! In future the location of temp files will come from configFile
 		~Request();
 
-		// ServerConfig &_configs;
 		std::string _method;
 		std::string path;
 		std::string serverProtocol;
@@ -34,8 +32,8 @@ namespace http {
 		std::map<std::string, std::string> headers;
 
 		std::string body;
-		bool bodyInDisk; // !New
-		int bodyFd;      // !New
+		bool bodyInDisk;
+		int bodyFd;
 		size_t bodyFdSize;
 		std::string bodyPath;
 
@@ -47,8 +45,8 @@ namespace http {
 		ChunkParser _chunk;
 
 		std::string getFileName();
-		int appendBody(const char *buf, size_t len);
-		int createTempFile();
+		int appendBody(const char *buf, size_t len, const ServerConfig &configs);
+		int createTempFile(const ServerConfig &configs);
 		void cleanup();
 		bool writeBodyToFd(int outFd);
 
