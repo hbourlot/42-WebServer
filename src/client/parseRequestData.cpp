@@ -73,6 +73,7 @@ static bool parseRequestLine(http::Request &req, const ServerConfig &serverInfo,
 
 	req.matchLocation = getMatchLocation(req.path, serverInfo.locations);
 	req.fileDirectory = getMatchDirectory(req.path, serverInfo.directories);
+	//! If directory it's removed this can be a Location because its a copy ↑↑↑↑↑
 
 	return true;
 }

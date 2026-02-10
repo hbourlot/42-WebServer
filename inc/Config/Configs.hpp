@@ -18,7 +18,7 @@ struct File {
 	std::string root;
 	std::string index;
 	std::string cgi_pass;
-	int max_buffer_size;      // Buffer size to write on temp files
+	size_t max_buffer_size;   // Buffer size to write on temp files
 	std::vector<File *> next; // ! Still or not gonna use at all ??
 };
 
@@ -34,8 +34,8 @@ struct Directory {
 	std::vector<std::string> cgi_path;
 	std::map<std::string, std::string> cgi;
 	std::string cgi_pass;
-	int max_body_size;   // Stores the maximum requests that the client can do
-	int max_buffer_size; // Buffer size to write on temp files
+	size_t max_body_size;   // Stores the maximum requests that the client can do
+	size_t max_buffer_size; // Buffer size to write on temp files
 	bool uploadEnable;
 	std::string uploadStore;
 	bool autoIndex;
@@ -85,8 +85,8 @@ struct Location {
 	std::string uploadStore;
 
 	// Limits
-	int max_body_size;
-	int max_buffer_size;
+	size_t max_body_size;
+	size_t max_buffer_size;
 
 	// Helper methods
 	bool isDir() const {
