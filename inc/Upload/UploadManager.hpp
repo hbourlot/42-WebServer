@@ -5,8 +5,8 @@
 
 class UploadManager {
   private:
-	static bool parseMultipart( const RouteContext &ctx, Client &Client, const ServerConfig &serverInfo );
+	static bool parseMultipart( const Location &matchLocation, Client &Client, const ServerConfig &serverInfo );
 
   public:
-	static bool handleUpload( const RouteContext &ctx, Client &client, const ServerConfig &serverInfo );
+	static bool handleUpload( const Location &matchLocation, Client &client, const ServerConfig &serverInfo );
 };

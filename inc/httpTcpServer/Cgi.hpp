@@ -1,6 +1,6 @@
 #pragma once
-#include "Config/Configs.hpp"
 #include "Client/Client.hpp"
+#include "Config/Configs.hpp"
 #include "HttpStructs.hpp"
 #include <cstring>
 #include <fcntl.h>
@@ -35,19 +35,19 @@ namespace http {
 	class Cgi {
 
 	  public:
-		Cgi( const http::Request &request, const std::string &scriptPath, const ServerConfig &serverInfo,
-		     Client *client );
+		Cgi(const http::Request &request, const std::string &scriptPath, const ServerConfig &serverInfo,
+		    Client *client);
 
 		~Cgi();
 
-		void executeCgi( void );
+		void executeCgi(void);
 		Response getResponse() const;
 		http::Request getRequest() const;
 		std::string getFilePath() const;
 		std::string getBody() const;
 		int &getStatus();
 		int getStatus() const;
-		std::vector< std::string > getArgv() const;
+		std::vector<std::string> getArgv() const;
 		int getPollFd() const;
 		pid_t getPid() const;
 		const int *getInputPipe() const;
@@ -76,17 +76,17 @@ namespace http {
 		Client *_client; // Back-reference to client
 		std::string _bodyFileName;
 
-		std::vector< char * > _envp;
-		std::vector< char * > _argv;
-		std::vector< std::string > _envStrings;
+		std::vector<char *> _envp;
+		std::vector<char *> _argv;
+		std::vector<std::string> _envStrings;
 
 		// Accumulate CGI stdout across poll cycles
 		std::string _outputBuffer;
 
 		// Pipe handling
-		int _pipefd[ 2 ];
-		int _inputPipe[ 2 ];
-		int _outputPipe[ 2 ];
+		int _pipefd[2];
+		int _inputPipe[2];
+		int _outputPipe[2];
 		pid_t _pid;
 
 		void buildEnvStrings();

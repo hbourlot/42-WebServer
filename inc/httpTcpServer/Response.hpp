@@ -50,8 +50,10 @@ namespace http {
 		std::string getContentType(const std::string &filePath);
 		std::string readFileContent(const std::string &filePath);
 
+		void buildCgiHeaderChunked(const HttpStatusCode &status);
+		void buildCgiBodyChunked(const char *buffer, size_t len);
+
 		void buildCgiResponse(const HttpStatusCode &status, const std::string &body, const ServerConfig &server);
-		void buildCgiResponseChunked(const HttpStatusCode &status);
 		void buildResponse(const HttpStatusCode &status, const std::string &body);
 		void buildErrorResponse(const HttpStatusCode &status, const ServerConfig &server);
 		void buildRedirect(const HttpStatusCode &status, const std::string &url);

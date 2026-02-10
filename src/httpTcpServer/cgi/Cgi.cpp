@@ -236,17 +236,17 @@ void http::Cgi::executeCgi() {
 		this->doDupTwoWay();
 
 		// build argv
-		std::vector< char * > argv;
-		argv.push_back(const_cast< char * >(_filePath.c_str()));
+		std::vector<char *> argv;
+		argv.push_back(const_cast<char *>(_filePath.c_str()));
 		// argv.push_back( const_cast< char* >( "http://localhost:8001/directory/youpi.bla" ) ); // !
 		argv.push_back(NULL);
 
 		// build envp
-		std::vector< char * > envp;
+		std::vector<char *> envp;
 		this->_envp.clear();
 
 		for (size_t i = 0; i < _envStrings.size(); ++i) {
-			this->_envp.push_back(const_cast< char * >(_envStrings[i].c_str()));
+			this->_envp.push_back(const_cast<char *>(_envStrings[i].c_str()));
 		}
 		this->_envp.push_back(NULL);
 

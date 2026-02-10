@@ -9,7 +9,7 @@
 http::Response::Response() : _protocol("HTTP/1.1") {
 }
 
-void http::Response::buildCgiResponseChunked(const HttpStatusCode &status) {
+void http::Response::buildCgiHeaderChunked(const HttpStatusCode &status) {
 	_isChunked = true;
 	// If CGI didn't provide Status, use the one passed as parameter
 	// if (!hasStatus) {
@@ -23,6 +23,19 @@ void http::Response::buildCgiResponseChunked(const HttpStatusCode &status) {
 
 	setDefaultHeaders();
 }
+
+void http::Response::buildCgiBodyChunked(const char *buffer, size_t len) {
+	if (!_isChunked || len == 0)
+		return;
+
+	std::ostringstream oss;
+	oss << std::hex << len << "\r\n";
+
+	_body.append(oss.str());
+	_body.append(buffer, len);
+	_body.append("\r\n");
+}
+
 //! Previous Version
 void http::Response::buildCgiResponse(const HttpStatusCode &status, const std::string &body,
                                       const ServerConfig &server) {
@@ -33,10 +46,11 @@ void http::Response::buildCgiResponse(const HttpStatusCode &status, const std::s
 	std::string content;
 
 	if (headerEnd != std::string::npos) {
+		std::cout << "Found in body of Cgi on pos: " << headerEnd << std::endl;
 		headers = body.substr(0, headerEnd);
 		content = body.substr(headerEnd + 4); // Skipping \r\n\r\n
 	} else {
-		// No headers found in body of Cgi
+		std::cout << "No headers found in body of Cgi\n";
 		content = body;
 	}
 
