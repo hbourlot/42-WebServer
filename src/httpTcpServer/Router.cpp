@@ -126,7 +126,6 @@ void http::Router::handleGet(Client &client, const ServerConfig &server, const L
 	std::string filePath;
 
 	filePath = getFilePath(request, server);
-	std::cout << "filePath: " << filePath << std::endl;
 	if (isDirectory(filePath)) {
 		handleDirectoryListing(client, server, filePath, matchLocation);
 		return;
