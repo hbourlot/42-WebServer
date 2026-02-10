@@ -69,39 +69,3 @@ bool http::ClientEventProcessor::hasCgiSuccessfullyFinished( Cgi* cgi ) const {
 		return true;
 	return false;
 }
-
-int http::ClientEventProcessor::readCgiPipeAndBuildResponse( http::Cgi* cgi, pollfd& pfd ) {
-
-	Client* client = cgi->getClient();
-
-	// Read available data from CGI pipe (non-blocking), up to per-event cap
-	char buffer[ BUFFER_SIZE ];
-	int readCount = 0;
-
-	while ( readCount < MAX_READS_PER_EVENT ) {
-		ssize_t bytesRead = read( pfd.fd, buffer, BUFFER_SIZE );
-
-		if ( bytesRead > 0 ) {
-			cgi->getOutputBuffer().append( buffer, bytesRead );
-			readCount++;
-		} else if ( bytesRead == 0 ) {
-			// EOF - finished reading
-			break;
-		} else if ( errno == EAGAIN || errno == EWOULDBLOCK ) {
-			// No more data available right now
-			break;
-		} else {
-			// Read error
-			std::cerr << "Error reading from CGI pipe: " << strerror( errno ) << std::endl;
-			client->getResponse().buildErrorResponse( HTTP_SERVER_ERR, _server._serverInfo );
-			pfd.fd = -1;
-			cleanupCgi( cgi );
-			client->setState( CGI_COMPLETED );
-			return -1;
-		}
-	}
-	if ( readCount >= MAX_READS_PER_EVENT )
-		return 1;
-
-	return 0;
-}

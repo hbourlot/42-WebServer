@@ -7,8 +7,6 @@ namespace http {
 	class TcpServer;
 };
 
-
-
 enum CLIENT_STATE {
 	RESET,
 	READ_SUCCESS = 1,
@@ -26,78 +24,75 @@ enum CLIENT_STATE {
 	CGI_COMPLETED,
 };
 
-
 class Client {
 
   public:
 	friend class ClientEventProcessor;
-	Client(int fd, http::TcpServer &server);
+	Client( int fd, http::TcpServer& server );
 	~Client();
 
 	int getFd() const;
 
-	http::TcpServer &getServer();
+	http::TcpServer& getServer();
 
 	// Buffers
-	std::string &getReadBuffer();
-	std::string &getWriteBuffer();
-	void appendToReadBuffer(const std::string &data);
-	void appendToWriteBuffer(const std::string &data);
+	std::string& getReadBuffer();
+	std::string& getWriteBuffer();
+	void appendToReadBuffer( const std::string& data );
+	void appendToWriteBuffer( const std::string& data );
 	void clearBuffers();
 	void clearReadBuffer();
 	void clearWriteBuffer();
-	void setState(CLIENT_STATE state);
+	void setState( CLIENT_STATE state );
 	CLIENT_STATE getState() const;
+	CLIENT_STATE& getState();
 
 	// request-response structures
-	http::Request &getRequest();
-	http::Response &getResponse();
+	http::Request& getRequest();
+	http::Response& getResponse();
 	void resetRequest();
 	void resetResponse();
 
 	// State of CGi REquest
 	bool isRequestComplete() const;
-	void setRequestComplete(bool value);
+	void setRequestComplete( bool value );
 
 	bool isCgiInProgress() const;
-	void setCgiInProgress(bool value);
+	void setCgiInProgress( bool value );
 
 	// SessionID Functions
 	std::string getSessionId() const;
-	void setSessionId(std::string &sessionId);
+	void setSessionId( std::string& sessionId );
 
 	// CGI process tracking
 	pid_t getCgiPid() const;
-	void setCgiPid(pid_t pid);
+	void setCgiPid( pid_t pid );
 	int getCgiOutputFd() const;
-	void setCgiOutputFd(int fd);
-	void storeCgiInfo(pid_t pid, int fd);
+	void setCgiOutputFd( int fd );
 
-	void consumeReadBuffer(size_t n);
+	void consumeReadBuffer( size_t n );
 
 	size_t getBytesToDiscard();
-	void setBytesToDiscard(size_t bytesToDiscard);
+	void setBytesToDiscard( size_t bytesToDiscard );
 
 	bool getDiscardingBody();
-	void setDiscardingBody(bool discardingBody);
-
-
+	void setDiscardingBody( bool discardingBody );
 
   private:
-	http::TcpServer &_server;
+	http::TcpServer& _server;
 
 	int _fd;
 	CLIENT_STATE _state;
-	
+
 	bool _requestComplete;
 	bool _cgiInProgress;
 	pid_t _cgiPid;
 	int _cgiOutputFd;
 	size_t _bytesToDiscard;
 	bool _discardingBody;
-	
+
 	http::Request _request;
-	
+
 	std::string _readBuffer;
 	std::string _writeBuffer;
 	http::Response _response;
@@ -105,4 +100,4 @@ class Client {
 	std::string _sessionId;
 };
 
-void ensureSessionId(Client &client);
+void ensureSessionId( Client& client );

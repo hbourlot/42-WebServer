@@ -1,38 +1,38 @@
 #include "Client/Client.hpp"
 
-Client::Client(int fd, http::TcpServer &server)
-    : _server(server), _fd(fd), _state(), _requestComplete(false), _cgiInProgress(false), _cgiPid(-1), _cgiOutputFd(-1),
-      _bytesToDiscard(0), _discardingBody(false), _request(/* server.getServerInfo() */) {
+Client::Client( int fd, http::TcpServer& server )
+    : _server( server ), _fd( fd ), _state(), _requestComplete( false ), _cgiInProgress( false ), _cgiPid( -1 ),
+      _cgiOutputFd( -1 ), _bytesToDiscard( 0 ), _discardingBody( false ), _request( /* server.getServerInfo() */ ) {
 }
 
 Client::~Client() {
 }
 
-http::TcpServer &Client::getServer() {
+http::TcpServer& Client::getServer() {
 	return _server;
 }
 
 int Client::getFd() const {
-	return (_fd);
+	return ( _fd );
 }
 
-std::string &Client::getReadBuffer() {
-	return (_readBuffer);
+std::string& Client::getReadBuffer() {
+	return ( _readBuffer );
 }
-std::string &Client::getWriteBuffer() {
-	return (_writeBuffer);
+std::string& Client::getWriteBuffer() {
+	return ( _writeBuffer );
 }
-void Client::appendToReadBuffer(const std::string &data) {
+void Client::appendToReadBuffer( const std::string& data ) {
 	_readBuffer += data;
 }
-void Client::appendToWriteBuffer(const std::string &data) {
+void Client::appendToWriteBuffer( const std::string& data ) {
 	_writeBuffer += data;
 }
 void Client::clearBuffers() {
 	// _readBuffer.clear();
 	// _writeBuffer.clear();
-    std::string().swap(_readBuffer);
-    std::string().swap(_writeBuffer);
+	std::string().swap( _readBuffer );
+	std::string().swap( _writeBuffer );
 }
 void Client::clearReadBuffer() {
 	_readBuffer.clear();
@@ -41,11 +41,11 @@ void Client::clearWriteBuffer() {
 	_writeBuffer.clear();
 }
 
-http::Request &Client::getRequest() {
-	return (_request);
+http::Request& Client::getRequest() {
+	return ( _request );
 }
-http::Response &Client::getResponse() {
-	return (_response);
+http::Response& Client::getResponse() {
+	return ( _response );
 }
 void Client::resetRequest() {
 	_request.cleanup();
@@ -56,17 +56,17 @@ void Client::resetResponse() {
 }
 
 bool Client::isRequestComplete() const {
-	return (_requestComplete);
+	return ( _requestComplete );
 }
-void Client::setRequestComplete(bool value) {
+void Client::setRequestComplete( bool value ) {
 	_requestComplete = value;
 }
 
 bool Client::isCgiInProgress() const {
-	return (_cgiInProgress);
+	return ( _cgiInProgress );
 }
 
-void Client::setCgiInProgress(bool value) {
+void Client::setCgiInProgress( bool value ) {
 	_cgiInProgress = value;
 }
 
@@ -74,7 +74,7 @@ pid_t Client::getCgiPid() const {
 	return _cgiPid;
 }
 
-void Client::setCgiPid(pid_t pid) {
+void Client::setCgiPid( pid_t pid ) {
 	_cgiPid = pid;
 }
 
@@ -82,11 +82,11 @@ int Client::getCgiOutputFd() const {
 	return _cgiOutputFd;
 }
 
-void Client::setCgiOutputFd(int fd) {
+void Client::setCgiOutputFd( int fd ) {
 	_cgiOutputFd = fd;
 }
 
-void Client::setState(CLIENT_STATE state) {
+void Client::setState( CLIENT_STATE state ) {
 	_state = state;
 }
 
@@ -94,30 +94,34 @@ CLIENT_STATE Client::getState() const {
 	return _state;
 }
 
-void Client::setSessionId(std::string &sessionId) {
+CLIENT_STATE& Client::getState() {
+	return _state;
+}
+
+void Client::setSessionId( std::string& sessionId ) {
 	_sessionId = sessionId;
 }
 
 std::string Client::getSessionId() const {
-	return (_sessionId);
+	return ( _sessionId );
 }
 
-void Client::consumeReadBuffer(size_t n) {
-	if (n >= _readBuffer.size())
+void Client::consumeReadBuffer( size_t n ) {
+	if ( n >= _readBuffer.size() )
 		_readBuffer.clear();
 	else
-		_readBuffer.erase(0, n);
+		_readBuffer.erase( 0, n );
 }
 
 size_t Client::getBytesToDiscard() {
-	return (_bytesToDiscard);
+	return ( _bytesToDiscard );
 }
-void Client::setBytesToDiscard(size_t bytesToDiscard) {
+void Client::setBytesToDiscard( size_t bytesToDiscard ) {
 	_bytesToDiscard = bytesToDiscard;
 }
 bool Client::getDiscardingBody() {
-	return (_discardingBody);
+	return ( _discardingBody );
 }
-void Client::setDiscardingBody(bool discardingBody) {
+void Client::setDiscardingBody( bool discardingBody ) {
 	_discardingBody = discardingBody;
 }
