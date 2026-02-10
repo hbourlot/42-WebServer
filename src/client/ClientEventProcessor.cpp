@@ -129,9 +129,6 @@ bool http::ClientEventProcessor::processRequest(Client &client) {
 	if (this->handleRouteValidation(client, validationStatus))
 		return true;
 
-	http::Request &request = client.getRequest();
-
-	// RouteContext ctx = makeContextFromLocation(*request.matchLocation, serverInfo, request);
 	if (validationStatus == VALID_IS_CGI)
 		Router::routeCgiRequest(client, serverInfo, *client.getRequest().matchLocation, *this);
 	else
@@ -162,8 +159,8 @@ bool http::ClientEventProcessor::buildErrorResponse(Client &client, CLIENT_STATE
 bool http::ClientEventProcessor::handleRouteValidation(Client &client, VALIDATION_STATUS &validationStatus) {
 	http::Response &response = client.getResponse();
 	ServerConfig &serverInfo = _server._serverInfo;
-	validationStatus = Router::validateRequest(client, _server._serverInfo);
-	std::cout << validationStatus << std::endl;
+	validationStatus = Router::validateRequest(client);
+
 	switch (validationStatus) {
 
 	case VALID_IS_CGI:

@@ -15,12 +15,6 @@ bool isDirectory(const std::string &filePath) {
 		return (false);
 	return (S_ISDIR(s.st_mode));
 }
-//! Previos version
-// std::string getFilePath(const std::string &path, const Location &matchLocation) {
-// 	std::string relativePath = path.substr(matchLocation.path.length());
-// 	std::string filePath = joinPath(matchLocation.root, relativePath);
-// 	return (filePath);
-// }
 
 std::string getFilePath(const http::Request &req, const ServerConfig &server) {
 	const Directory *dir = req.fileDirectory;
@@ -161,19 +155,6 @@ static std::string getExtension(const std::string &path) {
 	return path.substr(dotPos);
 }
 
-const File *getMatchFile(const std::string &path, const std::vector<File> &files) {
-	std::string ext = getExtension(path); // ".txt", ".py", etc.
-	if (ext.empty())
-		return NULL;
-
-	for (size_t i = 0; i < files.size(); ++i) {
-		if (files[i].extension.find(ext) != std::string::npos) {
-			return &files[i];
-		}
-	}
-	return NULL;
-}
-
 const Directory *getMatchDirectory(const std::string &path, const std::vector<Directory> &directories) {
 
 	const Directory *matchedLocation = NULL;
@@ -210,90 +191,6 @@ const Location *getMatchLocation(const std::string &path, const std::vector<Loca
 	}
 	return (matchedLocation);
 }
-
-// RouteContext makeContext(const MatchResult &match, const ServerConfig &server, http::Request &request,
-//                          VALIDATION_STATUS status) {
-// 	RouteContext ctx;
-
-// 	// 1️⃣ CGI FILE has priority?
-// 	if (status == VALID_IS_CGI && match.file) {
-// 		const File &file = *match.file;
-// 		ctx.methods = file.methods;
-// 		ctx.path = "";
-// 		ctx.root = file.root;
-// 		ctx.index = file.index;
-// 		ctx.autoIndex = false;
-// 		ctx.max_body_size = server.max_body_size;
-// 		ctx.cgi_pass = file.cgi_pass;
-// 		ctx.redirection = "";
-// 		ctx.uploadEnable = false;
-// 		ctx.uploadStore = "";
-// 	}
-// 	// 2️⃣ Location normal
-// 	else if (match.location) {
-// 		const Directory &loc = *match.location;
-// 		ctx.methods = loc.methods;
-// 		ctx.path = loc.path;
-// 		ctx.root = loc.root;
-// 		ctx.index = loc.index;
-// 		ctx.autoIndex = loc.autoIndex;
-// 		ctx.max_body_size = loc.max_body_size;
-// 		if (!loc.cgi_pass.empty())
-// 			ctx.cgi_pass = loc.cgi_pass;
-// 		else
-// 			ctx.cgi_pass = joinPath(loc.root, request.getFileName());
-// 		ctx.redirection = loc.redirection;
-// 		ctx.uploadEnable = loc.uploadEnable;
-// 		ctx.uploadStore = loc.uploadStore;
-// 	}
-// 	// 3️⃣ File static
-// 	else if (match.file) {
-// 		const File &file = *match.file;
-// 		ctx.methods = file.methods;
-// 		ctx.path = "";
-// 		ctx.root = file.root;
-// 		ctx.index = file.index;
-// 		ctx.autoIndex = false;
-// 		ctx.max_body_size = server.max_body_size;
-// 		ctx.cgi_pass = file.cgi_pass;
-// 		ctx.redirection = "";
-// 		ctx.uploadEnable = false;
-// 		ctx.uploadStore = "";
-// 	}
-
-// 	ctx.isCgi = (status == VALID_IS_CGI);
-// 	ctx.isRedirect = (status == VALID_REDIRECT_REQUIRED);
-
-// 	return ctx;
-// }
-
-// RouteContext makeContextFromLocation(const Location &loc, const ServerConfig &server, http::Request &request) {
-// 	RouteContext ctx;
-
-// 	ctx.methods = loc.methods;
-// 	ctx.path = loc.path;
-// 	ctx.root = loc.root;
-// 	ctx.index = loc.index;
-// 	ctx.autoIndex = loc.autoIndex;
-// 	ctx.max_body_size = loc.max_body_size;
-// 	ctx.redirection = loc.redirection;
-// 	ctx.uploadEnable = loc.uploadEnable;
-// 	ctx.uploadStore = loc.uploadStore;
-
-// 	// CGI
-// 	if (loc.isCgi()) {
-// 		if (!loc.cgi_pass.empty())
-// 			ctx.cgi_pass = loc.cgi_pass;
-// 		else
-// 			ctx.cgi_pass = joinPath(loc.root, request.getFileName());
-// 	}
-
-// 	// Flags
-// 	ctx.isCgi = loc.isCgi();
-// 	ctx.isRedirect = loc.isRedirect();
-
-// 	return ctx;
-// }
 
 std::string createUploadBody() {
 	std::string html;
@@ -337,103 +234,3 @@ ssize_t writeAll(int fd, const char *buf, size_t len) {
 	}
 	return total;
 }
-
-// std::string getFileExtension( const std::string &path ) {
-// 	size_t slashPos = path.find_last_of( '/' );
-// 	size_t dotPos = path.find_last_of( '.' );
-
-// 	if ( dotPos == std::string::npos || ( slashPos != std::string::npos && dotPos < slashPos ) )
-// 		return "";
-// 	return path.substr( dotPos );
-// }
-
-// std::vector< std::string > splitLocations( const std::string &path ) {
-// 	std::vector< std::string > result;
-// 	std::string current;
-// 	size_t i = 0;
-
-// 	// assumir que path começa com '/'
-// 	if ( path.empty() || path[ 0 ] != '/' )
-// 		return result;
-
-// 	i = 1; // saltar o '/'
-
-// 	while ( i < path.length() ) {
-// 		size_t next = path.find( '/', i );
-
-// 		if ( next == std::string::npos ) {
-// 			current += path.substr( i );
-// 			result.push_back( "/" + current );
-// 			break;
-// 		} else {
-// 			current += path.substr( i, next - i );
-// 			result.push_back( "/" + current );
-// 			current += "/";
-// 			i = next + 1;
-// 		}
-// 	}
-
-// 	return result;
-// }
-
-// void convertSetToVector( std::set< std::string > &setCtr, std::vector< std::string > &vecCtr ) {
-// 	for ( std::set< std::string >::iterator i = setCtr.begin(); i != setCtr.end(); i++ )
-// 		vecCtr.push_back( *i );
-// }
-
-// /// @brief Search in every directory and gets every method (ex. /directory/alias/test)
-// /// @param path Full directory
-// /// @return vector with all getted methods
-// std::vector< std::string > getAllMethods( ServerConfig server, std::string path ) {
-// 	std::vector< std::string > mergedMethods;
-// 	std::vector< std::string > splittedLocations;
-// 	std::set< std::string > noDupMethods;
-// 	splittedLocations = splitLocations( path );
-// 	for ( size_t i = 0; i < splittedLocations.size(); i++ ) {
-// 		Location *curLocation = server.GetLocationByPath( splittedLocations[ i ] );
-
-// 		if ( curLocation != NULL ) {
-// 			for ( size_t x = 0; x < curLocation->methods.size(); x++ )
-// 				noDupMethods.insert( curLocation->methods[ x ] );
-
-// 			if ( noDupMethods.size() >= 3 ) {
-// 				convertSetToVector( noDupMethods, mergedMethods );
-// 				return mergedMethods;
-// 			}
-// 		}
-// 	}
-
-// 	File *curFile = server.GetFileByExtension( "*" + getFileExtension( path ) );
-// 	if ( curFile != NULL ) {
-// 		for ( size_t x = 0; x < curFile->methods.size(); x++ ) {
-// 			noDupMethods.insert( curFile->methods[ x ] );
-// 		}
-// 	}
-
-// 	// Send the "SET" info to the "VECTOR"
-// 	convertSetToVector( noDupMethods, mergedMethods );
-// 	return mergedMethods;
-// }
-
-// std::string getContentType( const std::string &path ) {
-// 	size_t dot = path.find_last_of( '.' );
-// 	if ( dot == std::string::npos )
-// 		return "application/octet-stream"; // generic Binary
-
-// 	std::string ext = path.substr( dot + 1 );
-// 	if ( ext == "html" || ext == "htm" )
-// 		return "text/html";
-// 	if ( ext == "css" )
-// 		return "text/css";
-// 	if ( ext == "png" )
-// 		return "image/png";
-// 	if ( ext == "jpg" || ext == "jpeg" )
-// 		return "image/jpeg";
-// 	if ( ext == "gif" )
-// 		return "image/gif";
-// 	if ( ext == "txt" )
-// 		return "text/plain";
-// 	if ( ext == "pdf" )
-// 		return "application/pdf";
-// 	return "application/octet-stream";
-// }

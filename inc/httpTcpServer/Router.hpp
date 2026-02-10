@@ -8,7 +8,7 @@ namespace http {
 	class ClientEventProcessor;
 	class Router {
 	  public:
-		static VALIDATION_STATUS validateRequest(Client &client, const ServerConfig &server);
+		static VALIDATION_STATUS validateRequest(Client &client);
 		static bool routeCgiRequest(Client &client, const ServerConfig &server, const Location &matchLocation,
 		                            ClientEventProcessor &processor);
 		static void routeStaticRequest(Client &client, const ServerConfig &server, const Location &matchLocation);

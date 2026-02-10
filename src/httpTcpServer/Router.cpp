@@ -11,13 +11,6 @@ static bool validateRequestMethod(const http::Request &request, const std::vecto
 	}
 	return false;
 }
-static std::vector<std::string> resolveMethods(const Directory *loc, const File *file) {
-	if (loc && !loc->methods.empty())
-		return loc->methods;
-	if (file)
-		return file->methods;
-	return std::vector<std::string>();
-}
 
 static bool isCgirequest(const http::Request &request, const Location &location) {
 
@@ -52,7 +45,7 @@ static bool isCgirequest(const http::Request &request, const Location &location)
 //		- 2.1 RedirectME
 //		- 2.2 VALID CGI
 // File (se nao tiver CGI)
-VALIDATION_STATUS http::Router::validateRequest(Client &client, const ServerConfig &server) {
+VALIDATION_STATUS http::Router::validateRequest(Client &client) {
 
 	http::Request &request = client.getRequest();
 

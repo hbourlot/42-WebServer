@@ -32,15 +32,12 @@ template <typename T> std::string ft_to_string(const T &value) {
 
 // !DEBUG
 void printHttpHeaders(const std::map<std::string, std::string> &headers);
-// std::string getFilePath(const std::string &path, const Location &matchLocation);
-std::string getFilePath(const http::Request &req, const ServerConfig &server);
 void printLocation(const Directory &location);
 bool checkSplitString(const std::string &line, const std::string &sep, bool &isServerOpen);
 
-const File *getMatchFile(const std::string &path, const std::vector<File> &files);
+std::string getFilePath(const http::Request &req, const ServerConfig &server);
 const Directory *getMatchDirectory(const std::string &path, const std::vector<Directory> &locations);
 const Location *getMatchLocation(const std::string &path, const std::vector<Location> &locations);
-// const Location* getMatchLocation(const std::string& path, )
 
 std::string createUploadBody();
 ssize_t writeAll(int fd, const char *buf, size_t len);
