@@ -1,13 +1,8 @@
 #include "httpTcpServer/Request.hpp"
 #include <fcntl.h>
 
-#define MAX_BODY_IN_MEMORY 1048576 // 1MB
-
 http::Request::Request() : bodyInDisk(false), bodyFd(-1), _requestPhase(START) {
 }
-
-// http::Request::Request(ServerConfig &config) : _configs(config), bodyInDisk(false), bodyFd(-1) {
-// }
 
 http::Request::~Request() {
 }
@@ -17,12 +12,35 @@ void http::Request::cleanup() {
 		close(bodyFd);
 		remove(bodyPath.c_str());
 	}
+
+	_method.clear();
+	path.clear();
+	serverProtocol.clear();
+	pathInfo.clear();
+	pathTranslated.clear();
+	headers.clear();
+
+	body.clear();
+	bodyInDisk = false;
+	bodyFd = -1;
+	bodyFdSize = 0;
+	bodyPath.clear();
+
+	queryString.clear();
+	matchLocation = NULL;
+	fileDirectory = NULL;
+
+	_requestPhase = START;
+	_chunk = ChunkParser();
 }
 
-int http::Request::appendBody(const char *buf, size_t len) {
-	if (!bodyInDisk && body.size() > MAX_BODY_IN_MEMORY - len) {
+int http::Request::appendBody(const char *buf, size_t len, const ServerConfig &configs) {
+
+	size_t maxBuffer = matchLocation ? matchLocation->max_buffer_size : configs.max_buffer_size;
+
+	if (!bodyInDisk && body.size() > maxBuffer - len) {
 		bodyInDisk = true;
-		if (createTempFile())
+		if (createTempFile(configs))
 			return (-1);
 
 		if (writeAll(bodyFd, body.c_str(), body.size()) < 0)
@@ -41,9 +59,9 @@ int http::Request::appendBody(const char *buf, size_t len) {
 	return (0);
 }
 
-int http::Request::createTempFile() {
+int http::Request::createTempFile(const ServerConfig &configs) {
 	static long requestNbr = 0;
-	bodyPath = "./tmp/webserv_body_" + ft_to_string(requestNbr);
+	bodyPath = joinPath(configs.temp_path, "/webserv_body_" + ft_to_string(requestNbr));
 	requestNbr = (requestNbr < 2000) ? requestNbr + 1 : 0;
 
 	bodyFd = open(bodyPath.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0644);

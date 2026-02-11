@@ -1,8 +1,8 @@
 #include "Client/Client.hpp"
 
-Client::Client( int fd, http::TcpServer& server )
-    : _server( server ), _fd( fd ), _state(), _requestComplete( false ), _cgiInProgress( false ), _cgiPid( -1 ),
-      _cgiOutputFd( -1 ), _bytesToDiscard( 0 ), _discardingBody( false ), _request( /* server.getServerInfo() */ ) {
+Client::Client(int fd, http::TcpServer &server)
+    : _server(server), _fd(fd), _state(), _requestComplete(false), _cgiInProgress(false), _cgiPid(-1), _cgiOutputFd(-1),
+      _bytesToDiscard(0), _discardingBody(false), _request() {
 }
 
 Client::~Client() {
@@ -31,9 +31,10 @@ void Client::appendToWriteBuffer( const std::string& data ) {
 void Client::clearBuffers() {
 	// _readBuffer.clear();
 	// _writeBuffer.clear();
-	std::string().swap( _readBuffer );
-	std::string().swap( _writeBuffer );
+	std::string().swap(_readBuffer);
+	std::string().swap(_writeBuffer);
 }
+
 void Client::clearReadBuffer() {
 	_readBuffer.clear();
 }
@@ -49,7 +50,6 @@ http::Response& Client::getResponse() {
 }
 void Client::resetRequest() {
 	_request.cleanup();
-	_request = http::Request();
 }
 void Client::resetResponse() {
 	_response = http::Response();
