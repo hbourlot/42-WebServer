@@ -14,6 +14,8 @@
 #define CGIPASS 16
 #define CLIENT_MAX_BDY 17
 #define BODY_BUFFER 18
+#define EMPTY 19
+#define COMMENT 20
 
 class SetFile;
 
@@ -88,6 +90,10 @@ int getTypeLocation(std::string &trimmedLine) { // Function to check the informa
 		return CLIENT_MAX_BDY;
 	if (trimmedLine == "client_body_buffer_size")
 		return BODY_BUFFER;
+	if (trimmedLine.size() == 1 || trimmedLine == "{" || trimmedLine == "}" || trimmedLine == "\n")
+		return EMPTY;
+	if (trimmedLine[0] == '#')
+		return COMMENT;
 	return 100;
 }
 
@@ -127,7 +133,6 @@ int getCgi(std::string noSpaceLine, Directory &location, int cgiInfo) {
 			location.cgi_path.push_back(info); // Send it for the cgi_path variable
 	}
 
-	// std::cout << "CGI path: " << info << "|" << std::endl; //!Comment this line (Jorge)
 	return ready; // If 0, not enough information | If 1, ready to build the map
 }
 
@@ -142,6 +147,8 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 		return SetFile::setFileConfig(confFd, line, server);
 	}
 	location.path = locationPath(line); // Sets the Location path
+	location.max_body_size = 0;
+	location.max_buffer_size = 0;
 
 	if (location.path.size() == 0)
 		return false;
@@ -221,22 +228,25 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 			break;
 
 		case CLIENT_MAX_BDY:
-			location.max_body_size = getMaxRequestBody(noSpaceLine);
-			if (location.max_body_size == -1) {
+			if (getMaxRequestBody(noSpaceLine, location.max_body_size) == false){
 				std::cerr << "Invalid suffix of max body size" << std::endl;
 				return false;
 			}
 			break;
 
 		case BODY_BUFFER:
-			location.max_buffer_size = getMaxRequestBody(noSpaceLine);
-			if (location.max_body_size == -1) {
+			if (getMaxRequestBody(noSpaceLine, location.max_buffer_size) == false){
 				std::cerr << "Invalid suffix of max body size" << std::endl;
 				return false;
 			}
 			break;
+		
+		case EMPTY:
+		case COMMENT:
+			break;
 
 		default:
+			return false;
 			break;
 		}
 	}
@@ -255,12 +265,16 @@ void SetLocation::setDefaultLocation(ServerConfig &server, Directory &location) 
 		else
 			location.max_body_size = 1024;
 	}
-
-	if (location.max_buffer_size != 0) {
+	
+	std::cout << "Estamos aqui para ti " << location.max_buffer_size << " | " << server.max_buffer_size << std::endl;
+	if (location.max_buffer_size == 0) {
 		if (server.max_buffer_size != 0)
+		{
 			location.max_buffer_size = server.max_buffer_size;
+		}
 		else
 			location.max_buffer_size = 1024 * 1024;
+		
 	}
 
 	if (location.path.empty())

@@ -107,7 +107,7 @@ void http::Router::routeStaticRequest( Client& client, const ServerConfig& serve
 	else if ( request._method == "POST" )
 		return ( handlePost( client, server, matchLocation ) );
 	else if ( request._method == "DELETE" )
-		return ( handleDelete( client, server, matchLocation ) );
+		return ( handleDelete( client, server ) );
 	else
 		client.getResponse().buildErrorResponse( HTTP_FORBID_METHOD, server );
 }
@@ -148,7 +148,7 @@ void http::Router::handlePost( Client& client, const ServerConfig& serverInfo, c
 	client.getResponse().buildResponse( HTTP_OK, "" );
 }
 
-void http::Router::handleDelete( Client& client, const ServerConfig& server, const Location& matchLocation ) {
+void http::Router::handleDelete( Client& client, const ServerConfig& server) {
 	http::Response& response = client.getResponse();
 	http::Request& request = client.getRequest();
 
