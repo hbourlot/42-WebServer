@@ -149,7 +149,7 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			case CLIENT_MAX_BDY:
 				server.max_body_size = getMaxRequestBody(noSpaceLine);
 				if (server.max_body_size == -1) {
-					std::cerr << "Invalid sufix of max body size" << std::endl;
+					std::cerr << "Invalid suffix of max body size" << std::endl;
 					return false;
 				}
 				break;
@@ -171,7 +171,7 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			case BODY_BUFFER:
 				server.max_buffer_size = getMaxRequestBody(noSpaceLine);
 				if (server.max_body_size == -1) {
-					std::cerr << "Invalid sufix of max body size" << std::endl;
+					std::cerr << "Invalid suffix of max body size" << std::endl;
 					return false;
 				}
 				std::cout << "Buffer size " << server.max_buffer_size << std::endl;
@@ -253,6 +253,12 @@ void ReadConfig::setDefaultServer(ServerConfig &server) {
 	if (server.max_buffer_size == 0) {
 		std::cout << "Setting max buffer size to 1MB ✅" << std::endl;
 		server.max_buffer_size = 1024 * 1024;
+		for (int i = 0; i < server.directories.size(); ++i) {
+			server.directories[i].max_buffer_size = server.directories[i].max_buffer_size == 0 ? server.max_buffer_size : server.directories[i].max_buffer_size;
+		}
+		for (int i = 0; i < server.files.size(); ++i) {
+			server.files[i].max_buffer_size = server.files[i].max_buffer_size == 0 ? server.max_buffer_size : server.files[i].max_buffer_size;
+		}
 	}
 
 	if (server.temp_path.empty()) {

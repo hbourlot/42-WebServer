@@ -63,30 +63,30 @@ void SetLocation::getMethods(std::string noSpaceLine,
 	}
 }
 
-int getTypeLocation(std::string &trimedLine) { // Function to check the information to set
-	if (trimedLine == "methods")
+int getTypeLocation(std::string &trimmedLine) { // Function to check the information to set
+	if (trimmedLine == "methods")
 		return METHODS;
-	if (trimedLine == "root")
+	if (trimmedLine == "root")
 		return ROOT;
-	if (trimedLine == "redirect")
+	if (trimmedLine == "redirect")
 		return REDIRECT;
-	if (trimedLine == "cgi_extension")
+	if (trimmedLine == "cgi_extension")
 		return CGI_EXTENSION;
-	if (trimedLine == "cgi_path")
+	if (trimmedLine == "cgi_path")
 		return CGI_PATH;
-	if (trimedLine == "upload_enable")
+	if (trimmedLine == "upload_enable")
 		return UPLOAD_ENABLE;
-	if (trimedLine == "upload_store")
+	if (trimmedLine == "upload_store")
 		return UPLOAD_STORE;
-	if (trimedLine == "autoindex")
+	if (trimmedLine == "autoindex")
 		return AUTOINDEX;
-	if (trimedLine == "index")
+	if (trimmedLine == "index")
 		return INDEX;
-	if (trimedLine == "cgi_pass")
+	if (trimmedLine == "cgi_pass")
 		return CGIPASS;
-	if (trimedLine == "client_max_body_size")
+	if (trimmedLine == "client_max_body_size")
 		return CLIENT_MAX_BDY;
-	if (trimedLine == "client_body_buffer_size")
+	if (trimmedLine == "client_body_buffer_size")
 		return BODY_BUFFER;
 	return 100;
 }
@@ -133,7 +133,7 @@ int getCgi(std::string noSpaceLine, Directory &location, int cgiInfo) {
 
 bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, ServerConfig &server) {
 	std::string noSpaceLine; // Gets the string without the initial spaces
-	std::string trimedLine;  // Stores the atribute of the Location
+	std::string trimmedLine;  // Stores the attribute of the Location
 	std::string emptyString;
 	Directory location;
 	bool IsLocationOpen = false;
@@ -156,7 +156,7 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 		if (!CheckConf::checkLineFinished(noSpaceLine)) // Checks if have more information after the limitter
 			throw std::invalid_argument("Error: Extra words after End of Line\n");
 
-		trimedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
+		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
 
 		if (line.find("location") == std::string::npos) {
 			if (containBrackets(line, IsLocationOpen, emptyString) == false) {
@@ -171,10 +171,10 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 			}
 		}
 
-		if (trimedLine[0] == '}')
+		if (trimmedLine[0] == '}')
 			break;
 
-		switch (getTypeLocation(trimedLine)) {
+		switch (getTypeLocation(trimmedLine)) {
 		case METHODS:
 			getMethods(noSpaceLine, location.methods);
 			break;
@@ -223,7 +223,7 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 		case CLIENT_MAX_BDY:
 			location.max_body_size = getMaxRequestBody(noSpaceLine);
 			if (location.max_body_size == -1) {
-				std::cerr << "Invalid sufix of max body size" << std::endl;
+				std::cerr << "Invalid suffix of max body size" << std::endl;
 				return false;
 			}
 			break;
@@ -231,7 +231,7 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 		case BODY_BUFFER:
 			location.max_buffer_size = getMaxRequestBody(noSpaceLine);
 			if (location.max_body_size == -1) {
-				std::cerr << "Invalid sufix of max body size" << std::endl;
+				std::cerr << "Invalid suffix of max body size" << std::endl;
 				return false;
 			}
 			break;

@@ -37,13 +37,7 @@ void http::ClientEventProcessor::processRead( pollfd& pfd, Client* client, Cgi* 
 	}
 
 	if ( cgi ) {
-		if ( hasCgiFinished( cgi ) ) {
-			client->setState( CGI_COMPLETED );
-			cleanupCgi( cgi );
-
-		}
 		return;
-
 	}
 	
 	if ( client->getDiscardingBody() ) {
@@ -63,7 +57,6 @@ void http::ClientEventProcessor::processWrite( pollfd& pfd, Client* client, int 
 	if ( client->getState() == CGI_COMPLETED ) {
 		// buildar a resposta
 
-		write( STDOUT_FILENO, client->getReadBuffer().c_str(), 15 );
 		client->getResponse().buildCgiResponse( HTTP_OK, client->getReadBuffer(), _server._serverInfo );
 
 	} else if ( client->getCgiPid() == -1 && client->getState() != CGI_COMPLETED ) {
@@ -112,7 +105,6 @@ bool http::ClientEventProcessor::readFromSocket( SocketFD fd, std::string& readB
 
 		// Fatal error
 		Logs::log( LOGS_ERROR, "Error: recv()" );
-		std::cout << fd;
 		state = READ_ERROR;
 		return false;
 	}
@@ -206,7 +198,6 @@ bool http::ClientEventProcessor::handleRouteValidation( Client& client, VALIDATI
 	}
 }
 
-
 void http::ClientEventProcessor::processClientEvents( int index ) {
 
 	int fd = _server._fds[ index ].fd;
@@ -225,6 +216,7 @@ void http::ClientEventProcessor::processClientEvents( int index ) {
 			client = cgi->getClient();
 	}
 
+
 	// Regular client socket handling
 	if ( _server._fds[ index ].revents & POLLIN ) {
 		processRead( _server._fds[ index ], client, cgi );
@@ -233,6 +225,11 @@ void http::ClientEventProcessor::processClientEvents( int index ) {
 	if ( _server._fds[ index ].revents & POLLOUT ) {
 		processWrite( _server._fds[ index ], client, index );
 	}
+
+	if (cgi &&  hasCgiFinished( cgi ) ) {
+			client->setState( CGI_COMPLETED );
+			cleanupCgi( cgi );
+		}
 }
 
 bool http::ClientEventProcessor::handleResponse( pollfd& pfd, Client& client ) {

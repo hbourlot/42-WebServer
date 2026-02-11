@@ -35,27 +35,28 @@ std::string fileExtension(const std::string &line)
     return line.substr(start, end - start);
 }
 
-int getTypeFile( std::string &trimedLine ) { // Function to check the information to set
-	if ( trimedLine == "methods" )
+int getTypeFile( std::string &trimmedLine ) { // Function to check the information to set
+	if ( trimmedLine == "methods" )
 		return METHODS;
-	if ( trimedLine == "root" )
+	if ( trimmedLine == "root" )
 		return ROOT;
-	if ( trimedLine == "index" )
+	if ( trimmedLine == "index" )
 		return INDEX;
-	if ( trimedLine == "cgi_pass")
+	if ( trimmedLine == "cgi_pass")
 		return CGIPASS;
 	return 100;
 }
 
 bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConfig &server ) {
 	std::string noSpaceLine; // Gets the string without the initial spaces
-	std::string trimedLine;  // Stores the atribute of the Location
+	std::string trimmedLine;  // Stores the attribute of the Location
 	std::string emptyString;
 	File file;
 	bool IsFileOpen = false;
 
 	file.extension = fileExtension( line ); // Gets the file extension
 
+	file.max_buffer_size = server.max_buffer_size;
 	if (containBrackets(line, IsFileOpen, emptyString) == false)
 	{
 		return false; 
@@ -63,10 +64,10 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 	while ( std::getline( confFd, line ) ) {
 		noSpaceLine = removeSpace( line );
 
-		if ( !CheckConf::checkLineFinished( noSpaceLine ) ) // Checks if have more information after the limitter
+		if ( !CheckConf::checkLineFinished( noSpaceLine ) ) // Checks if have more information after the limiter
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
 
-		trimedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
+		trimmedLine = noSpaceLine.substr( 0, noSpaceLine.find( ' ' ) );
 		
 		if (line.find("location") == std::string::npos)
 		{
@@ -84,10 +85,10 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 			}
 		}
 		
-		if ( trimedLine[ 0 ] == '}' )
+		if ( trimmedLine[ 0 ] == '}' )
 			break;
 
-		switch ( getTypeFile( trimedLine ) ) {
+		switch ( getTypeFile( trimmedLine ) ) {
 		case METHODS:
 			SetLocation::getMethods( noSpaceLine, file.methods );
 			break;

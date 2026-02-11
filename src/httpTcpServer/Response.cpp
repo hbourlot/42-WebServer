@@ -46,11 +46,9 @@ void http::Response::buildCgiResponse(const HttpStatusCode &status, const std::s
 	std::string content;
 
 	if (headerEnd != std::string::npos) {
-		std::cout << "Found in body of Cgi on pos: " << headerEnd << std::endl;
 		headers = body.substr(0, headerEnd);
 		content = body.substr(headerEnd + 4); // Skipping \r\n\r\n
 	} else {
-		std::cout << "No headers found in body of Cgi\n";
 		content = body;
 	}
 

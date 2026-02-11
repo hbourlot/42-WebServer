@@ -169,7 +169,7 @@ size_t http::Cgi::getBodyBytesWritten() const {
 
 int http::Cgi::prepareCgiInputFile() {
 
-	_bodyFileName = _filePath + "_" + _client->getSessionId() + "_content.txt";
+	_bodyFileName = _serverInfo.temp_path + "_" + _client->getSessionId() + "_content.txt";
 	int fileFd;
 
 	fileFd = open(_bodyFileName.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
@@ -183,14 +183,6 @@ int http::Cgi::prepareCgiInputFile() {
 		close(fileFd);
 		return -1;
 	}
-
-	//! Previous version
-	// ssize_t written = write(fileFd, _request.body.c_str(), _request.body.size());
-	// if (written < 0 || static_cast< size_t >(written) != _request.body.size()) {
-	// 	std::cerr << "Failed to write to file: " << strerror(errno) << std::endl;
-	// 	close(fileFd);
-	// 	return -1;
-	// }
 
 	close(fileFd);
 	fileFd = -1;
@@ -238,7 +230,6 @@ void http::Cgi::executeCgi() {
 		// build argv
 		std::vector<char *> argv;
 		argv.push_back(const_cast<char *>(_filePath.c_str()));
-		// argv.push_back( const_cast< char* >( "http://localhost:8001/directory/youpi.bla" ) ); // !
 		argv.push_back(NULL);
 
 		// build envp

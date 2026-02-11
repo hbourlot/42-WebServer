@@ -216,6 +216,7 @@ namespace http {
 					removeDeadConnections( processor, i );
 					processor.processClientEvents( i );
 				}
+
 			}
 		} catch ( const TcpServerException &e ) {
 			std::cerr << "Error handling client connection => " << e.what() << std::endl;
@@ -226,7 +227,7 @@ namespace http {
 
 	void TcpServer::shutDownServer() {
 
-		Logs::log(LOGS_INFO, "===== Shutting down Server =====");
+		Logs::log(LOGS_INFO, "===== Starting to shut down the Server =====");
 
 		// Close all CGI pipes before shutting down
 		cleanupAllCgis();
@@ -243,9 +244,11 @@ namespace http {
 			_fds.erase( _fds.begin() + i );
 			--i;
 		}
+		Logs::log(LOGS_INFO, "===== END =====");
+
 	}
 
-	void TcpServer::closeClientConnection( size_t index ) { // TODO: [] Need to remove Cgi if it hass
+	void TcpServer::closeClientConnection( size_t index ) {
 		SocketFD fd = _fds[ index ].fd;
 		Client *client = _clientManager.getClient( fd );
 
@@ -260,7 +263,7 @@ namespace http {
 		std::string msg( "Closing FD => " );
 		msg += ft_to_string( fd );
 
-		Logs::log( LOGS_ERROR, msg );
+		Logs::log( LOGS_WARN, msg );
 
 		_socketAddressMap.erase( fd );
 		_clientManager.removeClient( fd );
