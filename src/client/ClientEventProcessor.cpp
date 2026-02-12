@@ -95,8 +95,6 @@ bool http::ClientEventProcessor::readFromSocket(SocketFD fd, std::string& readBu
 			continue; // Try to read more data
 		}
 
-		// if ( bytesReceived == 0 && readCount == 0 && errno == EWOULDBLOCK )
-		// 	return true;
 		if (bytesReceived == 0) {
 			break;
 		}
@@ -136,7 +134,7 @@ bool http::ClientEventProcessor::processRequest(Client& client) {
 
 	IN_OUT_STATE state = client.getState();
 
-	ServerConfig& serverInfo = _server._serverInfo;
+	ServerConfig &serverInfo = _server._serverInfo;
 	// Handle error states first (build error responses)
 	if (state != PARSE_OK) {
 		this->buildErrorResponse(client, state);
@@ -215,6 +213,7 @@ void http::ClientEventProcessor::processClientEvents(int index) {
 
 	std::map<int, Cgi*>::iterator it = _server._cgiByFd.find(fd);
 	Cgi* cgi = (it != _server._cgiByFd.end()) ? it->second : nullptr;
+	
 	if (cgi)
 		client = cgi->getClient();
 
@@ -229,8 +228,6 @@ void http::ClientEventProcessor::processClientEvents(int index) {
 
 	if (cgi && hasCgiFinished(cgi)) {
 		client->setState(CGI_COMPLETED);
-
-		// cleanupCgi( cgi );
 	}
 }
 
@@ -241,7 +238,7 @@ bool http::ClientEventProcessor::handleResponse(pollfd& pfd, Client& client) {
 	if (client.getWriteBuffer().empty())
 		client.appendToWriteBuffer(client.getResponse().buildResponseString());
 
-	std::string& writeBuffer = client.getWriteBuffer();
+	std::string &writeBuffer = client.getWriteBuffer();
 
 	if (writeBuffer.empty())
 		return 0;
@@ -279,7 +276,7 @@ bool http::ClientEventProcessor::sendResponse(pollfd& pfd, Client& client) {
 
 	const int MAX_SENDS_PER_EVENT = 3;
 	int sendCount = 0;
-	std::string& writeBuffer = client.getWriteBuffer();
+	std::string &writeBuffer = client.getWriteBuffer();
 
 	// Send up to MAX_SENDS_PER_EVENT times per poll event
 	while (sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty()) {

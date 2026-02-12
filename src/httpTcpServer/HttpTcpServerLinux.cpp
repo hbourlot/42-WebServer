@@ -158,21 +158,22 @@ namespace http {
 		return 0;
 	}
 
-	void TcpServer::removeDeadConnections(ClientEventProcessor& processor, size_t& index) {
+	bool TcpServer::removeDeadConnections(ClientEventProcessor &processor, size_t &index) {
 
 		if (_fds[index].revents & (POLLHUP | POLLERR | POLLNVAL)) {
+			// if (_fds[index].revents & (POLLERR | POLLNVAL)) {
 			SocketFD fd = _fds[index].fd;
 
 			// Check if this is a CGI pipe fd - skip it (handled by processCgiOutput)
 			if (_cgiByFd.find(fd) != _cgiByFd.end()) {
-				return; // CGI pipes are managed separately
+				return false; // CGI pipes are managed separately
 			}
 
 			// Clean up CGI resources if this is a client with active CGI
-			Client* client = _clientManager.getClient(fd);
+			Client *client = _clientManager.getClient(fd);
 			if (client && client->getCgiOutputFd() != -1) {
 				// Find and cleanup the CGI
-				std::map<int, http::Cgi*>::iterator it = _cgiByFd.find(client->getCgiOutputFd());
+				std::map<int, http::Cgi *>::iterator it = _cgiByFd.find(client->getCgiOutputFd());
 				if (it != _cgiByFd.end()) {
 					processor.cleanupCgi(it->second);
 				}
@@ -189,9 +190,11 @@ namespace http {
 			_clientManager.removeClient(fd);
 
 			_fds.erase(_fds.begin() + index);
-			--index;
+			// --index;
 			close(fd);
+			return true;
 		}
+		return false;
 	}
 
 	void TcpServer::runLoop(int timeOut) {
@@ -212,16 +215,16 @@ namespace http {
 				// Checking for new connections
 				acceptConnection();
 				for (size_t i = 1; i < _fds.size(); ++i) {
-					if (_fds[i].revents & (POLLIN | POLLOUT)) {
-						removeDeadConnections(processor, i);
-					}
+					bool erased = removeDeadConnections(processor, i);
+					if (erased)
+						continue;
 					processor.processClientEvents(i);
-					checkIdleConnections(i);
+					// checkIdleConnections(i);
 				}
 			}
-		} catch (const TcpServerException& e) {
+		} catch (const TcpServerException &e) {
 			std::cerr << "Error handling client connection => " << e.what() << std::endl;
-		} catch (const std::exception& e) {
+		} catch (const std::exception &e) {
 			std::cerr << "[EXCEPTION] std::exception: " << e.what() << std::endl;
 		}
 	}
@@ -250,10 +253,10 @@ namespace http {
 
 	void TcpServer::closeClientConnection(size_t index) {
 		SocketFD fd = _fds[index].fd;
-		Client* client = _clientManager.getClient(fd);
+		Client *client = _clientManager.getClient(fd);
 
 		if (client && client->getCgiPid() != -1) {
-			std::map<int, http::Cgi*>::iterator it = _cgiByFd.find(fd);
+			std::map<int, http::Cgi *>::iterator it = _cgiByFd.find(fd);
 			if (it != _cgiByFd.end()) {
 				delete it->second;
 				_cgiByFd.erase(it);
@@ -272,7 +275,7 @@ namespace http {
 	}
 
 	void TcpServer::cleanupAllCgis() {
-		for (std::map<int, http::Cgi*>::iterator it = _cgiByFd.begin(); it != _cgiByFd.end(); ++it) {
+		for (std::map<int, http::Cgi *>::iterator it = _cgiByFd.begin(); it != _cgiByFd.end(); ++it) {
 			it->second->killProcess();
 			delete it->second; // Cgi destructor closes pipes
 		}

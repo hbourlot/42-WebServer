@@ -16,6 +16,9 @@
 #define CGIPASS 10
 #define TEMP_PATH 11
 #define BODY_BUFFER 12
+#define SERVER 13
+#define EMPTY 14
+#define COMMENT 15
 
 ServerConfig::ServerConfig() {
 	port = 0;
@@ -60,7 +63,10 @@ void getErrorPage(std::string noSpaceLine, ServerConfig &server) {
 }
 
 int getTypeServer(std::string &trimmedLine) { // Return the type of information to use on switch
-	if (trimmedLine == "host")
+
+	if (trimmedLine.size() == 1 || trimmedLine == "{" || trimmedLine == "}" || trimmedLine == "\n")
+		return EMPTY;
+	else if (trimmedLine == "host")
 		return HOST;
 	else if (trimmedLine == "port")
 		return PORT;
@@ -82,6 +88,10 @@ int getTypeServer(std::string &trimmedLine) { // Return the type of information 
 		return TEMP_PATH;
 	else if (trimmedLine == "client_body_buffer_size")
 		return BODY_BUFFER;
+	else if (trimmedLine == "server")
+		return SERVER;
+	else if (trimmedLine[0] == '#')
+		return COMMENT;
 	return 100;
 }
 
@@ -92,15 +102,16 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 	ServerConfig server;     // Variable to save all the information
 
 	bool IsServerOpen = false;
-
+	bool GotServer = false;
 	// Check if the first line opens the brackets or not
 	if (containBrackets(line, IsServerOpen, emptyString) == false) {
 		return false;
 	}
 
 	server.port = 0;
-	server.max_body_size = 0; // Set the max value by default
-	server.max_buffer_size = 0;
+	server.max_body_size = 1024; // Set the max value by default
+	server.max_buffer_size = 1024 * 1024; // Set the value as 1MB
+	server.temp_path = "./";
 	while (std::getline(confFd, line)) { // Finish the server config block
 
 		noSpaceLine = removeSpace(line); // Removes the first spaces
@@ -126,7 +137,6 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			if (checkSplitString(line, "location", IsServerOpen) == false)
 				return false;
 		}
-
 		if (IsServerOpen == true) {
 			switch (getTypeServer(trimmedLine)) {
 			case ROOT:
@@ -147,8 +157,7 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 				break;
 
 			case CLIENT_MAX_BDY:
-				server.max_body_size = getMaxRequestBody(noSpaceLine);
-				if (server.max_body_size == -1) {
+				if (getMaxRequestBody(noSpaceLine, server.max_body_size) == false){
 					std::cerr << "Invalid suffix of max body size" << std::endl;
 					return false;
 				}
@@ -169,9 +178,8 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 				break;
 
 			case BODY_BUFFER:
-				server.max_buffer_size = getMaxRequestBody(noSpaceLine);
-				if (server.max_body_size == -1) {
-					std::cerr << "Invalid suffix of max body size" << std::endl;
+				if (getMaxRequestBody(noSpaceLine, server.max_buffer_size) == false){
+					std::cerr << "Invalid suffix of max buffer size" << std::endl;
 					return false;
 				}
 				break;
@@ -181,8 +189,19 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 					return false;
 				}
 				break;
+			
+			case SERVER:
+				if (GotServer)
+					return false;
+				GotServer = true;
+				break;
 
+			case EMPTY:
+			case COMMENT:
+				break;
+			
 			default:
+				return false;
 				break;
 			}
 		}
@@ -252,10 +271,10 @@ void ReadConfig::setDefaultServer(ServerConfig &server) {
 	if (server.max_buffer_size == 0) {
 		std::cout << "Setting max buffer size to 1MB ✅" << std::endl;
 		server.max_buffer_size = 1024 * 1024;
-		for (int i = 0; i < server.directories.size(); ++i) {
+		for (size_t i = 0; i < server.directories.size(); ++i) {
 			server.directories[i].max_buffer_size = server.directories[i].max_buffer_size == 0 ? server.max_buffer_size : server.directories[i].max_buffer_size;
 		}
-		for (int i = 0; i < server.files.size(); ++i) {
+		for (size_t i = 0; i < server.files.size(); ++i) {
 			server.files[i].max_buffer_size = server.files[i].max_buffer_size == 0 ? server.max_buffer_size : server.files[i].max_buffer_size;
 		}
 	}

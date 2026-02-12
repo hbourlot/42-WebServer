@@ -13,6 +13,8 @@
 #define INDEX 15
 #define CGIPASS 16
 #define BODY_BUFFER 17
+#define EMPTY 18
+#define COMMENT 19
 
 File::File() {
 	// String are automatically initialized;
@@ -44,6 +46,10 @@ int getTypeFile( std::string &trimmedLine ) { // Function to check the informati
 		return INDEX;
 	if ( trimmedLine == "cgi_pass")
 		return CGIPASS;
+	if (trimmedLine.size() == 1 || trimmedLine == "{" || trimmedLine == "}" || trimmedLine == "\n")
+		return EMPTY;
+	if (trimmedLine[0] == '#')
+		return COMMENT;
 	return 100;
 }
 
@@ -100,6 +106,10 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 			break;
 		case CGIPASS:
 			file.cgi_pass = getInfo( noSpaceLine );
+			break;
+				
+		case EMPTY:
+		case COMMENT:
 			break;
 		default:
 			break;

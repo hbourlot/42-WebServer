@@ -18,7 +18,7 @@ namespace http {
 		                      ClientEventProcessor &processor);
 		static void handleGet(Client &client, const ServerConfig &server, const Location &matchLocation);
 		static void handlePost(Client &client, const ServerConfig &server, const Location &matchLocation);
-		static void handleDelete(Client &client, const ServerConfig &server, const Location &matchLocation);
+		static void handleDelete(Client &client, const ServerConfig &server);
 		static void handleDirectoryListing(Client &client, const ServerConfig &server, const std::string &filePath,
 		                                   const Location &matchLocation);
 
