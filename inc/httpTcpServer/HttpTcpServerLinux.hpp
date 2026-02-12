@@ -90,7 +90,7 @@ namespace http {
 		void shutDownServer();
 		void startListen();
 		void acceptConnection();
-		void removeDeadConnections( ClientEventProcessor& processor, size_t& index );
+		bool removeDeadConnections( ClientEventProcessor& processor, size_t& index );
 		// void removeCgiDeadConnection( ClientEventProcessor &processor );
 		void closeClientConnection( size_t index );
 		void cleanupAllCgis();

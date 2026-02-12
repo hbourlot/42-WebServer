@@ -125,9 +125,7 @@ http::Response::Response(const http::Request &request) : _isChunked(false) {
 		std::string val = it->second;
 		_connectionType = std::make_pair(std::string("Connection"), it->second);
 	} else {
-		if (_protocol == "HTTP/1.1")
-			_connectionType = std::make_pair(std::string("Connection"), std::string("keep-alive"));
-		else
+
 			_connectionType = std::make_pair(std::string("Connection"), std::string("close"));
 	}
 
