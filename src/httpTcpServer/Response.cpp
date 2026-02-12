@@ -379,6 +379,15 @@ std::string http::Response::getContentType(const std::string &filePath) {
 }
 
 bool http::Response::shouldCloseConnection() {
+	// for ( std::map< std::string, std::string >::const_iterator it = _headers.begin(); it != _headers.end(); ++it ) {
+
+	// 	if (it->first.compare("Connection") == 0) {
+	// 		if (it->second == "close")
+	// 			return true;
+	// 	}
+	// }
+	// return false;
+
 	std::map<std::string, std::string>::const_iterator it = _headers.find("Connection");
 	if (it != _headers.end()) {
 		if (it->second == "close")

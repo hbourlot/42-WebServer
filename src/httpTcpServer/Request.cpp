@@ -37,7 +37,7 @@ void http::Request::cleanup() {
 int http::Request::appendBody(const char *buf, size_t len, const ServerConfig &configs) {
 
 	size_t maxBuffer = matchLocation ? matchLocation->max_buffer_size : configs.max_buffer_size;
-	if (!bodyInDisk && body.size() > maxBuffer - len) {
+	if (!bodyInDisk && len > maxBuffer - body.size()) {
 		bodyInDisk = true;
 		if (createTempFile(configs))
 			return (-1);

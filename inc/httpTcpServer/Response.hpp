@@ -41,6 +41,10 @@ namespace http {
 		std::string buildResponseString(void);
 		const std::map<std::string, std::string> &getHeaders() const;
 
+		std::string getBody() {
+			return _body;
+		}
+
 		bool shouldCloseConnection();
 
 		/// @brief Sets default HTTP headers including Date, Content-Length, and Connection type

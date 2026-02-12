@@ -174,7 +174,6 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 					std::cerr << "Invalid suffix of max body size" << std::endl;
 					return false;
 				}
-				std::cout << "Buffer size " << server.max_buffer_size << std::endl;
 				break;
 			case LOCATION:
 				if (SetLocation::setLocationConfig(confFd, noSpaceLine.substr(noSpaceLine.find(' ')), server) ==

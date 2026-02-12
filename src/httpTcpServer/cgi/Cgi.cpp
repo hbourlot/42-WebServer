@@ -9,11 +9,11 @@
 #include <sys/poll.h>
 #include <vector>
 
-http::Cgi::Cgi(const http::Request &request, const std::string &scriptPath, const ServerConfig &serverInfo,
-               Client *client)
+http::Cgi::Cgi(const http::Request& request, const std::string& scriptPath, const ServerConfig& serverInfo,
+               Client* client)
     : _status(), _clientFD(), _request(request), _response(Response(request)), _serverInfo(serverInfo),
       _clientAddress(), _bytesReceived(), _bodyBytesWritten(0), _body(), _client(client), _envp(), _argv(),
-      _envStrings() {
+      _envStrings(), _state(RESET) {
 
 	_filePath = scriptPath;
 
@@ -58,22 +58,22 @@ pid_t http::Cgi::getPid() const {
 	return _pid;
 }
 
-const int *http::Cgi::getInputPipe() const {
+const int* http::Cgi::getInputPipe() const {
 	return _inputPipe;
 }
 
 int http::Cgi::getStatus() const {
 	return _status;
 }
-int &http::Cgi::getStatus() {
+int& http::Cgi::getStatus() {
 	return _status;
 }
 
-const int *http::Cgi::getOutputPipe() const {
+const int* http::Cgi::getOutputPipe() const {
 	return _outputPipe;
 }
 
-Client *http::Cgi::getClient() const {
+Client* http::Cgi::getClient() const {
 	return _client;
 }
 
@@ -228,16 +228,16 @@ void http::Cgi::executeCgi() {
 		this->doDupTwoWay();
 
 		// build argv
-		std::vector<char *> argv;
-		argv.push_back(const_cast<char *>(_filePath.c_str()));
+		std::vector<char*> argv;
+		argv.push_back(const_cast<char*>(_filePath.c_str()));
 		argv.push_back(NULL);
 
 		// build envp
-		std::vector<char *> envp;
+		std::vector<char*> envp;
 		this->_envp.clear();
 
 		for (size_t i = 0; i < _envStrings.size(); ++i) {
-			this->_envp.push_back(const_cast<char *>(_envStrings[i].c_str()));
+			this->_envp.push_back(const_cast<char*>(_envStrings[i].c_str()));
 		}
 		this->_envp.push_back(NULL);
 
@@ -249,4 +249,12 @@ void http::Cgi::executeCgi() {
 		fcntl(_outputPipe[0], F_SETFL, O_NONBLOCK);
 		fcntl(_inputPipe[1], F_SETFL, O_NONBLOCK);
 	}
+};
+
+IN_OUT_STATE& http::Cgi::getState() {
+	return _state;
+};
+
+std::string& http::Cgi::getReadBuffer() {
+	return _outputBuffer;
 };

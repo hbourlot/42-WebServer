@@ -153,7 +153,7 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 	while (std::getline(confFd, line)) {
 		noSpaceLine = removeSpace(line);
 
-		if (!CheckConf::checkLineFinished(noSpaceLine)) // Checks if have more information after the limitter
+		if (!CheckConf::checkLineFinished(noSpaceLine)) // Checks if have more information after the limiter
 			throw std::invalid_argument("Error: Extra words after End of Line\n");
 
 		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));

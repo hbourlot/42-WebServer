@@ -15,65 +15,65 @@
 #include <unistd.h>
 #include <vector>
 
-static void setSocketAddr( sockaddr_in &socketAddress, int domain, int s_addr, int _port ) {
+static void setSocketAddr(sockaddr_in& socketAddress, int domain, int s_addr, int _port) {
 	socketAddress.sin_family = domain;
-	socketAddress.sin_addr.s_addr = s_addr;  // can replace this with a specific IP address if needed
-	socketAddress.sin_port = htons( _port ); // Converts 16-bit integer in host byte order
+	socketAddress.sin_addr.s_addr = s_addr; // can replace this with a specific IP address if needed
+	socketAddress.sin_port = htons(_port);  // Converts 16-bit integer in host byte order
 }
 
 namespace http {
 
-	TcpServer::TcpServer( ServerConfig server )
-	    : _serverInfo( server ), _serverSocket(), _socketAddress_len( sizeof( sockaddr_in ) ) {
-		std::string msg( "CREATED SERVER " );
+	TcpServer::TcpServer(ServerConfig server)
+	    : _serverInfo(server), _serverSocket(), _socketAddress_len(sizeof(sockaddr_in)) {
+		std::string msg("CREATED SERVER ");
 		msg = msg + _serverInfo.host + ":";
-		msg += ft_to_string( _serverInfo.port );
-		Logs::log( LOGS_INFO, msg );
+		msg += ft_to_string(_serverInfo.port);
+		Logs::log(LOGS_INFO, msg);
 	}
 
 	TcpServer::~TcpServer() {
-		close( _serverSocket );
+		close(_serverSocket);
 		// close(_acceptSocket);
 		// exit(1); //TODO Exit with a failure code??
 	}
 
-	std::vector< pollfd > &TcpServer::getVectorPollFds() {
+	std::vector<pollfd>& TcpServer::getVectorPollFds() {
 		return _fds;
 	};
 
 	int TcpServer::startServer() {
 
 		// Creates a server socket (IPv4, TCP, 0) (domain, type, protocol);
-		_serverSocket = socket( AF_INET, SOCK_STREAM, 0 );
-		if ( _serverSocket < 0 ) {
-			throw TcpServerException( "Cannot create socket" );
+		_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+		if (_serverSocket < 0) {
+			throw TcpServerException("Cannot create socket");
 			return -1;
 		}
 
 		// Set listening socket to non-blocking mode
-		fcntl( _serverSocket, F_SETFL, fcntl( _serverSocket, F_GETFL, 0 ) | O_NONBLOCK );
+		fcntl(_serverSocket, F_SETFL, fcntl(_serverSocket, F_GETFL, 0) | O_NONBLOCK);
 
 		// For inactivate the time wait from OS that block bind again
 		int opt = 1;
-		if ( setsockopt( _serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof( opt ) ) < 0 ) {
-			Logs::log( LOGS_ERROR, "setsockopt failed" );
-			close( _serverSocket );
-			exit( EXIT_FAILURE );
+		if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+			Logs::log(LOGS_ERROR, "setsockopt failed");
+			close(_serverSocket);
+			exit(EXIT_FAILURE);
 		}
 
 		struct sockaddr_in socketAddress;
 		// Set the socket address struct
-		setSocketAddr( socketAddress, AF_INET, INADDR_ANY, _serverInfo.port );
+		setSocketAddr(socketAddress, AF_INET, INADDR_ANY, _serverInfo.port);
 
 		// Associate socket with a specific IP addr and Port number (sockfd,
 		// sockaddr *, addrlen)
-		if ( bind( _serverSocket, (sockaddr *)&socketAddress, _socketAddress_len ) < 0 ) {
-			perror( "bind" );
-			throw TcpServerException( "Cannot bind socket to address" );
+		if (bind(_serverSocket, (sockaddr*)&socketAddress, _socketAddress_len) < 0) {
+			perror("bind");
+			throw TcpServerException("Cannot bind socket to address");
 			return -1;
 		}
 
-		_socketAddressMap[ _serverSocket ] = socketAddress;
+		_socketAddressMap[_serverSocket] = socketAddress;
 		return 0;
 	}
 
@@ -82,16 +82,16 @@ namespace http {
 
 		// TODO: Need to implement a properly valid max number of padding
 		// TODO: connections
-		listen_fd = listen( _serverSocket, 10 );
+		listen_fd = listen(_serverSocket, SOMAXCONN);
 
-		if ( listen_fd < 0 ) {
-			throw TcpServerException( "Socket Listen failed" );
+		if (listen_fd < 0) {
+			throw TcpServerException("Socket Listen failed");
 		}
 
 		std::ostringstream ss; // Output string stream for logging
-		ss << "Listening on ADDRESS: " << inet_ntoa( _socketAddressMap[ _serverSocket ].sin_addr )
-		   << " PORT: " << ntohs( _socketAddressMap[ _serverSocket ].sin_port );
-		Logs::log( LOGS_INFO, ss.str() );
+		ss << "Listening on ADDRESS: " << inet_ntoa(_socketAddressMap[_serverSocket].sin_addr)
+		   << " PORT: " << ntohs(_socketAddressMap[_serverSocket].sin_port);
+		Logs::log(LOGS_INFO, ss.str());
 	}
 
 	void TcpServer::acceptConnection() {
@@ -101,33 +101,33 @@ namespace http {
 		struct sockaddr_in socketAddress;
 
 		// Checks the if theres readable data available (event)
-		while ( _fds[ 0 ].revents & POLLIN ) {
-			acceptSocket = accept( _serverSocket, (struct sockaddr *)&socketAddress, &_socketAddress_len );
-			if ( acceptSocket < 0 ) {
-				if ( errno == EAGAIN || errno == EWOULDBLOCK ) {
+		while (_fds[0].revents & POLLIN) {
+			acceptSocket = accept(_serverSocket, (struct sockaddr*)&socketAddress, &_socketAddress_len);
+			if (acceptSocket < 0) {
+				if (errno == EAGAIN || errno == EWOULDBLOCK) {
 					// Means no more connections to accept
 					break;
 				}
-				Logs::logAcceptError( socketAddress );
+				Logs::logAcceptError(socketAddress);
 				return;
 			} else {
 
 				// Set client socket to non-blocking
-				fcntl( acceptSocket, F_SETFL, fcntl( acceptSocket, F_GETFL, 0 ) | O_NONBLOCK );
+				fcntl(acceptSocket, F_SETFL, fcntl(acceptSocket, F_GETFL, 0) | O_NONBLOCK);
 
 				client_pollfd.fd = acceptSocket;
 				client_pollfd.events = POLLIN;
 				client_pollfd.revents = 0;
 
-				_fds.push_back( client_pollfd );
-				_socketAddressMap[ acceptSocket ] = socketAddress;
+				_fds.push_back(client_pollfd);
+				_socketAddressMap[acceptSocket] = socketAddress;
 
-				_clientManager.addClient( acceptSocket, *this );
+				_clientManager.addClient(acceptSocket, *this);
 
 				// std::cout << "----- Connection Accepted 🟩\n\n";
-				std::string msg( "Connection Accepted 🟩 " );
-				msg += ft_to_string( client_pollfd.fd );
-				Logs::log( LOGS_INFO, msg );
+				std::string msg("Connection Accepted 🟩 ");
+				msg += ft_to_string(client_pollfd.fd);
+				Logs::log(LOGS_INFO, msg);
 			}
 		}
 	}
@@ -135,16 +135,15 @@ namespace http {
 	int TcpServer::runServer() {
 
 		// int timeOut = 1 * 60 * 1000;
-		int timeOut = 1 * 10 * 1000;
+		int timeOut = 1 * 10 * 1000; // 10s
 
-
-		if ( startServer() )
+		if (startServer())
 			return -1;
 		try {
 			startListen();
-		} catch ( const TcpServerException &e ) {
+		} catch (const TcpServerException& e) {
 			std::cerr << "Error while starting to listen => " << e.what() << std::endl;
-			close( _serverSocket );
+			close(_serverSocket);
 			return -1;
 		}
 
@@ -152,75 +151,77 @@ namespace http {
 		listen_fd.fd = _serverSocket;
 		listen_fd.events = POLLIN; // any readable data available
 		listen_fd.revents = 0;
-		_fds.push_back( listen_fd );
+		_fds.push_back(listen_fd);
 
-		runLoop( timeOut );
+		runLoop(timeOut);
 		shutDownServer();
 		return 0;
 	}
 
-	void TcpServer::removeDeadConnections( ClientEventProcessor &processor, size_t &index ) {
+	void TcpServer::removeDeadConnections(ClientEventProcessor& processor, size_t& index) {
 
-		if ( _fds[ index ].revents & ( POLLHUP | POLLERR | POLLNVAL ) ) {
-			SocketFD fd = _fds[ index ].fd;
+		if (_fds[index].revents & (POLLHUP | POLLERR | POLLNVAL)) {
+			SocketFD fd = _fds[index].fd;
 
 			// Check if this is a CGI pipe fd - skip it (handled by processCgiOutput)
-			if ( _cgiByFd.find( fd ) != _cgiByFd.end() ) {
+			if (_cgiByFd.find(fd) != _cgiByFd.end()) {
 				return; // CGI pipes are managed separately
 			}
 
 			// Clean up CGI resources if this is a client with active CGI
-			Client *client = _clientManager.getClient( fd );
-			if ( client && client->getCgiOutputFd() != -1 ) {
+			Client* client = _clientManager.getClient(fd);
+			if (client && client->getCgiOutputFd() != -1) {
 				// Find and cleanup the CGI
-				std::map< int, http::Cgi * >::iterator it = _cgiByFd.find( client->getCgiOutputFd() );
-				if ( it != _cgiByFd.end() ) {
-					processor.cleanupCgi( it->second );
+				std::map<int, http::Cgi*>::iterator it = _cgiByFd.find(client->getCgiOutputFd());
+				if (it != _cgiByFd.end()) {
+					processor.cleanupCgi(it->second);
 				}
 			}
 
-			if ( _socketAddressMap.count( fd ) )
-				_socketAddressMap.erase( fd );
+			if (_socketAddressMap.count(fd))
+				_socketAddressMap.erase(fd);
 
-			std::string msg( "Closing Dead FD => " );
-			msg += ft_to_string( fd );
+			std::string msg("Closing Dead FD => ");
+			msg += ft_to_string(fd);
 
-			Logs::log( LOGS_ERROR, msg );
-			
-			_clientManager.removeClient( fd );
-			
-			_fds.erase( _fds.begin() + index );
+			Logs::log(LOGS_ERROR, msg);
+
+			_clientManager.removeClient(fd);
+
+			_fds.erase(_fds.begin() + index);
 			--index;
-			close( fd );
+			close(fd);
 		}
 	}
 
-	void TcpServer::runLoop( int timeOut ) {
-		ClientEventProcessor processor( *this );
+	void TcpServer::runLoop(int timeOut) {
+		ClientEventProcessor processor(*this);
 		try {
-			while ( true ) {
+			while (true) {
 				// poll() waits for events on multiple file descriptors (like
 				// sockets), enabling non-blocking I/O in servers.
-				int ret = poll( _fds.data(), _fds.size(), timeOut );
+				int ret = poll(_fds.data(), _fds.size(), timeOut);
 
-				if ( ret < 0 ) {
+				if (ret < 0) {
 					std::cerr << "poll() failed" << std::endl;
-				} else if ( ret == 0 ) {
+				} else if (ret == 0) {
 					std::cerr << "poll() timeOut. Closing Server." << std::endl;
 					return;
 				}
 
 				// Checking for new connections
 				acceptConnection();
-				for ( size_t i = 1; i < _fds.size(); ++i ) {
-					removeDeadConnections( processor, i );
-					processor.processClientEvents( i );
+				for (size_t i = 1; i < _fds.size(); ++i) {
+					if (_fds[i].revents & (POLLIN | POLLOUT)) {
+						removeDeadConnections(processor, i);
+					}
+					processor.processClientEvents(i);
+					checkIdleConnections(i);
 				}
-
 			}
-		} catch ( const TcpServerException &e ) {
+		} catch (const TcpServerException& e) {
 			std::cerr << "Error handling client connection => " << e.what() << std::endl;
-		} catch ( const std::exception &e ) {
+		} catch (const std::exception& e) {
 			std::cerr << "[EXCEPTION] std::exception: " << e.what() << std::endl;
 		}
 	}
@@ -232,52 +233,72 @@ namespace http {
 		// Close all CGI pipes before shutting down
 		cleanupAllCgis();
 
-		for ( size_t i = 0; i < _fds.size(); ++i ) {
+		for (size_t i = 0; i < _fds.size(); ++i) {
 			std::string msg = "Removing from poll vector at idx '" + ft_to_string(i);
 			msg += "' fd='";
 			msg += ft_to_string(_fds[i].fd);
-			msg+= "'";
+			msg += "'";
 			Logs::log(LOGS_INFO, msg);
-		
+
 			if (_fds[i].fd != -1)
-				close( _fds[ i ].fd );
-			_fds.erase( _fds.begin() + i );
+				close(_fds[i].fd);
+			_fds.erase(_fds.begin() + i);
 			--i;
 		}
 		Logs::log(LOGS_INFO, "===== END =====");
-
 	}
 
-	void TcpServer::closeClientConnection( size_t index ) {
-		SocketFD fd = _fds[ index ].fd;
-		Client *client = _clientManager.getClient( fd );
+	void TcpServer::closeClientConnection(size_t index) {
+		SocketFD fd = _fds[index].fd;
+		Client* client = _clientManager.getClient(fd);
 
-		if ( client && client->getCgiPid() != -1 ) {
-			std::map< int, http::Cgi * >::iterator it = _cgiByFd.find( fd );
-			if ( it != _cgiByFd.end() ) {
+		if (client && client->getCgiPid() != -1) {
+			std::map<int, http::Cgi*>::iterator it = _cgiByFd.find(fd);
+			if (it != _cgiByFd.end()) {
 				delete it->second;
-				_cgiByFd.erase( it );
+				_cgiByFd.erase(it);
 			}
 		}
 
-		std::string msg( "Closing FD => " );
-		msg += ft_to_string( fd );
+		std::string msg("Closing FD => ");
+		msg += ft_to_string(fd);
 
-		Logs::log( LOGS_WARN, msg );
+		Logs::log(LOGS_WARN, msg);
 
-		_socketAddressMap.erase( fd );
-		_clientManager.removeClient( fd );
-		_fds.erase( _fds.begin() + index );
-		close( fd );
+		_socketAddressMap.erase(fd);
+		_clientManager.removeClient(fd);
+		_fds.erase(_fds.begin() + index);
+		close(fd);
 	}
 
 	void TcpServer::cleanupAllCgis() {
-		for ( std::map< int, http::Cgi * >::iterator it = _cgiByFd.begin(); it != _cgiByFd.end(); ++it ) {
+		for (std::map<int, http::Cgi*>::iterator it = _cgiByFd.begin(); it != _cgiByFd.end(); ++it) {
 			it->second->killProcess();
 			delete it->second; // Cgi destructor closes pipes
 		}
 		_cgiByFd.clear();
-		Logs::log( LOGS_INFO, "Cleaned up all CGI processes" );
+		Logs::log(LOGS_INFO, "Cleaned up all CGI processes");
+	}
+
+	void TcpServer::checkIdleConnections(size_t index) {
+
+		const int MAX_IDLE_TICKS = 3000;
+
+		SocketFD fd = _fds[index].fd;
+		Client* client = _clientManager.getClient(fd);
+
+		if (!client)
+			return;
+
+		if (_fds[index].revents == POLLIN && client->getState() == READ_EMPTY) {
+			client->incrementIdleTicks();
+			if (client->getIdleTicks() >= MAX_IDLE_TICKS) {
+				closeClientConnection(index);
+			}
+			return;
+		} else {
+			client->resetIdleTicks();
+		}
 	}
 
 } // namespace http

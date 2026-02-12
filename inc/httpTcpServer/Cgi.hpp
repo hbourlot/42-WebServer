@@ -16,22 +16,6 @@
 class Client;
 
 namespace http {
-	const std::string CGI_NO_OUTPUT_PAGE =
-	    "<!DOCTYPE html>\n"
-	    "<html><head><title>CGI Error</title><style>\n"
-	    "body{font-family:Arial,sans-serif;background:#f4f4f4;display:flex;justify-content:center;align-items:"
-	    "center;"
-	    "height:100vh;margin:0}\n"
-	    ".container{background:white;padding:40px;border-radius:8px;box-shadow:0 2px 10px "
-	    "rgba(0,0,0,0.1);text-align:center;max-width:500px}\n"
-	    "h1{color:#e74c3c;margin-bottom:20px}p{color:#555;line-height:1.6}.error-code{font-size:72px;color:#e74c3c;"
-	    "font-weight:bold;margin:20px 0}\n"
-	    "</style></head><body>\n"
-	    "<div class='container'><div class='error-code'>⚠️</div>\n"
-	    "<h1>CGI Script Error</h1><p><strong>No Output Received</strong></p>\n"
-	    "<p>The CGI script executed but did not produce any output.</p>\n"
-	    "<p>This could indicate an issue with the script or missing output headers.</p>\n"
-	    "</div></body></html>";
 	class Cgi {
 
 	  public:
@@ -57,10 +41,8 @@ namespace http {
 		bool hasDataToRead();
 		void writeToCgi();
 		size_t getBodyBytesWritten() const;
-
-		std::string &getOutputBuffer() {
-			return _outputBuffer;
-		};
+		IN_OUT_STATE& getState();
+		std::string &getReadBuffer();
 
 	  private:
 		int _status;
@@ -75,6 +57,7 @@ namespace http {
 		std::string _body;
 		Client *_client; // Back-reference to client
 		std::string _bodyFileName;
+		IN_OUT_STATE _state;
 
 		std::vector<char *> _envp;
 		std::vector<char *> _argv;
