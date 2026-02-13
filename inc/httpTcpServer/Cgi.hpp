@@ -25,57 +25,40 @@ namespace http {
 		~Cgi();
 
 		void executeCgi(void);
-		Response getResponse() const;
-		http::Request getRequest() const;
 		std::string getFilePath() const;
-		std::string getBody() const;
 		int &getStatus();
 		int getStatus() const;
-		std::vector<std::string> getArgv() const;
-		int getPollFd() const;
 		pid_t getPid() const;
-		const int *getInputPipe() const;
 		const int *getOutputPipe() const;
 		void killProcess();
 		Client *getClient() const;
-		bool hasDataToRead();
-		void writeToCgi();
-		size_t getBodyBytesWritten() const;
 		IN_OUT_STATE& getState();
 		std::string &getReadBuffer();
 
 	  private:
 		int _status;
-		SocketFD _clientFD;
 		http::Request _request;
 		Response _response;
 		ServerConfig _serverInfo;
 		std::string _filePath;
 		const sockaddr_in _clientAddress;
-		int _bytesReceived;
-		size_t _bodyBytesWritten;
-		std::string _body;
 		Client *_client; // Back-reference to client
 		std::string _bodyFileName;
 		IN_OUT_STATE _state;
 
 		std::vector<char *> _envp;
-		std::vector<char *> _argv;
 		std::vector<std::string> _envStrings;
 
 		// Accumulate CGI stdout across poll cycles
 		std::string _outputBuffer;
 
 		// Pipe handling
-		int _pipefd[2];
 		int _inputPipe[2];
 		int _outputPipe[2];
 		pid_t _pid;
 
 		void buildEnvStrings();
-		void doDupOneWay();
 		void doDupTwoWay();
-		void closeForOneWay();
 		void closeForTwoWay();
 		int prepareCgiInputFile();
 	};

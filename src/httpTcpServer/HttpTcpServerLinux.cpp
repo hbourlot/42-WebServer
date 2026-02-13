@@ -80,8 +80,6 @@ namespace http {
 	void TcpServer::startListen() {
 		int listen_fd;
 
-		// TODO: Need to implement a properly valid max number of padding
-		// TODO: connections
 		listen_fd = listen(_serverSocket, SOMAXCONN);
 
 		if (listen_fd < 0) {
@@ -219,7 +217,7 @@ namespace http {
 					if (erased)
 						continue;
 					processor.processClientEvents(i);
-					// checkIdleConnections(i);
+					checkIdleConnections(i);
 				}
 			}
 		} catch (const TcpServerException &e) {

@@ -91,7 +91,6 @@ namespace http {
 		void startListen();
 		void acceptConnection();
 		bool removeDeadConnections( ClientEventProcessor& processor, size_t& index );
-		// void removeCgiDeadConnection( ClientEventProcessor &processor );
 		void closeClientConnection( size_t index );
 		void cleanupAllCgis();
 		void checkIdleConnections(size_t index);
