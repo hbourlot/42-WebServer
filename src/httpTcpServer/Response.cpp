@@ -6,53 +6,65 @@
 #include <unistd.h>
 #include <utility>
 
-http::Response::Response() : _protocol("HTTP/1.1") {
+http::Response::Response()
+    : _protocol("HTTP/1.1"), _isChunked(false), _chunkState(CHUNK_PARSE_HEADERS), _statusCode(""), _statusMsg("") {
 }
 
-void http::Response::buildCgiHeaderChunked(const HttpStatusCode &status) {
+void http::Response::initFromRequest(const http::Request &request) {
+
+	_protocol = (!request.serverProtocol.empty()) ? request.serverProtocol : "HTTP/1.1";
+
+	std::map<std::string, std::string>::const_iterator it = request.headers.find("Connection");
+
+	if (it != request.headers.end())
+		_connectionType = std::make_pair(std::string("Connection"), it->second);
+	else
+		_connectionType = std::make_pair(std::string("Connection"), std::string("close"));
+
+	std::map<std::string, std::string>::const_iterator itRange = request.headers.find("Range");
+
+	if (itRange != request.headers.end())
+		_range = std::make_pair(itRange->first, itRange->second);
+}
+
+void http::Response::initChunked() {
+	if (_isChunked)
+		return;
 	_isChunked = true;
-	// If CGI didn't provide Status, use the one passed as parameter
-	// if (!hasStatus) {
-	_statusCode = status.code;
-	_statusMsg = status.message;
-	// }
+	setDefaultHeaders();
 	_headers.erase("Content-Length");
 	_headers["Transfer-Encoding"] = "chunked";
-
-	_body.clear();
-
-	setDefaultHeaders();
+}
+void http::Response::finishCgiChunked() {
+	if (_chunkState == CHUNK_FINISHED)
+		return;
+	_outBuffer += "0\r\n\r\n";
+	_chunkState = CHUNK_FINISHED;
 }
 
-void http::Response::buildCgiBodyChunked(const char *buffer, size_t len) {
-	if (!_isChunked || len == 0)
+void http::Response::markChunkendDone() {
+	_isChunked = false;
+}
+
+void http::Response::appendChunk(std::string &data) {
+	if (data.empty())
 		return;
 
-	std::ostringstream oss;
-	oss << std::hex << len << "\r\n";
+	std::ostringstream chunk;
+	chunk << std::hex << data.size() << "\r\n";
+	chunk << data << "\r\n";
 
-	_body.append(oss.str());
-	_body.append(buffer, len);
-	_body.append("\r\n");
+	_outBuffer += chunk.str();
+	data.erase(0, data.size());
 }
+bool http::Response::parseCgiHeaders(std::string &buffer) {
 
-//! Previous Version
-void http::Response::buildCgiResponse(const HttpStatusCode &status, const std::string &body,
-                                      const ServerConfig &server) {
-	(void)server;
+	size_t headerEnd = buffer.find("\r\n\r\n");
+	if (headerEnd == std::string::npos)
+		return false;
+	std::cout << "Found header: " << headerEnd << std::endl;
+	std::string headers = buffer.substr(0, headerEnd);
 
-	size_t headerEnd = body.find("\r\n\r\n");
-	std::string headers;
-	std::string content;
-
-	if (headerEnd != std::string::npos) {
-		headers = body.substr(0, headerEnd);
-		content = body.substr(headerEnd + 4); // Skipping \r\n\r\n
-	} else {
-		content = body;
-	}
-
-	// Parse CGI headers
 	std::istringstream headerStream(headers);
 	std::string line;
 	bool hasStatus = false;
@@ -96,60 +108,50 @@ void http::Response::buildCgiResponse(const HttpStatusCode &status, const std::s
 			_headers[key] = value;
 		}
 	}
-
-	// If CGI didn't provide Status, use the one passed as parameter
 	if (!hasStatus) {
-		_statusCode = status.code;
-		_statusMsg = status.message;
+		_statusCode = HTTP_OK.code;
+		_statusMsg = HTTP_OK.message;
 	}
-
-	// If CGI didn't provide Content-Type, set default
 	if (!hasContentType) {
 		_headers["Content-Type"] = "text/html";
 	}
 
-	_body = content;
+	buffer.erase(0, headerEnd + 4);
 
-	setDefaultHeaders();
+	return true;
 }
 
-http::Response::Response(const http::Request &request) : _isChunked(false) {
-	std::map<std::string, std::string>::const_iterator it = request.headers.find("Connection");
-
-	if (!request.serverProtocol.empty())
-		_protocol = request.serverProtocol;
-	else
-		_protocol = "HTTP/1.1";
-
-	if (it != request.headers.end()) {
-		std::string val = it->second;
-		_connectionType = std::make_pair(std::string("Connection"), it->second);
-	} else {
-
-			_connectionType = std::make_pair(std::string("Connection"), std::string("close"));
+void http::Response::appendCgiChunk(std::string &buffer) {
+	if (_chunkState == CHUNK_PARSE_HEADERS) {
+		if (!parseCgiHeaders(buffer))
+			return;
+		initChunked();
+		_outBuffer += buildResponseString(); // solo headers
+		_chunkState = CHUNK_STREAM_BODY;
 	}
 
-	std::map<std::string, std::string>::const_iterator itRange = request.headers.find("Range");
-
-	if (itRange != request.headers.end())
-		_range = std::make_pair(itRange->first, itRange->second);
-}
-
-http::Response &http::Response::operator=(const Response &other) {
-
-	if (this != &other) {
-		this->_protocol = other._protocol;
-		this->_connectionType = other._connectionType;
-		this->_range = other._range;
-		this->_statusCode = other._statusCode;
-		this->_statusMsg = other._statusMsg;
-		this->_body = other._body;
-		this->_headers = other._headers;
-		this->_isChunked = other._isChunked;
+	if (_chunkState == CHUNK_STREAM_BODY && !buffer.empty()) {
+		appendChunk(buffer);
 	}
-
-	return *this;
 }
+bool http::Response::isChunked() const {
+	return _isChunked;
+}
+
+std::string &http::Response::getCgiOutBuffer() {
+	return _outBuffer;
+}
+
+std::string http::Response::consumeOutBuffer() {
+	std::string tmp = _outBuffer;
+	_outBuffer.clear();
+	return tmp;
+}
+
+CgiChunkState http::Response::getchunkState() const {
+	return (_chunkState);
+}
+
 
 http::Response::~Response() {
 }
@@ -385,3 +387,118 @@ bool http::Response::shouldCloseConnection() {
 	}
 	return (false);
 }
+
+
+//! Previous Version
+// void http::Response::buildCgiResponse(const HttpStatusCode &status, const std::string &body,
+//                                       const ServerConfig &server) {
+// 	(void)server;
+
+// 	size_t headerEnd = body.find("\r\n\r\n");
+// 	std::string headers;
+// 	std::string content;
+
+// 	if (headerEnd != std::string::npos) {
+// 		headers = body.substr(0, headerEnd);
+// 		content = body.substr(headerEnd + 4); // Skipping \r\n\r\n
+// 	} else {
+// 		content = body;
+// 	}
+
+// 	// Parse CGI headers
+// 	std::istringstream headerStream(headers);
+// 	std::string line;
+// 	bool hasStatus = false;
+// 	bool hasContentType = false;
+
+// 	while (std::getline(headerStream, line)) {
+// 		if (line.empty() || line == "\r")
+// 			break;
+
+// 		// Remove \r if has
+// 		if (!line.empty() && line[line.size() - 1] == '\r')
+// 			line.erase(line.size() - 1);
+
+// 		size_t colonPos = line.find(':');
+// 		if (colonPos == std::string::npos)
+// 			continue;
+
+// 		std::string key = line.substr(0, colonPos);
+// 		std::string value = line.substr(colonPos + 1);
+
+// 		// Trim leading spaces from value
+// 		size_t start = value.find_first_not_of(" \t");
+// 		if (start != std::string::npos)
+// 			value = value.substr(start);
+
+// 		// Checking Status header (CGI can override status)
+// 		if (key == "Status") {
+// 			hasStatus = true;
+// 			// Parse status code from value (e.g., "200 OK")
+// 			_statusCode = value.substr(0, 3); // First 3 chars are the code
+
+// 			size_t spacePos = value.find(' ');
+// 			if (spacePos != std::string::npos)
+// 				_statusMsg = value.substr(spacePos + 1);
+// 			else
+// 				_statusMsg = "";
+// 		} else {
+// 			// Store other CGI headers (Content-Type, Location, etc.)
+// 			if (key == "Content-Type")
+// 				hasContentType = true;
+// 			_headers[key] = value;
+// 		}
+// 	}
+
+// 	// If CGI didn't provide Status, use the one passed as parameter
+// 	if (!hasStatus) {
+// 		_statusCode = status.code;
+// 		_statusMsg = status.message;
+// 	}
+
+// 	// If CGI didn't provide Content-Type, set default
+// 	if (!hasContentType) {
+// 		_headers["Content-Type"] = "text/html";
+// 	}
+
+// 	_body = content;
+
+// 	setDefaultHeaders();
+// }
+
+// http::Response::Response(const http::Request &request) : _isChunked(false), _chunkState(CHUNK_PARSE_HEADERS) {
+// 	std::map<std::string, std::string>::const_iterator it = request.headers.find("Connection");
+
+// 	if (!request.serverProtocol.empty())
+// 		_protocol = request.serverProtocol;
+// 	else
+// 		_protocol = "HTTP/1.1";
+
+// 	if (it != request.headers.end()) {
+// 		std::string val = it->second;
+// 		_connectionType = std::make_pair(std::string("Connection"), it->second);
+// 	} else {
+// 		_connectionType = std::make_pair(std::string("Connection"), std::string("close"));
+// 	}
+
+// 	std::map<std::string, std::string>::const_iterator itRange = request.headers.find("Range");
+
+// 	if (itRange != request.headers.end())
+// 		_range = std::make_pair(itRange->first, itRange->second);
+// }
+
+// http::Response &http::Response::operator=(const Response &other) {
+
+// 	if (this != &other) {
+// 		this->_protocol = other._protocol;
+// 		this->_connectionType = other._connectionType;
+// 		this->_range = other._range;
+// 		this->_statusCode = other._statusCode;
+// 		this->_statusMsg = other._statusMsg;
+// 		this->_body = other._body;
+// 		this->_headers = other._headers;
+// 		this->_isChunked = other._isChunked;
+// 	}
+
+// 	return *this;
+// }

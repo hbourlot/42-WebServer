@@ -11,9 +11,8 @@
 
 http::Cgi::Cgi(const http::Request &request, const std::string &scriptPath, const ServerConfig &serverInfo,
                Client *client)
-    : _status(), _clientFD(), _request(request), _response(Response(request)), _serverInfo(serverInfo),
-      _clientAddress(), _bytesReceived(), _bodyBytesWritten(0), _body(), _client(client), _envp(), _argv(),
-      _envStrings() {
+    : _status(), _clientFD(), _request(request), _serverInfo(serverInfo), _clientAddress(), _bytesReceived(),
+      _bodyBytesWritten(0), _body(), _client(client), _envp(), _argv(), _envStrings() {
 
 	_filePath = scriptPath;
 
@@ -40,10 +39,6 @@ std::string http::Cgi::getFilePath() const {
 
 http::Request http::Cgi::getRequest() const {
 	return _request;
-}
-
-http::Response http::Cgi::getResponse() const {
-	return _response;
 }
 
 int http::Cgi::getPollFd() const {

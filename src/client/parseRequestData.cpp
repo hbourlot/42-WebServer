@@ -233,7 +233,7 @@ bool http::ClientEventProcessor::parseRequestData(Client &client, const ServerCo
 
 	if (clientRequest.getRequestPhase() == FINISHED) {
 
-		client.getResponse() = Response(clientRequest);
+		client.getResponse().initFromRequest(client.getRequest());
 		ensureSessionId(client);
 
 		clientRequest.resetChunkParser();

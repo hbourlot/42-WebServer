@@ -41,7 +41,6 @@ namespace http {
 		~Cgi();
 
 		void executeCgi(void);
-		Response getResponse() const;
 		http::Request getRequest() const;
 		std::string getFilePath() const;
 		std::string getBody() const;
@@ -66,7 +65,6 @@ namespace http {
 		int _status;
 		SocketFD _clientFD;
 		http::Request _request;
-		Response _response;
 		ServerConfig _serverInfo;
 		std::string _filePath;
 		const sockaddr_in _clientAddress;
