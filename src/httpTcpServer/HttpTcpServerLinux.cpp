@@ -200,7 +200,7 @@ namespace http {
 	void TcpServer::runLoop(int timeOut) {
 		ClientEventProcessor processor(*this);
 		try {
-			while (true) {
+			while (!getStopServer()) {
 				// poll() waits for events on multiple file descriptors (like
 				// sockets), enabling non-blocking I/O in servers.
 				int ret = poll(_fds.data(), _fds.size(), timeOut);
@@ -221,6 +221,9 @@ namespace http {
 					processor.processClientEvents(i);
 				}
 			}
+			// std::cout << "Must CleanUp everything" << std::endl;
+			if (getStopServer())
+				Logs::log(LOGS_INFO, "SIGINT called, server will shut down");
 		} catch (const TcpServerException &e) {
 			std::cerr << "Error handling client connection => " << e.what() << std::endl;
 		} catch (const std::exception &e) {

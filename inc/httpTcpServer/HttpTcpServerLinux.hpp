@@ -54,7 +54,7 @@ namespace http {
 	  public:
 		friend class ClientEventProcessor;
 		// Default Constructor
-		TcpServer( ServerConfig server );
+		TcpServer(ServerConfig server);
 		// Default Destructor
 		~TcpServer();
 
@@ -63,14 +63,14 @@ namespace http {
 
 		class TcpServerException : public std::runtime_error {
 		  public:
-			explicit TcpServerException( const std::string& message ) : std::runtime_error( message ) {
+			explicit TcpServerException(const std::string &message) : std::runtime_error(message) {
 			}
 		};
-		std::vector< pollfd >& getVectorPollFds();
+		std::vector<pollfd> &getVectorPollFds();
 
-		std::vector< pollfd > _fds;
+		std::vector<pollfd> _fds;
 
-		ServerConfig& getServerInfo() {
+		ServerConfig &getServerInfo() {
 
 			return _serverInfo;
 		}
@@ -80,22 +80,23 @@ namespace http {
 		SocketFD _serverSocket;
 		ClientManager _clientManager;
 
-		std::map< SocketFD, sockaddr_in > _socketAddressMap;
+		std::map<SocketFD, sockaddr_in> _socketAddressMap;
 		unsigned int _socketAddress_len;
 
-		std::map< int, http::Cgi* > _cgiByFd; // CGI output fd → Cgi instance
+		std::map<int, http::Cgi *> _cgiByFd; // CGI output fd → Cgi instance
 
 		int startServer();
-		void runLoop( int timeOut );
+		void runLoop(int timeOut);
 		void shutDownServer();
 		void startListen();
 		void acceptConnection();
-		bool removeDeadConnections( ClientEventProcessor& processor, size_t& index );
+		bool removeDeadConnections(ClientEventProcessor &processor, size_t &index);
 		// void removeCgiDeadConnection( ClientEventProcessor &processor );
-		void closeClientConnection( size_t index );
+		void closeClientConnection(size_t index);
 		void cleanupAllCgis();
 	};
 
-	std::string getLocationFieldAsString( const std::vector< Directory >& locations, const std::string& field );
+	std::string getLocationFieldAsString(const std::vector<Directory> &locations, const std::string &field);
 
 } // namespace http
+bool &getStopServer();
