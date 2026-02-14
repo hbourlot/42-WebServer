@@ -2,20 +2,6 @@
 #include "Config/SetLocations.hpp"
 #include <utils.hpp>
 
-#define METHODS 7
-#define ROOT 8
-#define REDIRECT 9
-#define CGI_EXTENSION 10
-#define CGI_PATH 11
-#define UPLOAD_ENABLE 12
-#define UPLOAD_STORE 13
-#define AUTOINDEX 14
-#define INDEX 15
-#define CGIPASS 16
-#define CLIENT_MAX_BDY 17
-#define BODY_BUFFER 18
-#define EMPTY 19
-#define COMMENT 20
 
 class SetFile;
 
@@ -90,10 +76,10 @@ int getTypeLocation(std::string &trimmedLine) { // Function to check the informa
 		return CLIENT_MAX_BDY;
 	if (trimmedLine == "client_body_buffer_size")
 		return BODY_BUFFER;
-	if (trimmedLine.size() == 1 || trimmedLine == "{" || trimmedLine == "}" || trimmedLine == "\n")
-		return EMPTY;
 	if (trimmedLine[0] == '#')
 		return COMMENT;
+	if (trimmedLine == "{" || trimmedLine == "}" || trimmedLine.size() == 1)
+		return EMPTY;
 	return 100;
 }
 
@@ -147,8 +133,6 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 		return SetFile::setFileConfig(confFd, line, server);
 	}
 	location.path = locationPath(line); // Sets the Location path
-	location.max_body_size = 0;
-	location.max_buffer_size = 0;
 
 	if (location.path.size() == 0)
 		return false;
@@ -164,7 +148,6 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 			throw std::invalid_argument("Error: Extra words after End of Line\n");
 
 		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
-
 		if (line.find("location") == std::string::npos) {
 			if (containBrackets(line, IsLocationOpen, emptyString) == false) {
 				return false;
@@ -225,29 +208,34 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 
 		case CGIPASS:
 			location.cgi_pass = getInfo(noSpaceLine);
+			struct stat buffer;
+			if (stat(location.cgi_pass.c_str(), &buffer) != 0)
+				return false;
+			
 			break;
 
 		case CLIENT_MAX_BDY:
-			if (getMaxRequestBody(noSpaceLine, location.max_body_size) == false){
+			location.max_body_size = getMaxRequestBody(noSpaceLine);
+			if (location.max_body_size == -1) {
 				std::cerr << "Invalid suffix of max body size" << std::endl;
 				return false;
 			}
 			break;
 
 		case BODY_BUFFER:
-			if (getMaxRequestBody(noSpaceLine, location.max_buffer_size) == false){
+			location.max_buffer_size = getMaxRequestBody(noSpaceLine);
+			if (location.max_body_size == -1) {
 				std::cerr << "Invalid suffix of max body size" << std::endl;
 				return false;
 			}
 			break;
 		
-		case EMPTY:
 		case COMMENT:
+		case EMPTY:
 			break;
 
 		default:
 			return false;
-			break;
 		}
 	}
 
@@ -265,15 +253,12 @@ void SetLocation::setDefaultLocation(ServerConfig &server, Directory &location) 
 		else
 			location.max_body_size = 1024;
 	}
-	
-	if (location.max_buffer_size == 0) {
+
+	if (location.max_buffer_size != 0) {
 		if (server.max_buffer_size != 0)
-		{
 			location.max_buffer_size = server.max_buffer_size;
-		}
 		else
 			location.max_buffer_size = 1024 * 1024;
-		
 	}
 
 	if (location.path.empty())

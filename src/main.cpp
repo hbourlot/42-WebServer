@@ -1,6 +1,7 @@
 // #include "Config/Debug.hpp"
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include "utils.hpp"
+#include "../inc/Config/Debug.hpp"
 
 class ServerConfig;
 // Namespace to use on TCPServer
@@ -11,8 +12,11 @@ std::vector< TcpServer * > initialize_all_servers( const Configs &configuration 
 	std::vector< TcpServer * > servers;
 
 	for ( size_t i = 0; i < configuration.servers.size(); ++i ) {
+		std::cout << "------------------ SERVER " << i << "\n";
 		TcpServer *serv = new TcpServer( configuration.servers[i] );
-
+		std::cout << "keep -> " << configuration.servers[i].alive_timeout << std::endl;
+		printFiles(configuration.servers[i].files);
+		printDirectories(configuration.servers[i].directories);
 		serv->startServer();
 		servers.push_back( serv );
 	}

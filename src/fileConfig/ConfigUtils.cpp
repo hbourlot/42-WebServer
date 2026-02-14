@@ -1,9 +1,11 @@
 #include "Config/ConfigUtils.hpp"
 
+struct Directory;
+
 std::string removeSpace( std::string& line ) {
 	int i = 0;
 
-	for ( i = 0; line[ i ] && line[ i ] == ' ';
+	for ( i = 0; line[ i ] && (line[ i ] == ' ' || line[ i ] == '\t');
 	      i++ ) { // Runs all spaces and return the string without the first spaces
 		continue;
 	}
@@ -11,7 +13,7 @@ std::string removeSpace( std::string& line ) {
 	return line.substr( i );
 }
 
-bool getMaxRequestBody( std::string& value, size_t& result ) {
+int getMaxRequestBody( std::string& value ) {
 	std::string resultStr = getInfo( value );
 
 	if ( resultStr.empty() == false && resultStr[ resultStr.size() - 1 ] == ';' )
@@ -25,15 +27,15 @@ bool getMaxRequestBody( std::string& value, size_t& result ) {
 		else if ( last == 'M' )
 			multiplier = 1024 * 1024;
 		else
-			return false;
+			return -1;
 	}
+
 	char* end;
 	long num = std::strtol( resultStr.c_str(), &end, 10 );
 	if ( num < 0 ) {
 		throw std::runtime_error( "invalid size number" );
 	}
-	result = static_cast< size_t >( num ) * multiplier;
-	return true;
+	return static_cast< size_t >( num ) * multiplier;
 }
 
 std::string getInfo( std::string& noSpaceLine ) {
@@ -60,4 +62,26 @@ Directory& findPath( ServerConfig server, std::string path ) {
 		itb++;
 	}
 	return *ite;
+}
+
+bool stringToSizeT(const std::string& str, size_t& result){
+	std::stringstream ss(str);
+	ss >> result;
+
+	if (ss.fail() == true || ss.eof() == false)
+		return false;
+	return true;
+}
+
+bool stringIsAlpha(const std::string& str){
+	if (str.empty() )
+		return true;
+
+	for (int i = 0; str.size() > i; i++)
+	{
+		if (std::isalpha(str[i]) == false)
+			return false;
+	}
+
+	return true;
 }
