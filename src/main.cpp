@@ -8,13 +8,13 @@ int main( int argc, char **argv) {
 
 	Configs configuration;
 	try {
-
+		
 		if ( argc != 2 )
 			throw std::invalid_argument( "Invalid number of arguments" );
-
+		
 		if ( CheckConf::checkConfExtension( argv[ 1 ] ) == false )
 			throw std::invalid_argument( "Extension has to be '.conf'" );
-
+			
 		// Creates a config object
 		// Reads the configuration file
 		if ( ReadConfig::setConfigs( argv[ 1 ], configuration ) == false ) {

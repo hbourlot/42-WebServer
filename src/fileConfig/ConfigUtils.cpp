@@ -65,11 +65,13 @@ Directory& findPath( ServerConfig server, std::string path ) {
 }
 
 bool stringToSizeT(const std::string& str, size_t& result){
+
 	std::stringstream ss(str);
 	ss >> result;
 
-	if (ss.fail() == true || ss.eof() == false)
+	if (ss.fail() == true || ss.eof() == false){
 		return false;
+	}
 	return true;
 }
 

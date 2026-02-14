@@ -60,11 +60,16 @@ std::string dateString() {
 // Returns false, if the state is the same. Otherwise we return false
 bool containBrackets(std::string &line, bool &state, std::string extraStringToFind) {
 	// If we find the new string
+	std::cout << "Extra string " << extraStringToFind << "| " << extraStringToFind.empty() << std::endl;
 	if (!extraStringToFind.empty())
+	{
 		return (line.find(extraStringToFind) != std::string::npos);
-
+	}
+	
 	if (line.find('#') != std::string::npos) // Check if it is a comment
+	{
 		return true;
+	}
 
 	int openCount = 0;
 	int closeCount = 0;

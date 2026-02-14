@@ -107,7 +107,7 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			throw std::invalid_argument("Error: Extra words after End of Line\n");
 
 		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
-		
+
 		if (trimmedLine[0] == '}') // Finish the server info
 			break;
 
@@ -115,7 +115,6 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 		// This serves to check if we have stuff like " } location /upload {"
 		// We close the last location config, and we open a new one
 		if (line.find("location") == std::string::npos) {
-
 			if (containBrackets(line, IsServerOpen, emptyString) == false)
 				return false;
 		}
@@ -186,8 +185,10 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			}
 			
 			case ALIVE_TIMEOUT:
-				if (stringToSizeT(noSpaceLine, server.alive_timeout) == false)
+				if (stringToSizeT(getInfo(noSpaceLine), server.alive_timeout) == false){
+					std::cerr << "Failed to set the alive_timeout" << std::endl;
 					return false;
+				}
 				break;
 			
 			case SERVER:
@@ -218,6 +219,8 @@ bool ReadConfig::setConfigs(char *conf, Configs &configs) {
 	confFd.open(conf); // Open the config file.
 	try {
 		while (std::getline(confFd, line)) {
+			std::cout << "Bolona " << line.empty() << std::endl;
+
 			if (line.empty() == false &&
 			    containBrackets(line, inServer, "server") ==
 			        true) { // Removes the spaces before the name and return the value to check if it is a server
@@ -226,6 +229,10 @@ bool ReadConfig::setConfigs(char *conf, Configs &configs) {
 				{
 					return (false);
 				}
+			}
+			else{
+				std::cerr << "Invalid information in conf file" << std::endl;
+				return false;
 			}
 		}
 	} catch (const std::exception &exception) {

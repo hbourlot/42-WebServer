@@ -36,7 +36,12 @@ bool CheckConf::checkLineFinished( std::string &line ) {
 	if ( line[ 0 ] == '#' ) // Skips the comments
 		return true;
 
-	size_t lineSize = line.size() -1; // Gets the line size
+	size_t lineSize = 0; // Gets the line size
+	if (line.size() > 1) // Check the last '}' to close the server 
+		lineSize = line.size() - 1;
+	else
+		lineSize = line.size();
+
 	size_t end = line.find_first_of( ';' ); // Gets the position of ';'
 	if ( end != std::string::npos ) {
 		if ( end + 1 != lineSize ) {
