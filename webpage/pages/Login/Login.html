@@ -1,28 +1,54 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+  <head>
+    <title>WebServer</title>
+    <link rel="stylesheet" href="../../css/global.css" />
+    <link rel="stylesheet" href="../../components/Footer/styles.module.css" />
+    <link rel="stylesheet" href="../../components/Navbar/styles.module.css" />
+    <link rel="stylesheet" href="./styles.module.css" />
+    <link rel="icon" href="../../assets/wolfMoonIco.png" type="image/x-icon" />
+    <script src="../../js/layout.js"></script>
+  </head>
 
-<head>
-	<title>WebServer</title>
-	<link rel="stylesheet" href="../../css/global.css" />
-	<link rel="stylesheet" href="../../components/Footer/styles.module.css" />
-	<link rel="stylesheet" href="../../components/Navbar/styles.module.css" />
-	<link rel="stylesheet" href="./styles.module.css" />
-	<link rel="icon" href="../../assets/wolfMoonIco.png" type="image/x-icon" />
-	<script src="../../js/layout.js"></script>
-</head>
+  <body>
+    <header id="navbar"></header>
+    <div class="login-box">
+      <h2>Login</h2>
+      <form id="loginForm" method="POST" action="/login">
+        <input type="text" name="username" placeholder="Username" required />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          required
+        />
 
-<body>
-	<header id="navbar"></header>
-	<div class="login-box">
-		<h2>Login</h2>
-		<form id="loginForm" method="POST" action="/login">
-			<input type="text" name="username" placeholder="Username" required />
-			<input type="password" name="password" placeholder="Password" required />
+        <button type="submit">Log In</button>
+      </form>
+    </div>
+    <footer id="footer"></footer>
+  </body>
+  <script>
+    document
+      .getElementById("loginForm")
+      .addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-			<button type="submit">Log In</button>
-		</form>
-	</div>
-	<footer id="footer"></footer>
-</body>
+        const formData = new FormData(this);
 
+        const response = await fetch("/login", {
+          method: "POST",
+          body: formData,
+        });
+
+        const text = await response.text();
+
+        if (response.status == 200) {
+          alert("Login correcto");
+          window.location.href = "/dashboard.html"; // si quieres redirigir
+        } else {
+          alert("Login incorrecto");
+        }
+      });
+  </script>
 </html>

@@ -30,7 +30,7 @@ void http::ClientEventProcessor::cleanupCgi( http::Cgi* cgi ) {
 	cgi->killProcess(); // Kill CGI process if still running
 
 	// Remove CGI pipe fd from poll array BEFORE deleting Cgi (which closes pipes)
-	for ( size_t i = 0; i < _cgi_by_fd.size(); ++i ) {
+	for ( size_t i = 0; i < _allSockets.size(); ++i ) {
 		if ( _allSockets[ i ].fd == outputFd ) {
 			_allSockets.erase( _allSockets.begin() + i );
 			break;

@@ -18,7 +18,7 @@ static void discardingBody( Client &client, pollfd &pfd ) {
 		client.setBytesToDiscard( 0 );
 		client.setDiscardingBody( false );
 
-		client.getResponse() = http::Response( client.getRequest() );
+		client.getResponse().initFromRequest( client.getRequest() );
 		ensureSessionId( client );
 		client.setState( PARSE_TOO_LARGE );
 
@@ -31,11 +31,11 @@ static void discardingBody( Client &client, pollfd &pfd ) {
 }
 
 void http::ClientEventProcessor::run() {
-	
-	int timeOut = 1 * 10 * 1000; // 10s
+
+	int timeOut = 1 * 60 * 1000; // 10s
 
 	try {
-		while ( true ) {
+		while ( getStopServer() == false ) {
 			int ret = poll( _allSockets.data(), _allSockets.size(), timeOut );
 
 			if ( ret < 0 )
@@ -75,7 +75,7 @@ void http::ClientEventProcessor::acceptConnections() {
 		while ( _allSockets[i].revents && POLLIN ) {
 			unsigned int socketAddress_len = sizeof( sockaddr_in );
 			fd = accept( _allSockets[i].fd, (struct sockaddr *)&socketAddress, &socketAddress_len );
-			
+
 			if ( fd < 0 ) {
 				if ( errno == EAGAIN || errno == EWOULDBLOCK ) {
 					// Means no more connections to accept
@@ -118,6 +118,7 @@ bool http::ClientEventProcessor::removeDeadConnections( size_t &index ) {
 
 		// Clean up CGI resources if this is a client with active CGI
 		Client *client = _clientManager.getClient( fd );
+
 		if ( client && client->getCgiOutputFd() != -1 ) {
 			// Find and cleanup the CGI
 			std::map< int, http::Cgi * >::iterator it = _cgi_by_fd.find( client->getCgiOutputFd() );
@@ -137,7 +138,6 @@ bool http::ClientEventProcessor::removeDeadConnections( size_t &index ) {
 		_clientManager.removeClient( fd );
 
 		_allSockets.erase( _allSockets.begin() + index );
-		// --index;
 		close( fd );
 		return true;
 	}
@@ -224,7 +224,7 @@ void http::ClientEventProcessor::shutDownProcessor() {
 void http::ClientEventProcessor::processRead( pollfd &pfd, Client *client, Cgi *cgi ) {
 
 	std::string &readBuffer = cgi ? cgi->getReadBuffer() : client->getReadBuffer();
-	
+
 	if ( !readFromSocket( pfd.fd, readBuffer, cgi ? cgi->getState() : client->getState() ) ) {
 		return;
 	}
@@ -253,14 +253,20 @@ void http::ClientEventProcessor::processWrite( pollfd &pfd, Client *client, int 
 		cgi = it->second;
 	}
 
-	if ( client->getState() == CGI_COMPLETED && cgi ) {
+	if ( client->getState() == CGI_JUST_STARTED && cgi ) {
 
 		std::string &readBuffer = cgi->getReadBuffer();
+		client->getResponse().appendCgiChunk( readBuffer );
 
-		if ( client->getWriteBuffer().empty() )
-			client->getResponse().buildCgiResponse( HTTP_OK, readBuffer, client->getServer()._serverInfo );
-		cleanupCgi( cgi );
-
+	} else if ( client->getState() == CGI_COMPLETED && cgi ) {
+		if ( !hasCgiSuccessfullyFinished( cgi ) ) {
+			client->getResponse().buildErrorResponse( HTTP_SERVER_ERR, client->getServer().getServerInfo() );
+		} else {
+			client->getResponse().appendCgiChunk( cgi->getReadBuffer(), true );
+			if ( client->getResponse().isChunked() )
+				client->getResponse().finishCgiChunked();
+			cleanupCgi( cgi );
+		}
 	} else if ( client->getCgiPid() == -1 && client->getState() != CGI_COMPLETED ) {
 		if ( !processRequest( *client ) )
 			return;
@@ -426,8 +432,13 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 	SocketFD clientFd = client.getFd();
 
 	// Build response if write buffer is emptysendResponse
-	if ( client.getWriteBuffer().empty() )
+	if ( client.getWriteBuffer().empty() && !client.getResponse().isChunked() )
 		client.appendToWriteBuffer( client.getResponse().buildResponseString() );
+	if ( client.getResponse().isChunked() ) {
+		std::string chunk = client.getResponse().consumeOutBuffer();
+		if ( !chunk.empty() )
+			client.appendToWriteBuffer( chunk );
+	}
 
 	std::string &writeBuffer = client.getWriteBuffer();
 
@@ -438,7 +449,12 @@ bool http::ClientEventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 	}
 
 	// Check if all data was sent
-	if ( writeBuffer.empty() ) {
+	if ( writeBuffer.empty() && client.getResponse().isChunked() ) {
+		if ( client.getResponse().getchunkState() == CHUNK_FINISHED )
+			client.getResponse().markChunkendDone();
+	}
+
+	if ( writeBuffer.empty() && !client.getResponse().isChunked() ) {
 		std::string msg( "Server Response sent to client fd='" );
 		msg += ft_to_string( clientFd ) + "' sessionID: " + client.getSessionId();
 		if ( DEBUG ) {
@@ -467,7 +483,7 @@ bool http::ClientEventProcessor::sendResponse( pollfd &pfd, Client &client ) {
 
 	int sendCount = 0;
 	std::string &writeBuffer = client.getWriteBuffer();
-
+	// std::cout << "writeBuffer" << writeBuffer << std::endl;
 	// Send up to MAX_SENDS_PER_EVENT times per poll event
 	while ( sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty() ) {
 		ssize_t bytesSent = send( clientFd, writeBuffer.c_str(), writeBuffer.size(), MSG_NOSIGNAL );

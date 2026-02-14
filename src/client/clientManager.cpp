@@ -47,7 +47,7 @@ void ClientManager::resetClientState( int fd ) {
 	}
 	Client *client = _clients[ fd ];
 	client->setState( RESET );
-	// client->clearBuffers();
+	client->clearBuffers();
 	client->resetRequest();
 	client->resetResponse();
 	client->setCgiInProgress( false );

@@ -7,16 +7,26 @@ class ServerConfig;
 // Namespace to use on TCPServer
 using namespace http;
 
+void cleanup(int signo) {
+	getStopServer() = true;
+}
+
+bool &getStopServer() {
+	static bool s_stopServer = false;
+	return (s_stopServer);
+}
+
+
 std::vector< TcpServer * > initialize_all_servers( const Configs &configuration ) {
 
 	std::vector< TcpServer * > servers;
 
 	for ( size_t i = 0; i < configuration.servers.size(); ++i ) {
-		std::cout << "------------------ SERVER " << i << "\n";
+		// std::cout << "------------------ SERVER " << i << "\n";
 		TcpServer *serv = new TcpServer( configuration.servers[i] );
-		std::cout << "keep -> " << configuration.servers[i].alive_timeout << std::endl;
-		printFiles(configuration.servers[i].files);
-		printDirectories(configuration.servers[i].directories);
+		// std::cout << "keep -> " << configuration.servers[i].alive_timeout << std::endl;
+		// printFiles(configuration.servers[i].files);
+		// printDirectories(configuration.servers[i].directories);
 		serv->startServer();
 		servers.push_back( serv );
 	}
@@ -42,6 +52,11 @@ void free_servers_memory( const std::vector< TcpServer * > &servers ) {
 
 int main( int ac, char **av ) {
 
+		struct sigaction sa;
+	sa.sa_handler = cleanup;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sigaction(SIGINT, &sa, NULL);
 	Configs configuration;
 
 	try {

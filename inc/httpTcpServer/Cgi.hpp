@@ -38,7 +38,6 @@ namespace http {
 	  private:
 		int _status;
 		http::Request _request;
-		Response _response;
 		ServerConfig _serverInfo;
 		std::string _filePath;
 		const sockaddr_in _clientAddress;

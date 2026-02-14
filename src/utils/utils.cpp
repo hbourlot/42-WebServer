@@ -152,7 +152,7 @@ static std::string getExtension(const std::string &path) {
 	if (slashPos != std::string::npos && dotPos < slashPos)
 		return "";
 
-	return path.substr(dotPos);
+	return path.substr(dotPos + 1);
 }
 
 const Directory *getMatchDirectory(const std::string &path, const std::vector<Directory> &directories) {
@@ -175,8 +175,9 @@ const Location *getMatchLocation(const std::string &path, const std::vector<Loca
 	std::string ext = getExtension(path);
 	if (!ext.empty()) {
 		for (size_t i = 0; i < locations.size(); ++i) {
-			if (locations[i].extension.find(ext) != std::string::npos)
+			if (locations[i].extension.find(ext) != std::string::npos) {
 				return &locations[i];
+			}
 		}
 	}
 	const Location *matchedLocation = NULL;

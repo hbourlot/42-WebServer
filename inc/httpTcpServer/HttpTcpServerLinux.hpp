@@ -112,3 +112,4 @@ namespace http {
 	std::string getLocationFieldAsString( const std::vector< Directory > &locations, const std::string &field );
 
 } // namespace http
+bool &getStopServer();

@@ -1,4 +1,5 @@
 #include "Client/Client.hpp"
+#include <signal.h>
 
 Client::Client(int fd, http::TcpServer& server)
     : _server(server), _fd(fd), _state(), _requestComplete(false), _cgiInProgress(false), _cgiPid(-1), _cgiOutputFd(-1),
@@ -6,10 +7,18 @@ Client::Client(int fd, http::TcpServer& server)
 }
 
 Client::~Client() {
-	_request.cleanup();
+	clearBuffers();
+	resetRequest();
+	resetResponse();
+
+	if (_cgiOutputFd > 0)
+		close(_cgiOutputFd);
+
+	if (_cgiPid > 0)
+		kill(_cgiPid, SIGKILL);
 }
 
-http::TcpServer& Client::getServer() {
+http::TcpServer &Client::getServer() {
 	return _server;
 }
 
@@ -32,7 +41,7 @@ void Client::appendToWriteBuffer(const std::string& data) {
 void Client::clearBuffers() {
 	// _readBuffer.clear();
 	// _writeBuffer.clear();
-	std::string().swap(_readBuffer);
+	// std::string().swap(_readBuffer);
 	std::string().swap(_writeBuffer);
 }
 

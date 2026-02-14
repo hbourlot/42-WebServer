@@ -232,12 +232,14 @@ bool ReadConfig::setConfigs(char *conf, Configs &configs) {
 	} catch (const std::exception &exception) {
 		std::cerr << "Got an exception " << exception.what() << std::endl;
 		confFd.close();
+		return false;
 	}
 	confFd.close();
 	if (configs.servers.empty() == true)
 		return false;
 
 	ReadConfig::setServerLocations(configs);
+
 	return (true);
 };
 

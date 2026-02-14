@@ -89,6 +89,30 @@ bool http::Request::writeBodyToFd(int outFd) {
 	return r == 0;
 }
 
+std::string &http::Request::readALlBody() {
+	if (!bodyInDisk)
+		return (body);
+
+	body.clear();
+	body.reserve(bodyFdSize);
+
+	off_t oldPos = lseek(bodyFd, 0, SEEK_CUR);
+
+	if (lseek(bodyFd, 0, SEEK_SET) < 0)
+		return body;
+
+	char buffer[8192];
+	ssize_t bytes;
+
+	while ((bytes = read(bodyFd, buffer, sizeof(buffer))) > 0)
+		body.append(buffer, bytes);
+
+	if (oldPos >= 0)
+		lseek(bodyFd, oldPos, SEEK_SET);
+
+	return body;
+}
+
 REQUEST_PHASE http::Request::getRequestPhase() {
 	return (_requestPhase);
 }
