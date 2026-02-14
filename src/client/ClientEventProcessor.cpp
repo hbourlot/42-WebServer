@@ -3,6 +3,12 @@
 
 http::ClientEventProcessor::ClientEventProcessor(TcpServer& server) : _server(server){};
 
+http::ClientEventProcessor::ClientEventProcessor(std::vector<pollfd>& allFds, std::vector<TcpServer*> servers)
+    : _allSockets(allFds), _servers(servers) {
+
+	int size_servers = _allSockets.size();
+};
+
 http::ClientEventProcessor::~ClientEventProcessor(){};
 
 static void discardingBody(Client& client, pollfd& pfd) {
@@ -25,6 +31,108 @@ static void discardingBody(Client& client, pollfd& pfd) {
 		client.clearReadBuffer();
 	}
 }
+
+void http::ClientEventProcessor::run() {
+
+	try {
+		while (true) {
+			int ret = poll(_allSockets.data(), _allSockets.size(), -1);
+
+			if (ret < 0)
+				std::cerr << "poll() failed" << std::endl;
+			else if (ret == 0) {
+				std::cerr << "poll() timeOut. Closing Server." << std::endl;
+				return;
+			}
+
+			// Checking for new Connections
+			acceptConnections();
+			for (size_t i = 1; i < _allSockets.size(); ++i) {
+				bool erased = removeDeadConnections(processor, i);
+				if (erased)
+					continue;
+				processor.processClientEvents(i);
+				checkIdleConnections(i);
+			}
+		}
+	}
+}
+
+void http::ClientEventProcessor::acceptConnections() {
+
+	SocketFD fd;
+	struct pollfd client_pollfd;
+	struct sockaddr_in socketAddress;
+
+	while (_allSockets[0].revents && POLLIN) {
+		unsigned int socketAddress_len = sizeof(sockaddr_in);
+		fd = accept(_allSockets[0].fd, (struct sockaddr*)&socketAddress, &socketAddress_len);
+		if (fd < 0) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+				// Means no more connections to accept
+				break;
+			}
+			Logs::logAcceptError(socketAddress);
+			return;
+		} else {
+
+			// Set client socket to non-blocking
+			fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+
+			client_pollfd.fd = fd;
+			client_pollfd.events = POLLIN;
+			client_pollfd.revents = 0;
+
+			_allSockets.push_back(client_pollfd);
+
+			_servers[0]->setSocketAddress(fd, socketAddress);
+			_clientManager.addClient(fd, (*_servers[0]));
+
+			std::string msg("Connection Accepted 🟩 ");
+			msg += ft_to_string(client_pollfd.fd);
+			Logs::log(LOGS_INFO, msg);
+		}
+	}
+}
+
+bool http::ClientEventProcessor::removeDeadConnections(size_t& index) {
+	
+	if (_allSockets[index].revents & (POLLHUP | POLLERR | POLLNVAL)) {
+		// if (_allSockets[index].revents & (POLLERR | POLLNVAL)) {
+		SocketFD fd = _allSockets[index].fd;
+
+		// Check if this is a CGI pipe fd - skip it (handled by processCgiOutput)
+		if (_cgiByFd.find(fd) != _cgiByFd.end()) {
+			return false; // CGI pipes are managed separately
+		}
+
+		// Clean up CGI resources if this is a client with active CGI
+		Client* client = _clientManager.getClient(fd);
+		if (client && client->getCgiOutputFd() != -1) {
+			// Find and cleanup the CGI
+			std::map<int, http::Cgi*>::iterator it = _cgiByFd.find(client->getCgiOutputFd());
+			if (it != _cgiByFd.end()) {
+				this->cleanupCgi(it->second);
+			}
+		}
+
+		if (_socketAddressMap.count(fd))
+			_socketAddressMap.erase(fd);
+
+		std::string msg("Closing Dead FD => ");
+		msg += ft_to_string(fd);
+
+		Logs::log(LOGS_ERROR, msg);
+
+		_clientManager.removeClient(fd);
+
+		_allSockets.erase(_fds.begin() + index);
+		// --index;
+		close(fd);
+		return true;
+	}
+	return false;
+};
 
 void http::ClientEventProcessor::processRead(pollfd& pfd, Client* client, Cgi* cgi) {
 
@@ -134,7 +242,7 @@ bool http::ClientEventProcessor::processRequest(Client& client) {
 
 	IN_OUT_STATE state = client.getState();
 
-	ServerConfig &serverInfo = _server._serverInfo;
+	ServerConfig& serverInfo = _server._serverInfo;
 	// Handle error states first (build error responses)
 	if (state != PARSE_OK) {
 		this->buildErrorResponse(client, state);
@@ -213,7 +321,7 @@ void http::ClientEventProcessor::processClientEvents(int index) {
 
 	std::map<int, Cgi*>::iterator it = _server._cgiByFd.find(fd);
 	Cgi* cgi = (it != _server._cgiByFd.end()) ? it->second : nullptr;
-	
+
 	if (cgi)
 		client = cgi->getClient();
 
@@ -238,7 +346,7 @@ bool http::ClientEventProcessor::handleResponse(pollfd& pfd, Client& client) {
 	if (client.getWriteBuffer().empty())
 		client.appendToWriteBuffer(client.getResponse().buildResponseString());
 
-	std::string &writeBuffer = client.getWriteBuffer();
+	std::string& writeBuffer = client.getWriteBuffer();
 
 	if (writeBuffer.empty())
 		return 0;
@@ -274,9 +382,8 @@ bool http::ClientEventProcessor::handleResponse(pollfd& pfd, Client& client) {
 bool http::ClientEventProcessor::sendResponse(pollfd& pfd, Client& client) {
 	SocketFD clientFd = client.getFd();
 
-	const int MAX_SENDS_PER_EVENT = 3;
 	int sendCount = 0;
-	std::string &writeBuffer = client.getWriteBuffer();
+	std::string& writeBuffer = client.getWriteBuffer();
 
 	// Send up to MAX_SENDS_PER_EVENT times per poll event
 	while (sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty()) {

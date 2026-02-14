@@ -4,7 +4,6 @@
 #include "Client/ClientManager.hpp"
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
-// #include "Client/ClientEventProcessor.hpp"
 #include "HttpStatus.hpp"
 #include "HttpStructs.hpp"
 #include "Logs/Logs.hpp"
@@ -29,6 +28,7 @@
 #include <unistd.h>
 #include <vector>
 
+
 #define DFL_404 "content/defaults/error_404.html"
 #define DFL_405 "content/defaults/error_405.html"
 #define DFL_500 "content/defaults/error_500.html"
@@ -44,17 +44,21 @@
 
 class Cgi;
 
-namespace http {
 
+
+namespace http {
+	#include <netinet/in.h> // This pulls sockaddr_in into the http namespace
+	
 	class ClientEventProcessor;
 	const int BUFFER_SIZE = 65536;
 	const int MAX_READS_PER_EVENT = 3;
+	const int MAX_SENDS_PER_EVENT = 3;
 
 	class TcpServer {
 	  public:
 		friend class ClientEventProcessor;
 		// Default Constructor
-		TcpServer( ServerConfig server );
+		TcpServer(ServerConfig server);
 		// Default Destructor
 		~TcpServer();
 
@@ -63,16 +67,29 @@ namespace http {
 
 		class TcpServerException : public std::runtime_error {
 		  public:
-			explicit TcpServerException( const std::string& message ) : std::runtime_error( message ) {
+			explicit TcpServerException(const std::string& message) : std::runtime_error(message) {
 			}
 		};
-		std::vector< pollfd >& getVectorPollFds();
+		std::vector<pollfd>& getVectorPollFds();
 
-		std::vector< pollfd > _fds;
+		std::vector<pollfd> _fds;
 
 		ServerConfig& getServerInfo() {
 
 			return _serverInfo;
+		}
+
+		struct sockaddr_in& getSocketAddress() {
+			std::map<SocketFD, sockaddr_in>::iterator it = _socketAddressMap.find(_serverSocket);
+			if (it == _socketAddressMap.end()) {
+				throw TcpServerException("Server socket address not found in map.");
+			}
+			return it->second;
+		}
+		void setSocketAddress(SocketFD fd, struct socketaddr_in& socketAddress) {
+			struct socketaddr_in c;
+			
+			_socketAddressMap[fd] = socketAddress;
 		}
 
 	  private:
@@ -80,22 +97,22 @@ namespace http {
 		SocketFD _serverSocket;
 		ClientManager _clientManager;
 
-		std::map< SocketFD, sockaddr_in > _socketAddressMap;
+		std::map<SocketFD, sockaddr_in> _socketAddressMap;
 		unsigned int _socketAddress_len;
 
-		std::map< int, http::Cgi* > _cgiByFd; // CGI output fd → Cgi instance
+		std::map<int, http::Cgi*> _cgiByFd; // CGI output fd → Cgi instance
 
 		int startServer();
-		void runLoop( int timeOut );
+		void runLoop(int timeOut);
 		void shutDownServer();
 		void startListen();
 		void acceptConnection();
-		bool removeDeadConnections( ClientEventProcessor& processor, size_t& index );
-		void closeClientConnection( size_t index );
+		bool removeDeadConnections(ClientEventProcessor& processor, size_t& index);
+		void closeClientConnection(size_t index);
 		void cleanupAllCgis();
 		void checkIdleConnections(size_t index);
 	};
 
-	std::string getLocationFieldAsString( const std::vector< Directory >& locations, const std::string& field );
+	std::string getLocationFieldAsString(const std::vector<Directory>& locations, const std::string& field);
 
 } // namespace http

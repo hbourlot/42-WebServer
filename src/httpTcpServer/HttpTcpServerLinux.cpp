@@ -130,7 +130,7 @@ namespace http {
 		}
 	}
 
-	int TcpServer::runServer() {
+	int TcpServer:: runServer() {
 
 		// int timeOut = 1 * 60 * 1000;
 		int timeOut = 1 * 10 * 1000; // 10s
