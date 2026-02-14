@@ -5,7 +5,6 @@
 bool CheckConf::checkConfExtension( char *file ) {
 	std::string extension = file;
 	size_t size = extension.size(); // Start at the end of the file
-
 	if ( extension.find( '.' ) == std::string::npos ) { // Tries to find a '.'
 		throw std::invalid_argument( "Error: Missing a '.'\n" );
 		return ( false );
@@ -49,9 +48,6 @@ bool CheckConf::checkLineFinished( std::string &line ) {
 	size_t openBrackets = line.find_first_of( '{' ); // Get the position of '{'
 	if ( openBrackets != std::string::npos ) {
 		if ( openBrackets + 1 != lineSize ) {
-			std::cout << "Line: " << line << " | open bracket: " << openBrackets << " | Comma: " << end
-			          << " | Line size: " << lineSize << std::endl;
-
 			std::cerr << "Its something wrong with: " << line << std::endl;
 			return false;
 		}
@@ -66,7 +62,5 @@ bool CheckConf::checkLineFinished( std::string &line ) {
 		}
 	}
 
-	// std::cout << "Line: " << line << " | open bracket: " << openBrackets << " | close brackets: " << closeBrackets <<
-	// " | Comma: " << end << " | Line size: " << lineSize << std::endl;
 	return true;
 }

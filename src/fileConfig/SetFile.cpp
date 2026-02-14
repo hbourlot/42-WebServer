@@ -2,18 +2,6 @@
 #include "Config/SetLocations.hpp"
 #include <utils.hpp>
 
-#define METHODS 7
-#define ROOT 8
-#define REDIRECT 9
-#define CGI_EXTENSION 10
-#define CGI_PATH 11
-#define UPLOAD_ENABLE 12
-#define UPLOAD_STORE 13
-#define AUTOINDEX 14
-#define INDEX 15
-#define CGIPASS 16
-#define BODY_BUFFER 17
-
 File::File() {
 	// String are automatically initialized;
 }
@@ -44,6 +32,10 @@ int getTypeFile( std::string &trimmedLine ) { // Function to check the informati
 		return INDEX;
 	if ( trimmedLine == "cgi_pass")
 		return CGIPASS;
+	if ( trimmedLine[0] == '#')
+		return COMMENT;
+	if ( trimmedLine == "{" || trimmedLine == "}" || trimmedLine.size() == 1)
+		return EMPTY;
 	return 100;
 }
 
@@ -101,8 +93,11 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 		case CGIPASS:
 			file.cgi_pass = getInfo( noSpaceLine );
 			break;
+		case COMMENT:
+		case EMPTY:
+				break;
 		default:
-			break;
+			return false;
 		}
 	}
 	setDefaultFile(file);

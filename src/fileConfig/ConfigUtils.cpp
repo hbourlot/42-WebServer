@@ -1,9 +1,11 @@
 #include "Config/ConfigUtils.hpp"
 
+struct Directory;
+
 std::string removeSpace( std::string& line ) {
 	int i = 0;
 
-	for ( i = 0; line[ i ] && line[ i ] == ' ';
+	for ( i = 0; line[ i ] && (line[ i ] == ' ' || line[ i ] == '\t');
 	      i++ ) { // Runs all spaces and return the string without the first spaces
 		continue;
 	}
@@ -60,4 +62,13 @@ Directory& findPath( ServerConfig server, std::string path ) {
 		itb++;
 	}
 	return *ite;
+}
+
+bool stringToSizeT(const std::string& str, size_t& result){
+	std::stringstream ss(str);
+	ss >> result;
+
+	if (ss.fail() == true || ss.eof() == false)
+		return false;
+	return true;
 }

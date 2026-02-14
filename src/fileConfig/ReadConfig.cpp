@@ -4,19 +4,6 @@
 #include <string>
 #include <utils.hpp>
 
-#define HOST 1
-#define PORT 2
-#define SERVER_NAME 3
-#define CLIENT_MAX_BDY 4
-#define ERROR_PAGE 5
-#define LOCATION 6
-#define ROOT 7
-#define FILE 8
-#define INDEX 9
-#define CGIPASS 10
-#define TEMP_PATH 11
-#define BODY_BUFFER 12
-
 ServerConfig::ServerConfig() {
 	port = 0;
 	max_body_size = 0;
@@ -82,6 +69,15 @@ int getTypeServer(std::string &trimmedLine) { // Return the type of information 
 		return TEMP_PATH;
 	else if (trimmedLine == "client_body_buffer_size")
 		return BODY_BUFFER;
+	else if (trimmedLine == "keepalive_timeout")
+		return ALIVE_TIMEOUT;
+	else if (trimmedLine[0] == '#')
+		return COMMENT;
+	else if (trimmedLine == "{" || trimmedLine == "}" || trimmedLine.size() == 1)
+		return EMPTY;
+	else if (trimmedLine == "server")
+		return SERVER;
+	
 	return 100;
 }
 
@@ -92,7 +88,7 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 	ServerConfig server;     // Variable to save all the information
 
 	bool IsServerOpen = false;
-
+	bool detectedServer = false;
 	// Check if the first line opens the brackets or not
 	if (containBrackets(line, IsServerOpen, emptyString) == false) {
 		return false;
@@ -101,6 +97,8 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 	server.port = 0;
 	server.max_body_size = 0; // Set the max value by default
 	server.max_buffer_size = 0;
+	server.alive_timeout = 3;
+
 	while (std::getline(confFd, line)) { // Finish the server config block
 
 		noSpaceLine = removeSpace(line); // Removes the first spaces
@@ -109,7 +107,7 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			throw std::invalid_argument("Error: Extra words after End of Line\n");
 
 		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
-
+		
 		if (trimmedLine[0] == '}') // Finish the server info
 			break;
 
@@ -165,7 +163,6 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 
 			case TEMP_PATH:
 				server.temp_path = getInfo(noSpaceLine);
-				std::cout << "Temp path " << server.temp_path << std::endl;
 				break;
 
 			case BODY_BUFFER:
@@ -175,14 +172,30 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 					return false;
 				}
 				break;
+			
 			case LOCATION:
 				if (SetLocation::setLocationConfig(confFd, noSpaceLine.substr(noSpaceLine.find(' ')), server) ==
 				    false) {
 					return false;
 				}
 				break;
-
+			
+			case ALIVE_TIMEOUT:
+				if (stringToSizeT(noSpaceLine, server.alive_timeout) == false)
+					return false;
+				break;
+			
+			case SERVER:
+				if (detectedServer == true)
+					return false;
+				detectedServer = true;
+				break;
+			
+			case COMMENT:
+			case EMPTY:
+				break;
 			default:
+				return false;
 				break;
 			}
 		}
