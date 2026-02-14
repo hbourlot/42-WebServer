@@ -49,6 +49,7 @@ namespace http {
 		int createTempFile(const ServerConfig &configs);
 		void cleanup();
 		bool writeBodyToFd(int outFd);
+		std::string &readALlBody();
 
 		REQUEST_PHASE getRequestPhase();
 		void setRequestPhase(REQUEST_PHASE requestPhase);

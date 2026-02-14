@@ -3,7 +3,7 @@
 std::string removeSpace( std::string& line ) {
 	int i = 0;
 
-	for ( i = 0; line[ i ] && line[ i ] == ' ';
+	for ( i = 0; line[ i ] && (line[ i ] == ' ' || line [ i ] == '\t');
 	      i++ ) { // Runs all spaces and return the string without the first spaces
 		continue;
 	}
