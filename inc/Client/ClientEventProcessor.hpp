@@ -10,58 +10,67 @@
 namespace http {
 
 	class ClientEventProcessor {
-	  public:
-		friend class Router;
+		public:
+			friend class Router;
 
-		ClientEventProcessor(std::vector<pollfd>& allServerFds, std::vector<TcpServer*> servers);
+			class ClientEventProcessorException : public std::runtime_error {
+				public:
+					explicit ClientEventProcessorException( const std::string &msg ) : std::runtime_error( msg ) {};
+			};
 
-		ClientEventProcessor(TcpServer& server);
+			ClientEventProcessor( std::vector< pollfd > &allServerFds, std::vector< TcpServer * > servers );
 
-		~ClientEventProcessor();
+			~ClientEventProcessor();
 
-		void run();
+			void run();
 
-		void acceptConnections();
+			void acceptConnections();
 
-		bool removeDeadConnections(size_t& index);
+			bool removeDeadConnections( size_t &index );
 
-		void processRead(pollfd& pfd, Client* client, Cgi* cgi);
+			void shutDownProcessor();
 
-		void processWrite(pollfd& pfd, Client* client, int index);
+			void processRead( pollfd &pfd, Client *client, Cgi *cgi );
 
-		void processClientEvents(int index);
+			void processWrite( pollfd &pfd, Client *client, int index );
 
-		void registerCgi(http::Cgi* cgi);
+			void processClientEvents( int index );
 
-		void cleanupCgi(http::Cgi* cgi);
+			void registerCgi( http::Cgi *cgi );
 
-		bool hasCgiFinished(Cgi* cgi) const;
+			void cleanupCgi( http::Cgi *cgi );
 
-		bool hasCgiSuccessfullyFinished(Cgi* cgi) const;
+			bool hasCgiFinished( Cgi *cgi ) const;
 
-	  private:
-		std::vector<pollfd>& _allSockets;
-		std::vector<struct sockaddr_in> _socketAddress;
-		std::vector<TcpServer*> _servers;
-		ClientManager _clientManager;
+			bool hasCgiSuccessfullyFinished( Cgi *cgi ) const;
 
-		TcpServer _server; // ! will remove
-		size_t _clientIndex;
+		private:
+			std::vector< pollfd > &_allSockets;
+			std::vector< struct sockaddr_in > _socketAddress;
+			size_t _serverSocketSize;
+			std::vector< TcpServer * > _servers;
+			ClientManager _clientManager;
+			std::map< SocketFD, Cgi * > _cgi_by_fd;
 
-		bool readFromSocket(SocketFD fd, std::string& readBuffer, IN_OUT_STATE& state);
+			size_t _clientIndex;
 
-		bool parseRequestData(Client& client, const ServerConfig& serverInfo);
+			void checkIdleConnections( size_t index );
 
-		bool sendResponse(pollfd& pfd, Client& client);
+			void closeClientConnection( size_t index );
 
-		bool handleResponse(pollfd& pfd, Client& client);
+			bool readFromSocket( SocketFD fd, std::string &readBuffer, IN_OUT_STATE &state );
 
-		void closeConnection(size_t index);
+			bool parseRequestData( Client &client, const ServerConfig &serverInfo );
 
-		bool processRequest(Client& client);
+			bool sendResponse( pollfd &pfd, Client &client );
 
-		bool buildErrorResponse(Client& client, IN_OUT_STATE state);
+			bool handleResponse( pollfd &pfd, Client &client );
 
-		bool handleRouteValidation(Client& client, VALIDATION_STATUS& validationStatus);
+
+			bool processRequest( Client &client );
+
+			bool buildErrorResponse( Client &client, IN_OUT_STATE state );
+
+			bool handleRouteValidation( Client &client, VALIDATION_STATUS &validationStatus );
 	};
 } // namespace http

@@ -2,7 +2,7 @@
 #include "Configs.hpp"
 #include <iostream>
 
-void debugLocation( const Directory& loc ) {
+void debugDirectory( const Directory& loc ) {
 	std::cout << "--- START DEBUG\n";
 	std::cout << "Location:" << std::endl;
 	std::cout << "  path: " << loc.path << std::endl;
@@ -19,7 +19,7 @@ void debugLocation( const Directory& loc ) {
 	std::cout << "  cgi_extension: ";
 	for ( size_t i = 0; i < loc.cgi_extension.size(); ++i ) {
 		if ( i > 0 )
-			std::cout << ", ";
+		std::cout << ", ";
 		std::cout << loc.cgi_extension[ i ];
 	}
 	std::cout << std::endl;
@@ -27,7 +27,7 @@ void debugLocation( const Directory& loc ) {
 	for ( size_t i = 0; i < loc.cgi_path.size(); ++i ) {
 		if ( i > 0 )
 			std::cout << ", ";
-		std::cout << loc.cgi_path[ i ];
+			std::cout << loc.cgi_path[ i ];
 	}
 	std::cout << std::endl;
 	std::cout << "  cgi map: ";
@@ -35,9 +35,33 @@ void debugLocation( const Directory& loc ) {
 		std::cout << "[" << it->first << "]=" << it->second << " ";
 	}
 	std::cout << std::endl;
+	std::cout << "  cgi_pass: " << loc.cgi_pass << std::endl;
+	std::cout << "  max_body_size: " << loc.max_body_size << std::endl;
+	std::cout << "  max_buffer_size: " << loc.max_buffer_size << std::endl;
+	
 	std::cout << "  uploadEnable: " << ( loc.uploadEnable ? "true" : "false" ) << std::endl;
 	std::cout << "  uploadStore: " << loc.uploadStore << std::endl;
 	std::cout << "  autoIndex: " << ( loc.autoIndex ? "true" : "false" ) << std::endl;
 
+	std::cout << "--- END DEBUG\n";
+}
+
+void debugFile( const File& file ) {
+	std::cout << "--- START DEBUG\n";
+	std::cout << "Location:" << std::endl;
+	std::cout << "  extension: " << file.extension << std::endl;
+	std::cout << "  methods: ";
+	for ( size_t i = 0; i < file.methods.size(); ++i ) {
+		if ( i > 0 )
+			std::cout << ", ";
+		std::cout << file.methods[ i ];
+	}
+	std::cout << std::endl;
+	std::cout << "  root: " << file.root << std::endl;
+	std::cout << "  index: " << file.index << std::endl;
+	std::cout << std::endl;
+	std::cout << "  cgi_pass: " << file.cgi_pass << std::endl;
+	std::cout << "  max_buffer_size: " << file.max_buffer_size << std::endl;
+	
 	std::cout << "--- END DEBUG\n";
 }

@@ -28,7 +28,6 @@
 #include <unistd.h>
 #include <vector>
 
-
 #define DFL_404 "content/defaults/error_404.html"
 #define DFL_405 "content/defaults/error_405.html"
 #define DFL_500 "content/defaults/error_500.html"
@@ -44,75 +43,72 @@
 
 class Cgi;
 
-
-
 namespace http {
-	#include <netinet/in.h> // This pulls sockaddr_in into the http namespace
-	
+#include <netinet/in.h> // This pulls sockaddr_in into the http namespace
+
 	class ClientEventProcessor;
 	const int BUFFER_SIZE = 65536;
 	const int MAX_READS_PER_EVENT = 3;
 	const int MAX_SENDS_PER_EVENT = 3;
 
 	class TcpServer {
-	  public:
-		friend class ClientEventProcessor;
-		// Default Constructor
-		TcpServer(ServerConfig server);
-		// Default Destructor
-		~TcpServer();
 
-		// Main member
-		int runServer();
+		public:
+			friend class ClientEventProcessor;
+			// Default Constructor
+			TcpServer( ServerConfig server );
+			// Default Destructor
+			~TcpServer();
 
-		class TcpServerException : public std::runtime_error {
-		  public:
-			explicit TcpServerException(const std::string& message) : std::runtime_error(message) {
+			class TcpServerException : public std::runtime_error {
+				public:
+					explicit TcpServerException( const std::string &message ) : std::runtime_error( message ) {
+					}
+			};
+			std::vector< pollfd > &getVectorPollFds();
+
+			std::vector< pollfd > _fds;
+
+			ServerConfig &getServerInfo() {
+
+				return _serverInfo;
 			}
-		};
-		std::vector<pollfd>& getVectorPollFds();
 
-		std::vector<pollfd> _fds;
-
-		ServerConfig& getServerInfo() {
-
-			return _serverInfo;
-		}
-
-		struct sockaddr_in& getSocketAddress() {
-			std::map<SocketFD, sockaddr_in>::iterator it = _socketAddressMap.find(_serverSocket);
-			if (it == _socketAddressMap.end()) {
-				throw TcpServerException("Server socket address not found in map.");
+			struct sockaddr_in &getServerSocketAddress() {
+				std::map< SocketFD, sockaddr_in >::iterator it = _socketAddressMap.find( _serverSocket );
+				if ( it == _socketAddressMap.end() ) {
+					throw TcpServerException( "Server socket address not found in map." );
+				}
+				return it->second;
 			}
-			return it->second;
-		}
-		void setSocketAddress(SocketFD fd, struct socketaddr_in& socketAddress) {
-			struct socketaddr_in c;
-			
-			_socketAddressMap[fd] = socketAddress;
-		}
 
-	  private:
-		ServerConfig _serverInfo;
-		SocketFD _serverSocket;
-		ClientManager _clientManager;
+			std::map< SocketFD, sockaddr_in > &getSocketAddressRef() {
+				return _socketAddressMap;
+			}
 
-		std::map<SocketFD, sockaddr_in> _socketAddressMap;
-		unsigned int _socketAddress_len;
+			void setSocketAddress( SocketFD fd, sockaddr_in socketAddress ) {
+				_socketAddressMap[fd] = socketAddress;
+			}
 
-		std::map<int, http::Cgi*> _cgiByFd; // CGI output fd → Cgi instance
+			pollfd &getServerPOLLFD() {
+				return _serverPOLLFD;
+			}
 
-		int startServer();
-		void runLoop(int timeOut);
-		void shutDownServer();
-		void startListen();
-		void acceptConnection();
-		bool removeDeadConnections(ClientEventProcessor& processor, size_t& index);
-		void closeClientConnection(size_t index);
-		void cleanupAllCgis();
-		void checkIdleConnections(size_t index);
+			int startServer();
+
+		private:
+			ServerConfig _serverInfo;
+			SocketFD _serverSocket;
+			ClientManager _clientManager;
+
+			std::map< SocketFD, sockaddr_in > _socketAddressMap;
+			unsigned int _socketAddress_len;
+			pollfd _serverPOLLFD;
+
+			int initializeServer();
+			void startListen();
 	};
 
-	std::string getLocationFieldAsString(const std::vector<Directory>& locations, const std::string& field);
+	std::string getLocationFieldAsString( const std::vector< Directory > &locations, const std::string &field );
 
 } // namespace http

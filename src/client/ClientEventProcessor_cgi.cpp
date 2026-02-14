@@ -6,7 +6,7 @@
 void http::ClientEventProcessor::registerCgi( http::Cgi* cgi ) {
 	int outputFd = cgi->getOutputPipe()[ 0 ];
 
-	_server._cgiByFd[ outputFd ] = cgi; // Add CGI to map
+	_cgi_by_fd[ outputFd ] = cgi; // Add CGI to map
 
 	// Handling Output Pipe (Reading from CGI)
 	pollfd pfd;
@@ -14,7 +14,7 @@ void http::ClientEventProcessor::registerCgi( http::Cgi* cgi ) {
 	pfd.fd = cgi->getOutputPipe()[ 0 ];
 	pfd.events = POLLIN;
 	pfd.revents = 0;
-	_server._fds.push_back( pfd );
+	_allSockets.push_back( pfd );
 
 	std::string msg( "Registered CGI for PID " );
 	msg += ft_to_string( cgi->getPid() );
@@ -30,15 +30,15 @@ void http::ClientEventProcessor::cleanupCgi( http::Cgi* cgi ) {
 	cgi->killProcess(); // Kill CGI process if still running
 
 	// Remove CGI pipe fd from poll array BEFORE deleting Cgi (which closes pipes)
-	for ( size_t i = 0; i < _server._fds.size(); ++i ) {
-		if ( _server._fds[ i ].fd == outputFd ) {
-			_server._fds.erase( _server._fds.begin() + i );
+	for ( size_t i = 0; i < _cgi_by_fd.size(); ++i ) {
+		if ( _allSockets[ i ].fd == outputFd ) {
+			_allSockets.erase( _allSockets.begin() + i );
 			break;
 		}
 	}
 
 	// Remove from map
-	_server._cgiByFd.erase( outputFd );
+	_cgi_by_fd.erase( outputFd );
 
 	// Reset client CGI state
 	if ( client ) {
