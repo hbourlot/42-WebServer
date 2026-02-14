@@ -62,7 +62,7 @@ bool http::Response::parseCgiHeaders(std::string &buffer) {
 	size_t headerEnd = buffer.find("\r\n\r\n");
 	if (headerEnd == std::string::npos)
 		return false;
-	std::cout << "Found header: " << headerEnd << std::endl;
+
 	std::string headers = buffer.substr(0, headerEnd);
 
 	std::istringstream headerStream(headers);
@@ -121,10 +121,13 @@ bool http::Response::parseCgiHeaders(std::string &buffer) {
 	return true;
 }
 
-void http::Response::appendCgiChunk(std::string &buffer) {
+void http::Response::appendCgiChunk(std::string &buffer, bool isFinished) {
 	if (_chunkState == CHUNK_PARSE_HEADERS) {
-		if (!parseCgiHeaders(buffer))
-			return;
+		if (!isFinished) {
+			if (!parseCgiHeaders(buffer))
+				return;
+		}
+		buildResponse(HTTP_OK, "");
 		initChunked();
 		_outBuffer += buildResponseString(); // solo headers
 		_chunkState = CHUNK_STREAM_BODY;
@@ -151,7 +154,6 @@ std::string http::Response::consumeOutBuffer() {
 CgiChunkState http::Response::getchunkState() const {
 	return (_chunkState);
 }
-
 
 http::Response::~Response() {
 }
@@ -387,7 +389,6 @@ bool http::Response::shouldCloseConnection() {
 	}
 	return (false);
 }
-
 
 //! Previous Version
 // void http::Response::buildCgiResponse(const HttpStatusCode &status, const std::string &body,

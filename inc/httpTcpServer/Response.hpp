@@ -54,7 +54,7 @@ namespace http {
 		void buildCgiBodyChunked(const char *buffer, size_t len);
 
 		void initChunked();
-		void appendCgiChunk(std::string &buffer);
+		void appendCgiChunk(std::string &buffer, bool isFinished = false);
 		void appendChunk(std::string &data);
 		void finishCgiChunked();
 		bool parseCgiHeaders(std::string &buffer);

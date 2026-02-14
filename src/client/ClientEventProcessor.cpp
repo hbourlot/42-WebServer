@@ -68,6 +68,15 @@ void http::ClientEventProcessor::processWrite(pollfd &pfd, Client *client, int i
 		std::string &readBuffer = cgi->getOutputBuffer();
 		client->getResponse().appendCgiChunk(readBuffer);
 
+	} else if (client->getState() == CGI_COMPLETED && cgi) {
+		if (!hasCgiSuccessfullyFinished(cgi)) {
+			client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, _server.getServerInfo());
+		} else {
+			client->getResponse().appendCgiChunk(cgi->getOutputBuffer(), true);
+			if (client->getResponse().isChunked())
+				client->getResponse().finishCgiChunked();
+			cleanupCgi(cgi);
+		}
 	} else if (client->getCgiPid() == -1 && client->getState() != CGI_COMPLETED) {
 		if (!processRequest(*client))
 			return;
@@ -236,13 +245,6 @@ void http::ClientEventProcessor::processClientEvents(int index) {
 
 	if (cgi && hasCgiFinished(cgi)) {
 		client->setState(CGI_COMPLETED);
-		std::string &readBuffer = cgi->getOutputBuffer();
-		client->getResponse().appendCgiChunk(readBuffer);
-
-		if (client->getResponse().isChunked()) {
-			client->getResponse().finishCgiChunked();
-		}
-		cleanupCgi(cgi);
 	}
 }
 
