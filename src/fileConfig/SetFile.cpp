@@ -6,11 +6,14 @@ File::File() {
 	// String are automatically initialized;
 }
 
-std::string fileExtension(const std::string &line)
+bool fileExtension(const std::string &line, std::string &fileExtension)
 {
-    size_t start = line.find("*."); // Start where we have to find the path
-    if (start == std::string::npos) // If doesn't find any start returns null
-        return "";
+	if (line[1] != '*' || line[2] != '.')
+	{
+		std::cerr << "Failed to set the file extension" << std::endl;
+		return false;
+	}
+    size_t start = 3; // Start where we have to find the path
 
     size_t end = start;
     while (end < line.size() && 
@@ -20,7 +23,12 @@ std::string fileExtension(const std::string &line)
         end++;
     }
 
-    return line.substr(start, end - start);
+	fileExtension = line.substr(start, end - start);
+	if (stringIsAlpha(fileExtension) == false){
+		std::cerr << "File extension is not valid" << std::endl;	
+		return false;
+	}
+	return true;
 }
 
 int getTypeFile( std::string &trimmedLine ) { // Function to check the information to set
@@ -46,8 +54,9 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 	File file;
 	bool IsFileOpen = false;
 
-	file.extension = fileExtension( line ); // Gets the file extension
-
+	if (fileExtension( line, file.extension ) == false)
+		return false;
+	
 	file.max_buffer_size = server.max_buffer_size;
 	if (containBrackets(line, IsFileOpen, emptyString) == false)
 	{
@@ -92,6 +101,10 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 			break;
 		case CGIPASS:
 			file.cgi_pass = getInfo( noSpaceLine );
+			struct stat buffer;
+			
+			if (stat(file.cgi_pass.c_str(), &buffer) != 0)
+				return false;
 			break;
 		case COMMENT:
 		case EMPTY:

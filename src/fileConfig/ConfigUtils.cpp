@@ -72,3 +72,16 @@ bool stringToSizeT(const std::string& str, size_t& result){
 		return false;
 	return true;
 }
+
+bool stringIsAlpha(const std::string& str){
+	if (str.empty() )
+		return true;
+
+	for (int i = 0; str.size() > i; i++)
+	{
+		if (std::isalpha(str[i]) == false)
+			return false;
+	}
+
+	return true;
+}

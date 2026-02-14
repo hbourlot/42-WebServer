@@ -124,7 +124,7 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			if (checkSplitString(line, "location", IsServerOpen) == false)
 				return false;
 		}
-
+		
 		if (IsServerOpen == true) {
 			switch (getTypeServer(trimmedLine)) {
 			case ROOT:
@@ -174,11 +174,16 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 				break;
 			
 			case LOCATION:
-				if (SetLocation::setLocationConfig(confFd, noSpaceLine.substr(noSpaceLine.find(' ')), server) ==
-				    false) {
-					return false;
+			{
+				std::string path = noSpaceLine.substr(noSpaceLine.find(' '));
+				if (path.size() > 3 && path[1] == '*' && path[2] == '.'){
+					if (SetFile::setFileConfig(confFd, path, server) == false)
+						return false; // Failed to create the file
 				}
+				else if (SetLocation::setLocationConfig(confFd, path, server) == false)
+					return false;
 				break;
+			}
 			
 			case ALIVE_TIMEOUT:
 				if (stringToSizeT(noSpaceLine, server.alive_timeout) == false)
@@ -196,7 +201,6 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 				break;
 			default:
 				return false;
-				break;
 			}
 		}
 		noSpaceLine = removeSpace(line);

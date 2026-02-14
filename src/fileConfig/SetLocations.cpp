@@ -208,6 +208,10 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 
 		case CGIPASS:
 			location.cgi_pass = getInfo(noSpaceLine);
+			struct stat buffer;
+			if (stat(location.cgi_pass.c_str(), &buffer) != 0)
+				return false;
+			
 			break;
 
 		case CLIENT_MAX_BDY:
