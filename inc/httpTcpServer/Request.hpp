@@ -38,23 +38,23 @@ namespace http {
 		std::string bodyPath;
 
 		std::string queryString;
-		const Location *matchLocation;
-		const Directory *fileDirectory;
+		const Location* matchLocation;
+		const Directory* fileDirectory;
 
 		REQUEST_PHASE _requestPhase;
 		ChunkParser _chunk;
 
 		std::string getFileName();
-		int appendBody(const char *buf, size_t len, const ServerConfig &configs);
-		int createTempFile(const ServerConfig &configs);
+		int appendBody(const char* buf, size_t len, const ServerConfig& configs);
+		int createTempFile(const ServerConfig& configs);
 		void cleanup();
 		bool writeBodyToFd(int outFd);
-		std::string &readALlBody();
+		std::string& readALlBody();
 
 		REQUEST_PHASE getRequestPhase();
 		void setRequestPhase(REQUEST_PHASE requestPhase);
 
-		ChunkParser &getChunkParser();
+		ChunkParser& getChunkParser();
 		void resetChunkParser();
 	};
 

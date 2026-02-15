@@ -66,7 +66,6 @@ namespace http {
 
 			bool handleResponse( pollfd &pfd, Client &client );
 
-
 			bool processRequest( Client &client );
 
 			bool buildErrorResponse( Client &client, IN_OUT_STATE state );
