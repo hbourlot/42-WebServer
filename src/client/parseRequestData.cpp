@@ -1,31 +1,31 @@
 #include "Client/ClientEventProcessor.hpp"
 
-static void parseRequestQueries(http::Request &request) {
-	std::string fullPath = request.path;
+static void parseRequestQueries(http::Request& request) {
+	std::string fullPath = request.uri;
 	std::string::size_type qpos = fullPath.find('?');
 
 	if (qpos != std::string::npos) {
 		request.queryString = fullPath.substr(qpos + 1);
-		request.path = fullPath.substr(0, qpos);
+		request.uri = fullPath.substr(0, qpos);
 	} else {
 		request.queryString = "";
 	}
 }
 
-static void parsePath(http::Request &request, const ServerConfig &serverInfo) {
-	std::string &path = request.path;
+static void parsePath(http::Request& request, const ServerConfig& serverInfo) {
+	std::string& path = request.uri;
 
 	// by default
 	request.pathInfo = "";
 	request.pathTranslated = "";
 
 	for (size_t i = 0; i < serverInfo.directories.size(); ++i) {
-		const Directory &loc = serverInfo.directories[i];
+		const Directory& loc = serverInfo.directories[i];
 		if (loc.cgi_extension.empty())
 			continue;
 
 		for (size_t j = 0; j < loc.cgi_extension.size(); ++j) {
-			const std::string &ext = loc.cgi_extension[j];
+			const std::string& ext = loc.cgi_extension[j];
 
 			size_t pos = path.find(ext);
 			if (pos == std::string::npos)
@@ -55,10 +55,10 @@ static void parsePath(http::Request &request, const ServerConfig &serverInfo) {
 	}
 }
 
-static bool parseRequestLine(http::Request &req, const ServerConfig &serverInfo, const std::string &readBuffer,
+static bool parseRequestLine(http::Request& req, const ServerConfig& serverInfo, const std::string& readBuffer,
                              size_t lineEnd) {
 
-	const char *data = readBuffer.c_str();
+	const char* data = readBuffer.c_str();
 
 	std::string requestLine(data, lineEnd);
 
@@ -68,18 +68,21 @@ static bool parseRequestLine(http::Request &req, const ServerConfig &serverInfo,
 		return false;
 
 	req._method = requestLine.substr(0, posM);
-	req.path = requestLine.substr(posM + 1, posP - posM - 1);
+
+	req.uri = requestLine.substr(posM + 1, posP - posM - 1);
+	// req.path = req.uri.substr(req.uri.find_last_not_of('/'));
+	// std::cout << req.uri;
 	req.serverProtocol = requestLine.substr(posP + 1);
 
-	req.matchLocation = getMatchLocation(req.path, serverInfo.locations);
-	req.fileDirectory = getMatchDirectory(req.path, serverInfo.directories);
+	req.matchLocation = getMatchLocation(req.uri, serverInfo.locations);
+	req.fileDirectory = getMatchDirectory(req.uri, serverInfo.directories);
 	//! If directory it's removed this can be a Location because its a copy ↑↑↑↑↑
 
 	return true;
 }
 
-static void parseRequestHeaders(http::Request &req, const std::string &readBuffer, size_t headerEnd) {
-	const char *data = readBuffer.c_str();
+static void parseRequestHeaders(http::Request& req, const std::string& readBuffer, size_t headerEnd) {
+	const char* data = readBuffer.c_str();
 	size_t pos = 0;
 	while (pos < headerEnd) {
 		size_t lineEnd = readBuffer.find("\r\n", pos);
@@ -99,9 +102,9 @@ static void parseRequestHeaders(http::Request &req, const std::string &readBuffe
 	}
 }
 
-static bool parseContentLengthBody(Client &client, const ServerConfig &configs) {
-	http::Request &request = client.getRequest();
-	std::string &buffer = client.getReadBuffer();
+static bool parseContentLengthBody(Client& client, const ServerConfig& configs) {
+	http::Request& request = client.getRequest();
+	std::string& buffer = client.getReadBuffer();
 
 	size_t len = strtoul(request.headers["Content-Length"].c_str(), NULL, 10);
 	if (len > buffer.size())
@@ -115,10 +118,10 @@ static bool parseContentLengthBody(Client &client, const ServerConfig &configs) 
 	return true;
 }
 
-static bool parseChunkBody(Client &client, const ServerConfig &configs) {
-	std::string &buffer = client.getReadBuffer();
-	ChunkParser &chunk = client.getRequest().getChunkParser();
-	http::Request &request = client.getRequest();
+static bool parseChunkBody(Client& client, const ServerConfig& configs) {
+	std::string& buffer = client.getReadBuffer();
+	ChunkParser& chunk = client.getRequest().getChunkParser();
+	http::Request& request = client.getRequest();
 	while (!buffer.empty()) {
 		switch (chunk.state) {
 		case CHUNK_SIZE: {
@@ -171,9 +174,9 @@ static bool parseChunkBody(Client &client, const ServerConfig &configs) {
 	return false;
 }
 
-static bool parseRequestBody(Client &client, const ServerConfig &configs) {
+static bool parseRequestBody(Client& client, const ServerConfig& configs) {
 
-	http::Request &req = client.getRequest();
+	http::Request& req = client.getRequest();
 
 	if (req.headers.count("Transfer-Encoding") && req.headers["Transfer-Encoding"] == "chunked")
 		return parseChunkBody(client, configs);
@@ -186,10 +189,27 @@ static bool parseRequestBody(Client &client, const ServerConfig &configs) {
 	return true;
 }
 
-bool http::ClientEventProcessor::parseRequestData(Client &client, const ServerConfig &serverInfo) {
+static void parseRequestSession(Client& client) {
 
-	std::string &readBuffer = client.getReadBuffer();
-	http::Request &clientRequest = client.getRequest();
+	std::map<std::string, std::string> headers = client.getRequest().getHeaders();
+	if (headers.count("Cookie")) {
+		std::string cookieHeader = headers["Cookie"];
+		// Simple string search to find the session ID
+		std::string sessionKey = "sessionId=";
+		size_t pos = cookieHeader.find(sessionKey);
+		if (pos != std::string::npos) {
+			size_t start = pos + sessionKey.length();
+			size_t end = cookieHeader.find(";", start);
+			std::string sessionId = cookieHeader.substr(start, end - start);
+			client.setSessionId(sessionId);
+		}
+	}
+}
+
+bool http::ClientEventProcessor::parseRequestData(Client& client, const ServerConfig& serverInfo) {
+
+	std::string& readBuffer = client.getReadBuffer();
+	http::Request& clientRequest = client.getRequest();
 
 	if (clientRequest.getRequestPhase() == START) {
 		size_t lineEnd = readBuffer.find("\r\n");
@@ -217,6 +237,7 @@ bool http::ClientEventProcessor::parseRequestData(Client &client, const ServerCo
 		}
 
 		parseRequestHeaders(clientRequest, readBuffer, headerEnd);
+		parseRequestSession(client);
 		readBuffer.erase(0, headerEnd + 4);
 		clientRequest.setRequestPhase(BODY);
 	}

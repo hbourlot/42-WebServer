@@ -24,6 +24,7 @@ HTTP_DIR		= httpTcpServer/
 REQUEST_DIR		= $(HTTP_DIR)request/
 CGI_DIR			= $(HTTP_DIR)cgi/
 UPL_DIR			= UploadManager/
+SESSION_DIR		= Session/
 
 BONUS_DIR       = bonus/
 OBJ_DIR         = obj/
@@ -39,6 +40,7 @@ UTILS_FUNC		= utils getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations SetFile
 HTTP_FUNC	    = HttpTcpServerLinux Router autoIndex Request Response Logs
 UPL_FUNC		= UploadManager parseMultipart
+SESSION_FUNC	= Session SessionManager
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
@@ -47,6 +49,7 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UPL_DIR), $(UPL_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(SESSION_DIR), $(SESSION_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR), main.cpp) 
 
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))

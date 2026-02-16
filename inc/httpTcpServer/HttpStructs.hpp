@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpStructs.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joralves <joralves@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbourlot <hbourlot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:32:48 by hbourlot          #+#    #+#             */
-/*   Updated: 2026/02/09 18:41:55 by joralves         ###   ########.fr       */
+/*   Updated: 2026/02/16 15:50:19 by hbourlot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,13 +43,3 @@ enum headerKey {
 	UserAgent,
 };
 
-enum VALIDATION_STATUS {
-
-	VALID_OK = 1,
-	VALID_METHOD_NOT_ALLOWED,
-	VALID_NOT_FOUND,
-	VALID_FORBIDDEN,
-	VALID_REDIRECT_REQUIRED,
-	VALID_IS_CGI,
-
-};

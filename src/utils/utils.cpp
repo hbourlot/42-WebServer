@@ -3,27 +3,27 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
 std::string http::Request::getFileName() {
-	std::string::size_type pos = path.rfind('/');
+	std::string::size_type pos = uri.rfind('/');
 	if (pos == std::string::npos)
-		return path;
-	return path.substr(pos + 1);
+		return uri;
+	return uri.substr(pos + 1);
 }
 
-bool isDirectory(const std::string &filePath) {
+bool isDirectory(const std::string& filePath) {
 	struct stat s;
 	if (stat(filePath.c_str(), &s) != 0)
 		return (false);
 	return (S_ISDIR(s.st_mode));
 }
 
-std::string getFilePath(const http::Request &req, const ServerConfig &server) {
-	const Directory *dir = req.fileDirectory;
+std::string getFilePath(const http::Request& req, const ServerConfig& server) {
+	const Directory* dir = req.fileDirectory;
 
 	std::string root = dir ? dir->root : server.root;
 
-	std::string relativePath = req.path;
+	std::string relativePath = req.uri;
 	if (dir && !dir->path.empty()) {
-		relativePath = req.path.substr(dir->path.length());
+		relativePath = req.uri.substr(dir->path.length());
 		if (relativePath.empty())
 			relativePath = "/";
 	}
@@ -31,13 +31,13 @@ std::string getFilePath(const http::Request &req, const ServerConfig &server) {
 	return joinPath(root, relativePath);
 }
 
-std::string joinPath(const std::string &base, const std::string &sub) {
+std::string joinPath(const std::string& base, const std::string& sub) {
 	if (!base.empty() && (base[base.length() - 1] == '/' || sub[0] == '/'))
 		return (base + sub);
 	return (base + "/" + sub);
 }
 
-std::string ft_strtrim(const std::string &str) {
+std::string ft_strtrim(const std::string& str) {
 	unsigned int start = 0;
 	unsigned int end = str.length();
 
@@ -58,7 +58,7 @@ std::string dateString() {
 }
 
 // Returns false, if the state is the same. Otherwise we return false
-bool containBrackets(std::string &line, bool &state, std::string extraStringToFind) {
+bool containBrackets(std::string& line, bool& state, std::string extraStringToFind) {
 	// If we find the new string
 	if (!extraStringToFind.empty())
 		return (line.find(extraStringToFind) != std::string::npos);
@@ -108,7 +108,7 @@ bool containBrackets(std::string &line, bool &state, std::string extraStringToFi
 // This method is to check especific cases like " {{{ location / }}}"
 // This way we split the string by the location and see if we open him after
 // Only for location cases
-bool checkSplitString(const std::string &line, const std::string &sep, bool &isServerOpen) {
+bool checkSplitString(const std::string& line, const std::string& sep, bool& isServerOpen) {
 	std::string left = "";
 	std::string right = "";
 	std::string empty = "";
@@ -136,13 +136,13 @@ bool checkSplitString(const std::string &line, const std::string &sep, bool &isS
 	return true;
 }
 
-void print(const char *src) {
+void print(const char* src) {
 
 	std::string a(src);
 	std::cout << a << std::endl;
 };
 
-static std::string getExtension(const std::string &path) {
+static std::string getExtension(const std::string& path) {
 	size_t slashPos = path.find_last_of('/');
 	size_t dotPos = path.find_last_of('.');
 
@@ -155,14 +155,14 @@ static std::string getExtension(const std::string &path) {
 	return path.substr(dotPos + 1);
 }
 
-const Directory *getMatchDirectory(const std::string &path, const std::vector<Directory> &directories) {
+const Directory* getMatchDirectory(const std::string& path, const std::vector<Directory>& directories) {
 
-	const Directory *matchedLocation = NULL;
+	const Directory* matchedLocation = NULL;
 	size_t matchLength = 0;
 
 	for (size_t i = 0; i < directories.size(); ++i) {
 
-		const std::string &locPath = directories[i].path;
+		const std::string& locPath = directories[i].path;
 		if (path.find(locPath) != std::string::npos && locPath.size() > matchLength) {
 			matchedLocation = &directories[i];
 			matchLength = locPath.size();
@@ -171,7 +171,7 @@ const Directory *getMatchDirectory(const std::string &path, const std::vector<Di
 	return (matchedLocation);
 }
 
-const Location *getMatchLocation(const std::string &path, const std::vector<Location> &locations) {
+const Location* getMatchLocation(const std::string& path, const std::vector<Location>& locations) {
 	std::string ext = getExtension(path);
 	if (!ext.empty()) {
 		for (size_t i = 0; i < locations.size(); ++i) {
@@ -180,11 +180,11 @@ const Location *getMatchLocation(const std::string &path, const std::vector<Loca
 			}
 		}
 	}
-	const Location *matchedLocation = NULL;
+	const Location* matchedLocation = NULL;
 	size_t matchLength = 0;
 
 	for (size_t i = 0; i < locations.size(); ++i) {
-		const std::string &locPath = locations[i].path;
+		const std::string& locPath = locations[i].path;
 		if (path.find(locPath) != std::string::npos && locPath.size() > matchLength) {
 			matchedLocation = &locations[i];
 			matchLength = locPath.size();
@@ -219,7 +219,7 @@ std::string createUploadBody() {
 	return html;
 }
 
-ssize_t writeAll(int fd, const char *buf, size_t len) {
+ssize_t writeAll(int fd, const char* buf, size_t len) {
 	size_t total = 0;
 
 	while (total < len) {

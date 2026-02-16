@@ -82,11 +82,21 @@ class Client {
 	int getIdleTicks();
 	void resetIdleTicks();
 
+	std::string getSessionId() {
+		return _sessionID;
+	}
+
+	void setSessionId(const std::string& id) {
+		_sessionID = id;
+	}
+
+	
 
   private:
 	http::TcpServer& _server;
 
 	int _fd;
+	std::string _sessionID;
 	IN_OUT_STATE _state;
 
 	bool _requestComplete;

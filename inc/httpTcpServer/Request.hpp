@@ -25,7 +25,9 @@ namespace http {
 		~Request();
 
 		std::string _method;
+		std::string uri;
 		std::string path;
+		std::string fullPath;
 		std::string serverProtocol;
 		std::string pathInfo; // For Cgi
 		std::string pathTranslated;
@@ -43,6 +45,10 @@ namespace http {
 
 		REQUEST_PHASE _requestPhase;
 		ChunkParser _chunk;
+
+		std::map<std::string, std::string>& getHeaders() {
+			return headers;
+		};
 
 		std::string getFileName();
 		int appendBody(const char* buf, size_t len, const ServerConfig& configs);

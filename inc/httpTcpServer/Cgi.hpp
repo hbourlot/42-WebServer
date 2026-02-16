@@ -19,7 +19,7 @@ namespace http {
 	class Cgi {
 
 	  public:
-		Cgi(const http::Request &request, const std::string &scriptPath, const ServerConfig &serverInfo,
+		Cgi(const http::Request &request, const ServerConfig &serverInfo,
 		    Client *client);
 
 		~Cgi();

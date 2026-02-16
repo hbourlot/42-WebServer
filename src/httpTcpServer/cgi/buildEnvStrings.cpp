@@ -6,7 +6,7 @@
 
 static bool isValidEnv(std::string key) {
 
-	static const char *validCgiVars[] = {"AUTH_TYPE",
+	static const char* validCgiVars[] = {"AUTH_TYPE",
 	                                     "CONTENT_LENGTH",
 	                                     "CONTENT_TYPE",
 	                                     "DOCUMENT_ROOT",
@@ -73,9 +73,9 @@ void http::Cgi::buildEnvStrings() {
 	newMap["SERVER_SOFTWARE"] = "42WebServer/1.0";
 	newMap["GATEWAY_INTERFACE"] = "CGI/1.1";
 
-	newMap["REQUEST_URI"] = _request.path;
-	newMap["SCRIPT_NAME"] = _request.path;
-	newMap["PATH_INFO"] = _request.path;
+	newMap["REQUEST_URI"] = _request.uri;
+	newMap["SCRIPT_NAME"] = _request.uri;
+	newMap["PATH_INFO"] = _request.uri;
 	if (_request.headers.count("Content-Length")) {
 		newMap["CONTENT_LENGTH"] = _request.headers.at("Content-Length");
 	} else {

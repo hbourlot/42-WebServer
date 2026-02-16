@@ -9,12 +9,11 @@
 #include <sys/poll.h>
 #include <vector>
 
-http::Cgi::Cgi(const http::Request& request, const std::string& scriptPath, const ServerConfig& serverInfo,
-               Client* client)
+http::Cgi::Cgi(const http::Request& request, const ServerConfig& serverInfo, Client* client)
     : _status(), _request(request), _serverInfo(serverInfo), _clientAddress(), _client(client), _envp(), _envStrings(),
       _state(RESET) {
 
-	_filePath = scriptPath;
+	_filePath = request.matchLocation->cgi_pass;
 
 	buildEnvStrings();
 }

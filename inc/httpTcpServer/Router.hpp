@@ -6,21 +6,35 @@
 namespace http {
 
 	class ClientEventProcessor;
+	class Cgi;
+
 	class Router {
-	  public:
-		static VALIDATION_STATUS validateRequest(Client &client);
-		static bool routeCgiRequest(Client &client, const ServerConfig &server, const Location &matchLocation,
-		                            ClientEventProcessor &processor);
-		static void routeStaticRequest(Client &client, const ServerConfig &server, const Location &matchLocation);
 
 	  private:
-		static void launchCgi(Client &client, const ServerConfig &server, const Location &matchLocation,
-		                      ClientEventProcessor &processor);
-		static void handleGet(Client &client, const ServerConfig &server, const Location &matchLocation);
-		static void handlePost(Client &client, const ServerConfig &server, const Location &matchLocation);
-		static void handleDelete(Client &client, const ServerConfig &server);
-		static void handleDirectoryListing(Client &client, const ServerConfig &server, const std::string &filePath,
-		                                   const Location &matchLocation);
+		Client& _client;
+		Request& _request;
+		Response& _response;
+		ServerConfig& _serverConfig;
+		ClientEventProcessor& _eventProcessor;
+
+		bool checkRedirects();
+		bool checkAllowedMethods();
+		void resolvePath();
+		void executeRequest();
+
+	  public:
+		Router(Client& client, ClientEventProcessor& processor);
+
+		void process();
+
+		
+		private:
+		bool routeCgiRequest(); // ! to remove?
+		void launchCgi();
+		void handleGet();
+		void handlePost();
+		void handleDelete();
+		void handleDirectoryListing();
 
 		// Can add also other http methods here
 	};

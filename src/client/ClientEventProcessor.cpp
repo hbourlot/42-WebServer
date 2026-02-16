@@ -149,7 +149,6 @@ void http::ClientEventProcessor::checkIdleConnections(size_t index) {
 	SocketFD fd = _allSockets[index].fd;
 	Client* client = _clientManager.getClient(fd);
 
-	
 	if (!client)
 		return;
 
@@ -222,6 +221,22 @@ void http::ClientEventProcessor::shutDownProcessor() {
 	Logs::log(LOGS_INFO, "===== END =====");
 }
 
+void http::ClientEventProcessor::setSession(Client* client) {
+	Session* session = nullptr;
+	const std::string sessionId = client->getSessionId();
+
+	if (sessionId.empty()) {
+		session = &_sessionManager.createSession();
+	} else {
+		session = &_sessionManager.getSession(sessionId);
+	}
+
+	if (session) {
+		client->setSessionId(session->getSessionId());
+		// Now you can also set data on the session if needed
+		// session->setSessionData("username", "test");
+	}
+}
 
 void http::ClientEventProcessor::processRead(pollfd& pfd, Client* client, Cgi* cgi) {
 
@@ -247,7 +262,7 @@ void http::ClientEventProcessor::processRead(pollfd& pfd, Client* client, Cgi* c
 	pfd.events = POLLOUT; // Setting to POLL OUT
 };
 
-void http::ClientEventProcessor::processWrite(pollfd& pfd, Client* client, int index) {
+void http::ClientEventProcessor::handleCgiIO(Client* client) {
 
 	std::map<SocketFD, Cgi*>::iterator it = _cgi_by_fd.find(client->getCgiOutputFd());
 	Cgi* cgi = nullptr;
@@ -255,21 +270,51 @@ void http::ClientEventProcessor::processWrite(pollfd& pfd, Client* client, int i
 		cgi = it->second;
 	}
 
-	if (client->getState() == CGI_JUST_STARTED && cgi) {
+	if (!cgi) {
+		return;
+	}
 
+	if (client->getState() == CGI_JUST_STARTED) {
 		std::string& readBuffer = cgi->getReadBuffer();
 		client->getResponse().appendCgiChunk(readBuffer);
-
-	} else if (client->getState() == CGI_COMPLETED && cgi) {
+	} else if (client->getState() == CGI_COMPLETED) {
 		if (!hasCgiSuccessfullyFinished(cgi)) {
 			client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, client->getServer().getServerInfo());
 		} else {
+
+			std::string cgiOutput = cgi->getReadBuffer();
+
+			std::string authHeader = "X-Authenticated-User: ";
+			size_t headerPos = cgiOutput.find(authHeader);
+
+			if (headerPos != std::string::npos) {
+				size_t usernameStart = headerPos + authHeader.length();
+				size_t usernameEnd = cgiOutput.find("\n", usernameStart);
+				std::string username = cgiOutput.substr(usernameStart, usernameEnd - usernameStart);
+
+				username.erase(username.find_last_not_of(" \n\r\t") + 1);
+
+				Session& newSession = _sessionManager.createSession();
+				newSession.setSessionData("username", username);
+				newSession.setSessionData("authenticated", "true");
+
+				client->getResponse().setCookie("sessionId=" + newSession.getSessionId());
+			}
+
 			client->getResponse().appendCgiChunk(cgi->getReadBuffer(), true);
-			if (client->getResponse().isChunked())
+			if (client->getResponse().isChunked()) {
 				client->getResponse().finishCgiChunked();
-			cleanupCgi(cgi);
+			}
 		}
-	} else if (client->getCgiPid() == -1 && client->getState() != CGI_COMPLETED) {
+		cleanupCgi(cgi);
+	}
+}
+
+void http::ClientEventProcessor::processWrite(pollfd& pfd, Client* client, int index) {
+
+	if (client->getState() == CGI_JUST_STARTED || client->getState() == CGI_COMPLETED) {
+		handleCgiIO(client);
+	} else if (/* client->getCgiPid() == -1 && */ client->getState() != CGI_COMPLETED) {
 		if (!processRequest(*client))
 			return;
 	}
@@ -331,23 +376,37 @@ bool http::ClientEventProcessor::readFromSocket(SocketFD fd, std::string& readBu
 
 bool http::ClientEventProcessor::processRequest(Client& client) {
 
+	// Session& session = _sessionManager.getSession(client.getSessionId());
+	// client.setSessionId(session.getSessionId());
+
 	IN_OUT_STATE state = client.getState();
 
 	ServerConfig& serverInfo = client.getServer()._serverInfo;
+
 	// Handle error states first (build error responses)
 	if (state != PARSE_OK) {
 		this->buildErrorResponse(client, state);
 		return true;
 	}
-	// Handling SuccessfulRequest - from here
-	VALIDATION_STATUS validationStatus;
-	if (this->handleRouteValidation(client, validationStatus))
-		return true;
 
-	if (validationStatus == VALID_IS_CGI)
-		Router::routeCgiRequest(client, serverInfo, *client.getRequest().matchLocation, *this);
-	else
-		Router::routeStaticRequest(client, serverInfo, *client.getRequest().matchLocation);
+	std::string username = session.getSessionData("username");
+	bool isAuthenticated = session.getSessionData("authenticated") == "true";
+
+	// std::cout << "uri:" << client.getRequest().uri << std::endl;
+	// std::cout << "f: " << client.getRequest().fullPath << std::endl;
+	// if (client.getRequest().uri.find("/Dashboard.html") && !isAuthenticated) {
+	// 	client.getResponse().buildRedirect(HTTP_MOVED, "Login/Login.html");
+	// 	return true;
+	// }
+
+	http::Router router(client, *this);
+	router.process();
+	return true;
+
+	// if (validationStatus == VALID_IS_CGI)
+	// 	Router::routeCgiRequest(client, serverInfo, *client.getRequest().matchLocation, *this);
+	// else
+	// 	Router::routeStaticRequest(client, serverInfo, *client.getRequest().matchLocation);
 
 	return true;
 }
@@ -367,40 +426,6 @@ bool http::ClientEventProcessor::buildErrorResponse(Client& client, IN_OUT_STATE
 		return true;
 	default:
 		response.buildErrorResponse(HTTP_SERVER_ERR, client.getServer()._serverInfo);
-		return true;
-	}
-}
-
-bool http::ClientEventProcessor::handleRouteValidation(Client& client, VALIDATION_STATUS& validationStatus) {
-	http::Response& response = client.getResponse();
-	ServerConfig& serverInfo = client.getServer()._serverInfo;
-	validationStatus = Router::validateRequest(client);
-
-	switch (validationStatus) {
-
-	case VALID_IS_CGI:
-		return false;
-
-	case VALID_OK:
-		return false; // Continue to routing
-
-	case VALID_NOT_FOUND:
-		response.buildErrorResponse(HTTP_NOT_FOUND, serverInfo);
-		return true;
-
-	case VALID_REDIRECT_REQUIRED:
-		response.buildRedirect(HTTP_MOVED, client.getRequest().matchLocation->redirection);
-		return true;
-
-	case VALID_METHOD_NOT_ALLOWED:
-		response.buildErrorResponse(HTTP_FORBID_METHOD, serverInfo);
-		return true;
-	case VALID_FORBIDDEN:
-		response.buildErrorResponse(HTTP_FORBID, serverInfo);
-		return true;
-
-	default:
-		response.buildErrorResponse(HTTP_SERVER_ERR, serverInfo);
 		return true;
 	}
 }
@@ -431,6 +456,7 @@ void http::ClientEventProcessor::processClientEvents(int index) {
 }
 
 bool http::ClientEventProcessor::handleResponse(pollfd& pfd, Client& client) {
+
 	SocketFD clientFd = client.getFd();
 
 	// Build response if write buffer is emptysendResponse
@@ -461,7 +487,7 @@ bool http::ClientEventProcessor::handleResponse(pollfd& pfd, Client& client) {
 		msg += ft_to_string(clientFd) + "' sessionID: " + client.getSessionId();
 		if (DEBUG) {
 			msg += " ";
-			msg += client.getRequest().path;
+			msg += client.getRequest().uri;
 		}
 		Logs::log(LOGS_INFO, msg);
 

@@ -2,6 +2,7 @@
 
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include "utils.hpp"
+#include "Session/SessionManager.hpp"
 // #include "httpTcpServer/HttpStructs.hpp"
 #include <iostream>
 #include <poll.h>
@@ -50,13 +51,18 @@ namespace http {
 			size_t _serverSocketSize;
 			std::vector< TcpServer * > _servers;
 			ClientManager _clientManager;
+			SessionManager _sessionManager;
 			std::map< SocketFD, Cgi * > _cgi_by_fd;
 
 			size_t _clientIndex;
 
 			void checkIdleConnections( size_t index );
 
+			void setSession(Client* client); // !
+
 			void closeClientConnection( size_t index );
+
+			void handleCgiIO(Client* client);
 
 			bool readFromSocket( SocketFD fd, std::string &readBuffer, IN_OUT_STATE &state );
 
@@ -70,6 +76,5 @@ namespace http {
 
 			bool buildErrorResponse( Client &client, IN_OUT_STATE state );
 
-			bool handleRouteValidation( Client &client, VALIDATION_STATUS &validationStatus );
 	};
 } // namespace http
