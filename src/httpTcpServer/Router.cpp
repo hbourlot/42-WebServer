@@ -3,6 +3,9 @@
 
 static bool isCgirequest(const http::Request& request, const Location& location) {
 
+	if (!location.cgi_pass.empty())
+		return true;
+
 	for (size_t i = 0; i < location.cgi_extension.size(); ++i)
 		if (location.cgi_extension[i] == ".*") { // ".cgi" accept any kind of cgi
 			return true;
@@ -150,8 +153,10 @@ void http::Router::executeRequest() {
 	    (_request._method == "GET" || _request._method == "POST")) {
 		if (_request.matchLocation->isFile())
 			isCgi = true;
-		else
+		else {
+			std::cout << "DADASD\n";
 			isCgi = isCgirequest(_request, *_request.matchLocation);
+		}
 	}
 	if (isCgi) {
 		launchCgi();

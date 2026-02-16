@@ -273,16 +273,18 @@ void http::ClientEventProcessor::handleCgiIO(Client* client) {
 	if (!cgi) {
 		return;
 	}
-
 	if (client->getState() == CGI_JUST_STARTED) {
 		std::string& readBuffer = cgi->getReadBuffer();
 		client->getResponse().appendCgiChunk(readBuffer);
 	} else if (client->getState() == CGI_COMPLETED) {
 		if (!hasCgiSuccessfullyFinished(cgi)) {
+			// std::cout << "START WEWE\n\n";
 			client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, client->getServer().getServerInfo());
 		} else {
 
 			std::string cgiOutput = cgi->getReadBuffer();
+			std::cout << "START\n\n";
+			std::cout << cgiOutput;
 
 			std::string authHeader = "X-Authenticated-User: ";
 			size_t headerPos = cgiOutput.find(authHeader);
@@ -376,8 +378,8 @@ bool http::ClientEventProcessor::readFromSocket(SocketFD fd, std::string& readBu
 
 bool http::ClientEventProcessor::processRequest(Client& client) {
 
-	// Session& session = _sessionManager.getSession(client.getSessionId());
-	// client.setSessionId(session.getSessionId());
+	Session& session = _sessionManager.getSession(client.getSessionId());
+	client.setSessionId(session.getSessionId());
 
 	IN_OUT_STATE state = client.getState();
 
@@ -389,24 +391,21 @@ bool http::ClientEventProcessor::processRequest(Client& client) {
 		return true;
 	}
 
+	std::cout << client.getRequest().body << std::endl;
 	std::string username = session.getSessionData("username");
 	bool isAuthenticated = session.getSessionData("authenticated") == "true";
 
 	// std::cout << "uri:" << client.getRequest().uri << std::endl;
 	// std::cout << "f: " << client.getRequest().fullPath << std::endl;
-	// if (client.getRequest().uri.find("/Dashboard.html") && !isAuthenticated) {
-	// 	client.getResponse().buildRedirect(HTTP_MOVED, "Login/Login.html");
-	// 	return true;
-	// }
+	if ((client.getRequest().uri.find("/Dashboard.html") != std::string::npos) && !isAuthenticated) {
+		client.getResponse().buildRedirect(HTTP_MOVED, "http://localhost:8003/pages/Services/Services.html");
+		return true;
+	}
 
+	// std::cout << "m: " << client.getRequest()._method << std::endl;
 	http::Router router(client, *this);
 	router.process();
 	return true;
-
-	// if (validationStatus == VALID_IS_CGI)
-	// 	Router::routeCgiRequest(client, serverInfo, *client.getRequest().matchLocation, *this);
-	// else
-	// 	Router::routeStaticRequest(client, serverInfo, *client.getRequest().matchLocation);
 
 	return true;
 }
