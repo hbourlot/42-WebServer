@@ -33,7 +33,7 @@ int getMaxRequestBody( std::string& value ) {
 	char* end;
 	long num = std::strtol( resultStr.c_str(), &end, 10 );
 	if ( num < 0 ) {
-		throw std::runtime_error( "invalid size number" );
+		throw std::runtime_error( "Invalid size number for max size" );
 	}
 	return static_cast< size_t >( num ) * multiplier;
 }

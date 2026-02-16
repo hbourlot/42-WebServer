@@ -57,10 +57,9 @@ std::string dateString() {
 	return (date);
 }
 
-// Returns false, if the state is the same. Otherwise we return false
+// Returns true, if the state is the same. Otherwise we return false
 bool containBrackets(std::string &line, bool &state, std::string extraStringToFind) {
 	// If we find the new string
-	std::cout << "Extra string " << extraStringToFind << "| " << extraStringToFind.empty() << std::endl;
 	if (!extraStringToFind.empty())
 	{
 		return (line.find(extraStringToFind) != std::string::npos);

@@ -239,6 +239,12 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 		}
 	}
 
+	if (IsLocationOpen == true) // We need to check if the location is closed properly
+	{
+		std::cerr << "Location is not closed properly" << std::endl;
+		return false;
+	}
+
 	if (location.name == "cgi" && atIndexFlag == 1) // Checks if exists a autoindex inside a CGI location
 		throw std::invalid_argument("ERROR: Can't have autoindex inside a CGI location\n");
 	setDefaultLocation(server, location); // We have to set some default values

@@ -113,6 +113,13 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 			return false;
 		}
 	}
+
+	if (IsFileOpen == true) // We need to check if its close properly or not
+	{
+		std::cerr << "File is not closed properly" << std::endl;
+		return false;
+	}
+
 	setDefaultFile(file);
 	server.files.push_back( file );
 	return true;
