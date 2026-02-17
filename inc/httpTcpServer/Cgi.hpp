@@ -19,8 +19,7 @@ namespace http {
 	class Cgi {
 
 	  public:
-		Cgi(const http::Request &request, const ServerConfig &serverInfo,
-		    Client *client);
+		Cgi(const http::Request &request, const ServerConfig &serverInfo, Client *client);
 
 		~Cgi();
 
@@ -32,8 +31,27 @@ namespace http {
 		const int *getOutputPipe() const;
 		void killProcess();
 		Client *getClient() const;
-		IN_OUT_STATE& getState();
+		IN_OUT_STATE &getState();
 		std::string &getReadBuffer();
+		// bool http::Cgi::hasDataToRead() {
+		bool hasDataToRead() {
+
+			char testByte;
+
+			ssize_t result = recv(_outputPipe[0], &testByte, 1, MSG_PEEK);
+			//  | MSG_DONTWAIT
+
+			if (result > 0)
+				return true; // Data available
+
+			if (result == 0)
+				return false; // EOF - pipe closed
+
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+				return false; // No data available
+
+			return false; // Any other error
+		}
 
 	  private:
 		int _status;

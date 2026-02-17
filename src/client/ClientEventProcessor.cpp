@@ -446,7 +446,7 @@ void http::ClientEventProcessor::processClientEvents(int index) {
 		processWrite(_allSockets[index], client, index);
 	}
 
-	if (cgi && hasCgiFinished(cgi)) {
+	if (cgi && !cgi->hasDataToRead() && hasCgiFinished(cgi)) {
 		client->setState(CGI_COMPLETED);
 	}
 }

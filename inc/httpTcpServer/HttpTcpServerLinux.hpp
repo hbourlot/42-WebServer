@@ -99,6 +99,7 @@ namespace http {
 		private:
 			ServerConfig _serverInfo;
 			SocketFD _serverSocket;
+			// ClientManager _clientManager;
 
 			std::map< SocketFD, sockaddr_in > _socketAddressMap;
 			unsigned int _socketAddress_len;
