@@ -6,7 +6,7 @@
 
 static bool isValidEnv(std::string key) {
 
-	static const char* validCgiVars[] = {"AUTH_TYPE",
+	static const char *validCgiVars[] = {"AUTH_TYPE",
 	                                     "CONTENT_LENGTH",
 	                                     "CONTENT_TYPE",
 	                                     "DOCUMENT_ROOT",
@@ -52,8 +52,8 @@ void http::Cgi::buildEnvStrings() {
 
 	std::map<std::string, std::string> newMap;
 
-	for (std::map<std::string, std::string>::const_iterator it = _request.headers.begin(); it != _request.headers.end();
-	     ++it) {
+	for (std::map<std::string, std::string>::const_iterator it = _request._headers.begin();
+	     it != _request._headers.end(); ++it) {
 		std::string key = it->first;
 		for (size_t i = 0; i < key.size(); ++i) {
 			if (key[i] == '-')
@@ -67,29 +67,29 @@ void http::Cgi::buildEnvStrings() {
 	newMap["REQUEST_METHOD"] = _request._method;
 	newMap["FILE_NAME"] = _filePath;
 
-	newMap["DOCUMENT_ROOT"] = _request.matchLocation->root;
+	newMap["DOCUMENT_ROOT"] = _request._matchLocation->root;
 
-	newMap["SERVER_PROTOCOL"] = _request.serverProtocol;
+	newMap["SERVER_PROTOCOL"] = _request._serverProtocol;
 	newMap["SERVER_SOFTWARE"] = "42WebServer/1.0";
 	newMap["GATEWAY_INTERFACE"] = "CGI/1.1";
 
-	newMap["REQUEST_URI"] = _request.uri;
-	newMap["SCRIPT_NAME"] = _request.uri;
-	newMap["PATH_INFO"] = _request.uri;
-	if (_request.headers.count("Content-Length")) {
-		newMap["CONTENT_LENGTH"] = _request.headers.at("Content-Length");
+	newMap["REQUEST_URI"] = _request._uri;
+	newMap["SCRIPT_NAME"] = _request._uri;
+	newMap["PATH_INFO"] = _request._uri;
+	if (_request._headers.count("Content-Length")) {
+		newMap["CONTENT_LENGTH"] = _request._headers.at("Content-Length");
 	} else {
-		newMap["CONTENT_LENGTH"] = ft_to_string(_request.body.size());
+		newMap["CONTENT_LENGTH"] = ft_to_string(_request._body.size());
 	}
 
-	if (_request.headers.count("Content-Type"))
-		newMap["CONTENT_TYPE"] = _request.headers.at("Content-Type");
+	if (_request._headers.count("Content-Type"))
+		newMap["CONTENT_TYPE"] = _request._headers.at("Content-Type");
 
 	newMap["PATH_TRANSLATED"] =
-	    _request.matchLocation->root + (newMap["PATH_INFO"].empty() ? std::string("/") : _request.pathInfo);
+	    _request._matchLocation->root + (newMap["PATH_INFO"].empty() ? std::string("/") : _request._pathInfo);
 
 	newMap["REMOTE_PORT"] = ft_to_string(_clientAddress.sin_port);
-	newMap["QUERY_STRING"] = _request.queryString;
+	newMap["QUERY_STRING"] = _request._queryString;
 
 	for (std::map<std::string, std::string>::const_iterator it = newMap.begin(); it != newMap.end(); ++it) {
 		if (/* !it->second.empty() && */ isValidEnv(it->first))

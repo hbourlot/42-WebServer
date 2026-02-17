@@ -183,7 +183,6 @@ void http::ClientEventProcessor::closeClientConnection(size_t index) {
 	Logs::log(LOGS_WARN, msg);
 
 	if (client) {
-		std::cout << index << std::endl;
 		client->getServer().getSocketAddressRef().erase(fd);
 	}
 	_clientManager.removeClient(fd);
@@ -484,7 +483,7 @@ bool http::ClientEventProcessor::handleResponse(pollfd &pfd, Client &client) {
 		msg += ft_to_string(clientFd) + "' sessionID: " + client.getSessionId();
 		if (DEBUG) {
 			msg += " ";
-			msg += client.getRequest().uri;
+			msg += client.getRequest()._uri;
 		}
 		Logs::log(LOGS_INFO, msg);
 

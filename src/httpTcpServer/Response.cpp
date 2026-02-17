@@ -19,18 +19,18 @@ void http::Response::cleanup() {
 
 void http::Response::initFromRequest(const http::Request &request) {
 
-	_protocol = (!request.serverProtocol.empty()) ? request.serverProtocol : "HTTP/1.1";
+	_protocol = (!request._serverProtocol.empty()) ? request._serverProtocol : "HTTP/1.1";
 
-	std::map<std::string, std::string>::const_iterator it = request.headers.find("Connection");
+	std::map<std::string, std::string>::const_iterator it = request._headers.find("Connection");
 
-	if (it != request.headers.end())
+	if (it != request._headers.end())
 		_connectionType = std::make_pair(std::string("Connection"), it->second);
 	else
 		_connectionType = std::make_pair(std::string("Connection"), std::string("close"));
 
-	std::map<std::string, std::string>::const_iterator itRange = request.headers.find("Range");
+	std::map<std::string, std::string>::const_iterator itRange = request._headers.find("Range");
 
-	if (itRange != request.headers.end())
+	if (itRange != request._headers.end())
 		_range = std::make_pair(itRange->first, itRange->second);
 }
 

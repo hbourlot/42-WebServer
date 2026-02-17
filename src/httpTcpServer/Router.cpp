@@ -12,7 +12,7 @@ static bool isCgirequest(const http::Request &request, const Location &location)
 		}
 
 	// Extract file extension from the request path
-	std::string path = request.fullPath;
+	std::string path = request._fullPath;
 	size_t dotPos = path.find_last_of('.');
 
 	if (dotPos == std::string::npos) {
@@ -53,7 +53,7 @@ http::Router::Router(Client &client, ClientEventProcessor &processor)
 
 void http::Router::process() {
 	// 1. Find the best matching location for the request URI
-	_request.matchLocation = getMatchLocation(_request.uri, _serverConfig.locations);
+	_request._matchLocation = getMatchLocation(_request._uri, _serverConfig.locations);
 
 	// 2. Check for redirects first
 	if (checkRedirects()) {
@@ -74,11 +74,11 @@ void http::Router::process() {
 }
 
 bool http::Router::checkRedirects() {
-	if (!_request.matchLocation)
+	if (!_request._matchLocation)
 		return false;
 
-	if (!_request.matchLocation->redirection.empty()) {
-		_response.buildRedirect(HTTP_MOVED, _request.matchLocation->redirection);
+	if (!_request._matchLocation->redirection.empty()) {
+		_response.buildRedirect(HTTP_MOVED, _request._matchLocation->redirection);
 		return true;
 	}
 	return false;
@@ -86,20 +86,20 @@ bool http::Router::checkRedirects() {
 
 bool http::Router::checkAllowedMethods() {
 
-	if (!_request.matchLocation) {
+	if (!_request._matchLocation) {
 
 		return false;
 	}
 
 	const std::vector<std::string> &allowedMethods =
-	    _request.fileDirectory ? _request.fileDirectory->methods : _request.matchLocation->methods;
+	    _request._fileDirectory ? _request._fileDirectory->methods : _request._matchLocation->methods;
 
 	if (allowedMethods.empty())
 		return true;
 
 	for (size_t i = 0; i < allowedMethods.size(); ++i) {
 
-		if ((!_request.matchLocation->cgi_pass.empty() || _request.matchLocation->isCgi()) &&
+		if ((!_request._matchLocation->cgi_pass.empty() || _request._matchLocation->isCgi()) &&
 		    (_request._method == "GET" || _request._method == "POST")) {
 			return true;
 		}
@@ -115,20 +115,20 @@ void http::Router::resolvePath() {
 
 	std::string basePath;
 
-	if (_request.matchLocation && !_request.matchLocation->root.empty()) {
-		basePath = _request.matchLocation->root;
+	if (_request._matchLocation && !_request._matchLocation->root.empty()) {
+		basePath = _request._matchLocation->root;
 	} else {
 		basePath = _serverConfig.root;
 	}
 
-	_request.fullPath = getFilePath(_request, _serverConfig);
+	_request._fullPath = getFilePath(_request, _serverConfig);
 
-	if (_request.fullPath[_request.fullPath.length() - 1] == '/') {
+	if (_request._fullPath[_request._fullPath.length() - 1] == '/') {
 
 		std::string indexFile;
 
-		if (_request.matchLocation && !_request.matchLocation->index.empty()) {
-			indexFile = _request.matchLocation->index;
+		if (_request._matchLocation && !_request._matchLocation->index.empty()) {
+			indexFile = _request._matchLocation->index;
 		} else if (!_serverConfig.index.empty()) {
 			indexFile = _serverConfig.index;
 		}
@@ -139,20 +139,20 @@ void http::Router::resolvePath() {
 			}
 		}
 
-		_request.fullPath += indexFile;
+		_request._fullPath += indexFile;
 	} else if (!_serverConfig.index.empty()) {
-		_request.fullPath += _serverConfig.index;
+		_request._fullPath += _serverConfig.index;
 	}
 }
 void http::Router::executeRequest() {
 
 	bool isCgi = false;
-	if (_request.matchLocation && (!_request.matchLocation->cgi_pass.empty() || _request.matchLocation->isCgi()) &&
+	if (_request._matchLocation && (!_request._matchLocation->cgi_pass.empty() || _request._matchLocation->isCgi()) &&
 	    (_request._method == "GET" || _request._method == "POST")) {
-		if (_request.matchLocation->isFile())
+		if (_request._matchLocation->isFile())
 			isCgi = true;
 		else {
-			isCgi = isCgirequest(_request, *_request.matchLocation);
+			isCgi = isCgirequest(_request, *_request._matchLocation);
 		}
 	}
 	if (isCgi) {
@@ -193,27 +193,27 @@ bool http::Router::routeCgiRequest() {
 
 void http::Router::handleGet() {
 
-	if (isDirectory(_request.fullPath)) {
+	if (isDirectory(_request._fullPath)) {
 		handleDirectoryListing();
 		return;
 	}
 
-	if (!std::ifstream(_request.fullPath.c_str()).is_open()) {
+	if (!std::ifstream(_request._fullPath.c_str()).is_open()) {
 		_response.buildErrorResponse(HTTP_NOT_FOUND, _serverConfig);
 		return;
 	}
 
-	_response.buildFileResponse(HTTP_OK, _request.fullPath, _serverConfig);
+	_response.buildFileResponse(HTTP_OK, _request._fullPath, _serverConfig);
 }
 
 void http::Router::handlePost() {
 	std::string ContentType;
 
-	if (_request.matchLocation->uploadEnable) {
-		UploadManager::handleUpload(*_request.matchLocation, _client, _serverConfig);
+	if (_request._matchLocation->uploadEnable) {
+		UploadManager::handleUpload(*_request._matchLocation, _client, _serverConfig);
 		return;
 	}
-	if (_client.getRequest().body.size() > _request.matchLocation->max_body_size) {
+	if (_client.getRequest()._body.size() > _request._matchLocation->max_body_size) {
 		_client.getResponse().buildErrorResponse(HTTP_PAYLOAD, _serverConfig);
 		return;
 	}
@@ -225,22 +225,22 @@ void http::Router::handleDelete() {
 
 	struct stat st;
 
-	if (stat(_request.fullPath.c_str(), &st) != 0) {
+	if (stat(_request._fullPath.c_str(), &st) != 0) {
 		_response.buildErrorResponse(HTTP_NOT_FOUND, _serverConfig);
 		Logs::log(LOGS_ERROR, "File Not Found");
 		return;
 	}
 
-	if (isDirectory(_request.fullPath)) {
+	if (isDirectory(_request._fullPath)) {
 		_response.buildErrorResponse(HTTP_FORBID, _serverConfig);
 		Logs::log(LOGS_ERROR, "Cannot delete because its a folder");
 		return;
 	}
-	if (remove(_request.fullPath.c_str())) {
+	if (remove(_request._fullPath.c_str())) {
 		_response.buildErrorResponse(HTTP_SERVER_ERR, _serverConfig);
-		Logs::log(LOGS_ERROR, "Failed to delete File: " + _request.fullPath);
+		Logs::log(LOGS_ERROR, "Failed to delete File: " + _request._fullPath);
 		return;
 	}
 	_response.buildResponse(HTTP_NO_CONTENT, "");
-	Logs::log(LOGS_ERROR, "File deleted Successfully " + _request.fullPath);
+	Logs::log(LOGS_ERROR, "File deleted Successfully " + _request._fullPath);
 }

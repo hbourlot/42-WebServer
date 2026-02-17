@@ -25,42 +25,42 @@ namespace http {
 		~Request();
 
 		std::string _method;
-		std::string uri;
-		std::string path;
-		std::string fullPath;
-		std::string serverProtocol;
-		std::string pathInfo; // For Cgi
-		std::string pathTranslated;
-		std::map<std::string, std::string> headers;
+		std::string _uri;
+		std::string _path;
+		std::string _fullPath;
+		std::string _serverProtocol;
+		std::string _pathInfo; // For Cgi
+		std::string _pathTranslated;
+		std::map<std::string, std::string> _headers;
 
-		std::string body;
-		bool bodyInDisk;
-		int bodyFd;
-		size_t bodyFdSize;
-		std::string bodyPath;
+		std::string _body;
+		bool _bodyInDisk;
+		int _bodyFd;
+		size_t _bodyFdSize;
+		std::string _bodyPath;
 
-		std::string queryString;
-		const Location* matchLocation;
-		const Directory* fileDirectory;
+		std::string _queryString;
+		const Location *_matchLocation;
+		const Directory *_fileDirectory;
 
 		REQUEST_PHASE _requestPhase;
 		ChunkParser _chunk;
 
-		std::map<std::string, std::string>& getHeaders() {
-			return headers;
+		std::map<std::string, std::string> &getHeaders() {
+			return _headers;
 		};
 
 		std::string getFileName();
-		int appendBody(const char* buf, size_t len, const ServerConfig& configs);
-		int createTempFile(const ServerConfig& configs);
+		int appendBody(const char *buf, size_t len, const ServerConfig &configs);
+		int createTempFile(const ServerConfig &configs);
 		void cleanup();
 		bool writeBodyToFd(int outFd);
-		std::string& readALlBody();
+		std::string &readALlBody();
 
 		REQUEST_PHASE getRequestPhase();
 		void setRequestPhase(REQUEST_PHASE requestPhase);
 
-		ChunkParser& getChunkParser();
+		ChunkParser &getChunkParser();
 		void resetChunkParser();
 	};
 

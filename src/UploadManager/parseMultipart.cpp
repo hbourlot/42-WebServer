@@ -2,7 +2,7 @@
 
 static std::string extractBoundary(http::Request &request) {
 
-	std::string contentType = request.headers["Content-Type"];
+	std::string contentType = request._headers["Content-Type"];
 	std::string boundaryPrefix = "boundary=";
 
 	size_t pos = contentType.find(boundaryPrefix);

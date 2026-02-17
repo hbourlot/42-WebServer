@@ -1,6 +1,6 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
-static std::string getParentPath(const std::string& path) {
+static std::string getParentPath(const std::string &path) {
 	std::string parent = path;
 
 	if (!parent.empty() && parent[parent.length() - 1] == '/')
@@ -13,7 +13,7 @@ static std::string getParentPath(const std::string& path) {
 	return ("/");
 }
 
-static bool hasIndexFile(const std::string& path, const Location& matchLocation) {
+static bool hasIndexFile(const std::string &path, const Location &matchLocation) {
 
 	if (matchLocation.index.empty())
 		return false;
@@ -22,18 +22,18 @@ static bool hasIndexFile(const std::string& path, const Location& matchLocation)
 	return (std::ifstream(indexPath.c_str()).is_open());
 }
 
-static std::string generateAutoIndexPage(const std::string& dirPath, http::Request& request) {
+static std::string generateAutoIndexPage(const std::string &dirPath, http::Request &request) {
 	std::string html;
 	html += "<html>\n";
 	html += "  <body>\n";
-	html += "    <h1>Index of " + request.uri + "</h1>\n";
+	html += "    <h1>Index of " + request._uri + "</h1>\n";
 
-	DIR* directory = opendir(dirPath.c_str());
+	DIR *directory = opendir(dirPath.c_str());
 	if (!directory)
 		return "<html><body><h1>Unable to open "
 		       "directory</h1></body></html>";
 
-	struct dirent* entry;
+	struct dirent *entry;
 
 	while ((entry = readdir(directory)) != NULL) {
 		std::string d_name(entry->d_name);
@@ -43,9 +43,9 @@ static std::string generateAutoIndexPage(const std::string& dirPath, http::Reque
 		std::string href;
 
 		if (!d_name.compare(".."))
-			href = getParentPath(request.uri);
+			href = getParentPath(request._uri);
 		else
-			href = joinPath(request.uri, d_name);
+			href = joinPath(request._uri, d_name);
 
 		html += "    <p><a href=\"" + href + "\">" + d_name + "</a></p>\n";
 	}
@@ -57,21 +57,21 @@ static std::string generateAutoIndexPage(const std::string& dirPath, http::Reque
 }
 
 void http::Router::handleDirectoryListing() {
-	http::Request& request = _client.getRequest();
-	http::Response& response = _client.getResponse();
+	http::Request &request = _client.getRequest();
+	http::Response &response = _client.getResponse();
 
-	if (hasIndexFile(_request.fullPath, *_request.matchLocation)) {
-		std::string indexPath = joinPath(_request.fullPath, _request.matchLocation->index);
+	if (hasIndexFile(_request._fullPath, *_request._matchLocation)) {
+		std::string indexPath = joinPath(_request._fullPath, _request._matchLocation->index);
 		response.buildFileResponse(HTTP_OK, indexPath, _serverConfig);
 		return;
 	}
 
-	if (!_request.matchLocation->autoIndex) {
+	if (!_request._matchLocation->autoIndex) {
 		response.buildErrorResponse(HTTP_NOT_FOUND, _serverConfig);
 		return;
 	}
 
-	std::string body = generateAutoIndexPage(_request.fullPath, request);
+	std::string body = generateAutoIndexPage(_request._fullPath, request);
 
 	response.buildResponse(HTTP_OK, body);
 
