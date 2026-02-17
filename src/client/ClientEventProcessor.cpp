@@ -183,6 +183,7 @@ void http::ClientEventProcessor::closeClientConnection(size_t index) {
 	Logs::log(LOGS_WARN, msg);
 
 	if (client) {
+		std::cout << index << std::endl;
 		client->getServer().getSocketAddressRef().erase(fd);
 	}
 	_clientManager.removeClient(fd);
@@ -375,8 +376,8 @@ bool http::ClientEventProcessor::readFromSocket(SocketFD fd, std::string &readBu
 
 bool http::ClientEventProcessor::processRequest(Client &client) {
 
-	Session &session = _sessionManager.getSession(client.getSessionId());
-	client.setSessionId(session.getSessionId());
+	// Session &session = _sessionManager.getSession(client.getSessionId());
+	// client.setSessionId(session.getSessionId());
 
 	IN_OUT_STATE state = client.getState();
 
@@ -388,16 +389,16 @@ bool http::ClientEventProcessor::processRequest(Client &client) {
 		return true;
 	}
 
-	std::cout << client.getRequest().body << std::endl;
-	std::string username = session.getSessionData("username");
-	bool isAuthenticated = session.getSessionData("authenticated") == "true";
+	// std::cout << client.getRequest().body << std::endl;
+	// std::string username = session.getSessionData("username");
+	// bool isAuthenticated = session.getSessionData("authenticated") == "true";
 
-	// std::cout << "uri:" << client.getRequest().uri << std::endl;
-	// std::cout << "f: " << client.getRequest().fullPath << std::endl;
-	if ((client.getRequest().uri.find("/Dashboard.html") != std::string::npos) && !isAuthenticated) {
-		client.getResponse().buildRedirect(HTTP_MOVED, "http://localhost:8003/pages/Services/Services.html");
-		return true;
-	}
+	// // std::cout << "uri:" << client.getRequest().uri << std::endl;
+	// // std::cout << "f: " << client.getRequest().fullPath << std::endl;
+	// if ((client.getRequest().uri.find("/Dashboard.html") != std::string::npos) && !isAuthenticated) {
+	// 	client.getResponse().buildRedirect(HTTP_MOVED, "http://localhost:8003/pages/Services/Services.html");
+	// 	return true;
+	// }
 
 	// std::cout << "m: " << client.getRequest()._method << std::endl;
 	http::Router router(client, *this);
@@ -488,11 +489,11 @@ bool http::ClientEventProcessor::handleResponse(pollfd &pfd, Client &client) {
 		Logs::log(LOGS_INFO, msg);
 
 		if (client.getResponse().shouldCloseConnection()) {
-			client.getServer()._clientManager.resetClientState(clientFd);
+			_clientManager.resetClientState(clientFd);
 
 			return 1; // Close connection
 		}
-		client.getServer()._clientManager.resetClientState(clientFd);
+		_clientManager.resetClientState(clientFd);
 		pfd.events = POLLIN; // Reset to read for next request
 		return 0;
 	}

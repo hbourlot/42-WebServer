@@ -32,13 +32,13 @@ namespace http {
 	  public:
 		Response();
 		// Response(const http::Request &request);
-		void initFromRequest(const http::Request& request);
+		void initFromRequest(const http::Request &request);
 		// Response &operator=(const Response &other);
 		~Response();
 
 		// function Member
 		std::string buildResponseString(void);
-		const std::map<std::string, std::string>& getHeaders() const;
+		const std::map<std::string, std::string> &getHeaders() const;
 
 		std::string getBody() {
 			return _body;
@@ -54,29 +54,27 @@ namespace http {
 		void setDefaultHeaders();
 		void addToHeader(std::string key, std::string value);
 
-		std::string getContentType(const std::string& filePath);
-		std::string readFileContent(const std::string& filePath);
+		std::string getContentType(const std::string &filePath);
+		std::string readFileContent(const std::string &filePath);
 
-		void buildCgiChunked(const HttpStatusCode& status, const std::string& buffer, const ServerConfig& server);
-		void buildCgiHeaderChunked(const HttpStatusCode& status);
-		void buildCgiBodyChunked(const char* buffer, size_t len);
+		void cleanup();
 
 		void initChunked();
-		void appendCgiChunk(std::string& buffer, bool isFinished = false);
-		void appendChunk(std::string& data);
+		void appendCgiChunk(std::string &buffer, bool isFinished = false);
+		void appendChunk(std::string &data);
 		void finishCgiChunked();
-		bool parseCgiHeaders(std::string& buffer);
-		std::string& getCgiOutBuffer();
+		bool parseCgiHeaders(std::string &buffer);
+		std::string &getCgiOutBuffer();
 		CgiChunkState getchunkState() const;
 		std::string consumeOutBuffer();
 		void markChunkendDone();
 
-		void buildCgiResponse(const HttpStatusCode& status, const std::string& body, const ServerConfig& server);
-		void buildResponse(const HttpStatusCode& status, const std::string& body);
-		void buildErrorResponse(const HttpStatusCode& status, const ServerConfig& server);
-		void buildRedirect(const HttpStatusCode& status, const std::string& url);
-		void buildFileResponse(const HttpStatusCode& status, const std::string& filePath, const ServerConfig& server);
-		void buildRangeResponse(const std::string& filePath, const ServerConfig& server, struct ::stat& st);
+		void buildCgiResponse(const HttpStatusCode &status, const std::string &body, const ServerConfig &server);
+		void buildResponse(const HttpStatusCode &status, const std::string &body);
+		void buildErrorResponse(const HttpStatusCode &status, const ServerConfig &server);
+		void buildRedirect(const HttpStatusCode &status, const std::string &url);
+		void buildFileResponse(const HttpStatusCode &status, const std::string &filePath, const ServerConfig &server);
+		void buildRangeResponse(const std::string &filePath, const ServerConfig &server, struct ::stat &st);
 
 		bool isChunked() const;
 	};

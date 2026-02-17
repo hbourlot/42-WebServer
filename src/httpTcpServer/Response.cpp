@@ -7,7 +7,14 @@
 #include <utility>
 
 http::Response::Response()
-    : _protocol("HTTP/1.1"), _isChunked(false), _chunkState(CHUNK_PARSE_HEADERS), _statusCode(""), _statusMsg("") {
+    : _protocol("HTTP/1.1"), _isChunked(false), _chunkState(CHUNK_PARSE_HEADERS), _statusCode(""), _statusMsg(""),
+      _range("", "") {
+}
+
+void http::Response::cleanup() {
+	_protocol = "";
+	_connectionType = std::make_pair("", "");
+	_range = std::make_pair("", "");
 }
 
 void http::Response::initFromRequest(const http::Request &request) {
@@ -282,7 +289,7 @@ static bool parseRange(std::string &rangeValue, off_t &fileSize, off_t &start, o
 	}
 	if (end >= fileSize)
 		end = fileSize - 1;
-	const off_t MAX_CHUNK = 64 * 1024; // 16KB
+	const off_t MAX_CHUNK = 32 * 1024; // 16KB
 	if (end - start + 1 > MAX_CHUNK)
 		end = start + MAX_CHUNK - 1;
 	if (start > end) {
