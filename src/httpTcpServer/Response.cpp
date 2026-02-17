@@ -263,7 +263,6 @@ static bool parseRange(std::string &rangeValue, off_t &fileSize, off_t &start, o
 	std::string rangeSpec = rangeValue.substr(prefix.size());
 	size_t dash = rangeSpec.find('-');
 	if (dash == std::string::npos) {
-		std::cout << "HERE1\n";
 		return (false);
 	}
 
@@ -287,7 +286,6 @@ static bool parseRange(std::string &rangeValue, off_t &fileSize, off_t &start, o
 	if (end - start + 1 > MAX_CHUNK)
 		end = start + MAX_CHUNK - 1;
 	if (start > end) {
-		std::cout << "HERE3\n";
 
 		return (false);
 	}

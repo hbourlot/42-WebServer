@@ -1,7 +1,7 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include <algorithm>
 
-static bool isCgirequest(const http::Request& request, const Location& location) {
+static bool isCgirequest(const http::Request &request, const Location &location) {
 
 	if (!location.cgi_pass.empty())
 		return true;
@@ -34,7 +34,7 @@ static bool isCgirequest(const http::Request& request, const Location& location)
 void http::Router::launchCgi() {
 
 	// Create and execute CGI
-	http::Cgi* cgi = new http::Cgi(_request, _serverConfig, &_client);
+	http::Cgi *cgi = new http::Cgi(_request, _serverConfig, &_client);
 	cgi->executeCgi();
 
 	// Store CGI info in client
@@ -46,7 +46,7 @@ void http::Router::launchCgi() {
 	_client.setState(CGI_JUST_STARTED);
 }
 
-http::Router::Router(Client& client, ClientEventProcessor& processor)
+http::Router::Router(Client &client, ClientEventProcessor &processor)
     : _client(client), _request(client.getRequest()), _response(client.getResponse()),
       _serverConfig(client.getServer().getServerInfo()), _eventProcessor(processor) {
 }
@@ -91,7 +91,7 @@ bool http::Router::checkAllowedMethods() {
 		return false;
 	}
 
-	const std::vector<std::string>& allowedMethods =
+	const std::vector<std::string> &allowedMethods =
 	    _request.fileDirectory ? _request.fileDirectory->methods : _request.matchLocation->methods;
 
 	if (allowedMethods.empty())
@@ -123,7 +123,6 @@ void http::Router::resolvePath() {
 
 	_request.fullPath = getFilePath(_request, _serverConfig);
 
-
 	if (_request.fullPath[_request.fullPath.length() - 1] == '/') {
 
 		std::string indexFile;
@@ -144,7 +143,6 @@ void http::Router::resolvePath() {
 	} else if (!_serverConfig.index.empty()) {
 		_request.fullPath += _serverConfig.index;
 	}
-
 }
 void http::Router::executeRequest() {
 
@@ -154,7 +152,6 @@ void http::Router::executeRequest() {
 		if (_request.matchLocation->isFile())
 			isCgi = true;
 		else {
-			std::cout << "DADASD\n";
 			isCgi = isCgirequest(_request, *_request.matchLocation);
 		}
 	}
@@ -171,7 +168,7 @@ void http::Router::executeRequest() {
 	}
 }
 
-static bool validateRequestMethod(const http::Request& request, const std::vector<std::string>& methods) {
+static bool validateRequestMethod(const http::Request &request, const std::vector<std::string> &methods) {
 	if (request._method != "GET" && request._method != "POST" && request._method != "DELETE")
 		return false;
 
@@ -182,10 +179,9 @@ static bool validateRequestMethod(const http::Request& request, const std::vecto
 	return false;
 }
 
-
 bool http::Router::routeCgiRequest() {
 
-	http::Request& request = _client.getRequest();
+	http::Request &request = _client.getRequest();
 	if (request._method == "GET" || request._method == "POST") {
 		launchCgi();
 		return false;

@@ -15,7 +15,6 @@ INCLUDE         = inc/
 HEADERS         = $(shell find $(INCLUDE) -name "*.hpp")
 SRC_DIR         = src/
 FILE_DIR		= fileConfig/
-AUTH_DIR		= auth/
 UTILS_DIR		= utils/
 
 CLIENT_DIR 		= client/
@@ -34,7 +33,6 @@ COMPILED_FILES  = 0
 LEN             = 0
 
 CLIENT_FUNC		= client clientManager ClientEventProcessor ClientEventProcessor_cgi parseRequestData cookies
-AUTH_FUNC		= loginHandler
 CGI_FUNC		= Cgi buildEnvStrings
 UTILS_FUNC		= utils getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations SetFile
@@ -47,7 +45,6 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CGI_DIR), $(CGI_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(AUTH_DIR), $(AUTH_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UPL_DIR), $(UPL_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(SESSION_DIR), $(SESSION_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR), main.cpp) 

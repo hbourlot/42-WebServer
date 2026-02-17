@@ -15,20 +15,15 @@ static std::string extractBoundary(http::Request &request) {
 
 static std::string extractFilePart(std::string &body, const std::string &boundary) {
 
-	// std::string body = request.body;
 	size_t start = body.find(boundary);
 
 	if (start == std::string::npos)
 		return ("");
 
 	start += boundary.length() + 2;
-	std::cout << boundary << ":" << body.substr(0, boundary.size() * 2);
 	size_t end = body.find(boundary, start);
-	std::cout << "end : " << end << std::endl;
 	if (end == std::string::npos)
 		end = body.size();
-	// std::string filePart = body.substr(0, start);
-	// body.erase(0, start);
 	return (body.substr(start, end - start));
 }
 
@@ -40,7 +35,6 @@ static bool splitHeadersAndContent(const std::string &filePart, std::string &hea
 		return (false);
 
 	headers = filePart.substr(0, headerEnd);
-	std::cout << "headers :" << std::endl;
 	content = filePart.substr(headerEnd + 4);
 
 	return (true);
@@ -90,7 +84,6 @@ bool UploadManager::parseMultipart(const Location &matchLocation, Client &client
 	}
 
 	std::string &body = client.getRequest().readALlBody();
-	// std::cout << body << std::endl;
 	std::string filePart = extractFilePart(body, boundary);
 	if (filePart.empty()) {
 		client.getResponse().buildErrorResponse(HTTP_BAD_REQ, serverInfo);
