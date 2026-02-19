@@ -3,10 +3,11 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include "utils.hpp"
 #include "Session/SessionManager.hpp"
-// #include "httpTcpServer/HttpStructs.hpp"
+#include "httpTcpServer/Cgi.hpp"
 #include <iostream>
 #include <poll.h>
 #include <sys/poll.h>
+#include <vector>
 
 namespace http {
 
@@ -41,7 +42,6 @@ namespace http {
 
 			void cleanupCgi( http::Cgi *cgi );
 
-			bool hasCgiFinished( Cgi *cgi ) const;
 
 			bool hasCgiSuccessfullyFinished( Cgi *cgi ) const;
 

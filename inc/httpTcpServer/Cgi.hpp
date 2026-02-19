@@ -19,20 +19,23 @@ namespace http {
 	class Cgi {
 
 	  public:
-		Cgi(const http::Request &request, const ServerConfig &serverInfo, Client *client);
+		Cgi(const http::Request& request, const ServerConfig& serverInfo, Client* client);
 
 		~Cgi();
 
 		void executeCgi(void);
-		std::string getFilePath() const;
-		int &getStatus();
-		int getStatus() const;
-		pid_t getPid() const;
-		const int *getOutputPipe() const;
 		void killProcess();
-		Client *getClient() const;
-		IN_OUT_STATE &getState();
-		std::string &getReadBuffer();
+		std::string getFilePath() const;
+		pid_t getPid() const;
+		int getStatus() const;
+		int& getStatus();
+		const int* getOutputPipe() const;
+		int getOutputPipeFd() const;
+		Client* getClient() const;
+		IN_OUT_STATE& getState();
+		std::string& getReadBuffer();
+		void setHasFinished(bool hasFinished);
+
 		// bool http::Cgi::hasDataToRead() {
 		bool hasDataToRead() {
 
@@ -53,30 +56,40 @@ namespace http {
 			return false; // Any other error
 		}
 
+		bool hasFinished() {
+
+			if (_hasFinished)
+				return true;
+
+			pid_t result = waitpid(_pid, &_status, WNOHANG);
+			if (result > 0) {
+				_hasFinished = true;
+				return true;
+			}
+			_hasFinished = false;
+			return _hasFinished;
+		}
+
 	  private:
+		pid_t _pid;
 		int _status;
+		int _inputPipe[2];
+		int _outputPipe[2];
 		http::Request _request;
 		ServerConfig _serverInfo;
 		std::string _filePath;
 		const sockaddr_in _clientAddress;
-		Client *_client; // Back-reference to client
-		std::string _bodyFileName;
-		IN_OUT_STATE _state;
-
-		std::vector<char *> _envp;
+		Client* _client; // Back-reference to client
+		std::vector<char*> _envp;
 		std::vector<std::string> _envStrings;
-
-		// Accumulate CGI stdout across poll cycles
+		IN_OUT_STATE _state;
+		bool _hasFinished;
 		std::string _outputBuffer;
+		std::string _bodyFileName;
 
-		// Pipe handling
-		int _inputPipe[2];
-		int _outputPipe[2];
-		pid_t _pid;
-
-		void buildEnvStrings();
 		void doDupTwoWay();
 		void closeForTwoWay();
+		void buildEnvStrings();
 		int prepareCgiInputFile();
 	};
 

@@ -9,9 +9,9 @@
 #include <sys/poll.h>
 #include <vector>
 
-http::Cgi::Cgi(const http::Request &request, const ServerConfig &serverInfo, Client *client)
+http::Cgi::Cgi(const http::Request& request, const ServerConfig& serverInfo, Client* client)
     : _status(), _request(request), _serverInfo(serverInfo), _clientAddress(), _client(client), _envp(), _envStrings(),
-      _state(RESET) {
+      _state(RESET), _hasFinished(false){
 
 	_filePath = request._matchLocation->cgi_pass;
 
@@ -43,16 +43,20 @@ pid_t http::Cgi::getPid() const {
 int http::Cgi::getStatus() const {
 	return _status;
 }
-int &http::Cgi::getStatus() {
+int& http::Cgi::getStatus() {
 	return _status;
 }
 
-const int *http::Cgi::getOutputPipe() const {
+const int* http::Cgi::getOutputPipe() const {
 	return _outputPipe;
 }
 
-Client *http::Cgi::getClient() const {
+Client* http::Cgi::getClient() const {
 	return _client;
+}
+
+int http::Cgi::getOutputPipeFd() const {
+	return _outputPipe[0];
 }
 
 void http::Cgi::doDupTwoWay() {
@@ -100,7 +104,6 @@ int http::Cgi::prepareCgiInputFile() {
 		std::cerr << "Failed to open file for writing: " << strerror(errno) << std::endl;
 		return -1;
 	}
-
 	if (!_request.writeBodyToFd(fileFd)) {
 		std::cerr << "Failed to write to file: " << strerror(errno) << std::endl;
 		close(fileFd);
@@ -131,7 +134,6 @@ void http::Cgi::executeCgi() {
 	}
 
 	if (prepareCgiInputFile() != 0) {
-		// Close pipes on prepare failure
 		close(_inputPipe[0]);
 		close(_inputPipe[1]);
 		close(_outputPipe[0]);
@@ -143,7 +145,7 @@ void http::Cgi::executeCgi() {
 	this->_pid = fork();
 
 	if (this->_pid < 0) {
-		std::cerr << "Fork failed\n";
+		std::cerr << "Fork failed\n"; // ! 
 		_inputPipe[0] = _inputPipe[1] = _outputPipe[0] = _outputPipe[1] = -1;
 		return;
 	} else if (this->_pid == 0) {
@@ -151,16 +153,16 @@ void http::Cgi::executeCgi() {
 		this->doDupTwoWay();
 
 		// build argv
-		std::vector<char *> argv;
-		argv.push_back(const_cast<char *>(_filePath.c_str()));
+		std::vector<char*> argv;
+		argv.push_back(const_cast<char*>(_filePath.c_str()));
 		argv.push_back(NULL);
 
 		// build envp
-		std::vector<char *> envp;
+		std::vector<char*> envp;
 		this->_envp.clear();
 
 		for (size_t i = 0; i < _envStrings.size(); ++i) {
-			this->_envp.push_back(const_cast<char *>(_envStrings[i].c_str()));
+			this->_envp.push_back(const_cast<char*>(_envStrings[i].c_str()));
 		}
 		this->_envp.push_back(NULL);
 
@@ -174,10 +176,10 @@ void http::Cgi::executeCgi() {
 	}
 };
 
-IN_OUT_STATE &http::Cgi::getState() {
+IN_OUT_STATE& http::Cgi::getState() {
 	return _state;
 };
 
-std::string &http::Cgi::getReadBuffer() {
+std::string& http::Cgi::getReadBuffer() {
 	return _outputBuffer;
 };

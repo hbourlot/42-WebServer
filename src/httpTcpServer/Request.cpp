@@ -83,9 +83,11 @@ bool http::Request::writeBodyToFd(int outFd) {
 	lseek(_bodyFd, 0, SEEK_SET);
 	while ((r = read(_bodyFd, buf, sizeof(buf))) > 0) {
 		ssize_t w = write(outFd, buf, r);
-		if (w < 0 || w != r)
+		if (w < 0 || w != r) {
 			return false;
+		}
 	}
+
 	return r == 0;
 }
 
