@@ -1,6 +1,7 @@
 #include "httpTcpServer/Cgi.hpp"
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include <cstddef>
+#include <cstdlib>
 #include <map>
 #include <netinet/in.h>
 #include <signal.h>
@@ -14,7 +15,7 @@ http::Cgi::Cgi(const http::Request& request, const ServerConfig& serverInfo, Cli
       _clientAddress(client && client->getServer().getSocketAddressRef().count(client->getFd())
                          ? client->getServer().getSocketAddressRef()[client->getFd()]
                          : sockaddr_in()),
-      _client(client), _envp(), _envStrings(), _state(RESET), _hasFinished(false), bytesRead(0), triesRead(3250) {
+      _client(client), _envp(), _envStrings(), _state(RESET), _hasFinished(false) {
 
 	_filePath = request._matchLocation->cgi_pass;
 	_outputPipe[0] = -1;
@@ -63,8 +64,10 @@ int http::Cgi::getOutputPipeFd() const {
 }
 
 void http::Cgi::dupCgiFds() {
-	dup2(_stdinFd, STDIN_FILENO);
-	dup2(_outputPipe[1], STDOUT_FILENO);
+	if (dup2(_stdinFd, STDIN_FILENO) < 0)
+		std::cerr << "ERROR ON DUP2 STDIN\n" << std::endl;
+	if (dup2(_outputPipe[1], STDOUT_FILENO) < 0)
+		std::cerr << "ERROR ON DUP2 STDOUT\n" << std::endl;
 
 	// Close original fds in child after dup
 	close(_stdinFd);
@@ -89,34 +92,45 @@ void http::Cgi::killProcess() {
 }
 
 int http::Cgi::prepareCgiInputFile() {
-
-	_bodyFileName = _serverInfo.temp_path + "_" + _client->getSessionId() + "_content.txt";
-	int fileFd;
-
-	fileFd = open(_bodyFileName.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
-	if (fileFd < 0) {
-		std::cerr << "Failed to open file for writing: " << strerror(errno) << std::endl;
-		return -1;
-	}
-
-	if (!_request.writeBodyToFd(fileFd)) {
-		std::cerr << "Failed to write to file: " << strerror(errno) << std::endl;
-		close(fileFd);
-		return -1;
-	}
-
-	close(fileFd);
-	fileFd = -1;
+	std::string templatePath = _serverInfo.temp_path + "_" + _client->getSessionId() + "_content_XXXXXX";
+	std::vector<char> templateBuffer(templatePath.begin(), templatePath.end());
+	templateBuffer.push_back('\0');
 
 	if (_stdinFd >= 0) {
 		close(_stdinFd);
+		_stdinFd = -1;
 	}
 
-	_stdinFd = open(_bodyFileName.c_str(), O_RDONLY, 0644);
+	_stdinFd = mkstemp(templateBuffer.data());
 	if (_stdinFd < 0) {
-		std::cerr << "Failed to open file for reading: " << strerror(errno) << std::endl;
+		std::cerr << "Failed to create temp file for CGI input: " << strerror(errno) << std::endl;
 		return -1;
 	}
+	_bodyFileName = templateBuffer.data();
+
+	if (!_request.writeBodyToFd(_stdinFd)) {
+		std::cerr << "Failed to write to file: " << strerror(errno) << std::endl;
+		close(_stdinFd);
+		_stdinFd = -1;
+		return -1;
+	}
+
+	// Ensure all data is written to disk before forking
+	if (fsync(_stdinFd) == -1) {
+		std::cerr << "Failed to fsync file: " << strerror(errno) << std::endl;
+		close(_stdinFd);
+		_stdinFd = -1;
+		return -1;
+	}
+
+	// After writing, seek back to the beginning of the file for reading
+	if (lseek(_stdinFd, 0, SEEK_SET) == -1) {
+		std::cerr << "Failed to seek file for reading: " << strerror(errno) << std::endl;
+		close(_stdinFd);
+		_stdinFd = -1;
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -164,7 +178,6 @@ void http::Cgi::executeCgi() {
 			this->_envp.push_back(const_cast<char*>(_envStrings[i].c_str()));
 		}
 		this->_envp.push_back(NULL);
-		dumpEnvp();
 
 		execve(this->getFilePath().c_str(), argv.data(), this->_envp.data());
 		Logs::log(LOGS_ERROR, "CGI execution failed for script '" + this->getFilePath() + "': " + strerror(errno));
@@ -176,7 +189,6 @@ void http::Cgi::executeCgi() {
 		}
 		close(_outputPipe[1]);
 		_outputPipe[1] = -1;
-		// fcntl(_outputPipe[0], F_SETFL, O_NONBLOCK);
 		fcntl(_outputPipe[0], F_SETFL, fcntl(_outputPipe[0], F_GETFL, 0) | O_NONBLOCK);
 	}
 };
@@ -203,4 +215,18 @@ void http::Cgi::dumpEnvp() const {
 			break;
 		std::cerr << _envp[i] << std::endl;
 	}
+}
+
+bool http::Cgi::hasFinished() {
+
+	if (_hasFinished)
+		return true;
+
+	pid_t result = waitpid(_pid, &_status, WNOHANG);
+	if (result > 0) {
+		_hasFinished = true;
+		return true;
+	}
+	_hasFinished = false;
+	return _hasFinished;
 }

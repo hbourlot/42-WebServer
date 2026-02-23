@@ -34,52 +34,16 @@ namespace http {
 		Client* getClient() const;
 		IN_OUT_STATE& getState();
 		std::string& getReadBuffer();
-		void setHasFinished(bool hasFinished);
 		void dumpEnvStrings() const;
 		void dumpEnvp() const;
 
-		size_t bytesRead;
-		int triesRead;
+		bool hasFinished();
 
-		// bool http::Cgi::hasDataToRead() {
-		bool hasDataToRead() {
-
-			char testByte;
-
-			ssize_t result = recv(_outputPipe[0], &testByte, 1, MSG_PEEK);
-			//  | MSG_DONTWAIT
-
-			if (result > 0)
-				return true; // Data available
-
-			if (result == 0)
-				return false; // EOF - pipe closed
-
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-				return false; // No data available
-
-			return false; // Any other error
-		}
-
-		bool hasFinished() {
-
-			if (_hasFinished)
-				return true;
-
-			pid_t result = waitpid(_pid, &_status, WNOHANG);
-			if (result > 0) {
-				_hasFinished = true;
-				return true;
-			}
-			_hasFinished = false;
-			return _hasFinished;
-		}
-
-		int _outputPipe[2];
 	  private:
 		pid_t _pid;
 		int _status;
 		int _stdinFd;
+		int _outputPipe[2];
 		http::Request _request;
 		ServerConfig _serverInfo;
 		std::string _filePath;

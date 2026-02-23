@@ -34,7 +34,7 @@ void http::Request::cleanup() {
 	_chunk = ChunkParser();
 }
 
-int http::Request::appendBody(const char *buf, size_t len, const ServerConfig &configs) {
+int http::Request::appendBody(const char* buf, size_t len, const ServerConfig& configs) {
 
 	size_t maxBuffer = _matchLocation ? _matchLocation->max_buffer_size : configs.max_buffer_size;
 	if (!_bodyInDisk && len > maxBuffer - _body.size()) {
@@ -58,7 +58,7 @@ int http::Request::appendBody(const char *buf, size_t len, const ServerConfig &c
 	return (0);
 }
 
-int http::Request::createTempFile(const ServerConfig &configs) {
+int http::Request::createTempFile(const ServerConfig& configs) {
 	static long requestNbr = 0;
 	_bodyPath = joinPath(configs.temp_path, "/webserv_body_" + ft_to_string(requestNbr));
 	requestNbr = (requestNbr < 2000) ? requestNbr + 1 : 0;
@@ -87,11 +87,10 @@ bool http::Request::writeBodyToFd(int outFd) {
 			return false;
 		}
 	}
-
 	return r == 0;
 }
 
-std::string &http::Request::readALlBody() {
+std::string& http::Request::readALlBody() {
 	if (!_bodyInDisk)
 		return (_body);
 
@@ -121,7 +120,7 @@ REQUEST_PHASE http::Request::getRequestPhase() {
 void http::Request::setRequestPhase(REQUEST_PHASE requestPhase) {
 	_requestPhase = requestPhase;
 }
-ChunkParser &http::Request::getChunkParser() {
+ChunkParser& http::Request::getChunkParser() {
 	return _chunk;
 }
 

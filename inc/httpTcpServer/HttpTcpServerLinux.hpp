@@ -53,63 +53,45 @@ namespace http {
 
 	class TcpServer {
 
-		public:
-			friend class ClientEventProcessor;
-			// Default Constructor
-			TcpServer( ServerConfig server );
-			// Default Destructor
-			~TcpServer();
+	  public:
+		friend class ClientEventProcessor;
+		// Default Constructor
+		TcpServer(ServerConfig server);
+		// Default Destructor
+		~TcpServer();
 
-			class TcpServerException : public std::runtime_error {
-				public:
-					explicit TcpServerException( const std::string &message ) : std::runtime_error( message ) {
-					}
-			};
-			std::vector< pollfd > &getVectorPollFds();
-
-			std::vector< pollfd > _fds;
-
-			ServerConfig &getServerInfo() {
-
-				return _serverInfo;
+		class TcpServerException : public std::runtime_error {
+		  public:
+			explicit TcpServerException(const std::string& message) : std::runtime_error(message) {
 			}
+		};
+		std::vector<pollfd>& getVectorPollFds();
 
-			struct sockaddr_in &getServerSocketAddress() {
-				std::map< SocketFD, sockaddr_in >::iterator it = _socketAddressMap.find( _serverSocket );
-				if ( it == _socketAddressMap.end() ) {
-					throw TcpServerException( "Server socket address not found in map." );
-				}
-				return it->second;
-			}
+		std::vector<pollfd> _fds;
 
-			std::map< SocketFD, sockaddr_in > &getSocketAddressRef() {
-				return _socketAddressMap;
-			}
+		ServerConfig& getServerInfo() {
 
-			void setSocketAddress( SocketFD fd, sockaddr_in socketAddress ) {
-				_socketAddressMap[fd] = socketAddress;
-			}
+			return _serverInfo;
+		}
 
-			pollfd &getServerPOLLFD() {
-				return _serverPOLLFD;
-			}
+		std::map<SocketFD, sockaddr_in>& getSocketAddressRef();
+		void setSocketAddress(SocketFD fd, sockaddr_in socketAddress);
+		pollfd& getServerPOLLFD();
+		int startServer();
 
-			int startServer();
+	  private:
+		ServerConfig _serverInfo;
+		SocketFD _serverSocket;
 
-		private:
-			ServerConfig _serverInfo;
-			SocketFD _serverSocket;
-			// ClientManager _clientManager;
+		std::map<SocketFD, sockaddr_in> _socketAddressMap;
+		unsigned int _socketAddress_len;
+		pollfd _serverPOLLFD;
 
-			std::map< SocketFD, sockaddr_in > _socketAddressMap;
-			unsigned int _socketAddress_len;
-			pollfd _serverPOLLFD;
-
-			int initializeServer();
-			void startListen();
+		int initializeServer();
+		void startListen();
 	};
 
-	std::string getLocationFieldAsString( const std::vector< Directory > &locations, const std::string &field );
+	std::string getLocationFieldAsString(const std::vector<Directory>& locations, const std::string& field);
 
 } // namespace http
-bool &getStopServer();
+bool& getStopServer();
