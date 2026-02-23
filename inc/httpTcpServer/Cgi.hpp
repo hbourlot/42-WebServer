@@ -35,6 +35,11 @@ namespace http {
 		IN_OUT_STATE& getState();
 		std::string& getReadBuffer();
 		void setHasFinished(bool hasFinished);
+		void dumpEnvStrings() const;
+		void dumpEnvp() const;
+
+		size_t bytesRead;
+		int triesRead;
 
 		// bool http::Cgi::hasDataToRead() {
 		bool hasDataToRead() {
@@ -70,11 +75,11 @@ namespace http {
 			return _hasFinished;
 		}
 
+		int _outputPipe[2];
 	  private:
 		pid_t _pid;
 		int _status;
-		int _inputPipe[2];
-		int _outputPipe[2];
+		int _stdinFd;
 		http::Request _request;
 		ServerConfig _serverInfo;
 		std::string _filePath;
@@ -87,8 +92,7 @@ namespace http {
 		std::string _outputBuffer;
 		std::string _bodyFileName;
 
-		void doDupTwoWay();
-		void closeForTwoWay();
+		void dupCgiFds();
 		void buildEnvStrings();
 		int prepareCgiInputFile();
 	};

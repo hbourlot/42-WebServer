@@ -10,20 +10,23 @@
 #include <vector>
 
 http::Cgi::Cgi(const http::Request& request, const ServerConfig& serverInfo, Client* client)
-    : _status(), _request(request), _serverInfo(serverInfo), _clientAddress(), _client(client), _envp(), _envStrings(),
-      _state(RESET), _hasFinished(false){
+    : _pid(-1), _status(0), _stdinFd(-1), _request(request), _serverInfo(serverInfo),
+      _clientAddress(client && client->getServer().getSocketAddressRef().count(client->getFd())
+                         ? client->getServer().getSocketAddressRef()[client->getFd()]
+                         : sockaddr_in()),
+      _client(client), _envp(), _envStrings(), _state(RESET), _hasFinished(false), bytesRead(0), triesRead(3250) {
 
 	_filePath = request._matchLocation->cgi_pass;
+	_outputPipe[0] = -1;
+	_outputPipe[1] = -1;
 
 	buildEnvStrings();
 }
 
 http::Cgi::~Cgi() {
-	// Close all pipe fds
-	if (_inputPipe[0] >= 0)
-		close(_inputPipe[0]);
-	if (_inputPipe[1] >= 0)
-		close(_inputPipe[1]);
+	// Close CGI fds
+	if (_stdinFd >= 0)
+		close(_stdinFd);
 	if (_outputPipe[0] >= 0)
 		close(_outputPipe[0]);
 	if (_outputPipe[1] >= 0)
@@ -59,25 +62,16 @@ int http::Cgi::getOutputPipeFd() const {
 	return _outputPipe[0];
 }
 
-void http::Cgi::doDupTwoWay() {
-	dup2(_inputPipe[0], STDIN_FILENO);
+void http::Cgi::dupCgiFds() {
+	dup2(_stdinFd, STDIN_FILENO);
 	dup2(_outputPipe[1], STDOUT_FILENO);
 
-	// Close all pipe fds - we now use stdin/stdout
-	close(_inputPipe[0]);
-	close(_inputPipe[1]);
+	// Close original fds in child after dup
+	close(_stdinFd);
 	close(_outputPipe[0]);
 	close(_outputPipe[1]);
-}
-
-void http::Cgi::closeForTwoWay() {
-	// Two-way: parent writes to CGI stdin and reads from stdout
-	close(_inputPipe[0]);  // Child reads from stdin
-	close(_outputPipe[1]); // Child writes to stdout
-	                       // Keep _inputPipe[1] to write to CGI
-	                       // Keep _outputPipe[0] to read from CGI
-
-	_inputPipe[0] = -1;
+	_stdinFd = -1;
+	_outputPipe[0] = -1;
 	_outputPipe[1] = -1;
 }
 
@@ -89,7 +83,7 @@ void http::Cgi::killProcess() {
 
 		if (result == 0) { // Process still running - kill it
 			kill(_pid, SIGKILL);
-			waitpid(_pid, &status, 0); // Reap zombie
+			waitpid(_pid, &status, 0);
 		}
 	}
 }
@@ -104,6 +98,7 @@ int http::Cgi::prepareCgiInputFile() {
 		std::cerr << "Failed to open file for writing: " << strerror(errno) << std::endl;
 		return -1;
 	}
+
 	if (!_request.writeBodyToFd(fileFd)) {
 		std::cerr << "Failed to write to file: " << strerror(errno) << std::endl;
 		close(fileFd);
@@ -113,13 +108,12 @@ int http::Cgi::prepareCgiInputFile() {
 	close(fileFd);
 	fileFd = -1;
 
-	// Close the original pipe read end before overwriting
-	if (_inputPipe[0] >= 0) {
-		close(_inputPipe[0]);
+	if (_stdinFd >= 0) {
+		close(_stdinFd);
 	}
 
-	_inputPipe[0] = open(_bodyFileName.c_str(), O_RDONLY);
-	if (_inputPipe[0] < 0) {
+	_stdinFd = open(_bodyFileName.c_str(), O_RDONLY, 0644);
+	if (_stdinFd < 0) {
 		std::cerr << "Failed to open file for reading: " << strerror(errno) << std::endl;
 		return -1;
 	}
@@ -128,29 +122,34 @@ int http::Cgi::prepareCgiInputFile() {
 
 void http::Cgi::executeCgi() {
 
-	if (pipe(this->_inputPipe) < 0 || pipe(this->_outputPipe) < 0) {
-		std::cerr << "Pipe creating failed\n";
+	if (prepareCgiInputFile() != 0) {
 		return;
 	}
 
-	if (prepareCgiInputFile() != 0) {
-		close(_inputPipe[0]);
-		close(_inputPipe[1]);
-		close(_outputPipe[0]);
-		close(_outputPipe[1]);
-		_inputPipe[0] = _inputPipe[1] = _outputPipe[0] = _outputPipe[1] = -1;
+	if (pipe(this->_outputPipe) < 0) {
+		std::cerr << "Pipe creating failed\n";
+		if (_stdinFd >= 0) {
+			close(_stdinFd);
+			_stdinFd = -1;
+		}
 		return;
 	}
 
 	this->_pid = fork();
 
 	if (this->_pid < 0) {
-		std::cerr << "Fork failed\n"; // ! 
-		_inputPipe[0] = _inputPipe[1] = _outputPipe[0] = _outputPipe[1] = -1;
+		std::cerr << "Fork failed\n"; // !
+		if (_stdinFd >= 0) {
+			close(_stdinFd);
+			_stdinFd = -1;
+		}
+		close(_outputPipe[0]);
+		close(_outputPipe[1]);
+		_outputPipe[0] = _outputPipe[1] = -1;
 		return;
 	} else if (this->_pid == 0) {
 
-		this->doDupTwoWay();
+		this->dupCgiFds();
 
 		// build argv
 		std::vector<char*> argv;
@@ -165,14 +164,20 @@ void http::Cgi::executeCgi() {
 			this->_envp.push_back(const_cast<char*>(_envStrings[i].c_str()));
 		}
 		this->_envp.push_back(NULL);
+		dumpEnvp();
 
 		execve(this->getFilePath().c_str(), argv.data(), this->_envp.data());
 		Logs::log(LOGS_ERROR, "CGI execution failed for script '" + this->getFilePath() + "': " + strerror(errno));
 		_exit(1);
 	} else {
-		this->closeForTwoWay();
-		fcntl(_outputPipe[0], F_SETFL, O_NONBLOCK);
-		fcntl(_inputPipe[1], F_SETFL, O_NONBLOCK);
+		if (_stdinFd >= 0) {
+			close(_stdinFd);
+			_stdinFd = -1;
+		}
+		close(_outputPipe[1]);
+		_outputPipe[1] = -1;
+		// fcntl(_outputPipe[0], F_SETFL, O_NONBLOCK);
+		fcntl(_outputPipe[0], F_SETFL, fcntl(_outputPipe[0], F_GETFL, 0) | O_NONBLOCK);
 	}
 };
 
@@ -183,3 +188,19 @@ IN_OUT_STATE& http::Cgi::getState() {
 std::string& http::Cgi::getReadBuffer() {
 	return _outputBuffer;
 };
+
+void http::Cgi::dumpEnvStrings() const {
+	std::cerr << "[CGI envStrings]" << std::endl;
+	for (size_t i = 0; i < _envStrings.size(); ++i) {
+		std::cerr << _envStrings[i] << std::endl;
+	}
+}
+
+void http::Cgi::dumpEnvp() const {
+	std::cerr << "[CGI envp]" << std::endl;
+	for (size_t i = 0; i < _envp.size(); ++i) {
+		if (_envp[i] == NULL)
+			break;
+		std::cerr << _envp[i] << std::endl;
+	}
+}

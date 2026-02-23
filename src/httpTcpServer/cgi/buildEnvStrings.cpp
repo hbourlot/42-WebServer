@@ -6,7 +6,7 @@
 
 static bool isValidEnv(std::string key) {
 
-	static const char *validCgiVars[] = {"AUTH_TYPE",
+	static const char* validCgiVars[] = {"AUTH_TYPE",
 	                                     "CONTENT_LENGTH",
 	                                     "CONTENT_TYPE",
 	                                     "DOCUMENT_ROOT",
@@ -67,7 +67,16 @@ void http::Cgi::buildEnvStrings() {
 	newMap["REQUEST_METHOD"] = _request._method;
 	newMap["FILE_NAME"] = _filePath;
 
-	newMap["DOCUMENT_ROOT"] = _request._matchLocation->root;
+	std::string documentRoot;
+	if (_request._matchLocation && _request._matchLocation->isFile()) {
+		documentRoot = _request._fileDirectory->root;
+	} else if (_request._matchLocation) {
+		documentRoot = _request._matchLocation ? _request._matchLocation->root : std::string("");
+	}
+	if (documentRoot.empty()) {
+		documentRoot = _serverInfo.root;
+	}
+	newMap["DOCUMENT_ROOT"] = documentRoot;
 
 	newMap["SERVER_PROTOCOL"] = _request._serverProtocol;
 	newMap["SERVER_SOFTWARE"] = "42WebServer/1.0";
@@ -85,10 +94,46 @@ void http::Cgi::buildEnvStrings() {
 	if (_request._headers.count("Content-Type"))
 		newMap["CONTENT_TYPE"] = _request._headers.at("Content-Type");
 
-	newMap["PATH_TRANSLATED"] =
-	    _request._matchLocation->root + (newMap["PATH_INFO"].empty() ? std::string("/") : _request._pathInfo);
+	std::string pathInfoPart = newMap["PATH_INFO"];
+	if (_request._headers.count("Content-Length")) {
+		newMap["CONTENT_LENGTH"] = _request._headers.at("Content-Length");
+	} else if (_request._bodyInDisk) {
+		newMap["CONTENT_LENGTH"] = ft_to_string(_request._bodyFdSize);
+	} else {
+		newMap["CONTENT_LENGTH"] = ft_to_string(_request._body.size());
+	}
 
-	newMap["REMOTE_PORT"] = ft_to_string(_clientAddress.sin_port);
+	// SERVER_NAME and SERVER_PORT from Host header if present, else config
+	std::string hostHeader;
+	std::string hostName;
+	std::string hostPort;
+	std::map<std::string, std::string>::const_iterator itHost = _request._headers.find("Host");
+	if (itHost != _request._headers.end()) {
+		hostHeader = itHost->second;
+		size_t colonPos = hostHeader.find(":");
+		if (colonPos != std::string::npos) {
+			hostName = hostHeader.substr(0, colonPos);
+			hostPort = hostHeader.substr(colonPos + 1);
+		} else {
+			hostName = hostHeader;
+			hostPort = ft_to_string(_serverInfo.port); // fallback to configured port
+		}
+	} else {
+		hostName = _serverInfo.host;
+		hostPort = ft_to_string(_serverInfo.port);
+	}
+	newMap["SERVER_NAME"] = hostName;
+	newMap["SERVER_PORT"] = hostPort;
+
+	// Remote address
+	char addrBuf[INET_ADDRSTRLEN] = {0};
+	if (inet_ntop(AF_INET, &_clientAddress.sin_addr, addrBuf, sizeof(addrBuf))) {
+		newMap["REMOTE_ADDR"] = addrBuf;
+	}
+	newMap["REMOTE_PORT"] = ft_to_string(ntohs(_clientAddress.sin_port));
+
+	// Absolute script path
+	newMap["SCRIPT_FILENAME"] = _filePath;
 	newMap["QUERY_STRING"] = _request._queryString;
 
 	for (std::map<std::string, std::string>::const_iterator it = newMap.begin(); it != newMap.end(); ++it) {

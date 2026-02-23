@@ -20,6 +20,8 @@ void http::ClientEventProcessor::registerCgi(http::Cgi* cgi) {
 
 		std::string msg("Registered CGI for PID ");
 		msg += ft_to_string(cgi->getPid());
+		msg += " and Client fd=" + ft_to_string(cgi->getClient()->getFd());
+		msg += " ";
 		msg += " with output fd ";
 		msg += ft_to_string(outputFd);
 		Logs::log(LOGS_INFO, msg);
@@ -27,7 +29,7 @@ void http::ClientEventProcessor::registerCgi(http::Cgi* cgi) {
 }
 
 void http::ClientEventProcessor::cleanupCgi(http::Cgi* cgi) {
-	int outputFd = cgi->getOutputPipe()[0];
+	int outputFd = cgi->getOutputPipeFd();
 	Client* client = cgi->getClient();
 
 	cgi->killProcess(); // Kill CGI process if still running
