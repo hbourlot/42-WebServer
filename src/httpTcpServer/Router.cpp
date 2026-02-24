@@ -4,7 +4,7 @@
 static bool isCgirequest(const http::Request& request, const Location& location) {
 
 	for (size_t i = 0; i < location.methods.size(); ++i)
-		if (location.methods[i] == request._method) {
+		if (location.methods[i] == request.getMethod()) {
 			return true;
 		}
 
@@ -14,7 +14,7 @@ static bool isCgirequest(const http::Request& request, const Location& location)
 		}
 
 	// Extract file extension from the request path
-	std::string path = request._fullPath;
+	std::string path = request.getFullPath();
 	size_t dotPos = path.find_last_of('.');
 
 	if (dotPos == std::string::npos) {
@@ -55,7 +55,7 @@ http::Router::Router(Client& client, ClientEventProcessor& processor)
 
 void http::Router::process() {
 	// 1. Find the best matching location for the request URI
-	_request._matchLocation = getMatchLocation(_request._uri, _serverConfig.locations);
+	_request.setMatchLocation(getMatchLocation(_request.getUri(), _serverConfig.locations));
 
 	// 2. Check for redirects first
 	if (checkRedirects()) {
@@ -76,11 +76,11 @@ void http::Router::process() {
 }
 
 bool http::Router::checkRedirects() {
-	if (!_request._matchLocation)
+	if (!_request.getMatchLocation())
 		return false;
 
-	if (!_request._matchLocation->redirection.empty()) {
-		_response.buildRedirect(HTTP_MOVED, _request._matchLocation->redirection);
+	if (!_request.getMatchLocation()->redirection.empty()) {
+		_response.buildRedirect(HTTP_MOVED, _request.getMatchLocation()->redirection);
 		return true;
 	}
 	return false;
@@ -88,24 +88,24 @@ bool http::Router::checkRedirects() {
 
 bool http::Router::checkAllowedMethods() {
 
-	if (!_request._matchLocation) {
+	if (!_request.getMatchLocation()) {
 
 		return false;
 	}
 
-	const std::vector<std::string>& allowedMethods = _request._matchLocation->methods;
+	const std::vector<std::string>& allowedMethods = _request.getMatchLocation()->methods;
 
 	if (allowedMethods.empty())
 		return true;
 
 	for (size_t i = 0; i < allowedMethods.size(); ++i) {
 
-		if (_request._method == allowedMethods[i])
+		if (_request.getMethod() == allowedMethods[i])
 			return true;
 	}
-	if (_request._matchLocation->isFile()) {
-		for (size_t i = 0; i < _request._fileDirectory->methods.size(); ++i) {
-			if (_request._method == _request._fileDirectory->methods[i])
+	if (_request.getMatchLocation()->isFile()) {
+		for (size_t i = 0; i < _request.getFileDirectory()->methods.size(); ++i) {
+			if (_request.getMethod() == _request.getFileDirectory()->methods[i])
 				return true;
 		}
 	}
@@ -117,20 +117,20 @@ void http::Router::resolvePath() {
 
 	std::string basePath;
 
-	if (_request._matchLocation && !_request._matchLocation->root.empty()) {
-		basePath = _request._matchLocation->root;
+	if (_request.getMatchLocation() && !_request.getMatchLocation()->root.empty()) {
+		basePath = _request.getMatchLocation()->root;
 	} else {
 		basePath = _serverConfig.root;
 	}
 
-	_request._fullPath = getFilePath(_request, _serverConfig);
+	_request.setFullPath(getFilePath(_request, _serverConfig));
 
-	if (_request._fullPath[_request._fullPath.length() - 1] == '/') {
+	if (_request.getFullPath()[_request.getFullPath().length() - 1] == '/') {
 
 		std::string indexFile;
 
-		if (_request._matchLocation && !_request._matchLocation->index.empty()) {
-			indexFile = _request._matchLocation->index;
+		if (_request.getMatchLocation() && !_request.getMatchLocation()->index.empty()) {
+			indexFile = _request.getMatchLocation()->index;
 		} else if (!_serverConfig.index.empty()) {
 			indexFile = _serverConfig.index;
 		}
@@ -141,38 +141,38 @@ void http::Router::resolvePath() {
 			}
 		}
 
-		_request._fullPath += indexFile;
+		_request.getFullPath() += indexFile;
 	} else if (!_serverConfig.index.empty()) {
-		_request._fullPath += _serverConfig.index;
+		_request.getFullPath() += _serverConfig.index;
 	}
 }
 void http::Router::executeRequest() {
 
 	bool isCgi = false;
-	if (_request._matchLocation && (!_request._matchLocation->cgi_pass.empty() || _request._matchLocation->isCgi()) &&
-	    (_request._method == "GET" || _request._method == "POST")) {
+	if (_request.getMatchLocation() && (!_request.getMatchLocation()->cgi_pass.empty() || _request.getMatchLocation()->isCgi()) &&
+	    (_request.getMethod() == "GET" || _request.getMethod() == "POST")) {
 
-		isCgi = isCgirequest(_request, *_request._matchLocation);
+		isCgi = isCgirequest(_request, *_request.getMatchLocation());
 	}
 	if (isCgi) {
 		launchCgi();
 	} else {
-		if (_request._method == "GET") {
+		if (_request.getMethod() == "GET") {
 			handleGet();
-		} else if (_request._method == "POST") {
+		} else if (_request.getMethod() == "POST") {
 			handlePost();
-		} else if (_request._method == "DELETE") {
+		} else if (_request.getMethod() == "DELETE") {
 			handleDelete();
 		}
 	}
 }
 
 static bool validateRequestMethod(const http::Request& request, const std::vector<std::string>& methods) {
-	if (request._method != "GET" && request._method != "POST" && request._method != "DELETE")
+	if (request.getMethod() != "GET" && request.getMethod() != "POST" && request.getMethod() != "DELETE")
 		return false;
 
 	for (size_t i = 0; i < methods.size(); ++i) {
-		if (request._method == methods[i])
+		if (request.getMethod() == methods[i])
 			return true;
 	}
 	return false;
@@ -181,7 +181,7 @@ static bool validateRequestMethod(const http::Request& request, const std::vecto
 bool http::Router::routeCgiRequest() {
 
 	http::Request& request = _client.getRequest();
-	if (request._method == "GET" || request._method == "POST") {
+	if (request.getMethod() == "GET" || request.getMethod() == "POST") {
 		launchCgi();
 		return false;
 	} else {
@@ -192,27 +192,27 @@ bool http::Router::routeCgiRequest() {
 
 void http::Router::handleGet() {
 
-	if (isDirectory(_request._fullPath)) {
+	if (isDirectory(_request.getFullPath())) {
 		handleDirectoryListing();
 		return;
 	}
 
-	if (!std::ifstream(_request._fullPath.c_str()).is_open()) {
+	if (!std::ifstream(_request.getFullPath().c_str()).is_open()) {
 		_response.buildErrorResponse(HTTP_NOT_FOUND, _serverConfig);
 		return;
 	}
 
-	_response.buildFileResponse(HTTP_OK, _request._fullPath, _serverConfig);
+	_response.buildFileResponse(HTTP_OK, _request.getFullPath(), _serverConfig);
 }
 
 void http::Router::handlePost() {
 	std::string ContentType;
 
-	if (_request._matchLocation->uploadEnable) {
-		UploadManager::handleUpload(*_request._matchLocation, _client, _serverConfig);
+	if (_request.getMatchLocation()->uploadEnable) {
+		UploadManager::handleUpload(*_request.getMatchLocation(), _client, _serverConfig);
 		return;
 	}
-	if (_client.getRequest()._body.size() > _request._matchLocation->max_body_size) {
+	if (_client.getRequest().getBody().size() > _request.getMatchLocation()->max_body_size) {
 		_client.getResponse().buildErrorResponse(HTTP_PAYLOAD, _serverConfig);
 		return;
 	}
@@ -224,22 +224,22 @@ void http::Router::handleDelete() {
 
 	struct stat st;
 
-	if (stat(_request._fullPath.c_str(), &st) != 0) {
+	if (stat(_request.getFullPath().c_str(), &st) != 0) {
 		_response.buildErrorResponse(HTTP_NOT_FOUND, _serverConfig);
 		Logs::log(LOGS_ERROR, "File Not Found");
 		return;
 	}
 
-	if (isDirectory(_request._fullPath)) {
+	if (isDirectory(_request.getFullPath())) {
 		_response.buildErrorResponse(HTTP_FORBID, _serverConfig);
 		Logs::log(LOGS_ERROR, "Cannot delete because its a folder");
 		return;
 	}
-	if (remove(_request._fullPath.c_str())) {
+	if (remove(_request.getFullPath().c_str())) {
 		_response.buildErrorResponse(HTTP_SERVER_ERR, _serverConfig);
-		Logs::log(LOGS_ERROR, "Failed to delete File: " + _request._fullPath);
+		Logs::log(LOGS_ERROR, "Failed to delete File: " + _request.getFullPath());
 		return;
 	}
 	_response.buildResponse(HTTP_NO_CONTENT, "");
-	Logs::log(LOGS_ERROR, "File deleted Successfully " + _request._fullPath);
+	Logs::log(LOGS_ERROR, "File deleted Successfully " + _request.getFullPath());
 }

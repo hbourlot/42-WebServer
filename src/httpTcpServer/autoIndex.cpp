@@ -26,7 +26,7 @@ static std::string generateAutoIndexPage(const std::string &dirPath, http::Reque
 	std::string html;
 	html += "<html>\n";
 	html += "  <body>\n";
-	html += "    <h1>Index of " + request._uri + "</h1>\n";
+	html += "    <h1>Index of " + request.getUri() + "</h1>\n";
 
 	DIR *directory = opendir(dirPath.c_str());
 	if (!directory)
@@ -43,9 +43,9 @@ static std::string generateAutoIndexPage(const std::string &dirPath, http::Reque
 		std::string href;
 
 		if (!d_name.compare(".."))
-			href = getParentPath(request._uri);
+			href = getParentPath(request.getUri());
 		else
-			href = joinPath(request._uri, d_name);
+			href = joinPath(request.getUri(), d_name);
 
 		html += "    <p><a href=\"" + href + "\">" + d_name + "</a></p>\n";
 	}
@@ -60,18 +60,18 @@ void http::Router::handleDirectoryListing() {
 	http::Request &request = _client.getRequest();
 	http::Response &response = _client.getResponse();
 
-	if (hasIndexFile(_request._fullPath, *_request._matchLocation)) {
-		std::string indexPath = joinPath(_request._fullPath, _request._matchLocation->index);
+	if (hasIndexFile(_request.getFullPath(), *_request.getMatchLocation())) {
+		std::string indexPath = joinPath(_request.getFullPath(), _request.getMatchLocation()->index);
 		response.buildFileResponse(HTTP_OK, indexPath, _serverConfig);
 		return;
 	}
 
-	if (!_request._matchLocation->autoIndex) {
+	if (!_request.getMatchLocation()->autoIndex) {
 		response.buildErrorResponse(HTTP_NOT_FOUND, _serverConfig);
 		return;
 	}
 
-	std::string body = generateAutoIndexPage(_request._fullPath, request);
+	std::string body = generateAutoIndexPage(_request.getFullPath(), request);
 
 	response.buildResponse(HTTP_OK, body);
 

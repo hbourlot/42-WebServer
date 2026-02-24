@@ -17,7 +17,7 @@ http::Cgi::Cgi(const http::Request &request, const ServerConfig &serverInfo, Cli
                          : sockaddr_in()),
       _client(client), _envp(), _envStrings(), _state(RESET), _hasFinished(false) {
 
-	_filePath = request._matchLocation->cgi_pass;
+	_filePath = request.getMatchLocation()->cgi_pass;
 	_outputPipe[0] = -1;
 	_outputPipe[1] = -1;
 

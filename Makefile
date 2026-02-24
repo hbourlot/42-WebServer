@@ -128,6 +128,10 @@ r:
 
 s:
 	@make -s
+	@./$(NAME) ./conf_files/good/webpage.conf
+
+sp:
+	@make -s
 	@./$(NAME) ./conf_files/good/scriptpage.conf
 
 v:

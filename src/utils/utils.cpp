@@ -17,16 +17,26 @@ bool isDirectory(const std::string &filePath) {
 }
 
 std::string getFilePath(const http::Request &req, const ServerConfig &server) {
-	const Directory *dir = req._fileDirectory;
+	const Directory *dir = req.getFileDirectory();
+	const Location *location = req.getMatchLocation();
 
-	std::string root = dir ? dir->root : server.root;
+	std::string root = server.root;
+	std::string relativePath = req.getUri();
 
-	std::string relativePath = req._uri;
-	if (dir && !dir->path.empty()) {
-		relativePath = req._uri.substr(dir->path.length());
-		if (relativePath.empty())
-			relativePath = "/";
+	if (location && !location->root.empty()) {
+		root = location->root;
+		if (!location->path.empty() && req.getUri().rfind(location->path, 0) == 0) {
+			relativePath = req.getUri().substr(location->path.length());
+		}
 	}
+
+	if (dir && !dir->path.empty()) {
+		root = dir->root;
+		relativePath = req.getUri().substr(dir->path.length());
+	}
+
+	if (relativePath.empty())
+		relativePath = "/";
 
 	return joinPath(root, relativePath);
 }

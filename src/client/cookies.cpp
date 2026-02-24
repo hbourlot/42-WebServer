@@ -33,11 +33,11 @@ static std::string generateSessionId() {
 	return (hex.str());
 }
 
-void ensureSessionId(Client &client) {
+void ensureSessionId(Client& client) {
 
 	std::string cookieHeader;
-	if (client.getRequest()._headers.count("Cookie")) {
-		cookieHeader = client.getRequest()._headers["Cookie"];
+	if (client.getRequest().getHeaders().count("Cookie")) {
+		cookieHeader = client.getRequest().getHeaders()["Cookie"];
 	}
 
 	std::string sessionId;

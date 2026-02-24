@@ -114,16 +114,137 @@ std::string& http::Request::readALlBody() {
 	return _body;
 }
 
+
+void http::Request::resetChunkParser() {
+	_chunk = ChunkParser();
+}
+
+bool http::Request::isBodyInDisk() {
+	return _bodyInDisk;
+}
+
+size_t http::Request::bodyFdSize() {
+	return _bodyFdSize;
+}
+
+// ! -- GETTERS
+
+
+
+std::string& http::Request::getFullPath() {
+	return _fullPath;
+}
+
+const std::string& http::Request::getFullPath() const {
+	return _fullPath;
+}
+
+std::string& http::Request::getServerProtocol() {
+	return _serverProtocol;
+}
+
+const std::string& http::Request::getServerProtocol() const {
+	return _serverProtocol;
+}
+
+std::string& http::Request::getMethod() {
+	return _method;
+}
+
+const std::string& http::Request::getMethod() const {
+	return _method;
+}
+
+std::string& http::Request::getBody() {
+	return _body;
+}
+
 REQUEST_PHASE http::Request::getRequestPhase() {
 	return (_requestPhase);
 }
-void http::Request::setRequestPhase(REQUEST_PHASE requestPhase) {
-	_requestPhase = requestPhase;
-}
+
 ChunkParser& http::Request::getChunkParser() {
 	return _chunk;
 }
 
-void http::Request::resetChunkParser() {
-	_chunk = ChunkParser();
+std::map<std::string, std::string>& http::Request::getHeaders() {
+	return _headers;
+};
+
+const std::map<std::string, std::string>& http::Request::getHeaders() const {
+	return _headers;
+};
+
+const std::string& http::Request::getUri() const {
+	return _uri;
+}
+
+std::string& http::Request::getUri() {
+	return _uri;
+}
+
+const std::string& http::Request::getQueryString() const {
+	return _queryString;
+}
+
+const std::string& http::Request::getPathInfo() const {
+	return _pathInfo;
+}
+
+const std::string& http::Request::getPathTranslated() const {
+	return _pathTranslated;
+}
+
+std::string& http::Request::getPathTranslated() {
+	return _pathTranslated;
+}
+
+const Directory* http::Request::getFileDirectory() const {
+	return _fileDirectory;
+}
+
+const Location* http::Request::getMatchLocation() const {
+	return _matchLocation;
+}
+
+// ! -- SETTERS
+
+void http::Request::setFullPath(std::string src) {
+	_fullPath = src;
+}
+
+void http::Request::setQueryString(std::string src) {
+	_queryString = src;
+}
+
+void http::Request::setUri(const std::string src) {
+	_uri = src;
+}
+
+void http::Request::setPathInfo(const std::string src) {
+	_pathInfo = src;
+}
+
+void http::Request::setPathTranslated(const std::string src) {
+	_pathTranslated = src;
+}
+
+void http::Request::setMethod(const std::string src) {
+	_method = src;
+}
+
+void http::Request::setServerProtocol(const std::string src) {
+	_serverProtocol = src;
+}
+
+void http::Request::setMatchLocation(const Location* location) {
+	_matchLocation = location;
+}
+
+void http::Request::setFileDirectory(const Directory* location) {
+	_fileDirectory = location;
+}
+
+void http::Request::setRequestPhase(REQUEST_PHASE requestPhase) {
+	_requestPhase = requestPhase;
 }

@@ -2,12 +2,12 @@
 <html>
   <head>
     <title>WebServer</title>
-    <link rel="stylesheet" href="../../css/global.css" />
-    <link rel="stylesheet" href="../../components/Footer/styles.module.css" />
-    <link rel="stylesheet" href="../../components/Navbar/styles.module.css" />
-    <link rel="stylesheet" href="./styles.module.css" />
-    <link rel="icon" href="../../assets/wolfMoonIco.png" type="image/x-icon" />
-    <script src="../../js/layout.js"></script>
+    <link rel="stylesheet" href="/css/global.css" />
+    <link rel="stylesheet" href="/components/Footer/styles.module.css" />
+    <link rel="stylesheet" href="/components/Navbar/styles.module.css" />
+    <link rel="stylesheet" href="/pages/Login/styles.module.css" />
+    <link rel="icon" href="/assets/wolfMoonIco.png" type="image/x-icon" />
+    <script src="/js/layout.js"></script>
   </head>
 
   <body>
@@ -45,7 +45,7 @@
 
         if (response.status == 200) {
           alert("Login OK");
-          window.location.href = "/dashboard.html";
+          window.location.href = "/dashboard";
         } else {
           alert("Login ERROR");
         }

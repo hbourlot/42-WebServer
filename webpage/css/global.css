@@ -11,24 +11,137 @@ html {
 
 body {
 	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-	background-image: linear-gradient(
-		to bottom,
-		#114594,
-		#0f4089,
-		#0d3a7e,
-		#0b3573,
-		#0a3068,
-		#072c60,
-		#052857,
-		#04244f,
-		#022047,
-		#011c3f,
-		#011838,
-		#011430
-	);
+	position: relative;
+	overflow-x: hidden;
+	background-color: #02030b;
+	background-image:
+		radial-gradient(
+			1200px 700px at 18% -14%,
+			rgba(90, 72, 255, 0.3),
+			transparent 58%
+		),
+		radial-gradient(
+			900px 560px at 84% 10%,
+			rgba(0, 190, 255, 0.14),
+			transparent 55%
+		),
+		radial-gradient(
+			1000px 680px at 50% 120%,
+			rgba(212, 84, 255, 0.14),
+			transparent 62%
+		),
+		linear-gradient(165deg, #02030b 0%, #050b1c 42%, #0a1635 100%);
+	background-attachment: fixed;
 	min-height: 100vh;
 	line-height: 1.5;
 	display: flex;
 	flex-direction: column;
 }
 
+body::before,
+body::after {
+	content: "";
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+}
+
+body::before {
+	background-image:
+		radial-gradient(
+			1px 1px at 8% 14%,
+			rgba(255, 255, 255, 0.9),
+			transparent 100%
+		),
+		radial-gradient(
+			1.5px 1.5px at 22% 36%,
+			rgba(220, 235, 255, 0.85),
+			transparent 100%
+		),
+		radial-gradient(
+			1px 1px at 31% 74%,
+			rgba(255, 255, 255, 0.75),
+			transparent 100%
+		),
+		radial-gradient(
+			2px 2px at 45% 24%,
+			rgba(255, 255, 255, 0.78),
+			transparent 100%
+		),
+		radial-gradient(
+			1px 1px at 57% 61%,
+			rgba(190, 225, 255, 0.8),
+			transparent 100%
+		),
+		radial-gradient(
+			1.6px 1.6px at 66% 14%,
+			rgba(255, 255, 255, 0.72),
+			transparent 100%
+		),
+		radial-gradient(
+			1px 1px at 74% 49%,
+			rgba(255, 255, 255, 0.88),
+			transparent 100%
+		),
+		radial-gradient(
+			1.7px 1.7px at 82% 30%,
+			rgba(210, 230, 255, 0.85),
+			transparent 100%
+		),
+		radial-gradient(
+			1px 1px at 90% 68%,
+			rgba(255, 255, 255, 0.78),
+			transparent 100%
+		),
+		radial-gradient(
+			2px 2px at 94% 12%,
+			rgba(255, 255, 255, 0.8),
+			transparent 100%
+		);
+	opacity: 0.65;
+	animation: starDrift 80s linear infinite;
+}
+
+body::after {
+	background-image:
+		radial-gradient(
+			700px 420px at 14% 18%,
+			rgba(98, 0, 255, 0.13),
+			transparent 70%
+		),
+		radial-gradient(
+			820px 480px at 78% 78%,
+			rgba(0, 162, 255, 0.1),
+			transparent 72%
+		);
+	mix-blend-mode: screen;
+	opacity: 0.5;
+	animation: nebulaPulse 10s ease-in-out infinite;
+}
+
+main,
+header,
+footer {
+	position: relative;
+	z-index: 1;
+}
+
+@keyframes starDrift {
+	from {
+		transform: translateY(0);
+	}
+	to {
+		transform: translateY(-28px);
+	}
+}
+
+@keyframes nebulaPulse {
+	0%,
+	100% {
+		opacity: 0.45;
+	}
+	50% {
+		opacity: 0.62;
+	}
+}

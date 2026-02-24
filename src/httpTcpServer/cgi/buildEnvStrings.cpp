@@ -52,8 +52,8 @@ void http::Cgi::buildEnvStrings() {
 
 	std::map<std::string, std::string> newMap;
 
-	for (std::map<std::string, std::string>::const_iterator it = _request._headers.begin();
-	     it != _request._headers.end(); ++it) {
+	for (std::map<std::string, std::string>::const_iterator it = _request.getHeaders().begin();
+	     it != _request.getHeaders().end(); ++it) {
 		std::string key = it->first;
 		for (size_t i = 0; i < key.size(); ++i) {
 			if (key[i] == '-')
@@ -64,51 +64,51 @@ void http::Cgi::buildEnvStrings() {
 		newMap["HTTP_" + key] = it->second;
 	}
 
-	newMap["REQUEST_METHOD"] = _request._method;
+	newMap["REQUEST_METHOD"] = _request.getMethod();
 	newMap["FILE_NAME"] = _filePath;
 
 	std::string documentRoot;
-	if (_request._matchLocation && _request._matchLocation->isFile()) {
-		documentRoot = _request._fileDirectory->root;
-	} else if (_request._matchLocation) {
-		documentRoot = _request._matchLocation ? _request._matchLocation->root : std::string("");
+	if (_request.getMatchLocation() && _request.getMatchLocation()->isFile()) {
+		documentRoot = _request.getFileDirectory()->root;
+	} else if (_request.getMatchLocation()) {
+		documentRoot = _request.getMatchLocation() ? _request.getMatchLocation()->root : std::string("");
 	}
 	if (documentRoot.empty()) {
 		documentRoot = _serverInfo.root;
 	}
 	newMap["DOCUMENT_ROOT"] = documentRoot;
 
-	newMap["SERVER_PROTOCOL"] = _request._serverProtocol;
+	newMap["SERVER_PROTOCOL"] = _request.getServerProtocol();
 	newMap["SERVER_SOFTWARE"] = "42WebServer/1.0";
 	newMap["GATEWAY_INTERFACE"] = "CGI/1.1";
 
-	newMap["REQUEST_URI"] = _request._uri;
-	newMap["SCRIPT_NAME"] = _request._uri;
-	newMap["PATH_INFO"] = _request._uri;
-	if (_request._headers.count("Content-Length")) {
-		newMap["CONTENT_LENGTH"] = _request._headers.at("Content-Length");
+	newMap["REQUEST_URI"] = _request.getUri();
+	newMap["SCRIPT_NAME"] = _request.getUri();
+	newMap["PATH_INFO"] = _request.getUri();
+	if (_request.getHeaders().count("Content-Length")) {
+		newMap["CONTENT_LENGTH"] = _request.getHeaders().at("Content-Length");
 	} else {
-		newMap["CONTENT_LENGTH"] = ft_to_string(_request._body.size());
+		newMap["CONTENT_LENGTH"] = ft_to_string(_request.getBody().size());
 	}
 
-	if (_request._headers.count("Content-Type"))
-		newMap["CONTENT_TYPE"] = _request._headers.at("Content-Type");
+	if (_request.getHeaders().count("Content-Type"))
+		newMap["CONTENT_TYPE"] = _request.getHeaders().at("Content-Type");
 
 	std::string pathInfoPart = newMap["PATH_INFO"];
-	if (_request._headers.count("Content-Length")) {
-		newMap["CONTENT_LENGTH"] = _request._headers.at("Content-Length");
-	} else if (_request._bodyInDisk) {
-		newMap["CONTENT_LENGTH"] = ft_to_string(_request._bodyFdSize);
+	if (_request.getHeaders().count("Content-Length")) {
+		newMap["CONTENT_LENGTH"] = _request.getHeaders().at("Content-Length");
+	} else if (_request.isBodyInDisk()) {
+		newMap["CONTENT_LENGTH"] = ft_to_string(_request.bodyFdSize());
 	} else {
-		newMap["CONTENT_LENGTH"] = ft_to_string(_request._body.size());
+		newMap["CONTENT_LENGTH"] = ft_to_string(_request.getBody().size());
 	}
 
 	// SERVER_NAME and SERVER_PORT from Host header if present, else config
 	std::string hostHeader;
 	std::string hostName;
 	std::string hostPort;
-	std::map<std::string, std::string>::const_iterator itHost = _request._headers.find("Host");
-	if (itHost != _request._headers.end()) {
+	std::map<std::string, std::string>::const_iterator itHost = _request.getHeaders().find("Host");
+	if (itHost != _request.getHeaders().end()) {
 		hostHeader = itHost->second;
 		size_t colonPos = hostHeader.find(":");
 		if (colonPos != std::string::npos) {
@@ -134,7 +134,7 @@ void http::Cgi::buildEnvStrings() {
 
 	// Absolute script path
 	newMap["SCRIPT_FILENAME"] = _filePath;
-	newMap["QUERY_STRING"] = _request._queryString;
+	newMap["QUERY_STRING"] = _request.getQueryString();
 
 	for (std::map<std::string, std::string>::const_iterator it = newMap.begin(); it != newMap.end(); ++it) {
 		if (/* !it->second.empty() && */ isValidEnv(it->first))

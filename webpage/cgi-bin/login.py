@@ -57,7 +57,7 @@ def main():
         # send the actual redirect response to the browser.
         print("Status: 200 OK")
         print(f"X-Authenticated-User: {username}")
-        print("Location: /pages/Dashboard/") # The page to redirect to after login
+        print("Location: /dashboard") # The page to redirect to after login
         print("Content-Type: text/html")
         print() # This creates the necessary blank line between headers and body
         print("<html><body><h1>Login Successful, redirecting...</h1></body></html>")

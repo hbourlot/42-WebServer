@@ -2,9 +2,9 @@
 
 bool UploadManager::handleUpload(const Location &matchLocation, Client &client, const ServerConfig &serverInfo) {
 
-	std::map<std::string, std::string>::const_iterator it = client.getRequest()._headers.find("Content-Type");
+	std::map<std::string, std::string>::const_iterator it = client.getRequest().getHeaders().find("Content-Type");
 
-	if (it == client.getRequest()._headers.end()) {
+	if (it == client.getRequest().getHeaders().end()) {
 		client.getResponse().buildErrorResponse(HTTP_BAD_REQ, serverInfo);
 		return false;
 	}
