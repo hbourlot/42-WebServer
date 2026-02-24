@@ -33,7 +33,7 @@ static std::string generateSessionId() {
 	return (hex.str());
 }
 
-void ensureSessionId(Client& client) {
+void ensureSessionId(Client &client) {
 
 	std::string cookieHeader;
 	if (client.getRequest().getHeaders().count("Cookie")) {
@@ -49,5 +49,5 @@ void ensureSessionId(Client& client) {
 		sessionId = generateSessionId();
 		client.getResponse().addToHeader("Set-Cookie", "sessionId=" + sessionId + "; Path=/; HttpOnly");
 	}
-	client.setSessionId(sessionId);
+	client.setSessionID(sessionId);
 }

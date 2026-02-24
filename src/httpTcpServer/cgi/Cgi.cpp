@@ -92,7 +92,7 @@ void http::Cgi::killProcess() {
 }
 
 int http::Cgi::prepareCgiInputFile() {
-	std::string templatePath = joinPath(_serverInfo.temp_path, "_" + _client->getSessionId() + "_content_XXXXXX");
+	std::string templatePath = joinPath(_serverInfo.temp_path, "_" + _client->getSessionID() + "_content_XXXXXX");
 	std::vector<char> templateBuffer(templatePath.begin(), templatePath.end());
 	templateBuffer.push_back('\0');
 

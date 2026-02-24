@@ -188,23 +188,6 @@ static bool parseRequestBody(Client& client, const ServerConfig& configs) {
 	return true;
 }
 
-// static void parseRequestSession(Client &client) {
-
-// 	std::map<std::string, std::string> headers = client.getRequest().getHeaders();
-// 	if (headers.count("Cookie")) {
-// 		std::string cookieHeader = headers["Cookie"];
-// 		// Simple string search to find the session ID
-// 		std::string sessionKey = "sessionId=";
-// 		size_t pos = cookieHeader.find(sessionKey);
-// 		if (pos != std::string::npos) {
-// 			size_t start = pos + sessionKey.length();
-// 			size_t end = cookieHeader.find(";", start);
-// 			std::string sessionId = cookieHeader.substr(start, end - start);
-// 			client.setSessionId(sessionId);
-// 		}
-// 	}
-// }
-
 bool http::ClientEventProcessor::parseRequestData(Client& client, const ServerConfig& serverInfo) {
 
 	std::string& readBuffer = client.getReadBuffer();
@@ -236,7 +219,6 @@ bool http::ClientEventProcessor::parseRequestData(Client& client, const ServerCo
 		}
 
 		parseRequestHeaders(clientRequest, readBuffer, headerEnd);
-		// parseRequestSession(client);
 		readBuffer.erase(0, headerEnd + 4);
 		clientRequest.setRequestPhase(BODY);
 	}

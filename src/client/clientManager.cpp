@@ -16,7 +16,6 @@ void ClientManager::addClient(int fd, http::TcpServer &server) {
 		return;
 	}
 	_clients[fd] = new Client(fd, server);
-	Logs::log(LOGS_WARN, "Client accepted " + ft_to_string(fd));
 }
 
 void ClientManager::removeClient(int fd) {
@@ -24,7 +23,6 @@ void ClientManager::removeClient(int fd) {
 	if (it != _clients.end()) {
 		delete it->second;
 		_clients.erase(it);
-		Logs::log(LOGS_WARN, "Client removed " + ft_to_string(fd));
 	}
 }
 

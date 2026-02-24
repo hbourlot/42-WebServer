@@ -1,7 +1,7 @@
 #include "Client/Client.hpp"
 #include <signal.h>
 
-Client::Client(int fd, http::TcpServer& server)
+Client::Client(int fd, http::TcpServer &server)
     : _server(server), _fd(fd), _state(), _requestComplete(false), _cgiInProgress(false), _cgiPid(-1), _cgiOutputFd(-1),
       _bytesToDiscard(0), _discardingBody(false), _request(), _idleTicks(0) {
 }
@@ -26,16 +26,16 @@ int Client::getFd() const {
 	return (_fd);
 }
 
-std::string& Client::getReadBuffer() {
+std::string &Client::getReadBuffer() {
 	return (_readBuffer);
 }
-std::string& Client::getWriteBuffer() {
+std::string &Client::getWriteBuffer() {
 	return (_writeBuffer);
 }
-void Client::appendToReadBuffer(const std::string& data) {
+void Client::appendToReadBuffer(const std::string &data) {
 	_readBuffer += data;
 }
-void Client::appendToWriteBuffer(const std::string& data) {
+void Client::appendToWriteBuffer(const std::string &data) {
 	_writeBuffer += data;
 }
 void Client::clearBuffers() {
@@ -52,10 +52,10 @@ void Client::clearWriteBuffer() {
 	_writeBuffer.clear();
 }
 
-http::Request& Client::getRequest() {
+http::Request &Client::getRequest() {
 	return (_request);
 }
-http::Response& Client::getResponse() {
+http::Response &Client::getResponse() {
 	return (_response);
 }
 void Client::resetRequest() {
@@ -104,16 +104,16 @@ IN_OUT_STATE Client::getState() const {
 	return _state;
 }
 
-IN_OUT_STATE& Client::getState() {
+IN_OUT_STATE &Client::getState() {
 	return _state;
 }
 
-void Client::setSessionId(std::string& sessionId) {
-	_sessionId = sessionId;
+void Client::setSessionID(const std::string& sessionID) {
+	_sessionID = sessionID;
 }
 
-std::string Client::getSessionId() const {
-	return (_sessionId);
+std::string Client::getSessionID() const {
+	return (_sessionID);
 }
 
 void Client::consumeReadBuffer(size_t n) {

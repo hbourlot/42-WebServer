@@ -28,28 +28,28 @@ class Client {
 
   public:
 	friend class ClientEventProcessor;
-	Client(int fd, http::TcpServer& server);
+	Client(int fd, http::TcpServer &server);
 	~Client();
 
 	int getFd() const;
 
-	http::TcpServer& getServer();
+	http::TcpServer &getServer();
 
 	// Buffers
-	std::string& getReadBuffer();
-	std::string& getWriteBuffer();
-	void appendToReadBuffer(const std::string& data);
-	void appendToWriteBuffer(const std::string& data);
+	std::string &getReadBuffer();
+	std::string &getWriteBuffer();
+	void appendToReadBuffer(const std::string &data);
+	void appendToWriteBuffer(const std::string &data);
 	void clearBuffers();
 	void clearReadBuffer();
 	void clearWriteBuffer();
 	void setState(IN_OUT_STATE state);
 	IN_OUT_STATE getState() const;
-	IN_OUT_STATE& getState();
+	IN_OUT_STATE &getState();
 
 	// request-response structures
-	http::Request& getRequest();
-	http::Response& getResponse();
+	http::Request &getRequest();
+	http::Response &getResponse();
 	void resetRequest();
 	void resetResponse();
 
@@ -61,8 +61,8 @@ class Client {
 	void setCgiInProgress(bool value);
 
 	// SessionID Functions
-	std::string getSessionId() const;
-	void setSessionId(std::string& sessionId);
+	std::string getSessionID() const;
+	void setSessionID(const std::string& sessionID);
 
 	// CGI process tracking
 	pid_t getCgiPid() const;
@@ -82,21 +82,10 @@ class Client {
 	int getIdleTicks();
 	void resetIdleTicks();
 
-	std::string getSessionId() {
-		return _sessionID;
-	}
-
-	void setSessionId(const std::string& id) {
-		_sessionID = id;
-	}
-
-	
-
   private:
-	http::TcpServer& _server;
+	http::TcpServer &_server;
 
 	int _fd;
-	std::string _sessionID;
 	IN_OUT_STATE _state;
 
 	bool _requestComplete;
@@ -112,8 +101,8 @@ class Client {
 	std::string _writeBuffer;
 	http::Response _response;
 
-	std::string _sessionId;
+	std::string _sessionID;
 	int _idleTicks;
 };
 
-void ensureSessionId(Client& client);
+void ensureSessionId(Client &client);

@@ -110,7 +110,7 @@ bool UploadManager::parseMultipart(const Location &matchLocation, Client &client
 		return (false);
 	}
 
-	if (!saveFile(filename, content, matchLocation, client.getSessionId())) {
+	if (!saveFile(filename, content, matchLocation, client.getSessionID())) {
 		client.getResponse().buildErrorResponse(HTTP_SERVER_ERR, serverInfo);
 		Logs::log(LOGS_ERROR, "Internal Server Error: File not saved.");
 		return (false);
