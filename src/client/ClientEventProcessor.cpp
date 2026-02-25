@@ -108,20 +108,14 @@ void http::ClientEventProcessor::acceptConnections() {
 bool http::ClientEventProcessor::removeDeadConnections(size_t& index) {
 
 	if (_allSockets[index].revents & (POLLHUP | POLLERR | POLLNVAL)) {
-		// if (_allSockets[index].revents & (POLLERR | POLLNVAL)) {
 		SocketFD fd = _allSockets[index].fd;
 
-		// Check if this is a CGI pipe fd - skip it (handled by processCgiOutput)
 		if (_cgi_by_fd.find(fd) != _cgi_by_fd.end()) {
-
-			return false; // CGI pipes are managed separately
+			return false;
 		}
-
-		// Clean up CGI resources if this is a client with active CGI
 		Client* client = _clientManager.getClient(fd);
 
 		if (client && client->getCgiOutputFd() != -1) {
-			// Find and cleanup the CGI
 			std::map<int, http::Cgi*>::iterator it = _cgi_by_fd.find(client->getCgiOutputFd());
 			if (it != _cgi_by_fd.end()) {
 				this->cleanupCgi(it->second);
@@ -232,14 +226,12 @@ void http::ClientEventProcessor::setSession(Client* client) {
 		session = &_sessionManager.createSession();
 	} else {
 
-		std::cout << requestedSessionId << std::endl; // !
 		session = &_sessionManager.getSession(requestedSessionId);
 	}
 
 	client->setSessionID(session->getSessionId());
 
 	if (session->getSessionId() != requestedSessionId) {
-		std::cout << "SET NEW\n";
 		client->getResponse().addToHeader("Set-Cookie", "sessionId=" + session->getSessionId() + "; Path=/; HttpOnly");
 	}
 }
@@ -393,7 +385,6 @@ bool http::ClientEventProcessor::processRequest(Client& client) {
 		this->buildErrorResponse(client, state);
 		return true;
 	}
-
 
 	http::Router router(client, *this);
 	router.process();

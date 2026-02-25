@@ -38,14 +38,6 @@ std::string getFilePath(const http::Request &req, const ServerConfig &server) {
 	if (relativePath.empty())
 		relativePath = "/";
 
-		p("root=>");
-	p(root);
-	p(relativePath);
-	std::string a = joinPath(root, relativePath);
-	p(""); 
-	p(a);
-	p(""); 
-	p(""); 
 	return joinPath(root, relativePath);
 }
 
