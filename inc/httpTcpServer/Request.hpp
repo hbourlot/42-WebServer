@@ -33,11 +33,11 @@ namespace http {
 		int _bodyFd;
 		size_t _bodyFdSize;
 		std::string _bodyPath;
-  
+
 		std::string _queryString;
-		const Location* _matchLocation;
-		const Directory* _fileDirectory;
-  
+		const Location *_matchLocation;
+		const Directory *_fileDirectory;
+
 		REQUEST_PHASE _requestPhase;
 		ChunkParser _chunk;
 
@@ -45,44 +45,39 @@ namespace http {
 		Request();
 		~Request();
 
-
-
-		
 		std::string getFileName();
-		int appendBody(const char* buf, size_t len, const ServerConfig& configs);
-		int createTempFile(const ServerConfig& configs);
+		int appendBody(const char *buf, size_t len, const ServerConfig &configs);
+		int createTempFile(const ServerConfig &configs);
 		void cleanup();
 		bool writeBodyToFd(int outFd);
-		std::string& readALlBody();
-		
-		
+		std::string &readALlBody();
+
 		void resetChunkParser();
-		
+
 		bool isBodyInDisk();
 		size_t bodyFdSize();
-		
+
 		// ! -- GETTERS
-
-		std::string& getFullPath();
-		const std::string& getFullPath() const;
-		std::string& getServerProtocol();
-		const std::string& getServerProtocol() const;
-		std::string& getMethod();
-		const std::string& getMethod() const;
-		std::string& getBody();
+		std::string &getFullPath();
+		const std::string &getFullPath() const;
+		std::string &getServerProtocol();
+		const std::string &getServerProtocol() const;
+		std::string &getMethod();
+		const std::string &getMethod() const;
+		std::string &getBody();
+		size_t getBodySize() const;
 		REQUEST_PHASE getRequestPhase();
-		ChunkParser& getChunkParser();
-		std::map<std::string, std::string>& getHeaders();
-		const std::map<std::string, std::string>& getHeaders() const;
-		const std::string& getUri() const;
-		std::string& getUri();
-		const std::string& getQueryString() const;
-		const std::string& getPathInfo() const;
-		const std::string& getPathTranslated() const;
-		std::string& getPathTranslated();
-		const Directory* getFileDirectory() const;
-		const Location* getMatchLocation() const;
-
+		ChunkParser &getChunkParser();
+		std::map<std::string, std::string> &getHeaders();
+		const std::map<std::string, std::string> &getHeaders() const;
+		const std::string &getUri() const;
+		std::string &getUri();
+		const std::string &getQueryString() const;
+		const std::string &getPathInfo() const;
+		const std::string &getPathTranslated() const;
+		std::string &getPathTranslated();
+		const Directory *getFileDirectory() const;
+		const Location *getMatchLocation() const;
 
 		// ! -- SETTERS
 		void setFullPath(std::string src);
@@ -92,8 +87,8 @@ namespace http {
 		void setPathTranslated(const std::string src);
 		void setMethod(const std::string src);
 		void setServerProtocol(const std::string src);
-		void setMatchLocation(const Location* location);
-		void setFileDirectory(const Directory* location);
+		void setMatchLocation(const Location *location);
+		void setFileDirectory(const Directory *location);
 		void setRequestPhase(REQUEST_PHASE requestPhase);
 	};
 

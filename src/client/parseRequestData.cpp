@@ -1,6 +1,6 @@
 #include "Client/ClientEventProcessor.hpp"
 
-static void parseRequestQueries(http::Request& request) {
+static void parseRequestQueries(http::Request &request) {
 	std::string fullPath = request.getUri();
 	std::string::size_type qpos = fullPath.find('?');
 
@@ -12,20 +12,20 @@ static void parseRequestQueries(http::Request& request) {
 	}
 }
 
-static void parsePath(http::Request& request, const ServerConfig& serverInfo) {
-	std::string& path = request.getUri();
+static void parsePath(http::Request &request, const ServerConfig &serverInfo) {
+	std::string &path = request.getUri();
 
 	// by default
 	request.setPathInfo("");
 	request.setPathTranslated("");
 
 	for (size_t i = 0; i < serverInfo.directories.size(); ++i) {
-		const Directory& loc = serverInfo.directories[i];
+		const Directory &loc = serverInfo.directories[i];
 		if (loc.cgi_extension.empty())
 			continue;
 
 		for (size_t j = 0; j < loc.cgi_extension.size(); ++j) {
-			const std::string& ext = loc.cgi_extension[j];
+			const std::string &ext = loc.cgi_extension[j];
 
 			size_t pos = path.find(ext);
 			if (pos == std::string::npos)
@@ -55,10 +55,10 @@ static void parsePath(http::Request& request, const ServerConfig& serverInfo) {
 	}
 }
 
-static bool parseRequestLine(http::Request& req, const ServerConfig& serverInfo, const std::string& readBuffer,
+static bool parseRequestLine(http::Request &req, const ServerConfig &serverInfo, const std::string &readBuffer,
                              size_t lineEnd) {
 
-	const char* data = readBuffer.c_str();
+	const char *data = readBuffer.c_str();
 
 	std::string requestLine(data, lineEnd);
 
@@ -80,8 +80,8 @@ static bool parseRequestLine(http::Request& req, const ServerConfig& serverInfo,
 	return true;
 }
 
-static void parseRequestHeaders(http::Request& req, const std::string& readBuffer, size_t headerEnd) {
-	const char* data = readBuffer.c_str();
+static void parseRequestHeaders(http::Request &req, const std::string &readBuffer, size_t headerEnd) {
+	const char *data = readBuffer.c_str();
 	size_t pos = 0;
 	while (pos < headerEnd) {
 		size_t lineEnd = readBuffer.find("\r\n", pos);
@@ -101,9 +101,9 @@ static void parseRequestHeaders(http::Request& req, const std::string& readBuffe
 	}
 }
 
-static bool parseContentLengthBody(Client& client, const ServerConfig& configs) {
-	http::Request& request = client.getRequest();
-	std::string& buffer = client.getReadBuffer();
+static bool parseContentLengthBody(Client &client, const ServerConfig &configs) {
+	http::Request &request = client.getRequest();
+	std::string &buffer = client.getReadBuffer();
 
 	size_t len = strtoul(request.getHeaders()["Content-Length"].c_str(), NULL, 10);
 	if (len > buffer.size())
@@ -117,10 +117,10 @@ static bool parseContentLengthBody(Client& client, const ServerConfig& configs) 
 	return true;
 }
 
-static bool parseChunkBody(Client& client, const ServerConfig& configs) {
-	std::string& buffer = client.getReadBuffer();
-	ChunkParser& chunk = client.getRequest().getChunkParser();
-	http::Request& request = client.getRequest();
+static bool parseChunkBody(Client &client, const ServerConfig &configs) {
+	std::string &buffer = client.getReadBuffer();
+	ChunkParser &chunk = client.getRequest().getChunkParser();
+	http::Request &request = client.getRequest();
 	while (!buffer.empty()) {
 		switch (chunk.state) {
 		case CHUNK_SIZE: {
@@ -173,9 +173,9 @@ static bool parseChunkBody(Client& client, const ServerConfig& configs) {
 	return false;
 }
 
-static bool parseRequestBody(Client& client, const ServerConfig& configs) {
+static bool parseRequestBody(Client &client, const ServerConfig &configs) {
 
-	http::Request& req = client.getRequest();
+	http::Request &req = client.getRequest();
 
 	if (req.getHeaders().count("Transfer-Encoding") && req.getHeaders()["Transfer-Encoding"] == "chunked")
 		return parseChunkBody(client, configs);
@@ -188,10 +188,10 @@ static bool parseRequestBody(Client& client, const ServerConfig& configs) {
 	return true;
 }
 
-bool http::ClientEventProcessor::parseRequestData(Client& client, const ServerConfig& serverInfo) {
+bool http::ClientEventProcessor::parseRequestData(Client &client, const ServerConfig &serverInfo) {
 
-	std::string& readBuffer = client.getReadBuffer();
-	http::Request& clientRequest = client.getRequest();
+	std::string &readBuffer = client.getReadBuffer();
+	http::Request &clientRequest = client.getRequest();
 
 	if (clientRequest.getRequestPhase() == START) {
 		size_t lineEnd = readBuffer.find("\r\n");

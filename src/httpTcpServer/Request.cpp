@@ -34,8 +34,7 @@ void http::Request::cleanup() {
 	_chunk = ChunkParser();
 }
 
-int http::Request::appendBody(const char* buf, size_t len, const ServerConfig& configs) {
-
+int http::Request::appendBody(const char *buf, size_t len, const ServerConfig &configs) {
 	size_t maxBuffer = _matchLocation ? _matchLocation->max_buffer_size : configs.max_buffer_size;
 	if (!_bodyInDisk && len > maxBuffer - _body.size()) {
 		_bodyInDisk = true;
@@ -58,7 +57,7 @@ int http::Request::appendBody(const char* buf, size_t len, const ServerConfig& c
 	return (0);
 }
 
-int http::Request::createTempFile(const ServerConfig& configs) {
+int http::Request::createTempFile(const ServerConfig &configs) {
 	static long requestNbr = 0;
 	_bodyPath = joinPath(configs.temp_path, "/webserv_body_" + ft_to_string(requestNbr));
 	requestNbr = (requestNbr < 2000) ? requestNbr + 1 : 0;
@@ -90,7 +89,7 @@ bool http::Request::writeBodyToFd(int outFd) {
 	return r == 0;
 }
 
-std::string& http::Request::readALlBody() {
+std::string &http::Request::readALlBody() {
 	if (!_bodyInDisk)
 		return (_body);
 
@@ -114,7 +113,6 @@ std::string& http::Request::readALlBody() {
 	return _body;
 }
 
-
 void http::Request::resetChunkParser() {
 	_chunk = ChunkParser();
 }
@@ -129,81 +127,85 @@ size_t http::Request::bodyFdSize() {
 
 // ! -- GETTERS
 
-
-
-std::string& http::Request::getFullPath() {
+std::string &http::Request::getFullPath() {
 	return _fullPath;
 }
 
-const std::string& http::Request::getFullPath() const {
+const std::string &http::Request::getFullPath() const {
 	return _fullPath;
 }
 
-std::string& http::Request::getServerProtocol() {
+std::string &http::Request::getServerProtocol() {
 	return _serverProtocol;
 }
 
-const std::string& http::Request::getServerProtocol() const {
+const std::string &http::Request::getServerProtocol() const {
 	return _serverProtocol;
 }
 
-std::string& http::Request::getMethod() {
+std::string &http::Request::getMethod() {
 	return _method;
 }
 
-const std::string& http::Request::getMethod() const {
+const std::string &http::Request::getMethod() const {
 	return _method;
 }
 
-std::string& http::Request::getBody() {
+std::string &http::Request::getBody() {
 	return _body;
+}
+size_t http::Request::getBodySize() const {
+	std::cout << _bodyFdSize << ":" << _body.size() << std::endl;
+	if (_bodyInDisk)
+		return (_bodyFdSize);
+	return (_body.size());
 }
 
 REQUEST_PHASE http::Request::getRequestPhase() {
 	return (_requestPhase);
 }
 
-ChunkParser& http::Request::getChunkParser() {
+ChunkParser &http::Request::getChunkParser() {
 	return _chunk;
 }
 
-std::map<std::string, std::string>& http::Request::getHeaders() {
+std::map<std::string, std::string> &http::Request::getHeaders() {
 	return _headers;
 };
 
-const std::map<std::string, std::string>& http::Request::getHeaders() const {
+const std::map<std::string, std::string> &http::Request::getHeaders() const {
 	return _headers;
 };
 
-const std::string& http::Request::getUri() const {
+const std::string &http::Request::getUri() const {
 	return _uri;
 }
 
-std::string& http::Request::getUri() {
+std::string &http::Request::getUri() {
 	return _uri;
 }
 
-const std::string& http::Request::getQueryString() const {
+const std::string &http::Request::getQueryString() const {
 	return _queryString;
 }
 
-const std::string& http::Request::getPathInfo() const {
+const std::string &http::Request::getPathInfo() const {
 	return _pathInfo;
 }
 
-const std::string& http::Request::getPathTranslated() const {
+const std::string &http::Request::getPathTranslated() const {
 	return _pathTranslated;
 }
 
-std::string& http::Request::getPathTranslated() {
+std::string &http::Request::getPathTranslated() {
 	return _pathTranslated;
 }
 
-const Directory* http::Request::getFileDirectory() const {
+const Directory *http::Request::getFileDirectory() const {
 	return _fileDirectory;
 }
 
-const Location* http::Request::getMatchLocation() const {
+const Location *http::Request::getMatchLocation() const {
 	return _matchLocation;
 }
 
@@ -237,11 +239,11 @@ void http::Request::setServerProtocol(const std::string src) {
 	_serverProtocol = src;
 }
 
-void http::Request::setMatchLocation(const Location* location) {
+void http::Request::setMatchLocation(const Location *location) {
 	_matchLocation = location;
 }
 
-void http::Request::setFileDirectory(const Directory* location) {
+void http::Request::setFileDirectory(const Directory *location) {
 	_fileDirectory = location;
 }
 
