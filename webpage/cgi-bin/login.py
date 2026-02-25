@@ -1,47 +1,54 @@
 #!/usr/bin/env python3
 
+import json
 import os
+import re
 import sys
+import urllib.parse
 
 def parse_multipart_form_data():
-    """
-    Manually parses a multipart/form-data body from stdin.
-    This is a simplified parser for demonstration.
-    """
     form_data = {}
-    
-    # 1. Get the boundary from the CONTENT_TYPE environment variable
+
     content_type = os.environ.get("CONTENT_TYPE", "")
-    boundary = None
-    if "boundary=" in content_type:
-        boundary = "--" + content_type.split("boundary=")[1]
-
-    if not boundary:
-        return {}
-
-    # 2. Read the entire body from stdin
     content_length = int(os.environ.get("CONTENT_LENGTH", 0))
-    body = sys.stdin.read(content_length)
 
-    # 3. Split the body into parts using the boundary
-    parts = body.split(boundary)
+    if content_length <= 0:
+        return form_data
 
-    # 4. Process each part
+    body_bytes = sys.stdin.buffer.read(content_length)
+
+    if "application/x-www-form-urlencoded" in content_type:
+        parsed = urllib.parse.parse_qs(body_bytes.decode("utf-8", errors="replace"), keep_blank_values=True)
+        for key, values in parsed.items():
+            form_data[key] = values[0] if values else ""
+        return form_data
+
+    if "multipart/form-data" not in content_type:
+        return form_data
+
+    boundary_match = re.search(r'boundary=([^;]+)', content_type)
+    if not boundary_match:
+        return form_data
+
+    boundary = b"--" + boundary_match.group(1).encode("utf-8", errors="replace")
+    parts = body_bytes.split(boundary)
+
     for part in parts:
-        if 'Content-Disposition: form-data; name="' in part:
-            # Extract the name of the form field
-            try:
-                header, value = part.split('\\r\\n\\r\\n', 1)
-                name_part = header.split('name="')[1]
-                name = name_part.split('"')[0]
-                
-                # Clean up the value
-                value = value.strip('\\r\\n--')
-                form_data[name] = value
-            except ValueError:
-                # Skip malformed parts
-                continue
-                
+        if b"Content-Disposition" not in part:
+            continue
+
+        headers_raw, separator, value_raw = part.partition(b"\r\n\r\n")
+        if not separator:
+            continue
+
+        name_match = re.search(br'name="([^"]+)"', headers_raw)
+        if not name_match:
+            continue
+
+        name = name_match.group(1).decode("utf-8", errors="replace")
+        value = value_raw.rstrip(b"\r\n-")
+        form_data[name] = value.decode("utf-8", errors="replace")
+
     return form_data
 
 def main():
@@ -50,22 +57,29 @@ def main():
     username = data.get("username", "")
     password = data.get("password", "")
 
+    # print(f"username={username}", file=sys.stderr)
+    # print(f"password={password}", file=sys.stderr)
+
+
     # --- Hardcoded credentials for demonstration ---
     if username == "admin" and password == "1234":
-        # On success, send a custom header with the username and a Location hint.
-        # Your C++ server will see these headers, create a session, and then
-        # send the actual redirect response to the browser.
         print("Status: 200 OK")
         print(f"X-Authenticated-User: {username}")
-        print("Location: /dashboard") # The page to redirect to after login
-        print("Content-Type: text/html")
-        print() # This creates the necessary blank line between headers and body
-        print("<html><body><h1>Login Successful, redirecting...</h1></body></html>")
-    else:
-        # On failure, redirect back to the home page.
-        print("Status: 302 Found")
-        print("Location: /") # Redirect back to the home/login page
+        print("Content-Type: application/json; charset=UTF-8")
         print()
+        print(json.dumps({
+            "success": True,
+            "message": "Login successful",
+            # "redirect": "/dashboard"
+        }))
+    else:
+        print("Status: 200 OK")
+        print("Content-Type: application/json; charset=UTF-8")
+        print()
+        print(json.dumps({
+            "success": False,
+            "message": "Invalid username or password"
+        }))
 
 if __name__ == "__main__":
     main()

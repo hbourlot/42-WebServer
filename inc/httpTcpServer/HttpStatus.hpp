@@ -12,6 +12,7 @@ const HttpStatusCode HTTP_OK = { "200", "OK" };
 const HttpStatusCode HTTP_NO_CONTENT = { "204", "No Content" };
 const HttpStatusCode HTTP_PARTIAL_CONTENT = { "206", "Partial Content" };
 const HttpStatusCode HTTP_MOVED = { "301", "Moved Permanently" };
+const HttpStatusCode HTTP_TEMP_REDIRECT = { "307", "Temporary Redirect" };
 const HttpStatusCode HTTP_BAD_REQ = { "400", "Bad Request" };
 const HttpStatusCode HTTP_FORBID = { "403", "Forbidden" };
 const HttpStatusCode HTTP_NOT_FOUND = { "404", "Not Found" };

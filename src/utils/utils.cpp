@@ -38,13 +38,32 @@ std::string getFilePath(const http::Request &req, const ServerConfig &server) {
 	if (relativePath.empty())
 		relativePath = "/";
 
+		p("root=>");
+	p(root);
+	p(relativePath);
+	std::string a = joinPath(root, relativePath);
+	p(""); 
+	p(a);
+	p(""); 
+	p(""); 
 	return joinPath(root, relativePath);
 }
 
 std::string joinPath(const std::string &base, const std::string &sub) {
-	if (!base.empty() && (base[base.length() - 1] == '/' || sub[0] == '/'))
-		return (base + sub);
-	return (base + "/" + sub);
+    if (base.empty()) return sub;
+    if (sub.empty()) return base;
+
+    bool baseHasSlash = (base[base.length() - 1] == '/');
+    bool subHasSlash = (sub[0] == '/');
+
+    if (baseHasSlash && subHasSlash) {
+
+        return base + sub.substr(1);
+    } else if (!baseHasSlash && !subHasSlash) {
+        return base + "/" + sub;
+    }
+
+    return base + sub;
 }
 
 std::string ft_strtrim(const std::string &str) {

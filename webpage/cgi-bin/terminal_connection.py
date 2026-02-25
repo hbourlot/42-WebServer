@@ -1,6 +1,6 @@
 import os
 import sys
-
+# python3 terminal_connection.py /dev/pts/6
 if len(sys.argv) != 2:
     print("Usage: python3 read_from_terminal.py /dev/pts/N")
     sys.exit(1)

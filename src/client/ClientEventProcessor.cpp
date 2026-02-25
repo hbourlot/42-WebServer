@@ -202,19 +202,24 @@ void http::ClientEventProcessor::shutDownProcessor() {
 }
 
 void http::ClientEventProcessor::setSession(Client *client) {
-	Session *session = nullptr;
-	const std::string sessionId = client->getSessionID();
+	ensureSessionId(*client);
 
-	if (sessionId.empty()) {
+	std::string requestedSessionId = client->getSessionID();
+
+	Session *session = nullptr;
+	if (requestedSessionId.empty()) {
 		session = &_sessionManager.createSession();
 	} else {
-		session = &_sessionManager.getSession(sessionId);
+
+		std::cout << requestedSessionId << std::endl; // !
+		session = &_sessionManager.getSession(requestedSessionId);
 	}
 
-	if (session) {
-		client->setSessionID(session->getSessionId());
-		// Now you can also set data on the session if needed
-		// session->setSessionData("username", "test");
+	client->setSessionID(session->getSessionId());
+
+	if (session->getSessionId() != requestedSessionId) {
+		std::cout << "SET NEW\n";
+		client->getResponse().addToHeader("Set-Cookie", "sessionId=" + session->getSessionId() + "; Path=/; HttpOnly");
 	}
 }
 
@@ -313,6 +318,8 @@ void http::ClientEventProcessor::processRead(pollfd &pfd, Client *client, Cgi *c
 		return;
 	}
 
+	setSession(client);
+
 	pfd.events = POLLOUT; // Setting to POLL OUT
 };
 
@@ -337,22 +344,24 @@ void http::ClientEventProcessor::handleCgiIO(Client *client) {
 		if (!hasCgiSuccessfullyFinished(cgi)) {
 			client->getResponse().buildErrorResponse(HTTP_SERVER_ERR, client->getServer().getServerInfo());
 		} else {
+			client->getResponse().appendCgiChunk(cgi->getReadBuffer());
 
-			std::string cgiOutput = cgi->getReadBuffer();
+			const std::map<std::string, std::string> &cgiHeaders = client->getResponse().getHeaders();
+			std::map<std::string, std::string>::const_iterator itAuth = cgiHeaders.find("X-Authenticated-User");
 
-			// std::string authHeader = "X-Authenticated-User: ";
-			// size_t headerPos = cgiOutput.find(authHeader);
+			if (itAuth != cgiHeaders.end() && !itAuth->second.empty()) {
+				const std::string username = itAuth->second;
 
-			// if (headerPos != std::string::npos) {
-			// 	size_t usernameStart = headerPos + authHeader.length();
-			// 	size_t usernameEnd = cgiOutput.find("\n", usernameStart);
-			// 	std::string username = cgiOutput.substr(usernameStart, usernameEnd - usernameStart);
+				const std::string previousId = client->getSessionID();
+				Session &authSession = _sessionManager.getSession(previousId);
 
-			// 	username.erase(username.find_last_not_of(" \n\r\t") + 1);
+				authSession.setSessionData("username", username);
+				authSession.setSessionData("authenticated", "true");
 
-			// 	Session& newSession = _sessionManager.createSession();
-			// 	newSession.setSessionData("username", username);
-			// 	newSession.setSessionData("authenticated", "true");
+				client->setSessionID(authSession.getSessionId());
+				client->getResponse().addToHeader("Set-Cookie",
+				                                  "sessionId=" + authSession.getSessionId() + "; Path=/; HttpOnly");
+			}
 
 			// 	client->getResponse().setCookie("sessionId=" + newSession.getSessionId());
 			// }
@@ -367,7 +376,7 @@ void http::ClientEventProcessor::processWrite(pollfd &pfd, Client *client, int i
 
 	if (client->getState() == CGI_JUST_STARTED || client->getState() == CGI_COMPLETED) {
 		handleCgiIO(client);
-	} else if (/* client->getCgiPid() == -1 &&  */ client->getState() != CGI_COMPLETED) {
+	} else if (client->getState() != CGI_COMPLETED) {
 		if (!processRequest(*client))
 			return;
 	}
@@ -392,22 +401,8 @@ bool http::ClientEventProcessor::processRequest(Client &client) {
 		return true;
 	}
 
-	// std::cout << client.getRequest().body << std::endl;
-	// std::string username = session.getSessionData("username");
-	// bool isAuthenticated = session.getSessionData("authenticated") == "true";
-
-	// // std::cout << "uri:" << client.getRequest().uri << std::endl;
-	// // std::cout << "f: " << client.getRequest().fullPath << std::endl;
-	// if ((client.getRequest().uri.find("/Dashboard.html") != std::string::npos) && !isAuthenticated) {
-	// 	client.getResponse().buildRedirect(HTTP_MOVED, "http://localhost:8003/pages/Services/Services.html");
-	// 	return true;
-	// }
-
-	// std::cout << "m: " << client.getRequest()._method << std::endl;
 	http::Router router(client, *this);
 	router.process();
-	return true;
-
 	return true;
 }
 
