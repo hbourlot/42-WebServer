@@ -9,27 +9,6 @@ http::ClientEventProcessor::ClientEventProcessor(std::vector<pollfd> &allFds, st
 
 http::ClientEventProcessor::~ClientEventProcessor(){};
 
-static void discardingBody(Client &client, pollfd &pfd) {
-	size_t available = client.getReadBuffer().size();
-	size_t bytesToDiscard = client.getBytesToDiscard();
-
-	if (available >= bytesToDiscard) {
-		client.consumeReadBuffer(bytesToDiscard);
-		client.setBytesToDiscard(0);
-		client.setDiscardingBody(false);
-
-		client.getResponse().initFromRequest(client.getRequest());
-		ensureSessionId(client);
-		client.setState(PARSE_TOO_LARGE);
-
-		pfd.events &= ~POLLIN;
-		pfd.events |= POLLOUT;
-	} else {
-		client.setBytesToDiscard(bytesToDiscard - available);
-		client.clearReadBuffer();
-	}
-}
-
 void http::ClientEventProcessor::run() {
 
 	int timeOut = 1 * 60 * 1000; // 10s
@@ -239,15 +218,94 @@ void http::ClientEventProcessor::setSession(Client *client) {
 	}
 }
 
+void http::ClientEventProcessor::readFromCgi(SocketFD fd, std::string &readBuffer, IN_OUT_STATE &state) {
+
+	char buffer[BUFFER_SIZE];
+	bool dataWasReadInThisCall = false;
+
+	while (true) {
+		ssize_t bytesReceived = read(fd, buffer, BUFFER_SIZE - 1);
+		if (bytesReceived > 0) {
+			readBuffer.append(buffer, bytesReceived);
+			dataWasReadInThisCall = true;
+			continue;
+
+		} else if (bytesReceived == 0) {
+			state = CGI_COMPLETED;
+			break;
+
+		} else {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+				if (dataWasReadInThisCall) {
+					state = READ_SUCCESS;
+				}
+				break;
+			} else {
+				Logs::log(LOGS_ERROR, "Error reading from CGI pipe");
+				state = READ_ERROR;
+				break;
+			}
+		}
+	}
+}
+
+bool http::ClientEventProcessor::readFromSocket(SocketFD fd, std::string &readBuffer, IN_OUT_STATE &state) {
+
+	char buffer[BUFFER_SIZE];
+	int readCount = 0;
+	bool dataReceived = false;
+
+	// Read up to MAX_READS_PER_EVENT times per poll event
+	while (readCount < MAX_READS_PER_EVENT) {
+
+		std::memset(buffer, 0, BUFFER_SIZE);
+		ssize_t bytesReceived = read(fd, buffer, BUFFER_SIZE - 1);
+
+		if (bytesReceived > 0) {
+			readBuffer.append(buffer, bytesReceived);
+			dataReceived = true;
+			readCount++;
+			continue; // Try to read more data
+		}
+
+		// if (bytesReceived == 0) {
+		// 	break;
+		// }
+
+		if (errno == EAGAIN || errno == EWOULDBLOCK) {
+			// No more data available, this is normal
+			break;
+		}
+
+		if (bytesReceived == 0 /*  && readCount == 0 */) {
+			state = READ_EMPTY;
+			return false;
+		}
+		// bytesReceived < 0
+
+		// Fatal error
+		Logs::log(LOGS_ERROR, "Error: recv()");
+		state = READ_ERROR;
+		return false;
+	}
+
+	if (dataReceived) {
+		state = READ_SUCCESS;
+		return true;
+	}
+
+	// state = READ_EMPTY;
+	return false;
+}
+
 void http::ClientEventProcessor::processRead(pollfd &pfd, Client *client, Cgi *cgi) {
 
-	std::string &readBuffer = /* cgi ? cgi->getReadBuffer() :  */ client->getReadBuffer();
-
-	if (!readFromSocket(pfd.fd, readBuffer, /* cgi ? cgi->getState() :  */ client->getState())) {
+	if (cgi) {
+		readFromCgi(pfd.fd, cgi->getReadBuffer(), cgi->getState());
 		return;
 	}
 
-	if (cgi) {
+	if (!readFromSocket(pfd.fd, client->getReadBuffer(), client->getState())) {
 		return;
 	}
 
@@ -327,55 +385,6 @@ void http::ClientEventProcessor::processWrite(pollfd &pfd, Client *client, int i
 	}
 };
 
-bool http::ClientEventProcessor::readFromSocket(SocketFD fd, std::string &readBuffer, IN_OUT_STATE &state) {
-
-	char buffer[BUFFER_SIZE];
-	int readCount = 0;
-	bool dataReceived = false;
-
-	// Read up to MAX_READS_PER_EVENT times per poll event
-	while (readCount < MAX_READS_PER_EVENT) {
-
-		std::memset(buffer, 0, BUFFER_SIZE);
-		ssize_t bytesReceived = read(fd, buffer, BUFFER_SIZE - 1);
-
-		if (bytesReceived > 0) {
-			readBuffer.append(buffer, bytesReceived);
-			dataReceived = true;
-			readCount++;
-			continue; // Try to read more data
-		}
-
-		// if (bytesReceived == 0) {
-		// 	break;
-		// }
-
-		if (errno == EAGAIN || errno == EWOULDBLOCK) {
-			// No more data available, this is normal
-			break;
-		}
-
-		if (bytesReceived == 0 /*  && readCount == 0 */) {
-			state = READ_EMPTY;
-			return false;
-		}
-		// bytesReceived < 0
-
-		// Fatal error
-		Logs::log(LOGS_ERROR, "Error: recv()");
-		state = READ_ERROR;
-		return false;
-	}
-
-	if (dataReceived) {
-		state = READ_SUCCESS;
-		return true;
-	}
-
-	// state = READ_EMPTY;
-	return false;
-}
-
 bool http::ClientEventProcessor::processRequest(Client &client) {
 
 	// Session &session = _sessionManager.getSession(client.getSessionId());
@@ -429,37 +438,6 @@ bool http::ClientEventProcessor::buildErrorResponse(Client &client, IN_OUT_STATE
 	}
 }
 
-static void readFromCgi(SocketFD fd, std::string &readBuffer, IN_OUT_STATE &state, http::Cgi *cgi) {
-
-	char buffer[65536];
-	bool dataWasReadInThisCall = false;
-
-	while (true) {
-		ssize_t bytesReceived = read(fd, buffer, 65536 - 1);
-		if (bytesReceived > 0) {
-			readBuffer.append(buffer, bytesReceived);
-			dataWasReadInThisCall = true;
-			continue;
-
-		} else if (bytesReceived == 0) {
-			state = CGI_COMPLETED;
-			break;
-
-		} else {
-			if (errno == EAGAIN || errno == EWOULDBLOCK) {
-				if (dataWasReadInThisCall) {
-					state = READ_SUCCESS;
-				}
-				break;
-			} else {
-				Logs::log(LOGS_ERROR, "Error reading from CGI pipe");
-				state = READ_ERROR;
-				break;
-			}
-		}
-	}
-}
-
 void http::ClientEventProcessor::processClientEvents(int index) {
 
 	int fd = _allSockets[index].fd;
@@ -473,11 +451,7 @@ void http::ClientEventProcessor::processClientEvents(int index) {
 	}
 
 	if (_allSockets[index].revents & POLLIN) {
-		if (cgi) {
-			readFromCgi(fd, cgi->getReadBuffer(), cgi->getState(), cgi);
-		} else {
-			processRead(_allSockets[index], client, cgi);
-		}
+		processRead(_allSockets[index], client, cgi);
 	}
 
 	if (_allSockets[index].revents & POLLOUT) {
@@ -485,7 +459,7 @@ void http::ClientEventProcessor::processClientEvents(int index) {
 	}
 
 	if ((_allSockets[index].revents & POLLHUP) && cgi && cgi->hasFinished()) {
-		readFromCgi(fd, cgi->getReadBuffer(), cgi->getState(), cgi);
+		readFromCgi(fd, cgi->getReadBuffer(), cgi->getState());
 		client->setState(CGI_COMPLETED);
 		return;
 	}
