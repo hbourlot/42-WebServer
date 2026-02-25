@@ -308,12 +308,7 @@ void http::ClientEventProcessor::processRead(pollfd &pfd, Client *client, Cgi *c
 	if (!readFromSocket(pfd.fd, client->getReadBuffer(), client->getState())) {
 		return;
 	}
-
-	if (client->getDiscardingBody()) {
-		discardingBody(*client, pfd);
-		return;
-	}
-
+	
 	if (!parseRequestData(*client, client->getServer()._serverInfo)) {
 		return;
 	}

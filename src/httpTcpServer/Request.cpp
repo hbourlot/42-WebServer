@@ -155,7 +155,6 @@ std::string &http::Request::getBody() {
 	return _body;
 }
 size_t http::Request::getBodySize() const {
-	std::cout << _bodyFdSize << ":" << _body.size() << std::endl;
 	if (_bodyInDisk)
 		return (_bodyFdSize);
 	return (_body.size());

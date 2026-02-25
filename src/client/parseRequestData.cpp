@@ -101,6 +101,25 @@ static void parseRequestHeaders(http::Request &req, const std::string &readBuffe
 	}
 }
 
+static void discardingBody(Client &client) {
+	size_t available = client.getReadBuffer().size();
+	size_t bytesToDiscard = client.getBytesToDiscard();
+
+	if (available >= bytesToDiscard) {
+		client.consumeReadBuffer(bytesToDiscard);
+		client.setBytesToDiscard(0);
+		client.setDiscardingBody(false);
+
+		client.getResponse().initFromRequest(client.getRequest());
+		ensureSessionId(client);
+		client.setState(PARSE_TOO_LARGE);
+
+	} else {
+		client.setBytesToDiscard(bytesToDiscard - available);
+		client.clearReadBuffer();
+	}
+}
+
 static bool parseContentLengthBody(Client &client, const ServerConfig &configs) {
 	http::Request &request = client.getRequest();
 	std::string &buffer = client.getReadBuffer();
@@ -109,11 +128,20 @@ static bool parseContentLengthBody(Client &client, const ServerConfig &configs) 
 	if (len > buffer.size())
 		return false;
 
-	if (request.appendBody(buffer.c_str(), len, configs)) {
-		client.setState(PARSE_ERROR);
-		return true;
+	if (len > request.getMatchLocation()->max_body_size)
+		client.setDiscardingBody(true);
+
+	if (client.getDiscardingBody()) {
+		discardingBody(client);
+	} else {
+		if (request.appendBody(buffer.c_str(), len, configs)) {
+			{
+				client.setState(PARSE_ERROR);
+				return true;
+			}
+			buffer.erase(0, len);
+		}
 	}
-	buffer.erase(0, len);
 	return true;
 }
 
@@ -131,6 +159,10 @@ static bool parseChunkBody(Client &client, const ServerConfig &configs) {
 			std::string sizeStr = buffer.substr(0, lineEnd);
 			chunk.currentChunkSize = strtoul(sizeStr.c_str(), NULL, 16);
 			buffer.erase(0, lineEnd + 2);
+			if (!client.getDiscardingBody() &&
+			    (request.getBodySize() + chunk.currentChunkSize > request.getMatchLocation()->max_body_size)) {
+				client.setDiscardingBody(true);
+			}
 			if (chunk.currentChunkSize == 0)
 				chunk.state = CHUNK_DONE;
 			else {
@@ -143,12 +175,16 @@ static bool parseChunkBody(Client &client, const ServerConfig &configs) {
 			size_t remaining = chunk.currentChunkSize - chunk.bytesReadInChunk;
 			size_t canRead = std::min(remaining, buffer.size());
 
-			if (request.appendBody(buffer.c_str(), canRead, configs)) {
-				client.setState(PARSE_ERROR);
-				return true;
+			if (client.getDiscardingBody()) {
+				buffer.erase(0, canRead);
+			} else {
+				if (request.appendBody(buffer.c_str(), canRead, configs)) {
+					client.setState(PARSE_ERROR);
+					return true;
+				}
+				buffer.erase(0, canRead);
 			}
 			chunk.bytesReadInChunk += canRead;
-			buffer.erase(0, canRead);
 			if (chunk.bytesReadInChunk == chunk.currentChunkSize)
 				chunk.state = CHUNK_CRLF;
 			else
@@ -166,6 +202,10 @@ static bool parseChunkBody(Client &client, const ServerConfig &configs) {
 			if (buffer.size() < 2)
 				return false;
 			buffer.erase(0, 2);
+
+			if (client.getDiscardingBody()) {
+				client.setState(PARSE_TOO_LARGE);
+			}
 			return (true);
 		}
 		}
@@ -240,8 +280,9 @@ bool http::ClientEventProcessor::parseRequestData(Client &client, const ServerCo
 
 		clientRequest.resetChunkParser();
 		Logs::log(LOGS_INFO, "Client: " + ft_to_string(client.getFd()) + " Made a Request");
-		if (client.getState() != PARSE_ERROR) // ! Here for now because line 140
+		if (client.getState() != PARSE_ERROR && client.getState() != PARSE_TOO_LARGE) // ! Here for now because line 140
 			client.setState(PARSE_OK);
+
 		clientRequest.setRequestPhase(START);
 
 		return true;
