@@ -1,5 +1,5 @@
 #pragma once
-#include "Configs.hpp"
+#include "Config/Configs.hpp"
 
 struct ReadConfig {
 	static bool setConfigs( char* conf, Configs& configs );

@@ -33,7 +33,7 @@ int getMaxRequestBody( std::string& value ) {
 	char* end;
 	long num = std::strtol( resultStr.c_str(), &end, 10 );
 	if ( num < 0 ) {
-		throw std::runtime_error( "invalid size number" );
+		throw std::runtime_error( "Invalid size number for max size" );
 	}
 	return static_cast< size_t >( num ) * multiplier;
 }
@@ -65,11 +65,13 @@ Directory& findPath( ServerConfig server, std::string path ) {
 }
 
 bool stringToSizeT(const std::string& str, size_t& result){
+
 	std::stringstream ss(str);
 	ss >> result;
 
-	if (ss.fail() == true || ss.eof() == false)
+	if (ss.fail() == true || ss.eof() == false){
 		return false;
+	}
 	return true;
 }
 
@@ -77,7 +79,7 @@ bool stringIsAlpha(const std::string& str){
 	if (str.empty() )
 		return true;
 
-	for (size_t i = 0; str.size() > i; i++)
+	for (int i = 0; str.size() > i; i++)
 	{
 		if (std::isalpha(str[i]) == false)
 			return false;

@@ -100,22 +100,26 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 	server.alive_timeout = 3;
 
 	while (std::getline(confFd, line)) { // Finish the server config block
-
 		noSpaceLine = removeSpace(line); // Removes the first spaces
+		
+		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
+
+		if (trimmedLine[0] == '}') // Finish the server info
+		{
+			IsServerOpen = false;
+			break;
+		}
+
 
 		if (!CheckConf::checkLineFinished(noSpaceLine))
 			throw std::invalid_argument("Error: Extra words after End of Line\n");
 
-		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
-		
-		if (trimmedLine[0] == '}') // Finish the server info
-			break;
+
 
 		// Check if we are going to location configs "location /upload"
 		// This serves to check if we have stuff like " } location /upload {"
 		// We close the last location config, and we open a new one
 		if (line.find("location") == std::string::npos) {
-
 			if (containBrackets(line, IsServerOpen, emptyString) == false)
 				return false;
 		}
@@ -186,7 +190,8 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			}
 			
 			case ALIVE_TIMEOUT:
-				if (stringToSizeT(getInfo(noSpaceLine), server.alive_timeout) == false) {
+				if (stringToSizeT(getInfo(noSpaceLine), server.alive_timeout) == false){
+					std::cerr << "Failed to set the alive_timeout" << std::endl;
 					return false;
 				}
 				break;
@@ -207,6 +212,13 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 		noSpaceLine = removeSpace(line);
 		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
 	}
+
+	if (IsServerOpen == true)
+	{
+		std::cerr << "Server is not close properly" << std::endl;
+		return false;
+	}
+
 	ReadConfig::setDefaultServer(server);
 	configs.servers.push_back(server); // Send the information for the main config
 	return (true);
@@ -219,14 +231,20 @@ bool ReadConfig::setConfigs(char *conf, Configs &configs) {
 	confFd.open(conf); // Open the config file.
 	try {
 		while (std::getline(confFd, line)) {
+			std::string verify = removeSpace(line);
 			if (line.empty() == false &&
-			    containBrackets(line, inServer, "server") ==
-			        true) { // Removes the spaces before the name and return the value to check if it is a server
+			    containBrackets(line, inServer, "server") == true) { // Removes the spaces before the name and return the value to check if it is a server
 				if (ReadConfig::setServerConfig(confFd, line, configs) ==
 				    false) // Will check if everything is OK when we get the server config info
 				{
 					return (false);
 				}
+			}
+			else if (verify[0] == '#' || verify.size() == 1 )
+				continue;
+			else{
+				std::cerr << "Invalid information in conf file" << std::endl;
+				return false;
 			}
 		}
 	} catch (const std::exception &exception) {

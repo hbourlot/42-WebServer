@@ -2,28 +2,30 @@
 #include "Config/SetLocations.hpp"
 #include <utils.hpp>
 
-
 File::File() {
 	// String are automatically initialized;
 }
 
-bool fileExtension( const std::string &line, std::string &fileExtension ) {
-	if ( line[1] != '*' || line[2] != '.' ) {
+bool fileExtension(const std::string &line, std::string &fileExtension)
+{
+	if (line[1] != '*' || line[2] != '.')
+	{
 		std::cerr << "Failed to set the file extension" << std::endl;
 		return false;
 	}
-	size_t start = 3;
+    size_t start = 3; // Start where we have to find the path
 
-	size_t end = start;
-	while ( end < line.size() && !std::isspace( line[end] ) &&
-			line[end] != '{' ) // We count the end of the path until we find a 'space' or '{', for cases like "location
-							   // /cgi bin/hello"
-	{
-		end++;
-	}
-	fileExtension = line.substr( start, end - start );
-	if ( stringIsAlpha( fileExtension ) == false ) {
-		std::cerr << "File extension is not valid" << std::endl;
+    size_t end = start;
+    while (end < line.size() && 
+           !std::isspace(line[end]) &&
+           line[end] != '{') // We count the end of the path until we find a 'space' or '{', for cases like "location /cgi bin/hello"
+    {
+        end++;
+    }
+
+	fileExtension = line.substr(start, end - start);
+	if (stringIsAlpha(fileExtension) == false){
+		std::cerr << "File extension is not valid" << std::endl;	
 		return false;
 	}
 	return true;
@@ -38,10 +40,10 @@ int getTypeFile( std::string &trimmedLine ) { // Function to check the informati
 		return INDEX;
 	if ( trimmedLine == "cgi_pass" )
 		return CGIPASS;
-	if ( trimmedLine.size() == 1 || trimmedLine == "{" || trimmedLine == "}" || trimmedLine == "\n" )
-		return EMPTY;
-	if ( trimmedLine[0] == '#' )
+	if ( trimmedLine[0] == '#')
 		return COMMENT;
+	if ( trimmedLine == "{" || trimmedLine == "}" || trimmedLine.size() == 1)
+		return EMPTY;
 	return 100;
 }
 
@@ -52,9 +54,9 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 	File file;
 	bool IsFileOpen = false;
 
-	if ( fileExtension( line, file.extension ) == false )
+	if (fileExtension( line, file.extension ) == false)
 		return false;
-
+	
 	file.max_buffer_size = server.max_buffer_size;
 	if ( containBrackets( line, IsFileOpen, emptyString ) == false ) {
 		return false;
@@ -95,19 +97,25 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 		case CGIPASS:
 			file.cgi_pass = getInfo( noSpaceLine );
 			struct stat buffer;
-
-			if ( stat( file.cgi_pass.c_str(), &buffer ) != 0 )
+			
+			if (stat(file.cgi_pass.c_str(), &buffer) != 0)
 				return false;
 			break;
-
-		case EMPTY:
 		case COMMENT:
-			break;
+		case EMPTY:
+				break;
 		default:
-			break;
+			return false;
 		}
 	}
-	setDefaultFile( file );
+
+	if (IsFileOpen == true) // We need to check if its close properly or not
+	{
+		std::cerr << "File is not closed properly" << std::endl;
+		return false;
+	}
+
+	setDefaultFile(file);
 	server.files.push_back( file );
 	return true;
 }
