@@ -308,7 +308,7 @@ void http::ClientEventProcessor::processRead(pollfd &pfd, Client *client, Cgi *c
 	if (!readFromSocket(pfd.fd, client->getReadBuffer(), client->getState())) {
 		return;
 	}
-	
+
 	if (!parseRequestData(*client, client->getServer()._serverInfo)) {
 		return;
 	}
@@ -358,9 +358,6 @@ void http::ClientEventProcessor::handleCgiIO(Client *client) {
 			// }
 
 			client->getResponse().appendCgiChunk(cgi->getReadBuffer(), true);
-			if (client->getResponse().isChunked()) {
-				client->getResponse().finishCgiChunked();
-			}
 		}
 		cleanupCgi(cgi);
 	}

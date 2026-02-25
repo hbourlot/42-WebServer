@@ -127,7 +127,7 @@ static bool parseContentLengthBody(Client &client, const ServerConfig &configs) 
 	size_t len = strtoul(request.getHeaders()["Content-Length"].c_str(), NULL, 10);
 	if (len > buffer.size())
 		return false;
-
+	std::cout << request.getMatchLocation()->max_body_size << std::endl;
 	if (len > request.getMatchLocation()->max_body_size)
 		client.setDiscardingBody(true);
 

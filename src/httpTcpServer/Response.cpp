@@ -8,7 +8,7 @@
 
 http::Response::Response()
     : _protocol("HTTP/1.1"), _isChunked(false), _chunkState(CHUNK_PARSE_HEADERS), _statusCode(""), _statusMsg(""),
-      _range("", "") {
+      _range("", ""), _parsedHeadersChunk(false) {
 }
 
 void http::Response::cleanup() {
@@ -17,7 +17,7 @@ void http::Response::cleanup() {
 	_range = std::make_pair("", "");
 }
 
-void http::Response::initFromRequest(const http::Request& request) {
+void http::Response::initFromRequest(const http::Request &request) {
 
 	_protocol = (!request.getServerProtocol().empty()) ? request.getServerProtocol() : "HTTP/1.1";
 
@@ -53,7 +53,7 @@ void http::Response::markChunkendDone() {
 	_isChunked = false;
 }
 
-void http::Response::appendChunk(std::string& data) {
+void http::Response::appendChunk(std::string &data) {
 	if (data.empty())
 		return;
 
@@ -64,7 +64,7 @@ void http::Response::appendChunk(std::string& data) {
 	_outBuffer += chunk.str();
 	data.erase(0, data.size());
 }
-bool http::Response::parseCgiHeaders(std::string& buffer) {
+bool http::Response::parseCgiHeaders(std::string &buffer) {
 
 	// Accept both CRLF and LF-only separators to be tolerant of CGI output.
 	size_t headerEnd = buffer.find("\r\n\r\n");
@@ -132,30 +132,33 @@ bool http::Response::parseCgiHeaders(std::string& buffer) {
 	}
 
 	buffer.erase(0, headerEnd + sepLen);
+	_parsedHeadersChunk = true;
 
 	return true;
 }
 
-void http::Response::appendCgiChunk(std::string& buffer, bool isFinished) {
+void http::Response::appendCgiChunk(std::string &buffer, bool isFinished) {
 	if (_chunkState == CHUNK_PARSE_HEADERS) {
-		if (!isFinished) {
-			if (!parseCgiHeaders(buffer))
-				return;
-		}
-		buildResponse(HTTP_OK, "");
+		if (!isFinished && !parseCgiHeaders(buffer))
+			return;
+
+		if (isFinished && !_parsedHeadersChunk)
+			buildResponse(HTTP_OK, "");
+
 		initChunked();
-		_outBuffer += buildResponseString(); // solo headers
+		_outBuffer += buildResponseString();
 		_chunkState = CHUNK_STREAM_BODY;
 	}
-	if (_chunkState == CHUNK_STREAM_BODY && !buffer.empty()) {
+	if (_chunkState == CHUNK_STREAM_BODY && !buffer.empty())
 		appendChunk(buffer);
-	}
+	if (isFinished)
+		finishCgiChunked();
 }
 bool http::Response::isChunked() const {
 	return _isChunked;
 }
 
-std::string& http::Response::getCgiOutBuffer() {
+std::string &http::Response::getCgiOutBuffer() {
 	return _outBuffer;
 }
 
@@ -209,20 +212,20 @@ std::string http::Response::buildResponseString(void) {
 	return responseString.str();
 }
 
-const std::map<std::string, std::string>& http::Response::getHeaders() const {
+const std::map<std::string, std::string> &http::Response::getHeaders() const {
 	return (_headers);
 }
 
 // Here function
 
-void http::Response::buildResponse(const HttpStatusCode& status, const std::string& body) {
+void http::Response::buildResponse(const HttpStatusCode &status, const std::string &body) {
 	_statusCode = status.code;
 	_statusMsg = status.message;
 	_body = body;
 
 	setDefaultHeaders();
 }
-static std::string createErrorBody(const HttpStatusCode& status) {
+static std::string createErrorBody(const HttpStatusCode &status) {
 	std::string html;
 
 	html += "<!DOCTYPE html>\n";
@@ -249,7 +252,7 @@ static std::string createErrorBody(const HttpStatusCode& status) {
 	return html;
 }
 
-void http::Response::buildErrorResponse(const HttpStatusCode& status, const ServerConfig& server) {
+void http::Response::buildErrorResponse(const HttpStatusCode &status, const ServerConfig &server) {
 	std::map<int, std::string>::const_iterator it;
 	it = server.errorPage.find(atoi(status.code.c_str()));
 	if (it != server.errorPage.end()) {
@@ -264,12 +267,12 @@ void http::Response::buildErrorResponse(const HttpStatusCode& status, const Serv
 	if (status.code.at(0) == '4' || status.code.at(0) == '5')
 		addToHeader("Connection", "close");
 }
-void http::Response::buildRedirect(const HttpStatusCode& status, const std::string& url) {
+void http::Response::buildRedirect(const HttpStatusCode &status, const std::string &url) {
 	buildResponse(status, "");
 	addToHeader("Location", url);
 }
 
-static bool parseRange(std::string& rangeValue, off_t& fileSize, off_t& start, off_t& end) {
+static bool parseRange(std::string &rangeValue, off_t &fileSize, off_t &start, off_t &end) {
 	std::string prefix = "bytes=";
 	if (rangeValue.compare(0, prefix.size(), prefix) != 0)
 		return (false);
@@ -307,7 +310,7 @@ static bool parseRange(std::string& rangeValue, off_t& fileSize, off_t& start, o
 	return (true);
 }
 
-void http::Response::buildRangeResponse(const std::string& filePath, const ServerConfig& server, struct ::stat& st) {
+void http::Response::buildRangeResponse(const std::string &filePath, const ServerConfig &server, struct ::stat &st) {
 	off_t start;
 	off_t end;
 
@@ -345,8 +348,8 @@ void http::Response::buildRangeResponse(const std::string& filePath, const Serve
 	addToHeader("Content-Type", getContentType(filePath));
 	addToHeader("Content-Length", ft_to_string(end - start + 1));
 }
-void http::Response::buildFileResponse(const HttpStatusCode& status, const std::string& filePath,
-                                       const ServerConfig& server) {
+void http::Response::buildFileResponse(const HttpStatusCode &status, const std::string &filePath,
+                                       const ServerConfig &server) {
 	struct ::stat st;
 	stat(filePath.c_str(), &st);
 	// 	return (buildErrorResponse(HTTP_NOT_FOUND, server));
@@ -362,7 +365,7 @@ void http::Response::buildFileResponse(const HttpStatusCode& status, const std::
 	addToHeader("Content-Type", getContentType(filePath));
 }
 
-std::string http::Response::readFileContent(const std::string& filePath) {
+std::string http::Response::readFileContent(const std::string &filePath) {
 	std::ifstream file(filePath.c_str());
 
 	std::ostringstream buffer;
@@ -371,7 +374,7 @@ std::string http::Response::readFileContent(const std::string& filePath) {
 	return buffer.str();
 }
 
-std::string http::Response::getContentType(const std::string& filePath) {
+std::string http::Response::getContentType(const std::string &filePath) {
 	size_t dot = filePath.find_last_of('.');
 	if (dot == std::string::npos)
 		return "application/octet-stream"; // generic Binary

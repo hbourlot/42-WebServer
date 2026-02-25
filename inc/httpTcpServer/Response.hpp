@@ -26,6 +26,7 @@ namespace http {
 		std::string _body;
 		std::map<std::string, std::string> _headers;
 		bool _isChunked;
+		bool _parsedHeadersChunk;
 		CgiChunkState _chunkState;
 		std::string _outBuffer;
 
