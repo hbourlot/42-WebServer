@@ -236,8 +236,6 @@ bool http::ClientEventProcessor::parseRequestData(Client& client, const ServerCo
 	if (clientRequest.getRequestPhase() == FINISHED) {
 
 		client.getResponse().initFromRequest(client.getRequest());
-		ensureSessionId(client);
-
 		clientRequest.resetChunkParser();
 		Logs::log(LOGS_INFO, "Client: " + ft_to_string(client.getFd()) + " Made a Request");
 		if (client.getState() != PARSE_ERROR) // ! Here for now because line 140

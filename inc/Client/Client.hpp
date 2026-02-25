@@ -106,3 +106,4 @@ class Client {
 };
 
 void ensureSessionId(Client &client);
+std::string getSessionIdFromCookies(const std::string& cookieHeader);

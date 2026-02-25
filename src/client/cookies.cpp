@@ -1,8 +1,6 @@
 #include "Client/ClientEventProcessor.hpp"
-#include <ctime>
-#include <iomanip>
 
-static std::string getSessionIdFromCookies(std::string cookieHeader) {
+std::string getSessionIdFromCookies(const std::string& cookieHeader) {
 	std::string sessionId;
 	size_t pos = cookieHeader.find("sessionId=");
 	if (pos == std::string::npos)
@@ -18,22 +16,7 @@ static std::string getSessionIdFromCookies(std::string cookieHeader) {
 	return (sessionId);
 }
 
-static std::string generateSessionId() {
-	static bool seeded = false;
-	if (!seeded) {
-		std::srand(std::time(0));
-		seeded = true;
-	}
-
-	unsigned int r = std::rand();
-
-	std::stringstream hex;
-	hex << std::hex << std::uppercase << std::setw(8) << std::setfill('0') << r;
-
-	return (hex.str());
-}
-
-void ensureSessionId(Client &client) {
+void ensureSessionId(Client& client) {
 
 	std::string cookieHeader;
 	if (client.getRequest().getHeaders().count("Cookie")) {
@@ -44,10 +27,7 @@ void ensureSessionId(Client &client) {
 	if (!cookieHeader.empty()) {
 		sessionId = getSessionIdFromCookies(cookieHeader);
 	}
-
-	if (sessionId.empty()) {
-		sessionId = generateSessionId();
-		client.getResponse().addToHeader("Set-Cookie", "sessionId=" + sessionId + "; Path=/; HttpOnly");
+	if (!sessionId.empty()) {
+		client.setSessionID(sessionId);
 	}
-	client.setSessionID(sessionId);
 }

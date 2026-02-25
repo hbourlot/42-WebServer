@@ -16,7 +16,10 @@
 .login-box p {
   color: #ccc;
   margin-bottom: 1.5rem;
+  
 }
+
+
 
 .login-box input[type="text"],
 .login-box input[type="password"] {
@@ -25,6 +28,16 @@
   margin: 1rem auto;
   padding: 0.5rem;
   font-size: 1rem;
+  color: #111;
+  background: #fff;
+  border: 1px solid #cfd4dc;
+  border-radius: 0.4rem;
+  caret-color: #111;
+}
+
+.login-box input[type="text"]::placeholder,
+.login-box input[type="password"]::placeholder {
+  color: #6b7280;
 }
 
 .login-box button {

@@ -51,28 +51,42 @@ void http::Router::launchCgi() {
 http::Router::Router(Client& client, ClientEventProcessor& processor)
     : _client(client), _request(client.getRequest()), _response(client.getResponse()),
       _serverConfig(client.getServer().getServerInfo()), _eventProcessor(processor) {
+
+	_protectedRoutes.insert("/upload-page");
 }
 
 void http::Router::process() {
-	// 1. Find the best matching location for the request URI
-	_request.setMatchLocation(getMatchLocation(_request.getUri(), _serverConfig.locations));
 
-	// 2. Check for redirects first
-	if (checkRedirects()) {
-		return; // A redirect response has been built
+	std::string uri = _client.getRequest().getUri();
+	Session& session = _eventProcessor._sessionManager.getSession(_client.getSessionID());
+	bool isAuthenticated = session.getSessionData("authenticated") == "true";
+
+	if (isProtectedRoute(uri) && !isAuthenticated) {
+		_client.getResponse().buildRedirect(HTTP_TEMP_REDIRECT, "http://localhost:8005/login"); // !
+		return;
 	}
 
-	// 3. Check if the request method is allowed
+	_request.setMatchLocation(getMatchLocation(_request.getUri(), _serverConfig.locations));
+
+	if (checkRedirects()) {
+		return;
+	}
 	if (!checkAllowedMethods()) {
 		_response.buildErrorResponse(HTTP_FORBID_METHOD, _serverConfig);
 		return;
 	}
 
-	// 4. Figure out the final file path (handling root, fullPath)
 	resolvePath();
-
-	// 5. Execute the request (serve static file or run CGI)
 	executeRequest();
+}
+
+bool http::Router::isProtectedRoute(const std::string& uri) const {
+	for (std::set<std::string>::const_iterator it = _protectedRoutes.begin(); it != _protectedRoutes.end(); ++it) {
+		const std::string& prefix = *it;
+		if (uri.rfind(prefix, 0) == 0)
+			return true;
+	}
+	return false;
 }
 
 bool http::Router::checkRedirects() {
@@ -149,7 +163,8 @@ void http::Router::resolvePath() {
 void http::Router::executeRequest() {
 
 	bool isCgi = false;
-	if (_request.getMatchLocation() && (!_request.getMatchLocation()->cgi_pass.empty() || _request.getMatchLocation()->isCgi()) &&
+	if (_request.getMatchLocation() &&
+	    (!_request.getMatchLocation()->cgi_pass.empty() || _request.getMatchLocation()->isCgi()) &&
 	    (_request.getMethod() == "GET" || _request.getMethod() == "POST")) {
 
 		isCgi = isCgirequest(_request, *_request.getMatchLocation());

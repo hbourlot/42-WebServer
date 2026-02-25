@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Session Check</title>
+		<meta charset="UTF-8" />
+		<link
+			rel="stylesheet"
+			href="/css/global.css"
+		/>
+		<link
+			rel="stylesheet"
+			href="/components/Footer/styles.module.css"
+		/>
+		<link
+			rel="stylesheet"
+			href="/components/Navbar/styles.module.css"
+		/>
+		<link
+			rel="icon"
+			href="/assets/wolfMoonIco.png"
+			type="image/x-icon"
+		/>
+		<script src="/js/layout.js"></script>
+		<style>
+			main {
+				width: min(760px, 92%);
+				margin: 2rem auto 3rem;
+			}
+
+			.card {
+				background: rgba(15, 13, 34, 0.5);
+				border: 1px solid rgba(207, 193, 255, 0.2);
+				border-radius: 14px;
+				backdrop-filter: blur(6px);
+				padding: 1.5rem;
+			}
+
+			h1 {
+				margin-bottom: 0.6rem;
+			}
+
+			p {
+				opacity: 0.92;
+			}
+
+			#status {
+				margin-top: 1rem;
+				font-weight: 600;
+			}
+
+			.ok {
+				color: #a7f3d0;
+			}
+
+			.err {
+				color: #fecaca;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header id="navbar"></header>
+
+		<main>
+			<section class="card">
+				<h1>Session Check</h1>
+				<p>
+					This page checks on the server if a
+					<strong>sessionId</strong> cookie is present.
+				</p>
+				<p id="status">Checking session...</p>
+			</section>
+		</main>
+
+		<footer id="footer"></footer>
+
+		<script>
+			async function checkSession() {
+				const statusEl = document.getElementById("status");
+
+				try {
+					const response = await fetch("/cgi-bin/check_session.py", {
+						method: "GET",
+						credentials: "same-origin",
+					});
+
+					if (!response.ok) {
+						throw new Error("Request failed");
+					}
+
+					const data = await response.json();
+
+					if (data.hasSession) {
+						statusEl.textContent =
+							"✅ sessionId found. You are recognized.";
+						statusEl.className = "ok";
+					} else {
+						statusEl.textContent =
+							"❌ No sessionId found. Please log in first.";
+						statusEl.className = "err";
+					}
+				} catch (error) {
+					statusEl.textContent =
+						"⚠️ Could not check session right now.";
+					statusEl.className = "err";
+				}
+			}
+
+			checkSession();
+		</script>
+	</body>
+</html>

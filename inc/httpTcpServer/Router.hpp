@@ -2,7 +2,7 @@
 #include "Client/Client.hpp"
 #include "Client/ClientEventProcessor.hpp"
 #include "Config/Configs.hpp"
-
+#include "httpTcpServer/HttpStatus.hpp"
 namespace http {
 
 	class ClientEventProcessor;
@@ -16,7 +16,9 @@ namespace http {
 		Response& _response;
 		ServerConfig& _serverConfig;
 		ClientEventProcessor& _eventProcessor;
+		std::set<std::string> _protectedRoutes;
 
+		bool isProtectedRoute(const std::string& uri) const;
 		bool checkRedirects();
 		bool checkAllowedMethods();
 		void resolvePath();
