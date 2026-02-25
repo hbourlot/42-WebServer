@@ -272,10 +272,10 @@ void ReadConfig::setDefaultServer(ServerConfig &server) {
 	if (server.max_buffer_size == 0) {
 		std::cout << "Setting max buffer size to 1MB ✅" << std::endl;
 		server.max_buffer_size = 1024 * 1024;
-		for (int i = 0; i < server.directories.size(); ++i) {
+		for (size_t i = 0; i < server.directories.size(); ++i) {
 			server.directories[i].max_buffer_size = server.directories[i].max_buffer_size == 0 ? server.max_buffer_size : server.directories[i].max_buffer_size;
 		}
-		for (int i = 0; i < server.files.size(); ++i) {
+		for (size_t i = 0; i < server.files.size(); ++i) {
 			server.files[i].max_buffer_size = server.files[i].max_buffer_size == 0 ? server.max_buffer_size : server.files[i].max_buffer_size;
 		}
 	}

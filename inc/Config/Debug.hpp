@@ -47,7 +47,7 @@ void debugDirectory( const Directory &loc ) {
 }
 
 void printDirectories( std::vector< Directory > vec ) {
-	for ( int i = 0; i < vec.size(); ++i ) {
+	for ( size_t i = 0; i < vec.size(); ++i ) {
 		std::cout << "+++++ START +++++\n\n";
 		debugDirectory( vec[i] );
 		std::cout << "\n+++++ END +++++\n\n";
@@ -75,7 +75,7 @@ void debugFile( const File &file ) {
 }
 
 void printFiles( std::vector< File > vec ) {
-	for ( int i = 0; i < vec.size(); ++i ) {
+	for ( size_t i = 0; i < vec.size(); ++i ) {
 		std::cout << "+++++ START +++++\n\n";
 		debugFile( vec[i] );
 		std::cout << "\n+++++ END +++++\n\n";

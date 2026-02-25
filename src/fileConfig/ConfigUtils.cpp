@@ -77,7 +77,7 @@ bool stringIsAlpha(const std::string& str){
 	if (str.empty() )
 		return true;
 
-	for (int i = 0; str.size() > i; i++)
+	for (size_t i = 0; str.size() > i; i++)
 	{
 		if (std::isalpha(str[i]) == false)
 			return false;

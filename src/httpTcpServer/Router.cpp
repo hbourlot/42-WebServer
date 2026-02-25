@@ -182,16 +182,6 @@ void http::Router::executeRequest() {
 	}
 }
 
-static bool validateRequestMethod(const http::Request& request, const std::vector<std::string>& methods) {
-	if (request.getMethod() != "GET" && request.getMethod() != "POST" && request.getMethod() != "DELETE")
-		return false;
-
-	for (size_t i = 0; i < methods.size(); ++i) {
-		if (request.getMethod() == methods[i])
-			return true;
-	}
-	return false;
-}
 
 bool http::Router::routeCgiRequest() {
 

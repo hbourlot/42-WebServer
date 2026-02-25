@@ -50,7 +50,7 @@ void http::ClientEventProcessor::acceptConnections() {
 	struct pollfd client_pollfd;
 	struct sockaddr_in socketAddress;
 
-	for (int i = 0; i < _serverSocketSize; ++i) {
+	for (size_t i = 0; i < _serverSocketSize; ++i) {
 		while (_allSockets[i].revents & POLLIN) {
 			unsigned int socketAddress_len = sizeof(sockaddr_in);
 			fd = accept(_allSockets[i].fd, (struct sockaddr *)&socketAddress, &socketAddress_len);
@@ -384,8 +384,6 @@ bool http::ClientEventProcessor::processRequest(Client &client) {
 	// client.setSessionId(session.getSessionId());
 
 	IN_OUT_STATE state = client.getState();
-
-	ServerConfig &serverInfo = client.getServer()._serverInfo;
 
 	// Handle error states first (build error responses)
 	if (state != PARSE_OK) {

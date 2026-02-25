@@ -7,8 +7,8 @@
 #include <utility>
 
 http::Response::Response()
-    : _protocol("HTTP/1.1"), _isChunked(false), _chunkState(CHUNK_PARSE_HEADERS), _statusCode(""), _statusMsg(""),
-      _range("", ""), _parsedHeadersChunk(false) {
+    : _protocol("HTTP/1.1"), _range("", ""), _statusCode(""), _statusMsg(""), _isChunked(false),
+      _parsedHeadersChunk(false), _chunkState(CHUNK_PARSE_HEADERS) {
 }
 
 void http::Response::cleanup() {
