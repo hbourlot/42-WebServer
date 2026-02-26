@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by hbourlot, jorge, miafonso.*
+*This project has been created as part of the 42 curriculum by hbourlot, joralves, miafonso.*
 
 # Webserv
 
@@ -191,7 +191,7 @@ No code was copied directly from AI tools
 ## Authors
 
 * hbourlot
-* jorge
+* joralves
 * miafonso
 
 ---
