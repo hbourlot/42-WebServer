@@ -1,5 +1,22 @@
-footer {
-	padding-top: 1rem;
+.footer_shell {
+	width: min(1200px, 100%);
+	margin: 3rem auto 0 auto;
+	padding: 2rem 0;
 	display: flex;
 	justify-content: center;
+	border-top: 1px solid rgba(206, 190, 255, 0.18);
+	background: linear-gradient(90deg, rgba(128,90,213,0.08) 0%, rgba(0,190,255,0.08) 100%);
+	box-shadow: 0 2px 16px 0 rgba(128,90,213,0.07);
+	border-radius: 12px 12px 0 0;
+}
+
+.footer_content {
+	font-size: 1.0rem;
+	color: #bbb;
+	letter-spacing: 0.02em;
+	transition: color 0.2s;
+}
+
+.footer_content:hover {
+	color: #fff;
 }
