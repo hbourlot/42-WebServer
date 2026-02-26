@@ -39,6 +39,8 @@ void printHttpHeaders(const std::map<std::string, std::string>& headers);
 void printLocation(const Directory& location);
 bool checkSplitString(const std::string& line, const std::string& sep, bool& isServerOpen);
 
+void PrintConfigs(Configs &configs);
+
 std::string getFilePath(const http::Request& req, const ServerConfig& server);
 const Directory* getMatchDirectory(const std::string& path, const std::vector<Directory>& locations);
 const Location* getMatchLocation(const std::string& path, const std::vector<Location>& locations);

@@ -70,7 +70,8 @@ int main(int ac, char **av) {
 
 		if (ReadConfig::setConfigs(av[1], configuration) == false)
 			throw std::invalid_argument("Failed to set the configs");
-
+		
+		PrintConfigs(configuration);
 	} catch (const std::exception &exception) {
 		std::cout << "Failed to initialize servers: " << exception.what() << std::endl;
 		return (-1);
