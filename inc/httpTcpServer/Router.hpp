@@ -18,7 +18,7 @@ namespace http {
 		ClientEventProcessor& _eventProcessor;
 		std::set<std::string> _protectedRoutes;
 
-		bool isProtectedRoute(const std::string& uri) const;
+		bool isProtectedRoute(const std::string& uri);
 		bool checkRedirects();
 		bool checkAllowedMethods();
 		void resolvePath();
@@ -29,9 +29,10 @@ namespace http {
 
 		void process();
 
-		
+
 		private:
-		bool routeCgiRequest(); // ! to remove?
+
+		bool handleRouteProtected();
 		void launchCgi();
 		void handleGet();
 		void handlePost();

@@ -33,8 +33,6 @@ namespace http {
 
 	TcpServer::~TcpServer() {
 		close(_serverSocket);
-		// close(_acceptSocket);
-		// exit(1); //TODO Exit with a failure code??
 	}
 
 	std::vector<pollfd>& TcpServer::getVectorPollFds() {
@@ -110,21 +108,24 @@ namespace http {
 		_serverPOLLFD.events = POLLIN; // any readable data available
 		_serverPOLLFD.revents = 0;
 
-		// runLoop( timeOut );
-		// shutDownServer();
 		return 0;
+	}
+
+	ServerConfig& TcpServer::getServerInfo() {
+		return _serverInfo;
 	}
 
 	std::map<SocketFD, sockaddr_in>& TcpServer::getSocketAddressRef() {
 		return _socketAddressMap;
 	}
 
+	pollfd& TcpServer::getServerPOLLFD() {
+		return _serverPOLLFD;
+	}
+
 	void TcpServer::setSocketAddress(SocketFD fd, sockaddr_in socketAddress) {
 		_socketAddressMap[fd] = socketAddress;
 	}
 
-	pollfd& TcpServer::getServerPOLLFD() {
-		return _serverPOLLFD;
-	}
 
 } // namespace http

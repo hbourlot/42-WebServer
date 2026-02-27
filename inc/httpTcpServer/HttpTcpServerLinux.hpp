@@ -69,11 +69,7 @@ namespace http {
 
 		std::vector<pollfd> _fds;
 
-		ServerConfig& getServerInfo() {
-
-			return _serverInfo;
-		}
-
+		ServerConfig& getServerInfo();
 		std::map<SocketFD, sockaddr_in>& getSocketAddressRef();
 		void setSocketAddress(SocketFD fd, sockaddr_in socketAddress);
 		pollfd& getServerPOLLFD();

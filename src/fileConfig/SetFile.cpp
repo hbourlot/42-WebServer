@@ -44,6 +44,10 @@ int getTypeFile( std::string &trimmedLine ) { // Function to check the informati
 		return COMMENT;
 	if ( trimmedLine == "{" || trimmedLine == "}" || trimmedLine.size() == 1)
 		return EMPTY;
+	if (trimmedLine == "client_max_body_size")
+		return CLIENT_MAX_BDY;
+	if (trimmedLine == "client_body_buffer_size")
+		return BODY_BUFFER;
 	return 100;
 }
 
@@ -101,6 +105,21 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 			if (stat(file.cgi_pass.c_str(), &buffer) != 0)
 				return false;
 			break;
+		case CLIENT_MAX_BDY:
+			file.max_body_size = getMaxRequestBody(noSpaceLine);
+			if (file.max_body_size == -1) {
+				std::cerr << "Invalid suffix of max body size" << std::endl;
+				return false;
+			}
+			break;
+
+		case BODY_BUFFER:
+			file.max_buffer_size = getMaxRequestBody(noSpaceLine);
+			if (file.max_body_size == -1) {
+				std::cerr << "Invalid suffix of max body size" << std::endl;
+				return false;
+			}
+			break;
 		case COMMENT:
 		case EMPTY:
 				break;
@@ -115,17 +134,31 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 		return false;
 	}
 
-	setDefaultFile(file);
+	setDefaultFile(file, server);
 	server.files.push_back( file );
 	return true;
 }
 
-void SetFile::setDefaultFile( File &file ) {
+void SetFile::setDefaultFile( File &file, ServerConfig &server) {
 	if ( file.extension.empty() )
 		throw std::invalid_argument( "Error: Missing path in one or more locations ❌\n" );
 
 	if ( file.methods.empty() ) {
 		std::cout << "No methods, so we will set the GET method ✅" << std::endl;
 		file.methods.push_back( "GET" );
+	}
+
+	if (file.max_body_size == 0) {
+		if (server.max_body_size != 0)
+			file.max_body_size = server.max_body_size;
+		else
+			file.max_body_size = 1024;
+	}
+
+	if (file.max_buffer_size == 0) {
+		if (server.max_buffer_size != 0)
+			file.max_buffer_size = server.max_buffer_size;
+		else
+			file.max_buffer_size = 1024 * 1024;
 	}
 }

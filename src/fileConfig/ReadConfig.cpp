@@ -7,6 +7,7 @@
 ServerConfig::ServerConfig() {
 	port = 0;
 	max_body_size = 0;
+	auth_login_page = "/login";
 }
 
 Directory *ServerConfig::GetLocationByPath(std::string path) {
@@ -77,7 +78,9 @@ int getTypeServer(std::string &trimmedLine) { // Return the type of information 
 		return EMPTY;
 	else if (trimmedLine == "server")
 		return SERVER;
-	
+	else if (trimmedLine == "auth_login_page")
+		return AUTH_LOGIN;
+
 	return 100;
 }
 
@@ -110,11 +113,8 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			break;
 		}
 
-
 		if (!CheckConf::checkLineFinished(noSpaceLine))
 			throw std::invalid_argument("Error: Extra words after End of Line\n");
-
-
 
 		// Check if we are going to location configs "location /upload"
 		// This serves to check if we have stuff like " } location /upload {"
@@ -201,7 +201,10 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 					return false;
 				detectedServer = true;
 				break;
-			
+			case AUTH_LOGIN:
+				server.auth_login_page = getInfo(noSpaceLine);
+				break;
+
 			case COMMENT:
 			case EMPTY:
 				break;
@@ -224,6 +227,15 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 	return (true);
 }
 
+void removeComment(std::string &line)
+{
+	size_t position = line.find('#');
+	if (position != std::string::npos)
+		line = line.substr(0, position);
+	return;
+	
+}
+
 bool ReadConfig::setConfigs(char *conf, Configs &configs) {
 	bool inServer = false;
 	std::ifstream confFd;
@@ -232,15 +244,17 @@ bool ReadConfig::setConfigs(char *conf, Configs &configs) {
 	try {
 		while (std::getline(confFd, line)) {
 			std::string verify = removeSpace(line);
-			if (line.empty() == false &&
-			    containBrackets(line, inServer, "server") == true) { // Removes the spaces before the name and return the value to check if it is a server
+			removeComment(verify);
+			std::cout << "VErify size " << verify.size() << std::endl;
+			if (verify.empty() == false &&
+			    containBrackets(verify, inServer, "server") == true) { // Removes the spaces before the name and return the value to check if it is a server
 				if (ReadConfig::setServerConfig(confFd, line, configs) ==
 				    false) // Will check if everything is OK when we get the server config info
 				{
 					return (false);
 				}
 			}
-			else if (verify[0] == '#' || verify.size() == 1 )
+			else if (verify.empty() == true || verify.size() == 1) // Check if it has a \n
 				continue;
 			else{
 				std::cerr << "Invalid information in conf file" << std::endl;
@@ -331,6 +345,9 @@ static void copyDirectoryIntoLocation(Directory &dir, Location &loc) {
 	// Limits
 	loc.max_body_size = dir.max_body_size;
 	loc.max_buffer_size = dir.max_buffer_size;
+
+	loc.auth_login_page = dir.auth_login_page;
+	loc.auth = dir.auth;
 
 	loc.type |= LOCATION_DIR;
 	if (!loc.cgi_extension.empty() || !loc.cgi_pass.empty())

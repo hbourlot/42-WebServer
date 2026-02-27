@@ -34,6 +34,8 @@
 #define SERVER 21
 #define COMMENT 22
 #define EMPTY 23
+#define AUTH_LOGIN 24
+#define AUTH 25
 
 struct File {
 	File();
@@ -42,6 +44,7 @@ struct File {
 	std::string root;
 	std::string index;
 	std::string cgi_pass;
+	size_t max_body_size;
 	size_t max_buffer_size;    // Buffer size to write on temp files
 	std::vector< File* > next; // ! Still or not gonna use at all ??
 };
@@ -63,6 +66,8 @@ struct Directory {
 	bool uploadEnable;
 	std::string uploadStore;
 	bool autoIndex;
+	bool auth;
+	std::string auth_login_page;
 	std::vector< Directory* > next; // ! Still or not gonna use at all ??
 };
 
@@ -79,7 +84,7 @@ struct Location {
 	Location()
 	    : type( 0 ), extension( "" ), path( "" ), methods(), root( "" ), index( "" ), autoIndex( false ),
 	      redirection( "" ), cgi_pass( "" ), cgi_extension(), cgi_path(), cgi(), uploadEnable( false ),
-	      uploadStore( "" ), max_body_size( 0 ), max_buffer_size( 0 ) {
+	      uploadStore( "" ), max_body_size( 0 ), max_buffer_size( 0 ), auth_login_page( "/login" ), auth ( false ) {
 		// SafetyInitialization
 	}
 
@@ -111,6 +116,10 @@ struct Location {
 	// Limits
 	size_t max_body_size;
 	size_t max_buffer_size;
+
+	// Session manager
+	bool auth;
+	std::string auth_login_page;
 
 	// Helper methods
 	bool isDir() const {
@@ -144,6 +153,7 @@ struct ServerConfig {
 	std::vector< Directory > directories;   // Stores the routes of the HTML pages
 	std::vector< File > files;              // Stores the specific files
 	std::vector< Location > locations;
+	std::string auth_login_page;
 	File* GetFileByExtension( std::string extension ); // Get the file by extension ".bat" (For example)
 	Directory* GetLocationByPath( std::string path );  // Get the "location '/"path"' "
 	size_t alive_timeout;					// Stores the time for max time for a request
