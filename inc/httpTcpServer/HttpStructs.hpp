@@ -11,35 +11,16 @@
 /* ************************************************************************** */
 
 #pragma once
-#include "httpTcpServer/HttpStatus.hpp"
-#include "httpTcpServer/Request.hpp"
-#include "httpTcpServer/Response.hpp"
-#include <map>
-#include <set>
-#include <string>
-#include <unistd.h>
-#include <vector>
 
-typedef int SocketFD;
 
-struct Directory;
 
-struct MatchResult;
+// #include "../Client/ClientEventProcessor.hpp"
+// namespace http {
 
-// Only interface propose
-enum headerKey {
-	Accept,
-	AcceptEncoding,
-	AcceptLanguage,
-	Connection,
-	ContentType,
-	Cookie,
-	Host,
-	Priority,
-	SecFetchDest,
-	SecFetchMode,
-	SecFetchSite,
-	UpgradeInsecureRequests,
-	UserAgent,
-};
-
+// 	class ClientEventProcessor;
+// 	ClientEventProcessor* getProcessor() {
+// 		static ClientEventProcessor processor;
+	
+// 		return &processor;
+// 	}
+// }

@@ -23,11 +23,7 @@ std::vector<TcpServer *> initialize_all_servers(const Configs &configuration) {
 	std::vector<TcpServer *> servers;
 
 	for (size_t i = 0; i < configuration.servers.size(); ++i) {
-		// std::cout << "------------------ SERVER " << i << "\n";
 		TcpServer *serv = new TcpServer(configuration.servers[i]);
-		// std::cout << "keep -> " << configuration.servers[i].alive_timeout << std::endl;
-		// printFiles(configuration.servers[i].files);
-		// printDirectories(configuration.servers[i].directories);
 		serv->startServer();
 		servers.push_back(serv);
 	}
@@ -45,9 +41,13 @@ std::vector<pollfd> get_all_listening_sockets_from(const std::vector<TcpServer *
 	return allSocketsFD;
 };
 
-void free_servers_memory(const std::vector<TcpServer *> &servers) {
+void free_servers_memory(std::vector<TcpServer *> &servers) {
 	for (size_t i = 0; i < servers.size(); ++i) {
-		delete servers.at(i);
+		if (servers[i]) {
+			delete servers[i];
+			servers[i] = NULL;
+
+		}
 	}
 }
 
@@ -83,7 +83,7 @@ int main(int ac, char **av) {
 
 	handleEvents.run();
 
-	free_servers_memory(servers);
+	// free_servers_memory(servers);
 
 	return 0;
 }

@@ -10,6 +10,19 @@ ClientManager::~ClientManager() {
 	_clients.clear();
 }
 
+void ClientManager::removeAllClients() {
+	// Iterate through all clients and delete them
+	for (std::map<int, Client*>::iterator it = _clients.begin(); 
+		 it != _clients.end(); ++it) {
+		if (it->second) {
+			delete it->second;  // Free each Client object
+			it->second = NULL;
+		}
+	}
+	_clients.clear();  // Clear the map
+	std::cout << "ClientManager: Removed all clients (" << _clients.size() << ")" << std::endl;
+}
+
 void ClientManager::addClient(int fd, http::TcpServer &server) {
 	if (_clients.find(fd) != _clients.end()) {
 		std::cerr << "Client with FD " << fd << " already exists." << std::endl;

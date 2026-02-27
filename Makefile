@@ -41,8 +41,8 @@ UPL_FUNC		= UploadManager parseMultipart
 SESSION_FUNC	= Session SessionManager
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CGI_DIR), $(CGI_FUNC:=.cpp)) \
+					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(HTTP_DIR), $(HTTP_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UPL_DIR), $(UPL_FUNC:=.cpp)) \
@@ -58,6 +58,7 @@ NAME            = webserv
 TOTAL_FILES     = $(shell echo $$(($(words $(OBJS_SRC)))))
 # VALGRIND        = valgrind --tool=massif
 VALGRIND        = valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
+# VALGRIND		= valgrind --leak-check=full --track-origins=yes
 # MSG             = "[ $(COMPILED_FILES)/$(TOTAL_FILES) $$(($(COMPILED_FILES) * 100 / $(TOTAL_FILES)))%% ] $(ORANGE)Compiling [$1]... $(RESET)"
 MSG 			= "$(CYAN) => ($(COMPILED_FILES)/$(TOTAL_FILES) $(PERCENT)%%) 🔧 Compiling [$1]...$(RESET)"
 

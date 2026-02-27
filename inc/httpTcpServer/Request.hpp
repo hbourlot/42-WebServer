@@ -1,6 +1,8 @@
 #pragma once
 #include "Config/Configs.hpp"
+#include "Logs/Logs.hpp"
 #include "utils.hpp"
+#include <fcntl.h>
 #include <unistd.h>
 
 enum REQUEST_PHASE { START, HEADER, BODY, FINISHED };

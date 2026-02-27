@@ -1,13 +1,17 @@
 #include "Client/ClientEventProcessor.hpp"
 #include "httpTcpServer/Cgi.hpp"
 
-http::ClientEventProcessor::ClientEventProcessor(std::vector<pollfd> &allFds, std::vector<TcpServer *> servers)
+
+
+http::ClientEventProcessor::ClientEventProcessor(std::vector<pollfd>& allFds, std::vector<TcpServer *>& servers)
     : _allSockets(allFds), _servers(servers) {
 
 	_serverSocketSize = _allSockets.size();
 };
 
-http::ClientEventProcessor::~ClientEventProcessor(){};
+http::ClientEventProcessor::~ClientEventProcessor(){
+	shutDownProcessor();
+};
 
 void http::ClientEventProcessor::run() {
 
@@ -164,35 +168,96 @@ void http::ClientEventProcessor::closeClientConnection(size_t index) {
 	close(fd);
 }
 
-static void cleanupAllCgis(std::map<SocketFD, http::Cgi *> &cgis) {
 
-	for (std::map<int, http::Cgi *>::iterator it = cgis.begin(); it != cgis.end(); ++it) {
-		it->second->killProcess();
-		delete it->second; // Cgi destructor closes pipes
-	}
-	cgis.clear();
-	Logs::log(LOGS_INFO, "Cleaned up all CGI processes");
-}
 
 void http::ClientEventProcessor::shutDownProcessor() {
-	Logs::log(LOGS_INFO, "===== Starting to shut down the Server =====");
+    Logs::log(LOGS_INFO, "===== Starting to shut down the Server =====");
 
-	// Close all CGI pipes before shutting down
-	cleanupAllCgis(_cgi_by_fd);
+    // 1. Clean up CGIs
+    for (std::vector<Cgi*>::iterator it = _allCgi.begin(); it != _allCgi.end(); ++it) {
+        Cgi* cgi = *it;
+        if (cgi) {
+            if (cgi->getPid() > 0) {
+                kill(cgi->getPid(), SIGKILL);
+                int status;
+                waitpid(cgi->getPid(), &status, 0);
+            }
+            if (cgi->getOutputPipeFd() != -1)
+                close(cgi->getOutputPipeFd());
+            delete cgi;
+        }
+    }
+    _allCgi.clear();
+    _cgi_by_fd.clear();
 
-	for (size_t i = 0; i < _allSockets.size(); ++i) {
-		std::string msg = "Removing from poll vector at idx '" + ft_to_string(i);
-		msg += "' fd='";
-		msg += ft_to_string(_allSockets[i].fd);
-		msg += "'";
-		Logs::log(LOGS_INFO, msg);
+    // 2. Clean up sockets - FIXED VERSION
+    for (std::vector<pollfd>::iterator it = _allSockets.begin(); it != _allSockets.end(); ) {
+        std::string msg = "Removing fd='" + ft_to_string(it->fd) + "'";
+        Logs::log(LOGS_INFO, msg);
 
-		if (_allSockets[i].fd != -1)
-			close(_allSockets[i].fd);
-		_allSockets.erase(_allSockets.begin() + i);
-		--i;
-	}
-	Logs::log(LOGS_INFO, "===== END =====");
+        if (it->fd != -1)
+            close(it->fd);
+        it = _allSockets.erase(it);  // ✅ Iterator stays valid
+    }
+
+	_clientManager.removeAllClients();
+
+    // 4. Clean up servers
+    for (size_t i = 0; i < _servers.size(); ++i) {
+        if (_servers[i]) {
+            delete _servers[i];
+            _servers[i] = NULL;
+        }
+    }
+    _servers.clear();  // ✅ Clear the vector too
+    Logs::log(LOGS_INFO, "===== END =====");
+}
+
+void http::ClientEventProcessor::shutDownProcessorCgi() {
+    Logs::log(LOGS_INFO, "===== Starting to shut down the Server =====");
+
+    // 1. Clean up CGIs
+    for (std::vector<Cgi*>::iterator it = _allCgi.begin(); it != _allCgi.end(); ++it) {
+        Cgi* cgi = *it;
+        if (cgi) {
+            if (cgi->getPid() > 0) {
+                kill(cgi->getPid(), SIGKILL);
+                int status;
+                waitpid(cgi->getPid(), &status, 0);
+            }
+            if (cgi->getOutputPipeFd() != -1)
+                close(cgi->getOutputPipeFd());
+            delete cgi;
+        }
+    }
+    _allCgi.clear();
+    _cgi_by_fd.clear();
+
+    // 2. Clean up sockets - FIXED VERSION
+    for (std::vector<pollfd>::iterator it = _allSockets.begin(); it != _allSockets.end(); ) {
+        std::string msg = "Removing fd='" + ft_to_string(it->fd) + "'";
+        Logs::log(LOGS_INFO, msg);
+
+        if (it->fd != -1)
+            close(it->fd);
+        it = _allSockets.erase(it);  // ✅ Iterator stays valid
+    }
+	_allCgi.~vector();
+	_cgi_by_fd.~map();
+	_allSockets.~vector();
+	_sessionManager.~SessionManager();
+	// _clientManager.removeAllClients();
+
+    // 4. Clean up servers
+    for (size_t i = 0; i < _servers.size(); ++i) {
+        if (_servers[i]) {
+            delete _servers[i];
+            _servers[i] = NULL;
+        }
+    }
+    _servers.clear();  // ✅ Clear the vector too
+	_servers.~vector();
+    Logs::log(LOGS_INFO, "===== END =====");
 }
 
 void http::ClientEventProcessor::setSession(Client *client) {

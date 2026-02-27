@@ -1,6 +1,7 @@
 #pragma once
 #include "Logs/Logs.hpp"
 #include "httpTcpServer/HttpStatus.hpp"
+#include "httpTcpServer/Request.hpp"
 #include <map>
 #include <set>
 #include <sstream>

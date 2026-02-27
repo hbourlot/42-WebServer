@@ -10,13 +10,13 @@
 #include <sys/poll.h>
 #include <vector>
 
-http::Cgi::Cgi(const http::Request &request, const ServerConfig &serverInfo, Client *client)
+http::Cgi::Cgi(const http::Request &request, const ServerConfig &serverInfo, Client *client, ClientEventProcessor& event_Processor)
     : _pid(-1), _status(0), _stdinFd(-1), _request(request), _serverInfo(serverInfo),
       _clientAddress(client && client->getServer().getSocketAddressRef().count(client->getFd())
                          ? client->getServer().getSocketAddressRef()[client->getFd()]
                          : sockaddr_in()),
       _client(client), _envp(), _envStrings(), _state(RESET), _hasFinished(false) {
-
+	eventProcessor = &event_Processor;
 	_filePath.clear();
 	if (request.getMatchLocation() && !request.getMatchLocation()->cgi_pass.empty()) {
 		_filePath = request.getMatchLocation()->cgi_pass;
@@ -38,6 +38,7 @@ http::Cgi::~Cgi() {
 	if (_outputPipe[1] >= 0)
 		close(_outputPipe[1]);
 
+		
 	remove(_bodyFileName.c_str());
 }
 
@@ -186,7 +187,9 @@ bool http::Cgi::executeCgi() {
 
 		execve(this->getFilePath().c_str(), argv.data(), this->_envp.data());
 		Logs::log(LOGS_ERROR, "CGI execution failed for script '" + this->getFilePath() + "': " + strerror(errno));
-		_exit(1);
+		// eventProcessor->~ClientEventProcessor();
+		// _exit(1);
+		kill(_pid, SIGINT);
 	} else {
 		if (_stdinFd >= 0) {
 			close(_stdinFd);

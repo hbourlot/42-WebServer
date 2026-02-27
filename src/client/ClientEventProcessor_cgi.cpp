@@ -42,6 +42,13 @@ void http::ClientEventProcessor::cleanupCgi(http::Cgi* cgi) {
 		}
 	}
 
+	for (size_t i = 0; i< _allCgi.size(); ++i) {
+		if (cgi == _allCgi[i]) {
+			_allCgi.erase(_allCgi.begin() + i);
+		}
+
+	}
+
 	// Remove from map
 	_cgi_by_fd.erase(outputFd);
 

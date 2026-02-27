@@ -36,6 +36,10 @@
 #define nullptr NULL
 #endif
 
+#ifndef SocketFD
+#define SocketFD int
+#endif
+
 // No flag for recv function
 #ifndef MSG_NOFLAGS
 #define MSG_NOFLAGS 0

@@ -1,7 +1,6 @@
 #pragma once
 #include "Client/Client.hpp"
 #include "Config/Configs.hpp"
-#include "HttpStructs.hpp"
 #include <cstring>
 #include <fcntl.h>
 #include <ios>
@@ -14,12 +13,12 @@
 #include <vector>
 
 class Client;
-
 namespace http {
+	class ClientEventProcessor;
 	class Cgi {
 
 	  public:
-		Cgi(const http::Request& request, const ServerConfig& serverInfo, Client* client);
+		Cgi(const http::Request& request, const ServerConfig& serverInfo, Client* client , ClientEventProcessor& event_Processor);
 
 		~Cgi();
 
@@ -38,6 +37,7 @@ namespace http {
 		void dumpEnvp() const;
 
 		bool hasFinished();
+		ClientEventProcessor* eventProcessor;
 
 	  private:
 		pid_t _pid;

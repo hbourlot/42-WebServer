@@ -1,4 +1,5 @@
 #include "Configs.hpp"
+#include <sys/stat.h>
 
 struct Configs;
 struct ServerConfig;

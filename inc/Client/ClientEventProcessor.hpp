@@ -1,14 +1,15 @@
 #pragma once
 
-#include "Session/SessionManager.hpp"
-#include "httpTcpServer/Cgi.hpp"
-#include "httpTcpServer/HttpTcpServerLinux.hpp"
-#include "utils.hpp"
+#include "../core.hpp"
+
 #include <iostream>
 #include <poll.h>
 #include <sys/poll.h>
 #include <vector>
 
+#ifndef SocketFD
+#define SocketFD int
+#endif
 namespace http {
 
 	class ClientEventProcessor {
@@ -20,7 +21,8 @@ namespace http {
 			explicit ClientEventProcessorException(const std::string &msg) : std::runtime_error(msg){};
 		};
 
-		ClientEventProcessor(std::vector<pollfd> &allServerFds, std::vector<TcpServer *> servers);
+
+		ClientEventProcessor(std::vector<pollfd>& allServerFds, std::vector<TcpServer *>& servers);
 
 		~ClientEventProcessor();
 
@@ -31,6 +33,8 @@ namespace http {
 		bool removeDeadConnections(size_t &index);
 
 		void shutDownProcessor();
+		
+		void shutDownProcessorCgi();
 
 		void processRead(pollfd &pfd, Client *client, Cgi *cgi);
 
@@ -45,13 +49,14 @@ namespace http {
 		bool hasCgiSuccessfullyFinished(Cgi *cgi) const;
 
 	  private:
-		std::vector<pollfd> &_allSockets;
+		std::vector<pollfd>& _allSockets;
 		std::vector<struct sockaddr_in> _socketAddress;
 		size_t _serverSocketSize;
-		std::vector<TcpServer *> _servers;
+		std::vector<TcpServer *>& _servers;
 		ClientManager _clientManager;
 		SessionManager _sessionManager;
 		std::map<SocketFD, Cgi *> _cgi_by_fd;
+		std::vector<Cgi*> _allCgi;
 
 		size_t _clientIndex;
 

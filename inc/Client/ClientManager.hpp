@@ -12,6 +12,7 @@ class ClientManager {
 	~ClientManager();
 
 	void addClient( int fd, http::TcpServer &server );
+	void removeAllClients();
 	void removeClient( int fd );
 	Client *getClient( int fd );
 	bool hasClient( int fd ) const;

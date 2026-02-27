@@ -1,6 +1,7 @@
 #pragma once
 
-#include "httpTcpServer/HttpStructs.hpp"
+#include "httpTcpServer/Request.hpp"
+#include "httpTcpServer/Response.hpp"
 
 #include <string>
 namespace http {
@@ -27,7 +28,7 @@ enum IN_OUT_STATE {
 class Client {
 
   public:
-	friend class ClientEventProcessor;
+	class ClientEventProcessor;
 	Client(int fd, http::TcpServer &server);
 	~Client();
 

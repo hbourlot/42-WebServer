@@ -36,26 +36,28 @@ static bool isCgirequest( const http::Request &request, const Location &location
 }
 
 void http::Router::launchCgi() {
-
-	http::Cgi *cgi = new http::Cgi( _request, _serverConfig, &_client );
-
+	http::Cgi *cgi = new http::Cgi( _request, _serverConfig, &_client, _eventProcessor);
 	if ( !cgi ) {
 		_client.getResponse().buildErrorResponse( HTTP_SERVER_ERR, _client.getServer().getServerInfo() );
 		return;
 	}
+	_eventProcessor._allCgi.push_back(cgi);
+	// _eventProcessor.shutDownProcessor();
+	// exit( 0 );
+
 	if ( cgi->executeCgi() ) {
 		delete cgi;
 		_client.getResponse().buildErrorResponse( HTTP_SERVER_ERR, _client.getServer().getServerInfo() );
 		return;
 	}
-
-	// Store CGI info in client
 	_client.setCgiPid( cgi->getPid() );
 	_client.setCgiOutputFd( cgi->getOutputPipe()[0] );
 
 	// Register CGI in map (takes ownership)
 	_eventProcessor.registerCgi( cgi );
 	_client.setState( CGI_JUST_STARTED );
+
+	// Store CGI info in client
 }
 
 http::Router::Router( Client &client, ClientEventProcessor &processor )
@@ -149,7 +151,7 @@ bool http::Router::checkAllowedMethods() {
 				methodValid = true;
 				break;
 			}
-		if (!methodValid)
+		if ( !methodValid )
 			return false;
 	}
 
@@ -212,8 +214,8 @@ void http::Router::executeRequest() {
 		 ( _request.getMethod() == "GET" || _request.getMethod() == "POST" ) ) {
 
 		isCgi = isCgirequest( _request, *_request.getMatchLocation() );
-		if (!isCgi) {
-			_client.getResponse().buildErrorResponse(HTTP_FORBID, _serverConfig);
+		if ( !isCgi ) {
+			_client.getResponse().buildErrorResponse( HTTP_FORBID, _serverConfig );
 			return;
 		}
 	}
