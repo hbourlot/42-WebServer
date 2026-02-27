@@ -115,16 +115,21 @@ namespace http {
 		return 0;
 	}
 
+	ServerConfig& TcpServer::getServerInfo() {
+		return _serverInfo;
+	}
+
 	std::map<SocketFD, sockaddr_in>& TcpServer::getSocketAddressRef() {
 		return _socketAddressMap;
+	}
+
+	pollfd& TcpServer::getServerPOLLFD() {
+		return _serverPOLLFD;
 	}
 
 	void TcpServer::setSocketAddress(SocketFD fd, sockaddr_in socketAddress) {
 		_socketAddressMap[fd] = socketAddress;
 	}
 
-	pollfd& TcpServer::getServerPOLLFD() {
-		return _serverPOLLFD;
-	}
 
 } // namespace http

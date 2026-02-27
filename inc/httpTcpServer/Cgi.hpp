@@ -23,7 +23,7 @@ namespace http {
 
 		~Cgi();
 
-		void executeCgi(void);
+		bool executeCgi(void);
 		void killProcess();
 		std::string getFilePath() const;
 		pid_t getPid() const;

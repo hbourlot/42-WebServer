@@ -139,10 +139,11 @@ int http::Cgi::prepareCgiInputFile() {
 	return 0;
 }
 
-void http::Cgi::executeCgi() {
+bool http::Cgi::executeCgi() {
 
+	return 1;
 	if (prepareCgiInputFile() != 0) {
-		return;
+		return -1;
 	}
 
 	if (pipe(this->_outputPipe) < 0) {
@@ -151,13 +152,13 @@ void http::Cgi::executeCgi() {
 			close(_stdinFd);
 			_stdinFd = -1;
 		}
-		return;
+		return -1;
 	}
 
 	this->_pid = fork();
 
 	if (this->_pid < 0) {
-		std::cerr << "Fork failed\n"; // !
+		std::cerr << "Fork failed\n";
 		if (_stdinFd >= 0) {
 			close(_stdinFd);
 			_stdinFd = -1;
@@ -165,7 +166,7 @@ void http::Cgi::executeCgi() {
 		close(_outputPipe[0]);
 		close(_outputPipe[1]);
 		_outputPipe[0] = _outputPipe[1] = -1;
-		return;
+		return -1;
 	} else if (this->_pid == 0) {
 
 		this->dupCgiFds();
@@ -196,6 +197,7 @@ void http::Cgi::executeCgi() {
 		_outputPipe[1] = -1;
 		fcntl(_outputPipe[0], F_SETFL, fcntl(_outputPipe[0], F_GETFL, 0) | O_NONBLOCK);
 	}
+	return 0;
 };
 
 IN_OUT_STATE &http::Cgi::getState() {

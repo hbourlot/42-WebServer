@@ -29,9 +29,10 @@ namespace http {
 
 		void process();
 
-		
+
 		private:
-		bool routeCgiRequest(); // ! to remove?
+
+		bool handleRouteProtected();
 		void launchCgi();
 		void handleGet();
 		void handlePost();
