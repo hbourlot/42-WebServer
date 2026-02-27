@@ -231,11 +231,7 @@ void removeComment(std::string &line)
 {
 	size_t position = line.find('#');
 	if (position != std::string::npos)
-	{
-		std::cout << "Antes do comentario " << line << std::endl;
 		line = line.substr(0, position);
-		std::cout << "Depois do comentario " << line << std::endl;
-	}
 	return;
 	
 }
@@ -349,6 +345,9 @@ static void copyDirectoryIntoLocation(Directory &dir, Location &loc) {
 	// Limits
 	loc.max_body_size = dir.max_body_size;
 	loc.max_buffer_size = dir.max_buffer_size;
+
+	loc.auth_login_page = dir.auth_login_page;
+	loc.auth = dir.auth;
 
 	loc.type |= LOCATION_DIR;
 	if (!loc.cgi_extension.empty() || !loc.cgi_pass.empty())

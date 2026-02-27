@@ -59,8 +59,6 @@ void http::Router::launchCgi() {
 http::Router::Router( Client &client, ClientEventProcessor &processor )
 	: _client( client ), _request( client.getRequest() ), _response( client.getResponse() ),
 	  _serverConfig( client.getServer().getServerInfo() ), _eventProcessor( processor ) {
-
-	_protectedRoutes.insert( "/upload-page" );
 }
 
 bool http::Router::handleRouteProtected() {
@@ -68,11 +66,18 @@ bool http::Router::handleRouteProtected() {
 	std::string uri = _client.getRequest().getUri();
 	Session &session = _eventProcessor._sessionManager.getSession( _client.getSessionID() );
 	bool isAuthenticated = session.getSessionData( "authenticated" ) == "true";
+	const Location* location = _request.getMatchLocation();
 
-	std::string port = ft_to_string( _client.getServer().getServerInfo().port );
-	std::string alternativeRoute = ft_to_string( "http://localhost:" + port + "/login" );
 
+
+	
 	if ( isProtectedRoute( uri ) && !isAuthenticated ) {
+
+		std::string port = ft_to_string( _client.getServer().getServerInfo().port );
+		std::string path = location ? location->auth_login_page : _client.getServer().getServerInfo().root;
+		std::string alternativeRoute = ft_to_string( "http://localhost:" + port );
+		alternativeRoute = joinPath(alternativeRoute, path);
+
 		_client.getResponse().buildRedirect( HTTP_TEMP_REDIRECT, alternativeRoute );
 		return true;
 	}
@@ -99,7 +104,14 @@ void http::Router::process() {
 	executeRequest();
 }
 
-bool http::Router::isProtectedRoute( const std::string &uri ) const {
+bool http::Router::isProtectedRoute( const std::string &uri ) {
+
+	// Adding protected routes
+	const Location* location = _request.getMatchLocation();
+	if (location && location->auth) {
+		_protectedRoutes.insert(_request.getUri());
+	}
+
 	for ( std::set< std::string >::const_iterator it = _protectedRoutes.begin(); it != _protectedRoutes.end(); ++it ) {
 		const std::string &prefix = *it;
 		if ( uri.rfind( prefix, 0 ) == 0 )
