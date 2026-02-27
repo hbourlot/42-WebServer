@@ -267,5 +267,5 @@ void http::Router::handleDelete() {
 		return;
 	}
 	_response.buildResponse( HTTP_NO_CONTENT, "" );
-	Logs::log( LOGS_ERROR, "File deleted Successfully " + _request.getFullPath() );
+	Logs::log( LOGS_WARN, "File deleted Successfully " + _request.getFullPath() );
 }

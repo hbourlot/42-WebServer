@@ -148,8 +148,8 @@ struct ServerConfig {
 	int port;                               // Stores the port to listen
 	std::string serverName;                 // Stores the name server
 	std::map< int, std::string > errorPage; // Stores the error pages
-	int max_body_size;                      // Stores the maximum requests that the client can do
-	int max_buffer_size;                    // Buffer size to write on temp files
+	size_t max_body_size;                   // Stores the maximum requests that the client can do
+	size_t max_buffer_size;                 // Buffer size to write on temp files
 	std::vector< Directory > directories;   // Stores the routes of the HTML pages
 	std::vector< File > files;              // Stores the specific files
 	std::vector< Location > locations;

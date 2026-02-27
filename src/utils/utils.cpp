@@ -265,11 +265,7 @@ void removeComment(std::string &line)
 {
 	size_t position = line.find('#');
 	if (position != std::string::npos)
-	{
-		std::cout << "Antes do comentario " << line << std::endl;
 		line = line.substr(0, position);
-		std::cout << "Depois do comentario " << line << std::endl;
-	}
 	return;
 }
 

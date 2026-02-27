@@ -13,7 +13,7 @@ std::string removeSpace( std::string& line ) {
 	return line.substr( i );
 }
 
-int getMaxRequestBody( std::string& value ) {
+long long getMaxRequestBody( std::string& value ) {
 	std::string resultStr = getInfo( value );
 
 	if ( resultStr.empty() == false && resultStr[ resultStr.size() - 1 ] == ';' )
