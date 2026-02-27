@@ -86,8 +86,9 @@ void PrintConfigs(Configs &configs)
         std::cout << "  HOST: " << BOLD << server.host << RESET << " | PORT: " << BOLD << server.port << RESET << std::endl;
         std::cout << "  NAME: " << (server.serverName.empty() ? "(none)" : server.serverName) << std::endl;
         std::cout << "  ROOT: " << server.root << std::endl;
-        
-        // Páginas de Erro formatadas
+        std::cout << "  MAX_BUFFER_SIZE:  " << server.max_buffer_size << std::endl;
+		std::cout << "  MAX_BODY_SIZE:  " << server.max_body_size << std::endl;
+		// Páginas de Erro formatadas
         std::cout << "  ERROR PAGES: ";
         if (server.errorPage.empty()) std::cout << "Default";
         for (std::map<int, std::string>::iterator it = server.errorPage.begin(); it != server.errorPage.end(); ++it) {
