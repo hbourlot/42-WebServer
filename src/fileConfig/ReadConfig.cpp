@@ -8,6 +8,7 @@ ServerConfig::ServerConfig() {
 	port = 0;
 	max_body_size = 0;
 	auth_login_page = "/login";
+	root = "./";
 }
 
 Directory *ServerConfig::GetLocationByPath(std::string path) {
