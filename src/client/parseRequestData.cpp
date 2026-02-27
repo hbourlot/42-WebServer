@@ -140,6 +140,8 @@ static bool parseContentLengthBody(Client &client, const ServerConfig &configs) 
 
 	if (!lengthParser.hasLength) {
 		lengthParser.length = strtoul(request.getHeaders()["Content-Length"].c_str(), NULL, 10);
+		std::cout << request.getHeaders()["Content-Length"] << std::endl;
+		std::cout << lengthParser.length << std::endl;
 		lengthParser.hasLength = true;
 
 		if (lengthParser.length > request.getMatchLocation()->max_body_size) {
@@ -150,7 +152,6 @@ static bool parseContentLengthBody(Client &client, const ServerConfig &configs) 
 
 	size_t remaining = lengthParser.length - lengthParser.bytesRead;
 	size_t canRead = std::min(buffer.size(), remaining);
-
 	if (canRead == 0 && lengthParser.length > 0)
 		return false;
 
@@ -158,6 +159,7 @@ static bool parseContentLengthBody(Client &client, const ServerConfig &configs) 
 		lengthParser.bytesRead += canRead;
 		buffer.erase(0, canRead);
 		discardingBody(client);
+		client.setState(PARSE_TOO_LARGE);
 		return (lengthParser.bytesRead >= lengthParser.length);
 	} else {
 		if (request.appendBody(buffer.data(), canRead, configs)) {
@@ -172,7 +174,6 @@ static bool parseContentLengthBody(Client &client, const ServerConfig &configs) 
 			return true;
 		}
 	}
-
 	return false;
 }
 
