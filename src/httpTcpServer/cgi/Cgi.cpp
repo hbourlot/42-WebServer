@@ -141,7 +141,6 @@ int http::Cgi::prepareCgiInputFile() {
 
 bool http::Cgi::executeCgi() {
 
-	return 1;
 	if (prepareCgiInputFile() != 0) {
 		return -1;
 	}
