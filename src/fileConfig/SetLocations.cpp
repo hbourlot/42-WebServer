@@ -14,7 +14,7 @@ struct SetFile;
 Directory::Directory()
     : name(""), path(""), methods(), root(""), index(""), redirection(""), cgi_extension(), cgi_path(), cgi(),
       cgi_pass(""), max_body_size(0), max_buffer_size(0), uploadEnable(false), uploadStore(""), autoIndex(false),
-      auth(false), auth_login_page ("/login"), next () {
+      auth(false), auth_login_page ("/login") {
 	// Safety initialization
 }
 

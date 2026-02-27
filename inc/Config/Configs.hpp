@@ -46,7 +46,6 @@ struct File {
 	std::string cgi_pass;
 	size_t max_body_size;
 	size_t max_buffer_size;    // Buffer size to write on temp files
-	std::vector< File* > next; // ! Still or not gonna use at all ??
 };
 
 struct Directory {
@@ -68,7 +67,6 @@ struct Directory {
 	bool autoIndex;
 	bool auth;
 	std::string auth_login_page;
-	std::vector< Directory* > next; // ! Still or not gonna use at all ??
 };
 
 enum LocationType {

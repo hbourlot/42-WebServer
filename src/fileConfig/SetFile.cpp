@@ -3,6 +3,9 @@
 #include <utils.hpp>
 
 File::File() {
+
+	max_body_size = 0;
+	max_buffer_size = 0;
 	// String are automatically initialized;
 }
 

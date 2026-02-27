@@ -52,7 +52,7 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB             = libHttpTcpServerLinux.a
 CXX             = c++
-CXXFLAGS        = -std=c++98 -g #-Wall -Wextra #-Werror
+CXXFLAGS        = -std=c++98 -g -Wall -Wextra -Werror
 DEBUG_FLAGS		= -DDEBUG -g -O0
 NAME            = webserv
 TOTAL_FILES     = $(shell echo $$(($(words $(OBJS_SRC)))))
