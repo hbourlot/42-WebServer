@@ -7,6 +7,14 @@ enum REQUEST_PHASE { START, HEADER, BODY, FINISHED };
 
 enum ChunkState { CHUNK_SIZE, CHUNK_DATA, CHUNK_CRLF, CHUNK_DONE };
 
+struct CLengthParser {
+	size_t length;
+	size_t bytesRead;
+	bool hasLength;
+	CLengthParser() : length(0), bytesRead(0), hasLength(false) {
+	}
+};
+
 struct ChunkParser {
 	ChunkState state;
 	size_t currentChunkSize;
@@ -39,7 +47,8 @@ namespace http {
 		const Directory *_fileDirectory;
 
 		REQUEST_PHASE _requestPhase;
-		ChunkParser _chunk;
+		ChunkParser _chunkParser;
+		CLengthParser _lengthParser;
 
 	  public:
 		Request();
@@ -68,6 +77,7 @@ namespace http {
 		size_t getBodySize() const;
 		REQUEST_PHASE getRequestPhase();
 		ChunkParser &getChunkParser();
+		CLengthParser &getLengthParser();
 		std::map<std::string, std::string> &getHeaders();
 		const std::map<std::string, std::string> &getHeaders() const;
 		const std::string &getUri() const;

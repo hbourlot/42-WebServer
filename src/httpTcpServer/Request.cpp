@@ -31,7 +31,7 @@ void http::Request::cleanup() {
 	_fileDirectory = NULL;
 
 	_requestPhase = START;
-	_chunk = ChunkParser();
+	_chunkParser = ChunkParser();
 }
 
 int http::Request::appendBody(const char *buf, size_t len, const ServerConfig &configs) {
@@ -114,7 +114,7 @@ std::string &http::Request::readALlBody() {
 }
 
 void http::Request::resetChunkParser() {
-	_chunk = ChunkParser();
+	_chunkParser = ChunkParser();
 }
 
 bool http::Request::isBodyInDisk() {
@@ -165,7 +165,11 @@ REQUEST_PHASE http::Request::getRequestPhase() {
 }
 
 ChunkParser &http::Request::getChunkParser() {
-	return _chunk;
+	return _chunkParser;
+}
+
+CLengthParser &http::Request::getLengthParser() {
+	return _lengthParser;
 }
 
 std::map<std::string, std::string> &http::Request::getHeaders() {

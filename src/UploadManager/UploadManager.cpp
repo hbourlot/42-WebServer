@@ -14,7 +14,6 @@ bool UploadManager::handleUpload(const Location &matchLocation, Client &client, 
 	if (contentType.find("multipart/form-data;") != std::string::npos) {
 		if (UploadManager::parseMultipart(matchLocation, client, serverInfo))
 			return (true);
-	} else if (contentType.find("text/plain") != std::string::npos) {
 	} else {
 		client.getResponse().buildErrorResponse(HTTP_UNSUPPORTED_MEDIA, serverInfo);
 	}
