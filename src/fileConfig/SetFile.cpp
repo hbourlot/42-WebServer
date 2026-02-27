@@ -139,12 +139,26 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 	return true;
 }
 
-void SetFile::setDefaultFile( File &file ) {
+void SetFile::setDefaultFile( File &file, ServerConfig &server) {
 	if ( file.extension.empty() )
 		throw std::invalid_argument( "Error: Missing path in one or more locations ❌\n" );
 
 	if ( file.methods.empty() ) {
 		std::cout << "No methods, so we will set the GET method ✅" << std::endl;
 		file.methods.push_back( "GET" );
+	}
+
+	if (file.max_body_size == 0) {
+		if (server.max_body_size != 0)
+			file.max_body_size = server.max_body_size;
+		else
+			file.max_body_size = 1024;
+	}
+
+	if (file.max_buffer_size == 0) {
+		if (server.max_buffer_size != 0)
+			file.max_buffer_size = server.max_buffer_size;
+		else
+			file.max_buffer_size = 1024 * 1024;
 	}
 }
