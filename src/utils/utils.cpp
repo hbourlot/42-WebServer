@@ -267,6 +267,7 @@ void removeComment(std::string &line)
 	size_t position = line.find('#');
 	if (position != std::string::npos)
 	{
+		std::cout << "Fodeu " << line << std::endl;
 		line = line.substr(0, position);
 	}
 	return;

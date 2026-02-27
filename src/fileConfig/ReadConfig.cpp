@@ -123,21 +123,19 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 
 	while (std::getline(confFd, line)) { // Finish the server config block
 		noSpaceLine = removeSpace(line); // Removes the first spaces
-		
+		std::cout << noSpaceLine[noSpaceLine.size() - 1] << std::endl;
 		removeComment(noSpaceLine);
 		if (noSpaceLine.empty() == true)
 			continue;
 		
 		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
-
 		if (trimmedLine[0] == '}') // Finish the server info
 		{
 			IsServerOpen = false;
 			break;
 		}
-		
 		if (!CheckConf::checkLineFinished(noSpaceLine))
-		throw std::invalid_argument("Error: Extra words after End of Line\n");
+			throw std::invalid_argument("Error: Extra words after End of Line\n");
 		
 		// Check if we are going to location configs "location /upload"
 		// This serves to check if we have stuff like " } location /upload {"
