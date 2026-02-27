@@ -3,19 +3,27 @@
 
 struct Directory;
 
-std::string removeSpace( std::string& line ) {
-	int i = 0;
+std::string removeSpace(std::string& line) {
+    if (line.empty()) return "";
 
-	for ( i = 0; line[ i ] && (line[ i ] == ' ' || line[ i ] == '\t');
-	      i++ ) { // Runs all spaces and return the string without the first spaces
-		continue;
-	}
+    const std::string whitespace = " \t\r\n\f\v";
+    
+    // 1. Achar o primeiro caracter que não é espaço
+    size_t start = line.find_first_not_of(whitespace);
+    if (start == std::string::npos) return "";
 
-	return line.substr( i );
+    // 2. Achar o último caracter que não é espaço
+    size_t end = line.find_last_not_of(whitespace);
+
+    // 3. RETORNAR EXATAMENTE O QUE ESTÁ NO MEIO
+    std::string result = line.substr(start, end - start + 1);
+    
+    return result;
 }
 
 int getMaxRequestBody( std::string& value, size_t& result ) {
 	std::string resultStr = getInfo( value );
+
 
 	if ( resultStr.empty() == false && resultStr[ resultStr.size() - 1 ] == ';' )
 		resultStr.erase( value.size() - 1 );

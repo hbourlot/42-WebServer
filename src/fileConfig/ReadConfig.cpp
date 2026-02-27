@@ -124,13 +124,11 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 
 	while (std::getline(confFd, line)) { // Finish the server config block
 		noSpaceLine = removeSpace(line); // Removes the first spaces
-
 		removeComment(noSpaceLine);
 		if (noSpaceLine.empty() == true)
 			continue;
 
 		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
-
 		if (trimmedLine[0] == '}') // Finish the server info
 		{
 			IsServerOpen = false;

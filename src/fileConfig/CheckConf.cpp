@@ -33,39 +33,35 @@ bool CheckConf::checkConfOpen( char *file ) {
 }
 
 bool CheckConf::checkLineFinished( std::string &line ) {
-	if ( line[ 0 ] == '#' ) // Skips the comments
-		return true;
+    if (line.empty() || line[0] == '#') return true;
 
-	size_t lineSize = 0; // Gets the line size
-	if (line.size() > 1) // Check the last '}' to close the server 
-		lineSize = line.size() - 1;
-	else
-		lineSize = line.size();
+    size_t actualSize = line.size(); // Ex: 15 para "host 127.0.0.1;"
 
-	size_t end = line.find_first_of( ';' ); // Gets the position of ';'
-	if ( end != std::string::npos ) {
-		if ( end + 1 != lineSize ) {
-			std::cerr << "Its something wrong with: " << line << end << lineSize << std::endl;
-			return false;
-		}
-	}
+    size_t semiPos = line.find(';');
+    if (semiPos != std::string::npos) {
+        if (semiPos != (actualSize - 1)) {
+             std::cerr << "Error: Trash after ';'" << std::endl;
+             return false;
+        }
+        return true; 
+    }
 
-	size_t openBrackets = line.find_first_of( '{' ); // Get the position of '{'
-	if ( openBrackets != std::string::npos ) {
-		if ( openBrackets + 1 != lineSize ) {
-			std::cerr << "Its something wrong with: " << line << std::endl;
-			return false;
-		}
-	}
+    size_t openPos = line.find('{');
+    if (openPos != std::string::npos) {
+        if (openPos != (actualSize - 1)) {
+             std::cerr << "Error: Trash after '{'" << std::endl;
+             return false;
+        }
+        return true;
+    }
 
-	size_t closeBrackets = line.find_first_of( '}' ); // Get the position of '}'
+	size_t closeBrackets = line.find( '}' ); // Get the position of '}'
 	if ( closeBrackets != std::string::npos ) {
-		if ( closeBrackets + 1 != lineSize ) {
-
-			std::cerr << "Its something wrong with: " << line << std::endl;
-			return false;
-		}
+        if (closeBrackets != (actualSize - 1)) {
+             std::cerr << "Error: Treash after '{'" << std::endl;
+             return false;
+        }
+        return true;
 	}
-
-	return true;
+    return true;
 }

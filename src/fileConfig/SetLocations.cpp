@@ -40,6 +40,8 @@ void SetLocation::getMethods(std::string noSpaceLine,
 	std::string method;
 
 	iss >> method;          // Skip the method word
+	if ( noSpaceLine.find( ';' ) == std::string::npos ) // If don't find the ';' throw an error
+		throw std::invalid_argument( "Error: Invalid end of line, missing ';' at the end\n" );
 	while (iss >> method) { // Saves the new method
 		if (!method.empty() && method[method.size() - 1] == ';')
 			method.erase(method.size() - 1);
@@ -112,6 +114,8 @@ int getCgi(std::string noSpaceLine, Directory &location, int cgiInfo) {
 	    !location.cgi_path.empty()) // It will check if we already have any pre requisites to build the cgi
 		ready = 1;
 
+	if ( noSpaceLine.find( ';' ) == std::string::npos ) // If don't find the ';' throw an error
+		throw std::invalid_argument( "Error: Invalid end of line, missing ';' at the end\n" );
 	while (iss >> info) { // Saves the new info
 
 		if (!info.empty() && info[info.size() - 1] == ';')
