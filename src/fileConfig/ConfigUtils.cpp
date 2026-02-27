@@ -1,4 +1,5 @@
 #include "Config/ConfigUtils.hpp"
+#include "utils.hpp"
 
 struct Directory;
 
@@ -28,6 +29,13 @@ int getMaxRequestBody( std::string& value, size_t& result ) {
 			multiplier = 1024 * 1024;
 		else
 			return -1;
+		resultStr.erase(resultStr.size() - 1);
+	}
+
+	if (isDigits(resultStr) == false)
+	{
+		std::cerr << "Invalid max size" << std::endl;
+		return -1;
 	}
 
 	char* end;
