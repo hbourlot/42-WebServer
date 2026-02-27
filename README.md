@@ -65,6 +65,7 @@ The server use a `.conf` file with the follow possibilities:
 * client_body_temp_path
 * client_body_buffer_size
 * keepalive_timeout
+* auth_login_page
 
 ### Locations configs
 
@@ -79,6 +80,8 @@ The server use a `.conf` file with the follow possibilities:
 * index
 * cgi_pass
 * client_body_buffer_size
+* auth_login_page
+* auth
 
 Example:
 

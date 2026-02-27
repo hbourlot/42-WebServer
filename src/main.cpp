@@ -73,7 +73,7 @@ int main(int ac, char **av) {
 		
 		PrintConfigs(configuration);
 	} catch (const std::exception &exception) {
-		std::cout << "Failed to initialize servers: " << exception.what() << std::endl;
+		std::cerr << "Failed to initialize servers: " << exception.what() << std::endl;
 		return (-1);
 	}
 

@@ -14,7 +14,7 @@ class SetFile;
 Directory::Directory()
     : name(""), path(""), methods(), root(""), index(""), redirection(""), cgi_extension(), cgi_path(), cgi(),
       cgi_pass(""), max_body_size(0), max_buffer_size(0), uploadEnable(false), uploadStore(""), autoIndex(false),
-      next() {
+      next(), auth_login_page ("/login"), auth(false) {
 	// Safety initialization
 }
 
@@ -78,6 +78,10 @@ int getTypeLocation(std::string &trimmedLine) { // Function to check the informa
 		return BODY_BUFFER;
 	if (trimmedLine[0] == '#')
 		return COMMENT;
+	if (trimmedLine == "auth_login_page")
+		return AUTH_LOGIN;
+	if (trimmedLine == "auth")
+		return AUTH;
 	if (trimmedLine == "{" || trimmedLine == "}" || trimmedLine.size() == 1)
 		return EMPTY;
 	return 100;
@@ -165,77 +169,89 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 			break;
 
 		switch (getTypeLocation(trimmedLine)) {
-		case METHODS:
-			getMethods(noSpaceLine, location.methods);
-			break;
-		case ROOT:
-			location.root = getInfo(noSpaceLine);
-			break;
-		case REDIRECT:
-			location.redirection = getInfo(noSpaceLine);
-			break;
-		case CGI_EXTENSION:
-			location.name = "cgi"; // Used to check on AUTOINDEX
-			if (getCgi(noSpaceLine, location, CGI_EXTENSION) == 1)
-				buildCgi(location); // -> Missing function
-			break;
-		case CGI_PATH:
-			location.name = "cgi"; // Used to check on AUTOINDEX
-			if (getCgi(noSpaceLine, location, CGI_PATH) == 1)
-				buildCgi(location); // If we already have the full information (PATH + EXTENSION), we build the map cgi
-			break;
-		case UPLOAD_ENABLE:
-			if (getInfo(noSpaceLine) == "on") // Change the permission to upload files
-				location.uploadEnable = true;
-			else
-				location.uploadEnable = false;
-			break;
-		case UPLOAD_STORE:
-			location.uploadStore = getInfo(noSpaceLine);
-			break;
-		case AUTOINDEX:
-			atIndexFlag = 1; // This will activate a flag, to see if it have any autoIndex inside the location, can't
-			                 // have inside CGI;
+			case METHODS:
+				getMethods(noSpaceLine, location.methods);
+				break;
+			case ROOT:
+				location.root = getInfo(noSpaceLine);
+				break;
+			case REDIRECT:
+				location.redirection = getInfo(noSpaceLine);
+				break;
+			case CGI_EXTENSION:
+				location.name = "cgi"; // Used to check on AUTOINDEX
+				if (getCgi(noSpaceLine, location, CGI_EXTENSION) == 1)
+					buildCgi(location); // -> Missing function
+				break;
+			case CGI_PATH:
+				location.name = "cgi"; // Used to check on AUTOINDEX
+				if (getCgi(noSpaceLine, location, CGI_PATH) == 1)
+					buildCgi(location); // If we already have the full information (PATH + EXTENSION), we build the map cgi
+				break;
+			case UPLOAD_ENABLE:
+				if (getInfo(noSpaceLine) == "on") // Change the permission to upload files
+					location.uploadEnable = true;
+				else
+					location.uploadEnable = false;
+				break;
+			case UPLOAD_STORE:
+				location.uploadStore = getInfo(noSpaceLine);
+				break;
+			case AUTOINDEX:
+				atIndexFlag = 1; // This will activate a flag, to see if it have any autoIndex inside the location, can't
+								// have inside CGI;
 
-			if (getInfo(noSpaceLine) == "on") // Change the permission to upload files
-				location.autoIndex = true;
-			else
-				location.autoIndex = false;
-			break;
-		case INDEX:
-			location.index = getInfo(noSpaceLine);
-			break;
+				if (getInfo(noSpaceLine) == "on") // Change the permission to upload files
+					location.autoIndex = true;
+				else
+					location.autoIndex = false;
+				break;
+			case INDEX:
+				location.index = getInfo(noSpaceLine);
+				break;
 
-		case CGIPASS:
-			location.cgi_pass = getInfo(noSpaceLine);
-			struct stat buffer;
-			if (stat(location.cgi_pass.c_str(), &buffer) != 0)
-				return false;
+			case CGIPASS:
+				location.cgi_pass = getInfo(noSpaceLine);
+				struct stat buffer;
+				if (stat(location.cgi_pass.c_str(), &buffer) != 0)
+					return false;
+				
+				break;
+
+			case CLIENT_MAX_BDY:
+				location.max_body_size = getMaxRequestBody(noSpaceLine);
+				if (location.max_body_size == -1) {
+					std::cerr << "Invalid suffix of max body size" << std::endl;
+					return false;
+				}
+				break;
+
+			case BODY_BUFFER:
+				location.max_buffer_size = getMaxRequestBody(noSpaceLine);
+				if (location.max_body_size == -1) {
+					std::cerr << "Invalid suffix of max body size" << std::endl;
+					return false;
+				}
+				break;
 			
-			break;
+			case AUTH_LOGIN:
+				location.auth_login_page = getInfo(noSpaceLine);
+				break;
 
-		case CLIENT_MAX_BDY:
-			location.max_body_size = getMaxRequestBody(noSpaceLine);
-			if (location.max_body_size == -1) {
-				std::cerr << "Invalid suffix of max body size" << std::endl;
+			case AUTH:
+				if (getInfo(noSpaceLine) != "required")
+				{
+					return false;
+				} // If it is not that word we give a error
+				location.auth = true;
+				break;
+
+			case COMMENT:
+			case EMPTY:
+				break;
+
+			default:
 				return false;
-			}
-			break;
-
-		case BODY_BUFFER:
-			location.max_buffer_size = getMaxRequestBody(noSpaceLine);
-			if (location.max_body_size == -1) {
-				std::cerr << "Invalid suffix of max body size" << std::endl;
-				return false;
-			}
-			break;
-		
-		case COMMENT:
-		case EMPTY:
-			break;
-
-		default:
-			return false;
 		}
 	}
 
@@ -282,5 +298,15 @@ void SetLocation::setDefaultLocation(ServerConfig &server, Directory &location) 
 			std::cerr << "No root defined. Setting /var/www + path ✅" << std::endl;
 			location.root = "/var/www" + location.path;
 		}
+	}
+
+	std::cout << "Auth login " << location.auth_login_page << " Server login " << server.auth_login_page << std::endl;
+
+	if (location.auth_login_page == "/login" && 
+		server.auth_login_page != "/login")
+	{
+		std::cout << "Entrou aqui" << std::endl;
+		location.auth_login_page = server.auth_login_page;
+		std::cout << "Location nova " << location.auth_login_page << std::endl;
 	}
 }

@@ -23,12 +23,12 @@ void PrintFiles(std::vector<File> &files)
 	}
 }
 
-void PrintLocations(std::vector< Location > &locations)
+void PrintLocations(std::vector< Directory > &locations)
 {
 	for (int i = 0; i < locations.size(); i++)
 	{
-		Location location = locations[i];
-		std::cout << "----- PRINTING LOCATION " << location.extension << " -----" << std::endl;
+		Directory location = locations[i];
+		std::cout << "----- PRINTING LOCATION " << " -----" << std::endl;
 		std::cout << "Path: " << location.path << std::endl;
 		for (int i = 0; i < location.methods.size() ; i++)
 			std::cout << "--> Methods: " << location.methods[i] << std::endl;
@@ -52,8 +52,10 @@ void PrintLocations(std::vector< Location > &locations)
 		std::cout << "Upload store: " << location.uploadStore << std::endl;
 		std::cout << "Max body size: " << location.max_body_size << std::endl;
 		std::cout << "Max buffer size: " << location.max_buffer_size << std::endl;
+		std::cout << "Auth login page: " << location.auth_login_page << std::endl;
+		std::cout << "Auth: " << location.auth << std::endl;
 
-		std::cout << "\n\n\n\n" << std::endl;
+		std::cout << "\n\n" << std::endl;
 	}
 }
 
@@ -73,7 +75,8 @@ void PrintConfigs(Configs &configs)
 			std::cout  << "--> Error pages: " << it->second << std::endl;
     	}
 		std::cout << "Alive timeout: " << server.alive_timeout << std::endl;
-		PrintLocations(server.locations);
+		std::cout << "Auth login page: " << server.auth_login_page << std::endl;
+		PrintLocations(server.directories);
 		// PrintFiles(server.files);
 		std::cout << "\n\n\n";
 	}
