@@ -84,6 +84,25 @@ int getTypeServer(std::string &trimmedLine) { // Return the type of information 
 	return 100;
 }
 
+bool isValidPort(const std::string &str, int &port) {
+	std::stringstream ss(str);
+
+	if (!(ss >> port)) {
+		return false;
+	}
+
+	char extra;
+	if (ss >> extra) {
+		return false;
+	}
+
+	if (port < 1 || port > 65535) {
+		return false;
+	}
+
+	return true;
+}
+
 bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Configs &configs) {
 	std::string noSpaceLine; // Gets the string without the initial spaces
 	std::string trimmedLine; // Stores the attribute of the server
@@ -104,7 +123,11 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 
 	while (std::getline(confFd, line)) { // Finish the server config block
 		noSpaceLine = removeSpace(line); // Removes the first spaces
-		
+
+		removeComment(noSpaceLine);
+		if (noSpaceLine.empty() == true)
+			continue;
+
 		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
 
 		if (trimmedLine[0] == '}') // Finish the server info
@@ -128,7 +151,7 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			if (checkSplitString(line, "location", IsServerOpen) == false)
 				return false;
 		}
-		
+
 		if (IsServerOpen == true) {
 			switch (getTypeServer(trimmedLine)) {
 			case ROOT:
@@ -141,7 +164,14 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 				server.index = getInfo(noSpaceLine);
 				break;
 			case PORT:
-				server.port = std::atoi(getInfo(noSpaceLine).c_str()); // Convert the string into a int
+				if (isDigits(getInfo(noSpaceLine)) == false) {
+					std::cerr << "Port is invalid" << std::endl;
+					return false;
+				} else if (isValidPort(getInfo(noSpaceLine), server.port) == false) {
+					std::cerr << "Port is above the limit, must be between 1 - 65535" << std::endl;
+					return false;
+				}
+
 				break;
 
 			case SERVER_NAME:
@@ -176,26 +206,24 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 					return false;
 				}
 				break;
-			
-			case LOCATION:
-			{
+
+			case LOCATION: {
 				std::string path = noSpaceLine.substr(noSpaceLine.find(' '));
-				if (path.size() > 3 && path[1] == '*' && path[2] == '.'){
+				if (path.size() > 3 && path[1] == '*' && path[2] == '.') {
 					if (SetFile::setFileConfig(confFd, path, server) == false)
 						return false; // Failed to create the file
-				}
-				else if (SetLocation::setLocationConfig(confFd, path, server) == false)
+				} else if (SetLocation::setLocationConfig(confFd, path, server) == false)
 					return false;
 				break;
 			}
-			
+
 			case ALIVE_TIMEOUT:
-				if (stringToSizeT(getInfo(noSpaceLine), server.alive_timeout) == false){
+				if (stringToSizeT(getInfo(noSpaceLine), server.alive_timeout) == false) {
 					std::cerr << "Failed to set the alive_timeout" << std::endl;
 					return false;
 				}
 				break;
-			
+
 			case SERVER:
 				if (detectedServer == true)
 					return false;
@@ -216,8 +244,7 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
 	}
 
-	if (IsServerOpen == true)
-	{
+	if (IsServerOpen == true) {
 		std::cerr << "Server is not close properly" << std::endl;
 		return false;
 	}
@@ -225,15 +252,6 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 	ReadConfig::setDefaultServer(server);
 	configs.servers.push_back(server); // Send the information for the main config
 	return (true);
-}
-
-void removeComment(std::string &line)
-{
-	size_t position = line.find('#');
-	if (position != std::string::npos)
-		line = line.substr(0, position);
-	return;
-	
 }
 
 bool ReadConfig::setConfigs(char *conf, Configs &configs) {
@@ -245,18 +263,17 @@ bool ReadConfig::setConfigs(char *conf, Configs &configs) {
 		while (std::getline(confFd, line)) {
 			std::string verify = removeSpace(line);
 			removeComment(verify);
-			std::cout << "VErify size " << verify.size() << std::endl;
 			if (verify.empty() == false &&
-			    containBrackets(verify, inServer, "server") == true) { // Removes the spaces before the name and return the value to check if it is a server
+			    containBrackets(verify, inServer, "server") ==
+			        true) { // Removes the spaces before the name and return the value to check if it is a server
 				if (ReadConfig::setServerConfig(confFd, line, configs) ==
 				    false) // Will check if everything is OK when we get the server config info
 				{
 					return (false);
 				}
-			}
-			else if (verify.empty() == true || verify.size() == 1) // Check if it has a \n
+			} else if (verify.empty() == true || verify.size() == 1) // Check if it has a \n
 				continue;
-			else{
+			else {
 				std::cerr << "Invalid information in conf file" << std::endl;
 				return false;
 			}
@@ -305,10 +322,13 @@ void ReadConfig::setDefaultServer(ServerConfig &server) {
 		std::cout << "Setting max buffer size to 1MB ✅" << std::endl;
 		server.max_buffer_size = 1024 * 1024;
 		for (size_t i = 0; i < server.directories.size(); ++i) {
-			server.directories[i].max_buffer_size = server.directories[i].max_buffer_size == 0 ? server.max_buffer_size : server.directories[i].max_buffer_size;
+			server.directories[i].max_buffer_size = server.directories[i].max_buffer_size == 0
+			                                            ? server.max_buffer_size
+			                                            : server.directories[i].max_buffer_size;
 		}
 		for (size_t i = 0; i < server.files.size(); ++i) {
-			server.files[i].max_buffer_size = server.files[i].max_buffer_size == 0 ? server.max_buffer_size : server.files[i].max_buffer_size;
+			server.files[i].max_buffer_size =
+			    server.files[i].max_buffer_size == 0 ? server.max_buffer_size : server.files[i].max_buffer_size;
 		}
 	}
 
@@ -366,6 +386,7 @@ static void copyFileIntoLocation(File &file, Location &loc) {
 	loc.index = file.index;
 	loc.cgi_pass = file.cgi_pass;
 	loc.max_buffer_size = file.max_buffer_size;
+	loc.max_body_size = file.max_body_size;
 
 	loc.type |= LOCATION_FILE;
 }
