@@ -179,8 +179,7 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 				break;
 
 			case CLIENT_MAX_BDY:
-				server.max_body_size = getMaxRequestBody(noSpaceLine);
-				if (server.max_body_size == -1) {
+				if (getMaxRequestBody(noSpaceLine, server.max_body_size) == -1) {
 					std::cerr << "Invalid suffix of max body size" << std::endl;
 					return false;
 				}
@@ -200,8 +199,7 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 				break;
 
 			case BODY_BUFFER:
-				server.max_buffer_size = getMaxRequestBody(noSpaceLine);
-				if (server.max_body_size == -1) {
+				if (getMaxRequestBody(noSpaceLine, server.max_buffer_size) == -1) {
 					std::cerr << "Invalid suffix of max body size" << std::endl;
 					return false;
 				}

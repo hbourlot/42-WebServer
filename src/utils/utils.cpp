@@ -271,7 +271,7 @@ void removeComment(std::string &line)
 
 bool isDigits(std::string str)
 {
-    for (int i = 0; str.size() > i; i++)
+    for (size_t i = 0; str.size() > i; i++)
 	{
 		if (!(str[i] >= 48 && str[i] <= 57 ))
 			return false;

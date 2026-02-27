@@ -84,7 +84,7 @@ struct Location {
 	Location()
 	    : type( 0 ), extension( "" ), path( "" ), methods(), root( "" ), index( "" ), autoIndex( false ),
 	      redirection( "" ), cgi_pass( "" ), cgi_extension(), cgi_path(), cgi(), uploadEnable( false ),
-	      uploadStore( "" ), max_body_size( 0 ), max_buffer_size( 0 ), auth_login_page( "/login" ), auth ( false ) {
+	      uploadStore( "" ), max_body_size( 0 ), max_buffer_size( 0 ), auth ( false ), auth_login_page( "/login" ) {
 		// SafetyInitialization
 	}
 
