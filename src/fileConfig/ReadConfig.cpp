@@ -84,6 +84,25 @@ int getTypeServer(std::string &trimmedLine) { // Return the type of information 
 	return 100;
 }
 
+bool isValidPort(const std::string& str, int& port) {
+    std::stringstream ss(str);
+    
+    if (!(ss >> port)) {
+        return false; 
+    }
+
+    char extra;
+    if (ss >> extra) {
+        return false;
+    }
+
+    if (port < 1 || port > 65535) {
+        return false;
+    }
+
+    return true;
+}
+
 bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Configs &configs) {
 	std::string noSpaceLine; // Gets the string without the initial spaces
 	std::string trimmedLine; // Stores the attribute of the server
@@ -105,6 +124,10 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 	while (std::getline(confFd, line)) { // Finish the server config block
 		noSpaceLine = removeSpace(line); // Removes the first spaces
 		
+		removeComment(noSpaceLine);
+		if (noSpaceLine.empty() == true)
+			continue;
+		
 		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
 
 		if (trimmedLine[0] == '}') // Finish the server info
@@ -112,18 +135,18 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			IsServerOpen = false;
 			break;
 		}
-
+		
 		if (!CheckConf::checkLineFinished(noSpaceLine))
-			throw std::invalid_argument("Error: Extra words after End of Line\n");
-
+		throw std::invalid_argument("Error: Extra words after End of Line\n");
+		
 		// Check if we are going to location configs "location /upload"
 		// This serves to check if we have stuff like " } location /upload {"
 		// We close the last location config, and we open a new one
 		if (line.find("location") == std::string::npos) {
 			if (containBrackets(line, IsServerOpen, emptyString) == false)
-				return false;
+			return false;
 		}
-
+		
 		else {
 			if (checkSplitString(line, "location", IsServerOpen) == false)
 				return false;
@@ -141,7 +164,17 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 				server.index = getInfo(noSpaceLine);
 				break;
 			case PORT:
-				server.port = std::atoi(getInfo(noSpaceLine).c_str()); // Convert the string into a int
+				if (isDigits(getInfo(noSpaceLine)) == false)
+				{
+					std::cerr << "Port is invalid" << std::endl;
+					return false;
+				}
+				else if (isValidPort(getInfo(noSpaceLine), server.port) == false)
+				{
+					std::cerr << "Port is above the limit, must be between 1 - 65535" << std::endl;
+					return false;
+				}
+				
 				break;
 
 			case SERVER_NAME:
@@ -227,19 +260,6 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 	return (true);
 }
 
-void removeComment(std::string &line)
-{
-	size_t position = line.find('#');
-	if (position != std::string::npos)
-	{
-		std::cout << "Antes do comentario " << line << std::endl;
-		line = line.substr(0, position);
-		std::cout << "Depois do comentario " << line << std::endl;
-	}
-	return;
-	
-}
-
 bool ReadConfig::setConfigs(char *conf, Configs &configs) {
 	bool inServer = false;
 	std::ifstream confFd;
@@ -249,7 +269,6 @@ bool ReadConfig::setConfigs(char *conf, Configs &configs) {
 		while (std::getline(confFd, line)) {
 			std::string verify = removeSpace(line);
 			removeComment(verify);
-			std::cout << "VErify size " << verify.size() << std::endl;
 			if (verify.empty() == false &&
 			    containBrackets(verify, inServer, "server") == true) { // Removes the spaces before the name and return the value to check if it is a server
 				if (ReadConfig::setServerConfig(confFd, line, configs) ==

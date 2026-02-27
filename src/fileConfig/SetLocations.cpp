@@ -147,7 +147,6 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 	}
 	while (std::getline(confFd, line)) {
 		noSpaceLine = removeSpace(line);
-
 		if (!CheckConf::checkLineFinished(noSpaceLine)) // Checks if have more information after the limiter
 			throw std::invalid_argument("Error: Extra words after End of Line\n");
 
@@ -191,8 +190,13 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 			case UPLOAD_ENABLE:
 				if (getInfo(noSpaceLine) == "on") // Change the permission to upload files
 					location.uploadEnable = true;
-				else
+				else if (getInfo(noSpaceLine) == "off")
 					location.uploadEnable = false;
+				else
+				{
+					std::cerr << "Upload enable must be 'on' or 'off'" << std::endl;
+					return false;
+				}
 				break;
 			case UPLOAD_STORE:
 				location.uploadStore = getInfo(noSpaceLine);

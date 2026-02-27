@@ -47,3 +47,5 @@ const Location* getMatchLocation(const std::string& path, const std::vector<Loca
 
 std::string createUploadBody();
 ssize_t writeAll(int fd, const char* buf, size_t len);
+void removeComment(std::string &line);
+bool isDigits(std::string str);
