@@ -1,11 +1,13 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include <algorithm>
 
-static bool isCgirequest(const http::Request &request, const Location &location) {
+static bool isCgirequest( const http::Request &request, const Location &location ) {
 
+	bool methodValid = false;
 	for ( size_t i = 0; i < location.methods.size(); ++i )
 		if ( location.methods[i] == request.getMethod() ) {
-			return true;
+			methodValid = true;
+			break;
 		}
 
 	for ( size_t i = 0; i < location.cgi_extension.size(); ++i )
@@ -25,7 +27,7 @@ static bool isCgirequest(const http::Request &request, const Location &location)
 
 	// Check if the extension is in the location's CGI extensions
 	for ( size_t i = 0; i < location.cgi_extension.size(); ++i ) {
-		if ( location.cgi_extension[i] == extension ) {
+		if ( location.cgi_extension[i] == extension && methodValid ) {
 			return true;
 		}
 	}
@@ -41,7 +43,7 @@ void http::Router::launchCgi() {
 		_client.getResponse().buildErrorResponse( HTTP_SERVER_ERR, _client.getServer().getServerInfo() );
 		return;
 	}
-	if (cgi->executeCgi()) {
+	if ( cgi->executeCgi() ) {
 		delete cgi;
 		_client.getResponse().buildErrorResponse( HTTP_SERVER_ERR, _client.getServer().getServerInfo() );
 		return;
@@ -61,25 +63,20 @@ http::Router::Router( Client &client, ClientEventProcessor &processor )
 	  _serverConfig( client.getServer().getServerInfo() ), _eventProcessor( processor ) {
 }
 
-
-
 bool http::Router::handleRouteProtected() {
 
 	std::string uri = _client.getRequest().getUri();
 	Session &session = _eventProcessor._sessionManager.getSession( _client.getSessionID() );
 	bool isAuthenticated = session.getSessionData( "authenticated" ) == "true";
-	const Location* location = _request.getMatchLocation();
+	const Location *location = _request.getMatchLocation();
 
-
-
-	
 	if ( isProtectedRoute( uri ) && !isAuthenticated ) {
 
 		std::string port = ft_to_string( _client.getServer().getServerInfo().port );
 		std::string path = location ? location->auth_login_page : _client.getServer().getServerInfo().root;
 		std::string host = _client.getServer().getServerInfo().host;
 		std::string alternativeRoute = ft_to_string( "http://" + host + ":" + port );
-		alternativeRoute = joinPath(alternativeRoute, path);
+		alternativeRoute = joinPath( alternativeRoute, path );
 
 		_client.getResponse().buildRedirect( HTTP_TEMP_REDIRECT, alternativeRoute );
 		return true;
@@ -110,9 +107,9 @@ void http::Router::process() {
 bool http::Router::isProtectedRoute( const std::string &uri ) {
 
 	// Adding protected routes
-	const Location* location = _request.getMatchLocation();
-	if (location && location->auth) {
-		_protectedRoutes.insert(_request.getUri());
+	const Location *location = _request.getMatchLocation();
+	if ( location && location->auth ) {
+		_protectedRoutes.insert( _request.getUri() );
 	}
 
 	for ( std::set< std::string >::const_iterator it = _protectedRoutes.begin(); it != _protectedRoutes.end(); ++it ) {
@@ -142,6 +139,19 @@ bool http::Router::checkAllowedMethods() {
 	}
 
 	const std::vector< std::string > &allowedMethods = _request.getMatchLocation()->methods;
+
+	const Location *location = _request.getMatchLocation();
+	if ( location->isCgi() ) {
+
+		bool methodValid = false;
+		for ( size_t i = 0; i < location->methods.size(); ++i )
+			if ( location->methods[i] == _client.getRequest().getMethod() ) {
+				methodValid = true;
+				break;
+			}
+		if (!methodValid)
+			return false;
+	}
 
 	if ( allowedMethods.empty() )
 		return true;
@@ -202,6 +212,10 @@ void http::Router::executeRequest() {
 		 ( _request.getMethod() == "GET" || _request.getMethod() == "POST" ) ) {
 
 		isCgi = isCgirequest( _request, *_request.getMatchLocation() );
+		if (!isCgi) {
+			_client.getResponse().buildErrorResponse(HTTP_FORBID, _serverConfig);
+			return;
+		}
 	}
 	if ( isCgi ) {
 		launchCgi();

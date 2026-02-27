@@ -1,5 +1,12 @@
 // #include "webserver.hpp"
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
+#define RESET   "\033[0m"
+#define BOLD    "\033[1m"
+#define CYAN    "\033[36m"
+#define YELLOW  "\033[33m"
+#define MAGENTA "\033[35m"
+#define BLUE    "\033[34m"
+#define GREEN   "\033[32m"
 
 void printHttpHeaders( const std::map< std::string, std::string > &headers ) {
 	for ( std::map< std::string, std::string >::const_iterator it = headers.begin(); it != headers.end(); ++it ) {
@@ -9,77 +16,91 @@ void printHttpHeaders( const std::map< std::string, std::string > &headers ) {
 
 void PrintFiles(std::vector<File> &files)
 {
-	for (int i = 0; i < files.size(); i++)
-	{
-		File file = files[i];
-		std::cout << "----- PRINTING FILE " << file.extension << " -----" << std::endl;
-		for (int i = 0; i < file.methods.size() ; i++)
-			std::cout << "--> Methods: " << file.methods[i] << std::endl;
-		std::cout << "Root: " << file.root << std::endl;
-		std::cout << "Index: " << file.index << std::endl;
-		std::cout << "Cgi pass: " << file.cgi_pass << std::endl;
-		std::cout << "Max buffer size: " << file.max_buffer_size << std::endl;
+    if (files.empty()) return;
 
-	}
+    std::cout << MAGENTA << "  FILES CONFIGURATION:" << RESET << std::endl;
+
+    for (size_t i = 0; i < files.size(); i++)
+    {
+        File &file = files[i];
+        // Destaque para a extensão do ficheiro
+        std::cout << "    [File]: " << BOLD << GREEN << file.extension << RESET << std::endl;
+        
+        // Métodos na mesma linha
+        std::cout << "      ├─ Methods: [ ";
+        for (size_t j = 0; j < file.methods.size(); j++)
+            std::cout << file.methods[j] << (j == file.methods.size() - 1 ? "" : ", ");
+        std::cout << " ]" << std::endl;
+
+        std::cout << "      ├─ Root: " << (file.root.empty() ? "(default)" : file.root) << std::endl;
+        std::cout << "      ├─ Index: " << (file.index.empty() ? "(none)" : file.index) << std::endl;
+        std::cout << "      ├─ CGI Pass: " << (file.cgi_pass.empty() ? "Disabled" : file.cgi_pass) << std::endl;
+        
+        // Footer da secção de ficheiro
+        std::cout << "      └─ Max Buffer: " << file.max_buffer_size << " bytes" << std::endl;
+        std::cout << std::endl;
+    }
 }
 
-void PrintLocations(std::vector< Directory > &locations)
+void PrintLocations(std::vector<Directory> &locations)
 {
-	for (int i = 0; i < locations.size(); i++)
-	{
-		Directory location = locations[i];
-		std::cout << "----- PRINTING LOCATION " << " -----" << std::endl;
-		std::cout << "Path: " << location.path << std::endl;
-		for (int i = 0; i < location.methods.size() ; i++)
-			std::cout << "--> Methods: " << location.methods[i] << std::endl;
-		std::cout << "Root: " << location.root << std::endl;
-		std::cout << "Index: " << location.index << std::endl;
-		std::cout << "Auto index: " << location.autoIndex << std::endl;
-		std::cout << "Redirection: " << location.redirection << std::endl;
-		std::cout << "Cgi pass: " << location.cgi_pass << std::endl;
-		
-		for (int i = 0; i < location.cgi_extension.size() ; i++)
-			std::cout << "--> Cgi extension: " << location.cgi_extension[i] << std::endl;
+    for (size_t i = 0; i < locations.size(); i++)
+    {
+        Directory &loc = locations[i];
+        std::cout << YELLOW << "    [Location " << i << "]: " << BOLD << loc.path << RESET << std::endl;
+        
+        // Usar uma indentação fixa para sub-itens
+        std::cout << "      ├─ Root: " << loc.root << std::endl;
+        std::cout << "      ├─ Index: " << loc.index << std::endl;
+        std::cout << "      ├─ Methods: [ ";
+        for (size_t j = 0; j < loc.methods.size(); j++)
+            std::cout << loc.methods[j] << (j == loc.methods.size() - 1 ? "" : ", ");
+        std::cout << " ]" << std::endl;
 
-		for (int i = 0; i < location.cgi_path.size() ; i++)
-			std::cout << "--> Cgi path: " << location.cgi_path[i] << std::endl;
-	
-		for (std::map<std::string, std::string>::iterator it = location.cgi.begin(); it != location.cgi.end(); ++it) {
-			std::cout  << "--> Cgi first: " << it->first << " --> Cgi second: " << it->second << std::endl;
-    	}
+        if (!loc.redirection.empty())
+            std::cout << "      ├─ Redirection: " << loc.redirection << std::endl;
+        
+        std::cout << "      ├─ CGI Pass: " << (loc.cgi_pass.empty() ? "None" : loc.cgi_pass) << std::endl;
+        
+        // Imprimir Mapas de forma limpa
+        if (!loc.cgi.empty()) {
+            std::cout << "      ├─ CGI Mappings:" << std::endl;
+            for (std::map<std::string, std::string>::iterator it = loc.cgi.begin(); it != loc.cgi.end(); ++it) {
+                std::cout  << "      │   └─ " << it->first << " => " << it->second << std::endl;
+            }
+        }
 
-		std::cout << "Upload enabled: " << location.uploadEnable << std::endl;
-		std::cout << "Upload store: " << location.uploadStore << std::endl;
-		std::cout << "Max body size: " << location.max_body_size << std::endl;
-		std::cout << "Max buffer size: " << location.max_buffer_size << std::endl;
-		std::cout << "Auth login page: " << location.auth_login_page << std::endl;
-		std::cout << "Auth: " << location.auth << std::endl;
-
-		std::cout << "\n\n" << std::endl;
-	}
+        std::cout << "      └─ Limits: Body=" << loc.max_body_size << " | Buffer=" << loc.max_buffer_size << std::endl;
+        std::cout << std::endl;
+    }
 }
 
 void PrintConfigs(Configs &configs)
 {
-	for (int i = 0; i < configs.servers.size(); i++)
-	{
-		ServerConfig server = configs.servers[i];
-		std::cout << "----- PRINTING SERVER INFO -----" << std::endl;
-		std::cout << "Root: " << server.root << std::endl;
-		std::cout << "Index: " << server.index << std::endl;
-		std::cout << "Host: " << server.host << std::endl;
-		std::cout << "temp_path: " << server.temp_path << std::endl;
-		std::cout << "Port: " << server.port << std::endl;
-		std::cout << "Server Name: " << server.serverName << std::endl;
-		for (std::map<int, std::string>::iterator it = server.errorPage.begin(); it != server.errorPage.end(); ++it) {
-			std::cout  << "--> Error pages: " << it->second << std::endl;
-    	}
-		std::cout << "Alive timeout: " << server.alive_timeout << std::endl;
-		std::cout << "Auth login page: " << server.auth_login_page << std::endl;
-		PrintLocations(server.directories);
-		// PrintFiles(server.files);
-		std::cout << "\n\n\n";
-	}
+    std::cout << BOLD << MAGENTA << "\n================ CONFIGURATION DUMP ================" << RESET << std::endl;
+
+    for (size_t i = 0; i < configs.servers.size(); i++)
+    {
+        ServerConfig &server = configs.servers[i];
+        std::cout << BLUE << "SERVER [" << i << "]" << RESET << std::endl;
+        std::cout << "  HOST: " << BOLD << server.host << RESET << " | PORT: " << BOLD << server.port << RESET << std::endl;
+        std::cout << "  NAME: " << (server.serverName.empty() ? "(none)" : server.serverName) << std::endl;
+        std::cout << "  ROOT: " << server.root << std::endl;
+        std::cout << "  MAX_BUFFER_SIZE:  " << server.max_buffer_size << std::endl;
+		std::cout << "  MAX_BODY_SIZE:  " << server.max_body_size << std::endl;
+		// Páginas de Erro formatadas
+        std::cout << "  ERROR PAGES: ";
+        if (server.errorPage.empty()) std::cout << "Default";
+        for (std::map<int, std::string>::iterator it = server.errorPage.begin(); it != server.errorPage.end(); ++it) {
+            std::cout << "[" << it->first << " -> " << it->second << "] ";
+        }
+        std::cout << "\n  TIMEOUT: " << server.alive_timeout << "s" << std::endl;
+
+        std::cout << CYAN << "  DIRECTORIES:" << RESET << std::endl;
+        PrintLocations(server.directories);
+        PrintFiles(server.files);
+        std::cout << BOLD << MAGENTA << "----------------------------------------------------" << RESET << std::endl;
+    }
 }
 
 // void printLocation( const Location &location ) {

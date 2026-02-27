@@ -12,7 +12,7 @@ struct Directory;
 struct File;
 
 namespace http {
-	struct Request;
+	class Request;
 	class Response;
 } // namespace http
 

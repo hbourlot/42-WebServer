@@ -46,7 +46,6 @@ struct File {
 	std::string cgi_pass;
 	size_t max_body_size;
 	size_t max_buffer_size;    // Buffer size to write on temp files
-	std::vector< File* > next; // ! Still or not gonna use at all ??
 };
 
 struct Directory {
@@ -68,7 +67,6 @@ struct Directory {
 	bool autoIndex;
 	bool auth;
 	std::string auth_login_page;
-	std::vector< Directory* > next; // ! Still or not gonna use at all ??
 };
 
 enum LocationType {
@@ -84,7 +82,7 @@ struct Location {
 	Location()
 	    : type( 0 ), extension( "" ), path( "" ), methods(), root( "" ), index( "" ), autoIndex( false ),
 	      redirection( "" ), cgi_pass( "" ), cgi_extension(), cgi_path(), cgi(), uploadEnable( false ),
-	      uploadStore( "" ), max_body_size( 0 ), max_buffer_size( 0 ), auth_login_page( "/login" ), auth ( false ) {
+	      uploadStore( "" ), max_body_size( 0 ), max_buffer_size( 0 ), auth ( false ), auth_login_page( "/login" ) {
 		// SafetyInitialization
 	}
 

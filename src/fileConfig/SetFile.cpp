@@ -3,6 +3,9 @@
 #include <utils.hpp>
 
 File::File() {
+
+	max_body_size = 0;
+	max_buffer_size = 0;
 	// String are automatically initialized;
 }
 
@@ -67,7 +70,11 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 	}
 	while ( std::getline( confFd, line ) ) {
 		noSpaceLine = removeSpace( line );
-
+		
+		removeComment(noSpaceLine);
+		if (noSpaceLine.empty() == true)
+			continue;
+		
 		if ( !CheckConf::checkLineFinished( noSpaceLine ) ) // Checks if have more information after the limiter
 			throw std::invalid_argument( "Error: Extra words after End of Line\n" );
 
@@ -106,16 +113,14 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 				return false;
 			break;
 		case CLIENT_MAX_BDY:
-			file.max_body_size = getMaxRequestBody(noSpaceLine);
-			if (file.max_body_size == -1) {
+			if (getMaxRequestBody(noSpaceLine, file.max_body_size) == -1) {
 				std::cerr << "Invalid suffix of max body size" << std::endl;
 				return false;
 			}
 			break;
 
 		case BODY_BUFFER:
-			file.max_buffer_size = getMaxRequestBody(noSpaceLine);
-			if (file.max_body_size == -1) {
+			if (getMaxRequestBody(noSpaceLine, file.max_buffer_size) == -1) {
 				std::cerr << "Invalid suffix of max body size" << std::endl;
 				return false;
 			}

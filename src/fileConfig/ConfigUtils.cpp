@@ -1,4 +1,5 @@
 #include "Config/ConfigUtils.hpp"
+#include "utils.hpp"
 
 struct Directory;
 
@@ -13,7 +14,7 @@ std::string removeSpace( std::string& line ) {
 	return line.substr( i );
 }
 
-long long getMaxRequestBody( std::string& value ) {
+int getMaxRequestBody( std::string& value, size_t& result ) {
 	std::string resultStr = getInfo( value );
 
 	if ( resultStr.empty() == false && resultStr[ resultStr.size() - 1 ] == ';' )
@@ -28,6 +29,13 @@ long long getMaxRequestBody( std::string& value ) {
 			multiplier = 1024 * 1024;
 		else
 			return -1;
+		resultStr.erase(resultStr.size() - 1);
+	}
+
+	if (isDigits(resultStr) == false)
+	{
+		std::cerr << "Invalid max size" << std::endl;
+		return -1;
 	}
 
 	char* end;
@@ -35,7 +43,8 @@ long long getMaxRequestBody( std::string& value ) {
 	if ( num < 0 ) {
 		throw std::runtime_error( "Invalid size number for max size" );
 	}
-	return static_cast< size_t >( num ) * multiplier;
+	result = static_cast< size_t >( num ) * multiplier;
+	return 1;
 }
 
 std::string getInfo( std::string& noSpaceLine ) {
@@ -79,7 +88,7 @@ bool stringIsAlpha(const std::string& str){
 	if (str.empty() )
 		return true;
 
-	for (int i = 0; str.size() > i; i++)
+	for (size_t i = 0; str.size() > i; i++)
 	{
 		if (std::isalpha(str[i]) == false)
 			return false;
