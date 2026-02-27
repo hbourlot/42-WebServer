@@ -203,8 +203,12 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 
 				if (getInfo(noSpaceLine) == "on") // Change the permission to upload files
 					location.autoIndex = true;
-				else
+				else if (getInfo(noSpaceLine) == "off")
 					location.autoIndex = false;
+				else{
+					std::cerr << "The auto index must be 'on' or 'off'" << std::endl;
+					return false;
+				}
 				break;
 			case INDEX:
 				location.index = getInfo(noSpaceLine);
@@ -213,8 +217,10 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 			case CGIPASS:
 				location.cgi_pass = getInfo(noSpaceLine);
 				struct stat buffer;
-				if (stat(location.cgi_pass.c_str(), &buffer) != 0)
+				if (stat(location.cgi_pass.c_str(), &buffer) != 0){
+					std::cerr << "Failed doing the CGI pass" << std::endl;
 					return false;
+				}
 				
 				break;
 
@@ -241,6 +247,7 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 			case AUTH:
 				if (getInfo(noSpaceLine) != "required")
 				{
+					std::cerr << "The auth variable must be 'required'" << std::endl;
 					return false;
 				} // If it is not that word we give a error
 				location.auth = true;
@@ -276,7 +283,7 @@ void SetLocation::setDefaultLocation(ServerConfig &server, Directory &location) 
 			location.max_body_size = 1024;
 	}
 
-	if (location.max_buffer_size != 0) {
+	if (location.max_buffer_size == 0) {
 		if (server.max_buffer_size != 0)
 			location.max_buffer_size = server.max_buffer_size;
 		else
@@ -299,8 +306,6 @@ void SetLocation::setDefaultLocation(ServerConfig &server, Directory &location) 
 			location.root = "/var/www" + location.path;
 		}
 	}
-
-	std::cout << "Auth login " << location.auth_login_page << " Server login " << server.auth_login_page << std::endl;
 
 	if (location.auth_login_page == "/login" && 
 		server.auth_login_page != "/login")
