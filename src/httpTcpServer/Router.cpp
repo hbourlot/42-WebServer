@@ -61,6 +61,8 @@ http::Router::Router( Client &client, ClientEventProcessor &processor )
 	  _serverConfig( client.getServer().getServerInfo() ), _eventProcessor( processor ) {
 }
 
+
+
 bool http::Router::handleRouteProtected() {
 
 	std::string uri = _client.getRequest().getUri();
@@ -75,7 +77,8 @@ bool http::Router::handleRouteProtected() {
 
 		std::string port = ft_to_string( _client.getServer().getServerInfo().port );
 		std::string path = location ? location->auth_login_page : _client.getServer().getServerInfo().root;
-		std::string alternativeRoute = ft_to_string( "http://localhost:" + port );
+		std::string host = _client.getServer().getServerInfo().host;
+		std::string alternativeRoute = ft_to_string( "http://" + host + ":" + port );
 		alternativeRoute = joinPath(alternativeRoute, path);
 
 		_client.getResponse().buildRedirect( HTTP_TEMP_REDIRECT, alternativeRoute );

@@ -134,7 +134,7 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 		return false;
 	}
 
-	setDefaultFile(file);
+	setDefaultFile(file, server);
 	server.files.push_back( file );
 	return true;
 }
