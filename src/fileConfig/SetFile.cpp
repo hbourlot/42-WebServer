@@ -44,6 +44,10 @@ int getTypeFile( std::string &trimmedLine ) { // Function to check the informati
 		return COMMENT;
 	if ( trimmedLine == "{" || trimmedLine == "}" || trimmedLine.size() == 1)
 		return EMPTY;
+	if (trimmedLine == "client_max_body_size")
+		return CLIENT_MAX_BDY;
+	if (trimmedLine == "client_body_buffer_size")
+		return BODY_BUFFER;
 	return 100;
 }
 
@@ -100,6 +104,21 @@ bool SetFile::setFileConfig( std::ifstream &confFd, std::string line, ServerConf
 			
 			if (stat(file.cgi_pass.c_str(), &buffer) != 0)
 				return false;
+			break;
+		case CLIENT_MAX_BDY:
+			file.max_body_size = getMaxRequestBody(noSpaceLine);
+			if (file.max_body_size == -1) {
+				std::cerr << "Invalid suffix of max body size" << std::endl;
+				return false;
+			}
+			break;
+
+		case BODY_BUFFER:
+			file.max_buffer_size = getMaxRequestBody(noSpaceLine);
+			if (file.max_body_size == -1) {
+				std::cerr << "Invalid suffix of max body size" << std::endl;
+				return false;
+			}
 			break;
 		case COMMENT:
 		case EMPTY:

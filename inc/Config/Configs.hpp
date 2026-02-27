@@ -42,6 +42,7 @@ struct File {
 	std::string root;
 	std::string index;
 	std::string cgi_pass;
+	size_t max_body_size;
 	size_t max_buffer_size;    // Buffer size to write on temp files
 	std::vector< File* > next; // ! Still or not gonna use at all ??
 };
