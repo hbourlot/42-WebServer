@@ -141,9 +141,6 @@ static bool parseContentLengthBody( Client &client, const ServerConfig &configs 
 	if ( len > buffer.size() )
 		return false;
 		
-		std::cout << ULONG_MAX << std::endl;
-	std::cout << "request.getMatchLocation()->max_body_size: " << request.getMatchLocation()->max_body_size
-			  << std::endl;
 	if ( len > request.getMatchLocation()->max_body_size ) {
 		client.setDiscardingBody( true );
 		client.setBytesToDiscard( len );
