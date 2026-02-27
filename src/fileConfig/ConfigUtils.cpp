@@ -13,7 +13,7 @@ std::string removeSpace( std::string& line ) {
 	return line.substr( i );
 }
 
-int getMaxRequestBody( std::string& value ) {
+int getMaxRequestBody( std::string& value, size_t& result ) {
 	std::string resultStr = getInfo( value );
 
 	if ( resultStr.empty() == false && resultStr[ resultStr.size() - 1 ] == ';' )
@@ -35,7 +35,8 @@ int getMaxRequestBody( std::string& value ) {
 	if ( num < 0 ) {
 		throw std::runtime_error( "Invalid size number for max size" );
 	}
-	return static_cast< size_t >( num ) * multiplier;
+	result = static_cast< size_t >( num ) * multiplier;
+	return 1;
 }
 
 std::string getInfo( std::string& noSpaceLine ) {
@@ -79,7 +80,7 @@ bool stringIsAlpha(const std::string& str){
 	if (str.empty() )
 		return true;
 
-	for (int i = 0; str.size() > i; i++)
+	for (size_t i = 0; str.size() > i; i++)
 	{
 		if (std::isalpha(str[i]) == false)
 			return false;

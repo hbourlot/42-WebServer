@@ -267,16 +267,14 @@ void removeComment(std::string &line)
 	size_t position = line.find('#');
 	if (position != std::string::npos)
 	{
-		std::cout << "Antes do comentario " << line << std::endl;
 		line = line.substr(0, position);
-		std::cout << "Depois do comentario " << line << std::endl;
 	}
 	return;
 }
 
 bool isDigits(std::string str)
 {
-    for (int i = 0; str.size() > i; i++)
+    for (size_t i = 0; str.size() > i; i++)
 	{
 		if (!(str[i] >= 48 && str[i] <= 57 ))
 			return false;

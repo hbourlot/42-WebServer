@@ -4,7 +4,7 @@
 #include "utils.hpp"
 
 
-class ServerConfig;
+struct ServerConfig;
 // Namespace to use on TCPServer
 using namespace http;
 

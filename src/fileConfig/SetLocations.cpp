@@ -3,7 +3,7 @@
 #include <utils.hpp>
 
 
-class SetFile;
+struct SetFile;
 
 // Directory::Directory() {
 // 	uploadEnable = false;
@@ -14,7 +14,7 @@ class SetFile;
 Directory::Directory()
     : name(""), path(""), methods(), root(""), index(""), redirection(""), cgi_extension(), cgi_path(), cgi(),
       cgi_pass(""), max_body_size(0), max_buffer_size(0), uploadEnable(false), uploadStore(""), autoIndex(false),
-      next(), auth_login_page ("/login"), auth(false) {
+      auth(false), auth_login_page ("/login"), next () {
 	// Safety initialization
 }
 
@@ -150,6 +150,10 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 		if (!CheckConf::checkLineFinished(noSpaceLine)) // Checks if have more information after the limiter
 			throw std::invalid_argument("Error: Extra words after End of Line\n");
 
+		removeComment(noSpaceLine);
+		if (noSpaceLine.empty() == true)
+			continue;
+
 		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
 		if (line.find("location") == std::string::npos) {
 			if (containBrackets(line, IsLocationOpen, emptyString) == false) {
@@ -229,16 +233,14 @@ bool SetLocation::setLocationConfig(std::ifstream &confFd, std::string line, Ser
 				break;
 
 			case CLIENT_MAX_BDY:
-				location.max_body_size = getMaxRequestBody(noSpaceLine);
-				if (location.max_body_size == -1) {
+				if (getMaxRequestBody(noSpaceLine, location.max_body_size) == -1) {
 					std::cerr << "Invalid suffix of max body size" << std::endl;
 					return false;
 				}
 				break;
 
 			case BODY_BUFFER:
-				location.max_buffer_size = getMaxRequestBody(noSpaceLine);
-				if (location.max_body_size == -1) {
+				if (getMaxRequestBody(noSpaceLine, location.max_buffer_size) == -1) {
 					std::cerr << "Invalid suffix of max body size" << std::endl;
 					return false;
 				}

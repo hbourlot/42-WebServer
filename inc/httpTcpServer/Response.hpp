@@ -14,7 +14,7 @@
 enum CgiChunkState { CHUNK_PARSE_HEADERS, CHUNK_STREAM_BODY, CHUNK_FINISHED };
 
 namespace http {
-	struct Request;
+	class Request;
 
 	class Response {
 	  private:
