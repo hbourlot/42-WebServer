@@ -22,7 +22,6 @@ std::string getFilePath(const http::Request &req, const ServerConfig &server) {
 
 	std::string root = server.root;
 	std::string relativePath = req.getUri();
-
 	if (location && !location->root.empty()) {
 		root = location->root;
 		if (!location->path.empty() && req.getUri().rfind(location->path, 0) == 0) {
@@ -42,20 +41,21 @@ std::string getFilePath(const http::Request &req, const ServerConfig &server) {
 }
 
 std::string joinPath(const std::string &base, const std::string &sub) {
-    if (base.empty()) return sub;
-    if (sub.empty()) return base;
+	if (base.empty())
+		return sub;
+	if (sub.empty())
+		return base;
 
-    bool baseHasSlash = (base[base.length() - 1] == '/');
-    bool subHasSlash = (sub[0] == '/');
+	bool baseHasSlash = (base[base.length() - 1] == '/');
+	bool subHasSlash = (sub[0] == '/');
+	if (baseHasSlash && subHasSlash) {
 
-    if (baseHasSlash && subHasSlash) {
+		return base + sub.substr(1);
+	} else if (!baseHasSlash && !subHasSlash) {
+		return base + "/" + sub;
+	}
 
-        return base + sub.substr(1);
-    } else if (!baseHasSlash && !subHasSlash) {
-        return base + "/" + sub;
-    }
-
-    return base + sub;
+	return base + sub;
 }
 
 std::string ft_strtrim(const std::string &str) {
@@ -81,11 +81,10 @@ std::string dateString() {
 // Returns true, if the state is the same. Otherwise we return false
 bool containBrackets(std::string &line, bool &state, std::string extraStringToFind) {
 	// If we find the new string
-	if (!extraStringToFind.empty())
-	{
+	if (!extraStringToFind.empty()) {
 		return (line.find(extraStringToFind) != std::string::npos);
 	}
-	
+
 	if (line.find('#') != std::string::npos) // Check if it is a comment
 	{
 		return true;
@@ -260,6 +259,3 @@ ssize_t writeAll(int fd, const char *buf, size_t len) {
 	}
 	return total;
 }
-
-
-

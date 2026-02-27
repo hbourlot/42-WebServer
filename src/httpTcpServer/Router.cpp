@@ -1,7 +1,7 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include <algorithm>
 
-static bool isCgirequest(const http::Request& request, const Location& location) {
+static bool isCgirequest(const http::Request &request, const Location &location) {
 
 	for (size_t i = 0; i < location.methods.size(); ++i)
 		if (location.methods[i] == request.getMethod()) {
@@ -36,7 +36,7 @@ static bool isCgirequest(const http::Request& request, const Location& location)
 void http::Router::launchCgi() {
 
 	// Create and execute CGI
-	http::Cgi* cgi = new http::Cgi(_request, _serverConfig, &_client);
+	http::Cgi *cgi = new http::Cgi(_request, _serverConfig, &_client);
 	cgi->executeCgi();
 
 	// Store CGI info in client
@@ -48,7 +48,7 @@ void http::Router::launchCgi() {
 	_client.setState(CGI_JUST_STARTED);
 }
 
-http::Router::Router(Client& client, ClientEventProcessor& processor)
+http::Router::Router(Client &client, ClientEventProcessor &processor)
     : _client(client), _request(client.getRequest()), _response(client.getResponse()),
       _serverConfig(client.getServer().getServerInfo()), _eventProcessor(processor) {
 
@@ -58,7 +58,7 @@ http::Router::Router(Client& client, ClientEventProcessor& processor)
 void http::Router::process() {
 
 	std::string uri = _client.getRequest().getUri();
-	Session& session = _eventProcessor._sessionManager.getSession(_client.getSessionID());
+	Session &session = _eventProcessor._sessionManager.getSession(_client.getSessionID());
 	bool isAuthenticated = session.getSessionData("authenticated") == "true";
 
 	if (isProtectedRoute(uri) && !isAuthenticated) {
@@ -80,9 +80,9 @@ void http::Router::process() {
 	executeRequest();
 }
 
-bool http::Router::isProtectedRoute(const std::string& uri) const {
+bool http::Router::isProtectedRoute(const std::string &uri) const {
 	for (std::set<std::string>::const_iterator it = _protectedRoutes.begin(); it != _protectedRoutes.end(); ++it) {
-		const std::string& prefix = *it;
+		const std::string &prefix = *it;
 		if (uri.rfind(prefix, 0) == 0)
 			return true;
 	}
@@ -107,7 +107,7 @@ bool http::Router::checkAllowedMethods() {
 		return false;
 	}
 
-	const std::vector<std::string>& allowedMethods = _request.getMatchLocation()->methods;
+	const std::vector<std::string> &allowedMethods = _request.getMatchLocation()->methods;
 
 	if (allowedMethods.empty())
 		return true;
@@ -182,10 +182,9 @@ void http::Router::executeRequest() {
 	}
 }
 
-
 bool http::Router::routeCgiRequest() {
 
-	http::Request& request = _client.getRequest();
+	http::Request &request = _client.getRequest();
 	if (request.getMethod() == "GET" || request.getMethod() == "POST") {
 		launchCgi();
 		return false;
@@ -228,7 +227,6 @@ void http::Router::handlePost() {
 void http::Router::handleDelete() {
 
 	struct stat st;
-
 	if (stat(_request.getFullPath().c_str(), &st) != 0) {
 		_response.buildErrorResponse(HTTP_NOT_FOUND, _serverConfig);
 		Logs::log(LOGS_ERROR, "File Not Found");
@@ -246,5 +244,5 @@ void http::Router::handleDelete() {
 		return;
 	}
 	_response.buildResponse(HTTP_NO_CONTENT, "");
-	Logs::log(LOGS_ERROR, "File deleted Successfully " + _request.getFullPath());
+	Logs::log(LOGS_WARN, "File deleted Successfully " + _request.getFullPath());
 }
