@@ -3,20 +3,8 @@
 
 static bool isCgirequest(const http::Request& request, const Location& location) {
 
-	// bool methodValid = false;
-	// for (size_t i = 0; i < location.methods.size(); ++i)
-	// 	if (location.methods[i] == request.getMethod()) {
-	// 		methodValid = true;
-	// 		break;
-	// 	}
-
 	if (!location.cgi_pass.empty())
 		return true;
-
-	for (size_t i = 0; i < location.cgi_extension.size(); ++i)
-		if (location.cgi_extension[i] == ".*") { // ".cgi" accept any kind of cgi
-			return true;
-		}
 
 	// Extract file extension from the request path
 	std::string path = request.getFullPath();
@@ -34,6 +22,11 @@ static bool isCgirequest(const http::Request& request, const Location& location)
 			return true;
 		}
 	}
+
+	for (size_t i = 0; i < location.cgi_extension.size(); ++i)
+		if (location.cgi_extension[i] == ".*") { // ".cgi" accept any kind of cgi
+			return true;
+		}
 
 	return false;
 }
