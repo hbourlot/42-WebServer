@@ -37,6 +37,7 @@ namespace http {
 		void dumpEnvp() const;
 
 		bool hasFinished();
+		bool hasSuccessfullyFinished() const;
 
 	  private:
 		pid_t _pid;

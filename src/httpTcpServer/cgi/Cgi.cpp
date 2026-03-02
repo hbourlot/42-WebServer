@@ -236,3 +236,12 @@ bool http::Cgi::hasFinished() {
 	_hasFinished = false;
 	return _hasFinished;
 }
+
+bool http::Cgi::hasSuccessfullyFinished() const {
+
+	int status = _status;
+
+	if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
+		return true;
+	return false;
+}

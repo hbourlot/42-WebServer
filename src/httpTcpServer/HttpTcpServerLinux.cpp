@@ -1,7 +1,6 @@
 
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
-
 static void setSocketAddr(sockaddr_in& socketAddress, int domain, int s_addr, int _port) {
 	socketAddress.sin_family = domain;
 	socketAddress.sin_addr.s_addr = s_addr; // can replace this with a specific IP address if needed
@@ -21,10 +20,6 @@ namespace http {
 	TcpServer::~TcpServer() {
 		close(_serverSocket);
 	}
-
-	std::vector<pollfd>& TcpServer::getVectorPollFds() {
-		return _fds;
-	};
 
 	int TcpServer::initializeServer() {
 
@@ -98,6 +93,16 @@ namespace http {
 		return 0;
 	}
 
+	void TcpServer::setSocketAddress(SocketFD fd, sockaddr_in socketAddress) {
+		_socketAddressMap[fd] = socketAddress;
+	}
+
+	// GETTERS
+
+	std::vector<pollfd>& TcpServer::getVectorPollFds() {
+		return _fds;
+	};
+
 	ServerConfig& TcpServer::getServerInfo() {
 		return _serverInfo;
 	}
@@ -109,10 +114,5 @@ namespace http {
 	pollfd& TcpServer::getServerPOLLFD() {
 		return _serverPOLLFD;
 	}
-
-	void TcpServer::setSocketAddress(SocketFD fd, sockaddr_in socketAddress) {
-		_socketAddressMap[fd] = socketAddress;
-	}
-
 
 } // namespace http

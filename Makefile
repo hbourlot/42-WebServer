@@ -32,13 +32,14 @@ OBJ_DIR         = obj/
 COMPILED_FILES  = 0
 LEN             = 0
 
-CLIENT_FUNC		= client clientManager ClientEventProcessor ClientEventProcessor_cgi parseRequestData cookies
+CLIENT_FUNC		= client clientManager parseRequestData cookies
 CGI_FUNC		= Cgi buildEnvStrings
 UTILS_FUNC		= utils getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations SetFile
 HTTP_FUNC	    = HttpTcpServerLinux Router autoIndex Request Response Logs
 UPL_FUNC		= UploadManager parseMultipart
 SESSION_FUNC	= Session SessionManager
+SRC_FUNC		= main EventProcessor
 
 SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(CLIENT_DIR), $(CLIENT_FUNC:=.cpp)) \
@@ -47,7 +48,7 @@ SRC_FILES       = $(addprefix $(SRC_DIR)$(FILE_DIR), $(FILE_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UTILS_DIR), $(UTILS_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(UPL_DIR), $(UPL_FUNC:=.cpp)) \
 					$(addprefix $(SRC_DIR)$(SESSION_DIR), $(SESSION_FUNC:=.cpp)) \
-					$(addprefix $(SRC_DIR), main.cpp) 
+					$(addprefix $(SRC_DIR), $(SRC_FUNC:=.cpp)) 
 
 OBJS_SRC        = $(addprefix $(OBJ_DIR), $(SRC_FILES:%.cpp=%.o))
 LIB             = libHttpTcpServerLinux.a
@@ -123,10 +124,6 @@ bonus: all
 
 # Shortcuts
 r:
-	@make -s
-	@./$(NAME) ./conf_files/good/webpage.conf
-
-s:
 	@make -s
 	@./$(NAME) ./conf_files/good/webpage.conf
 

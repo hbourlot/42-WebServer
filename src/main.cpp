@@ -3,7 +3,6 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include "utils.hpp"
 
-
 struct ServerConfig;
 // Namespace to use on TCPServer
 using namespace http;
@@ -13,18 +12,18 @@ void cleanup(int signo) {
 	getStopServer() = true;
 }
 
-bool &getStopServer() {
+bool& getStopServer() {
 	static bool s_stopServer = false;
 	return (s_stopServer);
 }
 
-std::vector<TcpServer *> initialize_all_servers(const Configs &configuration) {
+std::vector<TcpServer*> initialize_all_servers(const Configs& configuration) {
 
-	std::vector<TcpServer *> servers;
+	std::vector<TcpServer*> servers;
 
 	for (size_t i = 0; i < configuration.servers.size(); ++i) {
 		// std::cout << "------------------ SERVER " << i << "\n";
-		TcpServer *serv = new TcpServer(configuration.servers[i]);
+		TcpServer* serv = new TcpServer(configuration.servers[i]);
 		// std::cout << "keep -> " << configuration.servers[i].alive_timeout << std::endl;
 		// printFiles(configuration.servers[i].files);
 		// printDirectories(configuration.servers[i].directories);
@@ -35,7 +34,7 @@ std::vector<TcpServer *> initialize_all_servers(const Configs &configuration) {
 	return servers;
 };
 
-std::vector<pollfd> get_all_listening_sockets_from(const std::vector<TcpServer *> &servers) {
+std::vector<pollfd> get_all_listening_sockets_from(const std::vector<TcpServer*>& servers) {
 
 	std::vector<pollfd> allSocketsFD;
 	for (size_t i = 0; i < servers.size(); i++) {
@@ -45,13 +44,13 @@ std::vector<pollfd> get_all_listening_sockets_from(const std::vector<TcpServer *
 	return allSocketsFD;
 };
 
-void free_servers_memory(const std::vector<TcpServer *> &servers) {
+void free_servers_memory(const std::vector<TcpServer*>& servers) {
 	for (size_t i = 0; i < servers.size(); ++i) {
 		delete servers.at(i);
 	}
 }
 
-int main(int ac, char **av) {
+int main(int ac, char** av) {
 
 	struct sigaction sa;
 	sa.sa_handler = cleanup;
@@ -70,16 +69,16 @@ int main(int ac, char **av) {
 
 		if (ReadConfig::setConfigs(av[1], configuration) == false)
 			throw std::invalid_argument("Failed to set the configs");
-		
+
 		PrintConfigs(configuration);
-	} catch (const std::exception &exception) {
+	} catch (const std::exception& exception) {
 		std::cerr << "Failed to initialize servers: " << exception.what() << std::endl;
 		return (-1);
 	}
 
-	std::vector<TcpServer *> servers = initialize_all_servers(configuration);
+	std::vector<TcpServer*> servers = initialize_all_servers(configuration);
 	std::vector<pollfd> all_servers_fds = get_all_listening_sockets_from(servers);
-	ClientEventProcessor handleEvents(all_servers_fds, servers);
+	EventProcessor handleEvents(all_servers_fds, servers);
 
 	handleEvents.run();
 

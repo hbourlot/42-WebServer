@@ -10,10 +10,11 @@
 #include "Upload/UploadManager.hpp"
 #include "utils.hpp"
 
-
 #include <arpa/inet.h>
+#include <cstddef>
 #include <cstdlib>
 #include <dirent.h>
+#include <exception>
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
@@ -23,15 +24,12 @@
 #include <poll.h>
 #include <set>
 #include <sstream>
+#include <stdexcept>
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <vector>
-#include <cstddef>
-#include <exception>
-#include <stdexcept>
-#include <sys/poll.h>
 
 #define DFL_404 "content/defaults/error_404.html"
 #define DFL_405 "content/defaults/error_405.html"
@@ -53,7 +51,7 @@ class Cgi;
 namespace http {
 #include <netinet/in.h> // This pulls sockaddr_in into the http namespace
 
-	class ClientEventProcessor;
+	class EventProcessor;
 	const int BUFFER_SIZE = 65536;
 	const int MAX_READS_PER_EVENT = 3;
 	const int MAX_SENDS_PER_EVENT = 3;
@@ -61,7 +59,6 @@ namespace http {
 	class TcpServer {
 
 	  public:
-		friend class ClientEventProcessor;
 		// Default Constructor
 		TcpServer(ServerConfig server);
 		// Default Destructor
@@ -72,15 +69,18 @@ namespace http {
 			explicit TcpServerException(const std::string& message) : std::runtime_error(message) {
 			}
 		};
-		std::vector<pollfd>& getVectorPollFds();
-
+		
 		std::vector<pollfd> _fds;
-
+		
+		void setSocketAddress(SocketFD fd, sockaddr_in socketAddress);
+		int startServer();
+		
+		// GETTERS
+		std::vector<pollfd>& getVectorPollFds();
 		ServerConfig& getServerInfo();
 		std::map<SocketFD, sockaddr_in>& getSocketAddressRef();
-		void setSocketAddress(SocketFD fd, sockaddr_in socketAddress);
 		pollfd& getServerPOLLFD();
-		int startServer();
+
 
 	  private:
 		ServerConfig _serverInfo;
