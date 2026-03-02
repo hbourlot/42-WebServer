@@ -9,6 +9,9 @@
 #include <sys/poll.h>
 #include <vector>
 
+typedef int SocketFD;
+
+
 namespace http {
 
 	class ClientEventProcessor {

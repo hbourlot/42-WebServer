@@ -1,6 +1,11 @@
 #pragma once
 #include "Logs/Logs.hpp"
+#include "Request.hpp"
 #include "httpTcpServer/HttpStatus.hpp"
+
+#include <cstdlib>
+#include <sys/types.h>
+#include <utility>
 #include <map>
 #include <set>
 #include <sstream>

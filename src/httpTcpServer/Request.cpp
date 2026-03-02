@@ -1,5 +1,4 @@
 #include "httpTcpServer/Request.hpp"
-#include <fcntl.h>
 
 http::Request::Request() : _bodyInDisk(false), _bodyFd(-1), _requestPhase(START) {
 }

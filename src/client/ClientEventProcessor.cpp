@@ -1,5 +1,4 @@
 #include "Client/ClientEventProcessor.hpp"
-#include "httpTcpServer/Cgi.hpp"
 
 http::ClientEventProcessor::ClientEventProcessor(std::vector<pollfd> &allFds, std::vector<TcpServer *> servers)
     : _allSockets(allFds), _servers(servers) {

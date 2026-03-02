@@ -5,11 +5,12 @@
 #include "Config/CheckConf.hpp"
 #include "Config/ReadConfig.hpp"
 #include "HttpStatus.hpp"
-#include "HttpStructs.hpp"
 #include "Logs/Logs.hpp"
 #include "Router.hpp"
 #include "Upload/UploadManager.hpp"
 #include "utils.hpp"
+
+
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <dirent.h>
@@ -27,6 +28,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <vector>
+#include <cstddef>
+#include <exception>
+#include <stdexcept>
+#include <sys/poll.h>
 
 #define DFL_404 "content/defaults/error_404.html"
 #define DFL_405 "content/defaults/error_405.html"
@@ -40,6 +45,8 @@
 #ifndef MSG_NOFLAGS
 #define MSG_NOFLAGS 0
 #endif
+
+typedef int SocketFD;
 
 class Cgi;
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Client/Client.hpp"
-#include "httpTcpServer/HttpStructs.hpp"
 
 class UploadManager {
   private:

@@ -1,8 +1,10 @@
 #pragma once
 
-#include "httpTcpServer/HttpStructs.hpp"
-
+#include "httpTcpServer/Response.hpp"
+#include "httpTcpServer/Request.hpp"
+#include <signal.h>
 #include <string>
+
 namespace http {
 	class TcpServer;
 };

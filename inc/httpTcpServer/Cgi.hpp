@@ -1,7 +1,6 @@
 #pragma once
 #include "Client/Client.hpp"
 #include "Config/Configs.hpp"
-#include "HttpStructs.hpp"
 #include <cstring>
 #include <fcntl.h>
 #include <ios>

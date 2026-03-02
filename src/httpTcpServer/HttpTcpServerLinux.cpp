@@ -1,19 +1,6 @@
-#include "Client/ClientEventProcessor.hpp"
-#include "httpTcpServer/HttpStructs.hpp"
+
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
-#include <arpa/inet.h>
-#include <cstddef>
-#include <exception>
-#include <fcntl.h>
-#include <map>
-#include <netinet/in.h>
-#include <sstream>
-#include <stdexcept>
-#include <sys/poll.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <vector>
 
 static void setSocketAddr(sockaddr_in& socketAddress, int domain, int s_addr, int _port) {
 	socketAddress.sin_family = domain;
