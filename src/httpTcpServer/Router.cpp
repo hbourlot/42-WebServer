@@ -4,11 +4,14 @@
 static bool isCgirequest(const http::Request &request, const Location &location) {
 
 	bool methodValid = false;
+
 	for (size_t i = 0; i < location.methods.size(); ++i)
-		if (location.methods[i] == request.getMethod()) {
-			methodValid = true;
-			break;
-		}
+	if (location.methods[i] == request.getMethod()) {
+		methodValid = true;
+		break;
+	}
+	if(!location.cgi_pass.empty()&& methodValid == true)
+	return(true);
 
 	// Extract file extension from the request path
 	std::string path = request.getUri();
@@ -30,7 +33,7 @@ static bool isCgirequest(const http::Request &request, const Location &location)
 			return true;
 		}
 	}
-
+	std::cout << "Returning false" << std::endl;
 	return false;
 }
 
@@ -208,10 +211,10 @@ void http::Router::executeRequest() {
 	bool isCgi = false;
 	if (_request.getMatchLocation() &&
 	    (!_request.getMatchLocation()->cgi_pass.empty() || _request.getMatchLocation()->isCgi()) &&
-	    (_request.getMethod() == "GET" || _request.getMethod() == "POST")) {
+	    (_request.getMethod() != "DELETE")) {
 
 		isCgi = isCgirequest(_request, *_request.getMatchLocation());
-		if (!isCgi) {
+		if (!isCgi && !_request.getMatchLocation()->isFile()) {
 			_client.getResponse().buildErrorResponse(HTTP_FORBID, _serverConfig);
 			return;
 		}
