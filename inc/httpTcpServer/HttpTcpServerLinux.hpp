@@ -60,7 +60,7 @@ namespace http {
 
 	  public:
 		// Default Constructor
-		TcpServer(ServerConfig server);
+		TcpServer(const ServerConfig& server);
 		// Default Destructor
 		~TcpServer();
 

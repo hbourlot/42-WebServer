@@ -15,6 +15,7 @@
 class Client;
 
 namespace http {
+	class EventProcessor;
 	class Cgi {
 
 	  public:
@@ -40,15 +41,15 @@ namespace http {
 		bool hasSuccessfullyFinished() const;
 
 	  private:
+		http::Request _request;
+		ServerConfig _serverInfo;
+		Client* _client; // Back-reference to client
 		pid_t _pid;
 		int _status;
 		int _stdinFd;
-		int _outputPipe[2];
-		http::Request _request;
-		ServerConfig _serverInfo;
-		std::string _filePath;
 		const sockaddr_in _clientAddress;
-		Client* _client; // Back-reference to client
+		int _outputPipe[2];
+		std::string _filePath;
 		std::vector<char*> _envp;
 		std::vector<std::string> _envStrings;
 		IN_OUT_STATE _state;

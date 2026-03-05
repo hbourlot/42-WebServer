@@ -9,7 +9,7 @@ static void setSocketAddr(sockaddr_in& socketAddress, int domain, int s_addr, in
 
 namespace http {
 
-	TcpServer::TcpServer(ServerConfig server)
+	TcpServer::TcpServer(const ServerConfig& server)
 	    : _serverInfo(server), _serverSocket(), _socketAddress_len(sizeof(sockaddr_in)) {
 		std::string msg("CREATED SERVER ");
 		msg = msg + _serverInfo.host + ":";
