@@ -10,6 +10,9 @@ http::EventProcessor::~EventProcessor(){};
 
 void http::EventProcessor::run() {
 
+	if (_allSockets.empty())
+		return;
+
 	int timeOut = 1 * 60 * 1000; // 10s
 
 	try {
