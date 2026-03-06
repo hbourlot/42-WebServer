@@ -1,4 +1,3 @@
-
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
 static void setSocketAddr(sockaddr_in& socketAddress, int domain, int s_addr, int _port) {
@@ -13,7 +12,7 @@ namespace http {
 	    : _serverInfo(server), _serverSocket(), _socketAddress_len(sizeof(sockaddr_in)) {
 		std::string msg("CREATED SERVER ");
 		msg = msg + _serverInfo.host + ":";
-		msg += ft_to_string(_serverInfo.port);
+		msg += ft_to_string(_serverInfo.port[0]); //MUDAR
 		Logs::log(LOGS_INFO, msg);
 	}
 
@@ -43,8 +42,7 @@ namespace http {
 
 		struct sockaddr_in socketAddress;
 		// Set the socket address struct
-		setSocketAddr(socketAddress, AF_INET, INADDR_ANY, _serverInfo.port);
-
+		setSocketAddr(socketAddress, AF_INET, INADDR_ANY, _serverInfo.port[0]); //MUDAR
 		// Associate socket with a specific IP addr and Port number (sockfd,
 		// sockaddr *, addrlen)
 		if (bind(_serverSocket, (sockaddr*)&socketAddress, _socketAddress_len) < 0) {

@@ -6,7 +6,7 @@ static bool isCgirequest(const http::Request &request, const Location &location)
 
 	if (!location.cgi_pass.empty())
 		return true;
-
+		
 	// Extract file extension from the request path
 	std::string path = request.getFullPath();
 	size_t dotPos = path.find_last_of('.');
@@ -19,19 +19,11 @@ static bool isCgirequest(const http::Request &request, const Location &location)
 	std::string extension = path.substr(dotPos); // Includes the dot (.py, .cgi, etc.)
 
 	// Check if the extension is in the location's CGI extensions
-	for (size_t i = 0; i < location.cgi_extension.size(); ++i)
-	{
-		if (location.cgi_extension[i] == extension /* && methodValid */)
-		{
+	for (size_t i = 0; i < location.cgi_extension.size(); ++i) {
+		if (location.cgi_extension[i] == extension || location.cgi_extension[i] == ".*") {
 			return true;
 		}
 	}
-
-	for (size_t i = 0; i < location.cgi_extension.size(); ++i)
-		if (location.cgi_extension[i] == ".*")
-		{ // ".cgi" accept any kind of cgi
-			return true;
-		}
 
 	return false;
 }
@@ -62,10 +54,9 @@ void http::Router::launchCgi()
 	_client.setState(CGI_JUST_STARTED);
 }
 
-http::Router::Router(Client &client, EventProcessor &processor)
-    : _client(client), _request(client.getRequest()), _response(client.getResponse()),
-      _serverConfig(client.getServer().getServerInfo()), _eventProcessor(processor)
-{
+http::Router::Router(Client& client, EventProcessor& processor)
+	: _client(client), _request(client.getRequest()), _response(client.getResponse()),
+	  _serverConfig(client.getServer().getServerInfo()), _eventProcessor(processor) {
 }
 
 bool http::Router::handleRouteProtected()
@@ -79,7 +70,7 @@ bool http::Router::handleRouteProtected()
 	if (isProtectedRoute(uri) && !isAuthenticated)
 	{
 
-		std::string port = ft_to_string(_client.getServer().getServerInfo().port);
+		std::string port = ft_to_string(_client.getServer().getServerInfo().port[0]); //MUDAR
 		std::string path = location ? location->auth_login_page : _client.getServer().getServerInfo().root;
 		std::string host = _client.getServer().getServerInfo().host;
 		p(host);
