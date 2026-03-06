@@ -86,9 +86,20 @@ time_t getActualTime(){
 bool containBrackets(std::string &line, bool &state, std::string extraStringToFind) {
 	// If we find the new string
 	if (!extraStringToFind.empty()) {
-		return (line.find(extraStringToFind) != std::string::npos);
-	}
+		size_t found = line.find(extraStringToFind);
 
+		if (found != std::string::npos) {
+			size_t pos = found + extraStringToFind.length();
+
+			// ignorar espaços
+			while (pos < line.size() && std::isspace(line[pos]))
+				pos++;
+
+			if (pos < line.size() && line[pos] == '{')
+				return true;
+		}
+		return false;
+	}
 	if (line.find('#') != std::string::npos) // Check if it is a comment
 	{
 		return true;
