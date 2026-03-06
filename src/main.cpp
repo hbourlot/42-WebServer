@@ -21,13 +21,9 @@ std::vector< TcpServer * > initialize_all_servers( const Configs &configuration 
 
 	std::vector< TcpServer * > servers;
 
-	p(configuration.servers.size());
 	for ( size_t i = 0; i < configuration.servers.size(); ++i ) {
 		for ( size_t j = 0; j < configuration.servers[i].port.size(); ++j ) {
 
-			std::cout << "i " << i << "\n";
-			std::cout << configuration.servers[i].host << std::endl;
-			std::cout << configuration.servers[i].port[j] << std::endl;
 			TcpServer *serv = new TcpServer( configuration.servers[i], configuration.servers[i].port[j] );
 			if ( serv->startServer() ) {
 				delete serv;
