@@ -73,11 +73,8 @@ bool http::Router::handleRouteProtected()
 		std::string port = ft_to_string(_client.getServer().getServerInfo().port[0]); //MUDAR
 		std::string path = location ? location->auth_login_page : _client.getServer().getServerInfo().root;
 		std::string host = _client.getServer().getServerInfo().host;
-		p(host);
 		std::string alternativeRoute = ft_to_string("http://" + host + ":" + port);
 		alternativeRoute = joinPath(alternativeRoute, path);
-
-		p(alternativeRoute);
 		_client.getResponse().buildRedirect(HTTP_TEMP_REDIRECT, alternativeRoute);
 		return true;
 	}

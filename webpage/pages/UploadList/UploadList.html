@@ -1,83 +1,97 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Uploaded Files</title>
-    <link rel="stylesheet" href="/css/global.css" />
-    <link rel="stylesheet" href="/components/Footer/styles.module.css" />
-    <link rel="stylesheet" href="/components/Navbar/styles.module.css" />
-    <script src="/js/layout.js"></script>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Uploaded Files</title>
+		<link
+			rel="stylesheet"
+			href="/css/global.css"
+		/>
+		<link
+			rel="stylesheet"
+			href="/components/Footer/styles.module.css"
+		/>
+		<link
+			rel="stylesheet"
+			href="/components/Navbar/styles.module.css"
+		/>
+		<script src="/js/layout.js"></script>
 
-    <style>
-      .file-card {
-        border: 1px solid #ccc;
-        padding: 10px;
-        margin: 5px 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-radius: 8px;
-      }
-      .file-card a {
-        color: #007bff;
-        text-decoration: none;
-        font-weight: bold;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="navbar"></div>
-    <main style="padding: 20px">
-      <h2>Files Available</h2>
-      <div id="file-list">Loading files...</div>
-    </main>
+		<style>
+			.file-card {
+				border: 1px solid #ccc;
+				padding: 10px;
+				margin: 5px 0;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				border-radius: 8px;
+			}
+			.file-card a {
+				color: #007bff;
+				text-decoration: none;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="navbar"></div>
+		<main style="padding: 20px">
+			<h2>Files Available</h2>
+			<div id="file-list">Loading files...</div>
+		</main>
 
-    <script>
-      async function deleteFile(fileName) {
-        if (
-          !confirm(`¿Are you sure the want to delete the file -> ${fileName}?`)
-        )
-          return;
+		<script>
+			async function deleteFile(fileName) {
+				if (
+					!confirm(
+						`¿Are you sure the want to delete the file -> ${fileName}?`,
+					)
+				)
+					return;
 
-        try {
-          const response = await fetch(`.${fileName}`, {
-            method: "DELETE",
-          });
+				try {
+					const response = await fetch(`.${fileName}`, {
+						method: "DELETE",
+					});
 
-          if (response.ok) {
-            alert("File deleted successfully");
-            loadFiles();
-          } else {
-            const errorText = await response.text();
-            alert("Error on delete: " + response.status);
-            console.error("Error details:", errorText);
-          }
-        } catch (error) {
-          console.error("Error on DELETE request:", error);
-          alert("Couldn't connect with the server to delete");
-        }
-      }
-      async function loadFiles() {
-        try {
-          const response = await fetch("/upload-assets/");
-          const text = await response.text();
+					if (response.ok) {
+						alert("File deleted successfully");
+						loadFiles();
+					} else {
+						const errorText = await response.text();
+						alert("Error on delete: " + response.status);
+						console.error("Error details:", errorText);
+					}
+				} catch (error) {
+					console.error("Error on DELETE request:", error);
+					alert("Couldn't connect with the server to delete");
+				}
+			}
+			async function loadFiles() {
+				try {
+					const response = await fetch("/upload-assets/");
+					const text = await response.text();
 
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(text, "text/html");
-          const links = Array.from(doc.querySelectorAll("a"));
+					if (!response.ok) {
+						throw error("❌ Folder not found!");
+					}
+					const parser = new DOMParser();
+					const doc = parser.parseFromString(text, "text/html");
+					const links = Array.from(doc.querySelectorAll("a"));
 
-          const listContainer = document.getElementById("file-list");
-          listContainer.innerHTML = "";
+					const listContainer = document.getElementById("file-list");
+					listContainer.innerHTML = "";
 
-          links.forEach((link) => {
-            const href = link.getAttribute("href");
-            const name = link.textContent;
+					links.forEach((link) => {
+						const href = link.getAttribute("href");
+						const name = link.textContent;
 
-            if (href !== ".." && name !== "..") {
-              const card = document.createElement("div");
-              console.log(href);
-              card.className = "file-card";
-              card.innerHTML = `
+						if (href !== ".." && name !== "..") {
+							const card = document.createElement("div");
+							console.log(href);
+							card.className = "file-card";
+							card.innerHTML = `
 				<span>${name}</span>
 				<div class="actions">
 					<a href=".${href}" target="_blank">Preview</a>
@@ -86,18 +100,18 @@
 					</button>
 				</div>
 			`;
-              listContainer.appendChild(card);
-            }
-          });
-        } catch (error) {
-          console.error("Error loading files:", error);
-          document.getElementById("file-list").innerHTML =
-            "Couldn't load the files.";
-        }
-      }
+							listContainer.appendChild(card);
+						}
+					});
+				} catch (error) {
+					console.error("Error loading files:", error);
+					document.getElementById("file-list").innerHTML =
+						"Couldn't load the files.";
+				}
+			}
 
-      loadFiles();
-    </script>
-    <footer id="footer"></footer>
-  </body>
+			loadFiles();
+		</script>
+		<footer id="footer"></footer>
+	</body>
 </html>

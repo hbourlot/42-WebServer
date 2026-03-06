@@ -213,6 +213,7 @@ void http::EventProcessor::processClientEvents( int index ) {
 
 	if ( _allSockets[index].revents & POLLIN || _allSockets[index].revents & POLLOUT ||
 		 ( _allSockets[index].revents & POLLHUP && cgi ) ) {
+		if ( client )
 			client->setLastAction();
 	}
 }
