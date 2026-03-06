@@ -65,3 +65,35 @@ bool CheckConf::checkLineFinished( std::string &line ) {
 	}
     return true;
 }
+
+bool CheckConf::AddHostToPort(std::string host, std::vector<int> hostPort, std::map<std::string, std::vector<int> >& serversPort)
+{
+    std::map<std::string, std::vector<int> >::iterator it = serversPort.find(host);
+
+    if (it == serversPort.end())
+    {
+        serversPort.insert(std::make_pair(host, hostPort));
+        return true;
+    }
+
+    std::vector<int>& existingPorts = it->second;
+
+    for (size_t i = 0; i < hostPort.size(); i++)
+    {
+        bool found = false;
+
+        for (size_t j = 0; j < existingPorts.size(); j++)
+        {
+            if (hostPort[i] == existingPorts[j])
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            existingPorts.push_back(hostPort[i]);
+    }
+
+    return true;
+}

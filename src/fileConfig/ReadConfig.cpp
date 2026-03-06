@@ -5,7 +5,6 @@
 #include <utils.hpp>
 
 ServerConfig::ServerConfig() {
-	port = 0;
 	max_body_size = 0;
 	auth_login_page = "/login";
 	root = "./";
@@ -85,9 +84,9 @@ int getTypeServer(std::string &trimmedLine) { // Return the type of information 
 	return 100;
 }
 
-bool isValidPort(const std::string &str, int &port) {
+bool isValidPort(const std::string &str, std::vector<int> &vectorPort) {
 	std::stringstream ss(str);
-
+	int port = 0;
 	if (!(ss >> port)) {
 		return false;
 	}
@@ -101,6 +100,7 @@ bool isValidPort(const std::string &str, int &port) {
 		return false;
 	}
 
+	vectorPort.push_back(port);
 	return true;
 }
 
@@ -117,7 +117,6 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 		return false;
 	}
 
-	server.port = 0;
 	server.max_body_size = 0; // Set the max value by default
 	server.max_buffer_size = 0;
 	server.alive_timeout = 3;
@@ -246,7 +245,13 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 		return false;
 	}
 
+	
 	ReadConfig::setDefaultServer(server);
+	if (CheckConf::AddHostToPort(server.host, server.port, configs.serversPort) == false)
+	{
+		std::cerr << "You are signing the same port to the same Ip" << std::endl;
+		return false;
+	}
 	configs.servers.push_back(server); // Send the information for the main config
 	return (true);
 }
@@ -295,9 +300,9 @@ void ReadConfig::setDefaultServer(ServerConfig &server) {
 		server.host = "127.0.0.1";
 	}
 
-	if (server.port == 0) {
+	if (server.port.size() == 0) {
 		std::cout << "Server port 0 -- Setting to 8080 ✅" << std::endl;
-		server.port = 8080;
+		server.port.push_back(8080);
 	}
 
 	if (server.serverName.empty()) {

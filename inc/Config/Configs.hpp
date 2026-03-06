@@ -1,7 +1,4 @@
 #pragma once
-
-
-#include <sys/stat.h>
 #include "CheckConf.hpp"
 #include "ConfigUtils.hpp"
 #include <cstdlib>
@@ -13,6 +10,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <sys/stat.h>
 
 #define HOST 1
 #define PORT 2
@@ -146,7 +144,7 @@ struct ServerConfig {
 	std::string index;                      // Stores the index
 	std::string host;                       // Stores the host IP
 	std::string temp_path;                  // Stores the temp path for temp files
-	int port;                               // Stores the port to listen
+	std::vector<int> port;                               // Stores the port to listen
 	std::string serverName;                 // Stores the name server
 	std::map< int, std::string > errorPage; // Stores the error pages
 	size_t max_body_size;                   // Stores the maximum requests that the client can do
@@ -162,4 +160,5 @@ struct ServerConfig {
 
 struct Configs {
 	std::vector< ServerConfig > servers; // Will store the servers
+	std::map<std::string, std::vector<int> > serversPort; //
 };

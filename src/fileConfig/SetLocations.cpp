@@ -2,7 +2,6 @@
 #include "Config/SetLocations.hpp"
 #include <utils.hpp>
 
-
 struct SetFile;
 
 // Directory::Directory() {
