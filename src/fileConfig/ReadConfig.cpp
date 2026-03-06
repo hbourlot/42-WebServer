@@ -128,6 +128,11 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			continue;
 
 		trimmedLine = noSpaceLine.substr(0, noSpaceLine.find(' '));
+		if (trimmedLine[0] == '}') // Finish the server info
+		{
+			IsServerOpen = false;
+			break;
+		}
 
 		if (!CheckConf::checkLineFinished(noSpaceLine))
 			throw std::invalid_argument("Error: Extra words after End of Line\n");
