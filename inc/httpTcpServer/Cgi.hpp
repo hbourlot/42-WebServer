@@ -60,6 +60,7 @@ namespace http {
 		void dupCgiFds();
 		void buildEnvStrings();
 		int prepareCgiInputFile();
+		int validateFilePermision();
 	};
 
 }; // namespace http
