@@ -213,8 +213,6 @@ void http::EventProcessor::processClientEvents( int index ) {
 
 	if ( _allSockets[index].revents & POLLIN || _allSockets[index].revents & POLLOUT ||
 		 ( _allSockets[index].revents & POLLHUP && cgi ) ) {
-			std::cout << "HERE\n";
-			sleep(1);
 			client->setLastAction();
 	}
 }
