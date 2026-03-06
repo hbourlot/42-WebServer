@@ -1,23 +1,26 @@
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 #include <algorithm>
 
-static bool isCgirequest(const http::Request &request, const Location &location) {
+static bool isCgirequest(const http::Request& request, const Location& location) {
 
-	bool methodValid = false;
-
-	for (size_t i = 0; i < location.methods.size(); ++i)
-	if (location.methods[i] == request.getMethod()) {
-		methodValid = true;
-		break;
-	}
-	if(!location.cgi_pass.empty()&& methodValid == true)
-	return(true);
+	if (!location.cgi_pass.empty())
+		return true;
 
 	// Extract file extension from the request path
-	std::string path = request.getUri();
+	std::string path = request.getFullPath();
 	size_t dotPos = path.find_last_of('.');
+
 	if (dotPos == std::string::npos) {
 		return false; // No extension found
+	}
+
+	std::string extension = path.substr(dotPos); // Includes the dot (.py, .cgi, etc.)
+
+	// Check if the extension is in the location's CGI extensions
+	for (size_t i = 0; i < location.cgi_extension.size(); ++i) {
+		if (location.cgi_extension[i] == extension /* && methodValid */) {
+			return true;
+		}
 	}
 
 	for (size_t i = 0; i < location.cgi_extension.size(); ++i)
@@ -25,21 +28,12 @@ static bool isCgirequest(const http::Request &request, const Location &location)
 			return true;
 		}
 
-	std::string extension = path.substr(dotPos); // Includes the dot (.py, .cgi, etc.)
-
-	// Check if the extension is in the location's CGI extensions
-	for (size_t i = 0; i < location.cgi_extension.size(); ++i) {
-		if (location.cgi_extension[i] == extension && methodValid) {
-			return true;
-		}
-	}
-	std::cout << "Returning false" << std::endl;
 	return false;
 }
 
 void http::Router::launchCgi() {
 
-	http::Cgi *cgi = new http::Cgi(_request, _serverConfig, &_client);
+	http::Cgi* cgi = new http::Cgi(_request, _serverConfig, &_client);
 
 	if (!cgi) {
 		_client.getResponse().buildErrorResponse(HTTP_SERVER_ERR, _client.getServer().getServerInfo());
@@ -60,7 +54,7 @@ void http::Router::launchCgi() {
 	_client.setState(CGI_JUST_STARTED);
 }
 
-http::Router::Router(Client &client, ClientEventProcessor &processor)
+http::Router::Router(Client& client, EventProcessor& processor)
     : _client(client), _request(client.getRequest()), _response(client.getResponse()),
       _serverConfig(client.getServer().getServerInfo()), _eventProcessor(processor) {
 }
@@ -68,18 +62,20 @@ http::Router::Router(Client &client, ClientEventProcessor &processor)
 bool http::Router::handleRouteProtected() {
 
 	std::string uri = _client.getRequest().getUri();
-	Session &session = _eventProcessor._sessionManager.getSession(_client.getSessionID());
+	Session& session = _eventProcessor.getSessionManager().getSession(_client.getSessionID());
 	bool isAuthenticated = session.getSessionData("authenticated") == "true";
-	const Location *location = _request.getMatchLocation();
+	const Location* location = _request.getMatchLocation();
 
 	if (isProtectedRoute(uri) && !isAuthenticated) {
 
 		std::string port = ft_to_string(_client.getServer().getServerInfo().port);
 		std::string path = location ? location->auth_login_page : _client.getServer().getServerInfo().root;
 		std::string host = _client.getServer().getServerInfo().host;
+		p(host);
 		std::string alternativeRoute = ft_to_string("http://" + host + ":" + port);
 		alternativeRoute = joinPath(alternativeRoute, path);
 
+		p(alternativeRoute);
 		_client.getResponse().buildRedirect(HTTP_TEMP_REDIRECT, alternativeRoute);
 		return true;
 	}
@@ -106,16 +102,16 @@ void http::Router::process() {
 	executeRequest();
 }
 
-bool http::Router::isProtectedRoute(const std::string &uri) {
+bool http::Router::isProtectedRoute(const std::string& uri) {
 
 	// Adding protected routes
-	const Location *location = _request.getMatchLocation();
+	const Location* location = _request.getMatchLocation();
 	if (location && location->auth) {
 		_protectedRoutes.insert(_request.getUri());
 	}
 
 	for (std::set<std::string>::const_iterator it = _protectedRoutes.begin(); it != _protectedRoutes.end(); ++it) {
-		const std::string &prefix = *it;
+		const std::string& prefix = *it;
 		if (uri.rfind(prefix, 0) == 0)
 			return true;
 	}
@@ -140,9 +136,9 @@ bool http::Router::checkAllowedMethods() {
 		return false;
 	}
 
-	const std::vector<std::string> &allowedMethods = _request.getMatchLocation()->methods;
+	const std::vector<std::string>& allowedMethods = _request.getMatchLocation()->methods;
 
-	const Location *location = _request.getMatchLocation();
+	const Location* location = _request.getMatchLocation();
 	if (location->isCgi()) {
 
 		bool methodValid = false;
@@ -211,10 +207,9 @@ void http::Router::executeRequest() {
 	bool isCgi = false;
 	if (_request.getMatchLocation() &&
 	    (!_request.getMatchLocation()->cgi_pass.empty() || _request.getMatchLocation()->isCgi()) &&
-	    (_request.getMethod() != "DELETE")) {
-
+	    (_request.getMethod() == "GET" || _request.getMethod() == "POST")) {
 		isCgi = isCgirequest(_request, *_request.getMatchLocation());
-		if (!isCgi && !_request.getMatchLocation()->isFile()) {
+		if (!isCgi) {
 			_client.getResponse().buildErrorResponse(HTTP_FORBID, _serverConfig);
 			return;
 		}

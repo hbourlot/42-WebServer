@@ -1,4 +1,4 @@
-#include "Client/ClientEventProcessor.hpp"
+#include "httpTcpServer/EventProcessor.hpp"
 
 std::string getSessionIdFromCookies(const std::string& cookieHeader) {
 	std::string sessionId;

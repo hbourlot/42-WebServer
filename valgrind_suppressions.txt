@@ -1,0 +1,181 @@
+# Suppressions for expected STL/container allocations reported as "still reachable"
+# from config parsing / ServerConfig copies.
+
+{
+   webserv_readconfig_locations_still_reachable
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   fun:std::__new_allocator<Location>::allocate*
+   fun:std::_Vector_base<Location,*>::_M_allocate*
+   fun:std::vector<Location,*>::operator=*
+   fun:ReadConfig::setServerLocations*
+}
+
+{
+   webserv_serverconfig_copy_still_reachable_locations
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   fun:std::__new_allocator<Location>::allocate*
+   fun:std::_Vector_base<Location,*>::_M_create_storage*
+   fun:std::vector<Location,*>::vector*
+   fun:ServerConfig::ServerConfig*
+}
+
+{
+   webserv_locations_still_reachable
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   fun:std::__new_allocator<Location>::allocate*
+   fun:std::_Vector_base<Location, std::allocator<Location> >::_M_allocate*
+   fun:ReadConfig::setServerLocations*
+}
+
+{
+   webserv_serverconfig_copy_still_reachable_directories
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   fun:std::__new_allocator<Directory>::allocate*
+   fun:std::_Vector_base<Directory,*>::_M_create_storage*
+   fun:std::vector<Directory,*>::vector*
+   fun:ServerConfig::ServerConfig*
+}
+
+{
+   webserv_libstdcpp_reachable_fallback
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   obj:*/libstdc++.so*
+}
+
+{
+   <stl_allocations>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   obj:*/libstdc++*
+}
+{
+   <string_constructors>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   fun:*basic_string*
+}
+{
+   <vector_allocations>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   fun:*vector*
+}
+
+{
+  webserv_client_map_reachable
+  Memcheck:Leak
+  match-leak-kinds: reachable
+  fun:_Znwm
+  fun:std::__new_allocator<std::_Rb_tree_node<std::pair<int const, Client*> > >::allocate*
+  fun:ClientManager::addClient*
+}
+
+{
+  webserv_socketaddr_map_reachable
+  Memcheck:Leak
+  match-leak-kinds: reachable
+  fun:_Znwm
+  fun:std::__new_allocator<std::_Rb_tree_node<std::pair<int const, sockaddr_in> > >::allocate*
+  fun:http::TcpServer::setSocketAddress*
+}
+
+{
+  webserv_serverconfig_vector_reachable
+  Memcheck:Leak
+  match-leak-kinds: reachable
+  fun:_Znwm
+  fun:std::__new_allocator<ServerConfig>::allocate*
+  fun:ReadConfig::setServerConfig*
+}
+
+{
+  webserv_serverconfig_copy_reachable
+  Memcheck:Leak
+  match-leak-kinds: reachable
+  fun:_Znwm
+  fun:ServerConfig::ServerConfig*
+}
+
+{
+  webserv_httpstatus_statics
+  Memcheck:Leak
+  match-leak-kinds: reachable
+  fun:calloc
+  fun:__new_exitfn
+  fun:__static_initialization_and_destruction_0*
+}
+
+{
+  webserv_serverconfig_vector_reachable
+  Memcheck:Leak
+  match-leak-kinds: reachable
+  fun:_Znwm
+  fun:std::__new_allocator<ServerConfig>::allocate*
+  fun:std::_Vector_base<ServerConfig, std::allocator<ServerConfig> >::_M_allocate*
+  fun:std::vector<ServerConfig, std::allocator<ServerConfig> >::_M_realloc_insert*
+  fun:ReadConfig::setServerConfig*
+}
+
+{
+  webserv_clientmanager_addclient_reachable
+  Memcheck:Leak
+  match-leak-kinds: reachable
+  fun:_Znwm
+  fun:ClientManager::addClient*
+}
+
+{
+  webserv_serverconfig_vector_reachable
+  Memcheck:Leak
+  match-leak-kinds: reachable
+  fun:_Znwm
+  fun:std::__new_allocator<ServerConfig>::allocate*
+  fun:std::_Vector_base<ServerConfig, std::allocator<ServerConfig> >::_M_allocate*
+  fun:std::vector<ServerConfig, std::allocator<ServerConfig> >::_M_realloc_insert*
+  fun:ReadConfig::setServerConfig*
+}
+
+{
+  webserv_serverconfig_directories_reachable
+  Memcheck:Leak
+  match-leak-kinds: reachable
+  fun:_Znwm
+  fun:std::__new_allocator<Directory>::allocate*
+  fun:std::_Vector_base<Directory, std::allocator<Directory> >::_M_create_storage*
+  fun:std::vector<Directory, std::allocator<Directory> >::vector*
+  fun:ServerConfig::ServerConfig*
+}
+
+{
+  webserv_serverconfig_locations_reachable
+  Memcheck:Leak
+  match-leak-kinds: reachable
+  fun:_Znwm
+  fun:std::__new_allocator<Location>::allocate*
+  fun:std::_Vector_base<Location, std::allocator<Location> >::_M_allocate*
+  fun:std::vector<Location, std::allocator<Location> >::_M_allocate_and_copy*
+  fun:ReadConfig::setServerLocations*
+}
+{
+  webserv_serverconfig_locations_copy_reachable
+  Memcheck:Leak
+  match-leak-kinds: reachable
+  fun:_Znwm
+  fun:std::__new_allocator<Location>::allocate*
+  fun:std::_Vector_base<Location, std::allocator<Location> >::_M_create_storage*
+  fun:std::vector<Location, std::allocator<Location> >::vector*
+  fun:ServerConfig::ServerConfig*
+}

@@ -1,19 +1,5 @@
-#include "Client/ClientEventProcessor.hpp"
-#include "httpTcpServer/HttpStructs.hpp"
-#include "httpTcpServer/HttpTcpServerLinux.hpp"
 
-#include <arpa/inet.h>
-#include <cstddef>
-#include <exception>
-#include <fcntl.h>
-#include <map>
-#include <netinet/in.h>
-#include <sstream>
-#include <stdexcept>
-#include <sys/poll.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <vector>
+#include "httpTcpServer/HttpTcpServerLinux.hpp"
 
 static void setSocketAddr(sockaddr_in& socketAddress, int domain, int s_addr, int _port) {
 	socketAddress.sin_family = domain;
@@ -23,7 +9,7 @@ static void setSocketAddr(sockaddr_in& socketAddress, int domain, int s_addr, in
 
 namespace http {
 
-	TcpServer::TcpServer(ServerConfig server)
+	TcpServer::TcpServer(const ServerConfig& server)
 	    : _serverInfo(server), _serverSocket(), _socketAddress_len(sizeof(sockaddr_in)) {
 		std::string msg("CREATED SERVER ");
 		msg = msg + _serverInfo.host + ":";
@@ -34,10 +20,6 @@ namespace http {
 	TcpServer::~TcpServer() {
 		close(_serverSocket);
 	}
-
-	std::vector<pollfd>& TcpServer::getVectorPollFds() {
-		return _fds;
-	};
 
 	int TcpServer::initializeServer() {
 
@@ -111,6 +93,16 @@ namespace http {
 		return 0;
 	}
 
+	void TcpServer::setSocketAddress(SocketFD fd, sockaddr_in socketAddress) {
+		_socketAddressMap[fd] = socketAddress;
+	}
+
+	// GETTERS
+
+	std::vector<pollfd>& TcpServer::getVectorPollFds() {
+		return _fds;
+	};
+
 	ServerConfig& TcpServer::getServerInfo() {
 		return _serverInfo;
 	}
@@ -122,10 +114,5 @@ namespace http {
 	pollfd& TcpServer::getServerPOLLFD() {
 		return _serverPOLLFD;
 	}
-
-	void TcpServer::setSocketAddress(SocketFD fd, sockaddr_in socketAddress) {
-		_socketAddressMap[fd] = socketAddress;
-	}
-
 
 } // namespace http

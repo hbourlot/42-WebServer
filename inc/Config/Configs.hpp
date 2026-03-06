@@ -1,4 +1,7 @@
 #pragma once
+
+
+#include <sys/stat.h>
 #include "CheckConf.hpp"
 #include "ConfigUtils.hpp"
 #include <cstdlib>

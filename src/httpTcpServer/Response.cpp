@@ -1,10 +1,5 @@
 #include "httpTcpServer/Response.hpp"
-#include <cstdlib>
-#include <sstream>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <utility>
+
 
 http::Response::Response()
     : _protocol("HTTP/1.1"), _range("", ""), _statusCode(""), _statusMsg(""), _isChunked(false),

@@ -1,11 +1,11 @@
 #pragma once
 #include "Client/Client.hpp"
-#include "Client/ClientEventProcessor.hpp"
 #include "Config/Configs.hpp"
+#include "httpTcpServer/EventProcessor.hpp"
 #include "httpTcpServer/HttpStatus.hpp"
 namespace http {
 
-	class ClientEventProcessor;
+	class EventProcessor;
 	class Cgi;
 
 	class Router {
@@ -15,7 +15,7 @@ namespace http {
 		Request& _request;
 		Response& _response;
 		ServerConfig& _serverConfig;
-		ClientEventProcessor& _eventProcessor;
+		EventProcessor& _eventProcessor;
 		std::set<std::string> _protectedRoutes;
 
 		bool isProtectedRoute(const std::string& uri);
@@ -25,13 +25,11 @@ namespace http {
 		void executeRequest();
 
 	  public:
-		Router(Client& client, ClientEventProcessor& processor);
+		Router(Client& client, EventProcessor& processor);
 
 		void process();
 
-
-		private:
-
+	  private:
 		bool handleRouteProtected();
 		void launchCgi();
 		void handleGet();
