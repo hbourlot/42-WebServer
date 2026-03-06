@@ -1,52 +1,189 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="UTF-8" />
 
-		<title>WebServer</title>
-		<link
-			rel="stylesheet"
-			href="/css/global.css"
-		/>
-		<link
-			rel="stylesheet"
-			href="/components/Footer/styles.module.css"
-		/>
-		<link
-			rel="stylesheet"
-			href="/components/Navbar/styles.module.css"
-		/>
-		<link
-			rel="stylesheet"
-			href="/pages/Services/styles.module.css"
-		/>
-		<link
-			rel="icon"
-			href="/assets/wolfMoonIco.png"
-			type="image/x-icon"
-		/>
-		<script src="/js/layout.js"></script>
-	</head>
+<head>
+	<meta charset="UTF-8" />
+	<title>WebServer</title>
 
-	<body>
-		<header id="navbar"></header>
-		<div class="upload">
-			<h2>Upload Files</h2>
-			<p>Welcome! You can upload any type of file below.</p>
-			<form
-				action="/upload"
-				method="POST"
-				enctype="multipart/form-data"
-			>
-				<input
-					type="file"
-					name="media"
-					hidden
-					required
-				/>
-				<button type="submit">📤 Upload File</button>
-			</form>
+	<link rel="stylesheet" href="/css/global.css" />
+	<link rel="stylesheet" href="/components/Footer/styles.module.css" />
+	<link rel="stylesheet" href="/components/Navbar/styles.module.css" />
+	<link rel="stylesheet" href="/pages/Services/styles.module.css" />
+
+	<link rel="icon" href="/assets/wolfMoonIco.png" type="image/x-icon" />
+
+	<script src="/js/layout.js"></script>
+
+	<style>
+		.upload {
+			width: 400px;
+			margin: 60px auto;
+			padding: 30px;
+			border-radius: 10px;
+			background: #1e1e1e;
+			color: white;
+			text-align: center;
+		}
+
+		.drop-area {
+			border: 2px dashed #555;
+			padding: 30px;
+			margin-top: 15px;
+			cursor: pointer;
+			transition: 0.2s;
+		}
+
+		.drop-area.dragover {
+			border-color: #4CAF50;
+			background: #2b2b2b;
+		}
+
+		button {
+			margin-top: 15px;
+			padding: 10px 20px;
+			border: none;
+			border-radius: 6px;
+			background: #4CAF50;
+			color: white;
+			cursor: pointer;
+		}
+
+		progress {
+			width: 100%;
+			margin-top: 15px;
+		}
+
+		#fileName {
+			margin-top: 10px;
+			font-size: 0.9em;
+			color: #ccc;
+		}
+	</style>
+</head>
+
+<body>
+
+<header id="navbar"></header>
+
+<div class="upload">
+
+	<h2>Upload Files</h2>
+	<p>Drag & drop or select a file</p>
+
+	<form id="uploadForm">
+
+		<div class="drop-area" id="dropArea">
+			📁 Drop file here or click
+			<input type="file" id="fileInput" name="media" hidden required>
 		</div>
-		<footer id="footer"></footer>
-	</body>
+
+		<div id="fileName"></div>
+
+		<button type="submit">📤 Upload</button>
+
+		<progress id="progressBar" value="0" max="100" hidden></progress>
+
+	</form>
+
+	<p id="result"></p>
+
+</div>
+
+<footer id="footer"></footer>
+
+<script>
+
+const form = document.getElementById("uploadForm");
+const dropArea = document.getElementById("dropArea");
+const fileInput = document.getElementById("fileInput");
+const fileName = document.getElementById("fileName");
+const result = document.getElementById("result");
+const progressBar = document.getElementById("progressBar");
+
+
+// abrir selector al hacer click
+dropArea.addEventListener("click", () => {
+	fileInput.click();
+});
+
+
+// mostrar nombre del archivo
+fileInput.addEventListener("change", () => {
+	if (fileInput.files.length > 0) {
+		fileName.innerText = "Selected: " + fileInput.files[0].name;
+	}
+});
+
+
+// drag & drop
+dropArea.addEventListener("dragover", (e) => {
+	e.preventDefault();
+	dropArea.classList.add("dragover");
+});
+
+dropArea.addEventListener("dragleave", () => {
+	dropArea.classList.remove("dragover");
+});
+
+dropArea.addEventListener("drop", (e) => {
+	e.preventDefault();
+	dropArea.classList.remove("dragover");
+
+	const files = e.dataTransfer.files;
+	if (files.length > 0) {
+		fileInput.files = files;
+		fileName.innerText = "Selected: " + files[0].name;
+	}
+});
+
+
+// upload
+form.addEventListener("submit", function(e) {
+
+	e.preventDefault();
+
+	if (!fileInput.files.length) {
+		result.innerText = "❌ Please select a file";
+		return;
+	}
+
+	const formData = new FormData();
+	formData.append("media", fileInput.files[0]);
+
+	const xhr = new XMLHttpRequest();
+
+	xhr.open("POST", "/upload");
+
+	progressBar.hidden = false;
+
+	xhr.upload.addEventListener("progress", (e) => {
+		if (e.lengthComputable) {
+			const percent = (e.loaded / e.total) * 100;
+			progressBar.value = percent;
+		}
+	});
+
+	xhr.onload = () => {
+
+		if (xhr.status === 200) {
+			result.innerText = "✅ Upload successful";
+			progressBar.value = 100;
+		}
+		else {
+			result.innerText = "❌ Server error: " + xhr.status;
+		}
+
+	};
+
+	xhr.onerror = () => {
+		result.innerText = "❌ Network error";
+	};
+
+	xhr.send(formData);
+
+});
+
+</script>
+
+</body>
 </html>

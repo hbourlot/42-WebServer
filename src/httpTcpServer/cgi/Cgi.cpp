@@ -114,11 +114,10 @@ void http::Cgi::killProcess()
 
 int http::Cgi::validateFilePermision()
 {
-	std::cout << this->getFilePath() << std::endl;
 	struct stat st;
 	if (stat(this->_filePath.c_str(), &st) != 0)
 	{
-		std::cout << "File doesnot exist\n";
+		Logs::log(LOGS_ERROR, "CGI execution failed for script '" + this->getFilePath() + "': File doesn't exist");
 		return (-1);
 	}
 	if (!(st.st_mode & X_OK))

@@ -1,15 +1,17 @@
 #pragma once
 
-#include "httpTcpServer/Response.hpp"
 #include "httpTcpServer/Request.hpp"
+#include "httpTcpServer/Response.hpp"
 #include <signal.h>
 #include <string>
 
-namespace http {
+namespace http
+{
 	class TcpServer;
 };
 
-enum IN_OUT_STATE {
+enum IN_OUT_STATE
+{
 	RESET,
 	READ_SUCCESS = 1,
 	READ_INCOMPLETE,
@@ -26,7 +28,8 @@ enum IN_OUT_STATE {
 	CGI_COMPLETED,
 };
 
-class Client {
+class Client
+{
 
   public:
 	Client(int fd, http::TcpServer &server);
@@ -63,7 +66,7 @@ class Client {
 
 	// SessionID Functions
 	std::string getSessionID() const;
-	void setSessionID(const std::string& sessionID);
+	void setSessionID(const std::string &sessionID);
 
 	// CGI process tracking
 	pid_t getCgiPid() const;
@@ -79,9 +82,8 @@ class Client {
 	bool getDiscardingBody();
 	void setDiscardingBody(bool discardingBody);
 
-	void incrementIdleTicks();
-	int getIdleTicks();
-	void resetIdleTicks();
+	time_t getLastAction();
+	void setLastAction();
 
   private:
 	http::TcpServer &_server;
@@ -103,8 +105,8 @@ class Client {
 	http::Response _response;
 
 	std::string _sessionID;
-	int _idleTicks;
+	time_t _lastAction;
 };
 
 void ensureSessionId(Client &client);
-std::string getSessionIdFromCookies(const std::string& cookieHeader);
+std::string getSessionIdFromCookies(const std::string &cookieHeader);
