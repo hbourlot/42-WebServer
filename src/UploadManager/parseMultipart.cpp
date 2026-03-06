@@ -75,7 +75,6 @@ static bool saveFile(const std::string &filename, const std::string &content, co
 bool UploadManager::parseMultipart(const Location &matchLocation, Client &client, const ServerConfig &serverInfo) {
 
 	std::string boundary = extractBoundary(client.getRequest());
-
 	if (boundary.empty()) {
 		client.getResponse().buildErrorResponse(HTTP_BAD_REQ, serverInfo);
 		Logs::log(LOGS_ERROR, "400 Bad Request: No boundary.");

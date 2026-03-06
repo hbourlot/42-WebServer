@@ -60,7 +60,7 @@ namespace http {
 
 	  public:
 		// Default Constructor
-		TcpServer(const ServerConfig& server);
+		TcpServer(const ServerConfig& server, int portIndex);
 		// Default Destructor
 		~TcpServer();
 
@@ -80,6 +80,7 @@ namespace http {
 		ServerConfig& getServerInfo();
 		std::map<SocketFD, sockaddr_in>& getSocketAddressRef();
 		pollfd& getServerPOLLFD();
+		int port;
 
 
 	  private:

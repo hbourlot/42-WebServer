@@ -77,6 +77,10 @@ std::string dateString() {
 		date.erase(date.length() - 1);
 	return (date);
 }
+time_t getActualTime(){
+	time_t actual= time(0);
+	return(actual);
+}
 
 // Returns true, if the state is the same. Otherwise we return false
 bool containBrackets(std::string &line, bool &state, std::string extraStringToFind) {
@@ -236,7 +240,7 @@ std::string createUploadBody() {
 	html += "</head>\n<body>\n";
 	html += "<div class=\"error-box\">";
 	html += "<h1>Upload OK</h1>";
-	html += "<a href=\"/pages/Services/Services.html\" class=\"button\">Back</a>\n";
+	html += "<a href=\"/\" class=\"button\">Home</a>\n";
 	html += "</div>\n";
 	html += "</body>\n</html>\n";
 

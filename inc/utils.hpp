@@ -16,6 +16,7 @@ namespace http {
 } // namespace http
 
 std::string dateString();
+time_t getActualTime();
 std::string ft_strtrim(const std::string& str);
 bool isDirectory(const std::string& filePath);
 std::string joinPath(const std::string& base, const std::string& sub);

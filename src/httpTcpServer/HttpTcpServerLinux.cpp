@@ -1,14 +1,14 @@
-
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
 
 
 namespace http {
 
-	TcpServer::TcpServer( const ServerConfig &server )
+	TcpServer::TcpServer( const ServerConfig &server, int portIndex	)
 		: _serverInfo( server ), _serverSocket(), _socketAddress_len( sizeof( sockaddr_in ) ) {
+		port = portIndex;
 		std::string msg( "CREATED SERVER " );
 		msg = msg + _serverInfo.host + ":";
-		msg += ft_to_string( _serverInfo.port );
+		msg += ft_to_string( port);
 		Logs::log( LOGS_INFO, msg );
 	}
 
@@ -28,8 +28,7 @@ namespace http {
 		}
 
 		// Set listening socket to non-blocking mode
-		fcntl( _serverSocket, F_SETFL, fcntl( _serverSocket, F_GETFL, 0 ) | O_NONBLOCK );
-
+		
 		// For inactivate the time wait from OS that block bind again
 		int opt = 1;
 		if ( setsockopt( _serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof( opt ) ) < 0 ) {
@@ -38,10 +37,12 @@ namespace http {
 			exit( EXIT_FAILURE );
 		}
 
+		fcntl( _serverSocket, F_SETFL, fcntl( _serverSocket, F_GETFL, 0 ) | O_NONBLOCK );
+		
 		struct sockaddr_in socketAddress;
 
 		socketAddress.sin_family = AF_INET;
-		socketAddress.sin_port = htons( _serverInfo.port );
+		socketAddress.sin_port = htons( port );
 		// Convert host string to binary form
 		if ( _serverInfo.host.empty() || _serverInfo.host == "0.0.0.0" ) {
 			socketAddress.sin_addr.s_addr = INADDR_ANY;

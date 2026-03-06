@@ -30,7 +30,8 @@ void http::Request::cleanup() {
 	_fileDirectory = NULL;
 
 	_requestPhase = START;
-	_chunkParser = ChunkParser();
+	resetChunkParser();
+	resetCLenghtParser();
 }
 
 int http::Request::appendBody(const char *buf, size_t len, const ServerConfig &configs) {
@@ -114,6 +115,9 @@ std::string &http::Request::readALlBody() {
 
 void http::Request::resetChunkParser() {
 	_chunkParser = ChunkParser();
+}
+void http::Request::resetCLenghtParser() {
+	_lengthParser = CLengthParser();
 }
 
 bool http::Request::isBodyInDisk() {

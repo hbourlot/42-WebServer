@@ -22,16 +22,19 @@ std::vector< TcpServer * > initialize_all_servers( const Configs &configuration 
 	std::vector< TcpServer * > servers;
 
 	for ( size_t i = 0; i < configuration.servers.size(); ++i ) {
-		TcpServer *serv = new TcpServer( configuration.servers[i] );
-		if ( serv->startServer() ) {
-			delete serv;
-			while ( i > 0 ) {
-				delete servers[--i];
+		for ( size_t j = 0; j < configuration.servers[i].port.size(); ++j ) {
+
+			TcpServer *serv = new TcpServer( configuration.servers[i], configuration.servers[i].port[j] );
+			if ( serv->startServer() ) {
+				delete serv;
+				while ( i > 0 ) {
+					delete servers[--i];
+				}
+				servers.clear();
+				return servers;
 			}
-			servers.clear();
-			return servers;
+			servers.push_back( serv );
 		}
-		servers.push_back( serv );
 	}
 
 	return servers;
@@ -88,5 +91,4 @@ int main( int ac, char **av ) {
 	free_servers_memory( servers );
 
 	return 0;
-
 }

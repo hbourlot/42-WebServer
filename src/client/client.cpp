@@ -2,7 +2,7 @@
 
 Client::Client(int fd, http::TcpServer &server)
     : _server(server), _fd(fd), _state(), _requestComplete(false), _cgiInProgress(false), _cgiPid(-1), _cgiOutputFd(-1),
-      _bytesToDiscard(0), _discardingBody(false), _request(), _idleTicks(0) {
+      _bytesToDiscard(0), _discardingBody(false), _request() {
 }
 
 Client::~Client() {
@@ -135,14 +135,11 @@ void Client::setDiscardingBody(bool discardingBody) {
 	_discardingBody = discardingBody;
 }
 
-void Client::incrementIdleTicks() {
-	_idleTicks++;
+time_t Client::getLastAction(){
+	return(_lastAction);
+}
+void Client::setLastAction()
+{
+	_lastAction = getActualTime();
 }
 
-int Client::getIdleTicks() {
-	return _idleTicks;
-}
-
-void Client::resetIdleTicks() {
-	_idleTicks = 0;
-}

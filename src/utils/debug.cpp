@@ -83,7 +83,7 @@ void PrintConfigs(Configs &configs)
     {
         ServerConfig &server = configs.servers[i];
         std::cout << BLUE << "SERVER [" << i << "]" << RESET << std::endl;
-        std::cout << "  HOST: " << BOLD << server.host << RESET << " | PORT: " << BOLD << server.port << RESET << std::endl;
+        std::cout << "  HOST: " << BOLD << server.host << RESET << " | PORT: " << BOLD << server.port[0] << RESET << std::endl;
         std::cout << "  NAME: " << (server.serverName.empty() ? "(none)" : server.serverName) << std::endl;
         std::cout << "  ROOT: " << server.root << std::endl;
         std::cout << "  MAX_BUFFER_SIZE:  " << server.max_buffer_size << std::endl;
@@ -97,7 +97,24 @@ void PrintConfigs(Configs &configs)
         std::cout << "\n  TIMEOUT: " << server.alive_timeout << "s" << std::endl;
 
         std::cout << CYAN << "  DIRECTORIES:" << RESET << std::endl;
-        PrintLocations(server.directories);
+        
+		for (std::map<std::string, std::vector<int> >::iterator it = configs.serversPort.begin(); it != configs.serversPort.end(); ++it)
+		{
+			std::cout << "[" << it->first << " -> ";
+
+			for (size_t i = 0; i < it->second.size(); i++)
+			{
+				std::cout << it->second[i];
+
+				if (i < it->second.size() - 1)
+					std::cout << ", ";
+			}
+
+			std::cout << "] ";
+		}
+
+		std::cout << std::endl;
+		PrintLocations(server.directories);
         PrintFiles(server.files);
         std::cout << BOLD << MAGENTA << "----------------------------------------------------" << RESET << std::endl;
     }

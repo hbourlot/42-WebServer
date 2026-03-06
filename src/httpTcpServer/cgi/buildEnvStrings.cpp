@@ -116,14 +116,14 @@ void http::Cgi::buildEnvStrings() {
 			hostPort = hostHeader.substr(colonPos + 1);
 		} else {
 			hostName = hostHeader;
-			hostPort = ft_to_string(_serverInfo.port); // fallback to configured port
+			hostPort = ft_to_string(_serverInfo.port[0]); // fallback to configured port MUDAR
 		}
 	} else {
 		hostName = _serverInfo.host;
-		hostPort = ft_to_string(_serverInfo.port);
+		hostPort = ft_to_string(_serverInfo.port[0]); //MUDAR
 	}
 	newMap["SERVER_NAME"] = hostName;
-	newMap["SERVER_PORT"] = hostPort;
+	newMap["SERVER_PORT"] = hostPort; //MUDAR
 
 	// Remote address
 	char addrBuf[INET_ADDRSTRLEN] = {0};

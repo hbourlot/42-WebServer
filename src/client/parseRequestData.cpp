@@ -1,32 +1,39 @@
 #include "httpTcpServer/EventProcessor.hpp"
 #include <algorithm>
 
-static void parseRequestQueries(http::Request& request) {
+static void parseRequestQueries(http::Request &request)
+{
 	std::string fullPath = request.getUri();
 	std::string::size_type qpos = fullPath.find('?');
 
-	if (qpos != std::string::npos) {
+	if (qpos != std::string::npos)
+	{
 		request.setQueryString(fullPath.substr(qpos + 1));
 		request.setUri(fullPath.substr(0, qpos));
-	} else {
+	}
+	else
+	{
 		request.setQueryString("");
 	}
 }
 
-static void parsePath(http::Request& request, const ServerConfig& serverInfo) {
-	std::string& path = request.getUri();
+static void parsePath(http::Request &request, const ServerConfig &serverInfo)
+{
+	std::string &path = request.getUri();
 
 	// by default
 	request.setPathInfo("");
 	request.setPathTranslated("");
 
-	for (size_t i = 0; i < serverInfo.directories.size(); ++i) {
-		const Directory& loc = serverInfo.directories[i];
+	for (size_t i = 0; i < serverInfo.directories.size(); ++i)
+	{
+		const Directory &loc = serverInfo.directories[i];
 		if (loc.cgi_extension.empty())
 			continue;
 
-		for (size_t j = 0; j < loc.cgi_extension.size(); ++j) {
-			const std::string& ext = loc.cgi_extension[j];
+		for (size_t j = 0; j < loc.cgi_extension.size(); ++j)
+		{
+			const std::string &ext = loc.cgi_extension[j];
 
 			size_t pos = path.find(ext);
 			if (pos == std::string::npos)
@@ -55,22 +62,25 @@ static void parsePath(http::Request& request, const ServerConfig& serverInfo) {
 		}
 	}
 }
-static void decodeURI(std::string& uri) {
+static void decodeURI(std::string &uri)
+{
 	if (uri.empty())
 		return;
 
 	std::string toReplace = "%20";
 	size_t pos = uri.find(toReplace);
-	while (pos != std::string::npos) {
+	while (pos != std::string::npos)
+	{
 		uri.replace(pos, 3, " ");
 		pos = uri.find(toReplace, pos + 1);
 	}
 }
 
-static bool parseRequestLine(http::Request& req, const ServerConfig& serverInfo, const std::string& readBuffer,
-                             size_t lineEnd) {
+static bool parseRequestLine(http::Request &req, const ServerConfig &serverInfo, const std::string &readBuffer,
+                             size_t lineEnd)
+{
 
-	const char* data = readBuffer.c_str();
+	const char *data = readBuffer.c_str();
 
 	std::string requestLine(data, lineEnd);
 
@@ -94,10 +104,12 @@ static bool parseRequestLine(http::Request& req, const ServerConfig& serverInfo,
 }
 
 #include <limits.h>
-static void parseRequestHeaders(http::Request& req, const std::string& readBuffer, size_t headerEnd) {
-	const char* data = readBuffer.c_str();
+static void parseRequestHeaders(http::Request &req, const std::string &readBuffer, size_t headerEnd)
+{
+	const char *data = readBuffer.c_str();
 	size_t pos = 0;
-	while (pos < headerEnd) {
+	while (pos < headerEnd)
+	{
 		size_t lineEnd = readBuffer.find("\r\n", pos);
 		if (lineEnd == std::string::npos || lineEnd == pos)
 			break;
@@ -115,36 +127,40 @@ static void parseRequestHeaders(http::Request& req, const std::string& readBuffe
 	}
 }
 
-static void discardingBody(Client& client) {
+static void discardingBody(Client &client)
+{
 	size_t available = client.getReadBuffer().size();
 	size_t bytesToDiscard = client.getBytesToDiscard();
 
-	if (available >= bytesToDiscard) {
+	if (available >= bytesToDiscard)
+	{
 		client.consumeReadBuffer(bytesToDiscard);
 		client.setBytesToDiscard(0);
 		client.setDiscardingBody(false);
 
 		client.getResponse().initFromRequest(client.getRequest());
 		client.setState(PARSE_TOO_LARGE);
-
-	} else {
+	}
+	else
+	{
 		client.setBytesToDiscard(bytesToDiscard - available);
 		client.clearReadBuffer();
 	}
 }
 
-static bool parseContentLengthBody(Client& client, const ServerConfig& configs) {
-	http::Request& request = client.getRequest();
-	std::string& buffer = client.getReadBuffer();
-	CLengthParser& lengthParser = request.getLengthParser();
+static bool parseContentLengthBody(Client &client, const ServerConfig &configs)
+{
+	http::Request &request = client.getRequest();
+	std::string &buffer = client.getReadBuffer();
+	CLengthParser &lengthParser = request.getLengthParser();
 
-	if (!lengthParser.hasLength) {
+	if (!lengthParser.hasLength)
+	{
 		lengthParser.length = strtoul(request.getHeaders()["Content-Length"].c_str(), NULL, 10);
-		std::cout << request.getHeaders()["Content-Length"] << std::endl;
-		std::cout << lengthParser.length << std::endl;
 		lengthParser.hasLength = true;
 
-		if (lengthParser.length > request.getMatchLocation()->max_body_size) {
+		if (lengthParser.length > request.getMatchLocation()->max_body_size)
+		{
 			client.setDiscardingBody(true);
 			client.setBytesToDiscard(lengthParser.length);
 		}
@@ -155,14 +171,18 @@ static bool parseContentLengthBody(Client& client, const ServerConfig& configs) 
 	if (canRead == 0 && lengthParser.length > 0)
 		return false;
 
-	if (client.getDiscardingBody()) {
+	if (client.getDiscardingBody())
+	{
 		lengthParser.bytesRead += canRead;
 		buffer.erase(0, canRead);
 		discardingBody(client);
 		client.setState(PARSE_TOO_LARGE);
 		return (lengthParser.bytesRead >= lengthParser.length);
-	} else {
-		if (request.appendBody(buffer.data(), canRead, configs)) {
+	}
+	else
+	{
+		if (request.appendBody(buffer.data(), canRead, configs))
+		{
 			client.setState(PARSE_ERROR);
 			return true;
 		}
@@ -170,20 +190,23 @@ static bool parseContentLengthBody(Client& client, const ServerConfig& configs) 
 		lengthParser.bytesRead += canRead;
 		buffer.erase(0, canRead);
 
-		if (lengthParser.bytesRead >= lengthParser.length) {
+		if (lengthParser.bytesRead >= lengthParser.length)
 			return true;
-		}
 	}
 	return false;
 }
 
-static bool parseChunkBody(Client& client, const ServerConfig& configs) {
-	std::string& buffer = client.getReadBuffer();
-	ChunkParser& chunk = client.getRequest().getChunkParser();
-	http::Request& request = client.getRequest();
-	while (!buffer.empty()) {
-		switch (chunk.state) {
-		case CHUNK_SIZE: {
+static bool parseChunkBody(Client &client, const ServerConfig &configs)
+{
+	std::string &buffer = client.getReadBuffer();
+	ChunkParser &chunk = client.getRequest().getChunkParser();
+	http::Request &request = client.getRequest();
+	while (!buffer.empty())
+	{
+		switch (chunk.state)
+		{
+		case CHUNK_SIZE:
+		{
 			size_t lineEnd = buffer.find("\r\n");
 			if (lineEnd == std::string::npos)
 				return false;
@@ -192,25 +215,32 @@ static bool parseChunkBody(Client& client, const ServerConfig& configs) {
 			chunk.currentChunkSize = strtoul(sizeStr.c_str(), NULL, 16);
 			buffer.erase(0, lineEnd + 2);
 			if (!client.getDiscardingBody() &&
-			    (request.getBodySize() + chunk.currentChunkSize > request.getMatchLocation()->max_body_size)) {
+			    (request.getBodySize() + chunk.currentChunkSize > request.getMatchLocation()->max_body_size))
+			{
 				client.setDiscardingBody(true);
 			}
 			if (chunk.currentChunkSize == 0)
 				chunk.state = CHUNK_DONE;
-			else {
+			else
+			{
 				chunk.state = CHUNK_DATA;
 				chunk.bytesReadInChunk = 0;
 			}
 			break;
 		}
-		case CHUNK_DATA: {
+		case CHUNK_DATA:
+		{
 			size_t remaining = chunk.currentChunkSize - chunk.bytesReadInChunk;
 			size_t canRead = std::min(remaining, buffer.size());
 
-			if (client.getDiscardingBody()) {
+			if (client.getDiscardingBody())
+			{
 				buffer.erase(0, canRead);
-			} else {
-				if (request.appendBody(buffer.c_str(), canRead, configs)) {
+			}
+			else
+			{
+				if (request.appendBody(buffer.c_str(), canRead, configs))
+				{
 					client.setState(PARSE_ERROR);
 					return true;
 				}
@@ -223,19 +253,22 @@ static bool parseChunkBody(Client& client, const ServerConfig& configs) {
 				return false;
 			break;
 		}
-		case CHUNK_CRLF: {
+		case CHUNK_CRLF:
+		{
 			if (buffer.size() < 2)
 				return false;
 			buffer.erase(0, 2);
 			chunk.state = CHUNK_SIZE;
 			break;
 		}
-		case CHUNK_DONE: {
+		case CHUNK_DONE:
+		{
 			if (buffer.size() < 2)
 				return false;
 			buffer.erase(0, 2);
 
-			if (client.getDiscardingBody()) {
+			if (client.getDiscardingBody())
+			{
 				client.setState(PARSE_TOO_LARGE);
 			}
 			return (true);
@@ -245,9 +278,10 @@ static bool parseChunkBody(Client& client, const ServerConfig& configs) {
 	return false;
 }
 
-static bool parseRequestBody(Client& client, const ServerConfig& configs) {
+static bool parseRequestBody(Client &client, const ServerConfig &configs)
+{
 
-	http::Request& req = client.getRequest();
+	http::Request &req = client.getRequest();
 
 	if (req.getHeaders().count("Transfer-Encoding") && req.getHeaders()["Transfer-Encoding"] == "chunked")
 		return parseChunkBody(client, configs);
@@ -260,19 +294,22 @@ static bool parseRequestBody(Client& client, const ServerConfig& configs) {
 	return true;
 }
 
-bool http::EventProcessor::parseRequestData(Client& client, const ServerConfig& serverInfo) {
+bool http::EventProcessor::parseRequestData(Client &client, const ServerConfig &serverInfo)
+{
+	std::string &readBuffer = client.getReadBuffer();
+	http::Request &clientRequest = client.getRequest();
 
-	std::string& readBuffer = client.getReadBuffer();
-	http::Request& clientRequest = client.getRequest();
-
-	if (clientRequest.getRequestPhase() == START) {
+	if (clientRequest.getRequestPhase() == START)
+	{
 		size_t lineEnd = readBuffer.find("\r\n");
-		if (lineEnd == std::string::npos) {
+		if (lineEnd == std::string::npos)
+		{
 			client.setState(PARSE_INCOMPLETE);
 			return false;
 		}
 
-		if (!parseRequestLine(clientRequest, serverInfo, readBuffer, lineEnd)) {
+		if (!parseRequestLine(clientRequest, serverInfo, readBuffer, lineEnd))
+		{
 			client.setState(PARSE_INCOMPLETE);
 			return false;
 		}
@@ -283,9 +320,11 @@ bool http::EventProcessor::parseRequestData(Client& client, const ServerConfig& 
 		clientRequest.setRequestPhase(HEADER);
 	}
 
-	if (clientRequest.getRequestPhase() == HEADER) {
+	if (clientRequest.getRequestPhase() == HEADER)
+	{
 		size_t headerEnd = readBuffer.find("\r\n\r\n");
-		if (headerEnd == std::string::npos) {
+		if (headerEnd == std::string::npos)
+		{
 			client.setState(PARSE_INCOMPLETE);
 			return false;
 		}
@@ -295,9 +334,11 @@ bool http::EventProcessor::parseRequestData(Client& client, const ServerConfig& 
 		clientRequest.setRequestPhase(BODY);
 	}
 
-	if (clientRequest.getRequestPhase() == BODY) {
+	if (clientRequest.getRequestPhase() == BODY)
+	{
 
-		if (!parseRequestBody(client, serverInfo)) {
+		if (!parseRequestBody(client, serverInfo))
+		{
 			client.setState(PARSE_INCOMPLETE);
 			return false;
 		}
@@ -305,15 +346,14 @@ bool http::EventProcessor::parseRequestData(Client& client, const ServerConfig& 
 		clientRequest.setRequestPhase(FINISHED);
 	}
 
-	if (clientRequest.getRequestPhase() == FINISHED) {
-
+	if (clientRequest.getRequestPhase() == FINISHED)
+	{
 		client.getResponse().initFromRequest(client.getRequest());
 		clientRequest.resetChunkParser();
 		Logs::log(LOGS_INFO, "Client: " + ft_to_string(client.getFd()) + " Made a Request");
 		if (client.getState() != PARSE_ERROR && client.getState() != PARSE_TOO_LARGE)
 			client.setState(PARSE_OK);
 		clientRequest.setRequestPhase(START);
-
 		return true;
 	}
 	return false;
