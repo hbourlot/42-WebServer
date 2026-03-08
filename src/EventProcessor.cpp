@@ -30,10 +30,14 @@ void http::EventProcessor::run() {
 			acceptConnections();
 			for ( size_t i = _serverSocketSize; i < _allSockets.size(); ++i ) {
 				bool erased = removeDeadConnections( i );
-				if ( erased )
-					continue;
-				this->processClientEvents( i );
-				checkIdleConnections( i );
+			if ( erased ) {
+				--i;
+				continue;
+			}
+			this->processClientEvents( i );
+		erased = closeIdleConnection( i );
+			if ( erased )
+				--i;
 			}
 		}
 	} catch ( ClientEventProcessorException &e ) {
@@ -153,14 +157,14 @@ void http::EventProcessor::shutDownProcessor() {
 
 void http::EventProcessor::processRead( pollfd &pfd, Client *client, Cgi *cgi ) {
 
-	if ( cgi ) {
-		readFromCgi( pfd.fd, cgi->getReadBuffer(), cgi->getState() );
-		return;
-	}
+	if ( cgi )
+		return readFromCgi( pfd.fd, cgi->gitgetReadBuffer(), cgi->getState() );
 
 	if ( !readFromSocket( pfd.fd, client->getReadBuffer(), client->getState() ) ) {
 		return;
 	}
+
+	client->setLastAction();
 
 	if ( !parseRequestData( *client, client->getServer().getServerInfo() ) ) {
 		return;
@@ -279,18 +283,20 @@ SessionManager &http::EventProcessor::getSessionManager() {
 	return _sessionManager;
 }
 
-void http::EventProcessor::checkIdleConnections( size_t index ) {
+bool http::EventProcessor::closeIdleConnection( size_t index ) {
 
 	SocketFD fd = _allSockets[index].fd;
 	Client *client = _clientManager.getClient( fd );
 
 	if ( !client )
-		return;
+		return false;
 
-	// if ( getActualTime() - client->getLastAction() >
-	// 	 static_cast< long >( client->getServer().getServerInfo().alive_timeout ) ) {
-	// 	closeClientConnection( index );
-	// }
+	if ( getActualTime() - client->getLastAction() >
+		 static_cast< long >( client->getServer().getServerInfo().alive_timeout ) ) {
+		closeClientConnection( index );
+		return true;
+	}
+	return false;
 }
 
 void http::EventProcessor::closeClientConnection( size_t index ) {
@@ -342,7 +348,6 @@ void http::EventProcessor::setSession( Client *client ) {
 void http::EventProcessor::readFromCgi( SocketFD fd, std::string &readBuffer, IN_OUT_STATE &state ) {
     char buffer[BUFFER_SIZE];
 
-    // Removemos o while(true). Fazemos apenas UM read por cada notificação do poll().
     ssize_t bytesReceived = read( fd, buffer, BUFFER_SIZE ); 
 
     if ( bytesReceived > 0 ) {
@@ -510,7 +515,6 @@ bool http::EventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 		return 0;
 	}
 
-	// Still have data to send, keep POLLOUT active
 	pfd.events |= POLLOUT;
 	return 0; // Continue sending in next poll event
 }
@@ -518,32 +522,23 @@ bool http::EventProcessor::handleResponse( pollfd &pfd, Client &client ) {
 bool http::EventProcessor::sendResponse( pollfd &pfd, Client &client ) {
 	SocketFD clientFd = client.getFd();
 
-	int sendCount = 0;
 	std::string &writeBuffer = client.getWriteBuffer();
-	// std::cout << "writeBuffer" << writeBuffer << std::endl;
-	// Send up to MAX_SENDS_PER_EVENT times per poll event
-	while ( sendCount < MAX_SENDS_PER_EVENT && !writeBuffer.empty() ) {
-		ssize_t bytesSent = send( clientFd, writeBuffer.c_str(), writeBuffer.size(), MSG_NOSIGNAL );
 
-		if ( bytesSent < 0 ) {
-			if ( errno == EAGAIN || errno == EWOULDBLOCK ) {
-				// Socket buffer full, will continue later
-				pfd.events = POLLOUT;
-				return 0; // Keep connection alive, continue sending later
-			}
+	if ( writeBuffer.empty() )
+		return 0;
 
-			if ( errno == EPIPE )
-				Logs::log( LOGS_ERROR, "Client disconnected before response." );
-			else
-				Logs::log( LOGS_ERROR, "Error sending response to client." );
-			return 1; // Close connection
-		}
+	ssize_t bytesSent = send( clientFd, writeBuffer.c_str(), writeBuffer.size(), MSG_NOSIGNAL );
 
-		if ( bytesSent == 0 )
-			break; // Should not happen with send(), but handle gracefully
-
-		writeBuffer.erase( 0, bytesSent );
-		sendCount++;
+	if ( bytesSent < 0 ) {
+		pfd.events = POLLOUT;
+		return 0;
 	}
-	return ( 0 );
+
+	if ( bytesSent > 0 )
+		client.setLastAction();
+
+	if ( bytesSent > 0 )
+		writeBuffer.erase( 0, bytesSent );
+
+	return 0;
 }

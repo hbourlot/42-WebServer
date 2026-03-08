@@ -15,7 +15,6 @@ namespace http {
 
 	class EventProcessor {
 	  public:
-
 		class ClientEventProcessorException : public std::runtime_error {
 		  public:
 			explicit ClientEventProcessorException(const std::string& msg) : std::runtime_error(msg){};
@@ -47,7 +46,7 @@ namespace http {
 
 		// GETTERS
 
-		SessionManager& getSessionManager ();
+		SessionManager& getSessionManager();
 
 	  private:
 		std::vector<pollfd>& _allSockets;
@@ -60,9 +59,9 @@ namespace http {
 
 		size_t _clientIndex;
 
-		void checkIdleConnections(size_t index);
+		bool closeIdleConnection(size_t index);
 
-		void setSession(Client* client); // !
+		void setSession(Client* client);
 
 		void closeClientConnection(size_t index);
 
