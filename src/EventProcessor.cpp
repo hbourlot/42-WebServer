@@ -167,8 +167,7 @@ void http::EventProcessor::processRead( pollfd &pfd, Client *client, Cgi *cgi ) 
 	}
 
 	setSession( client );
-
-	pfd.events = POLLOUT; // Setting to POLL OUT
+	pfd.events = POLLOUT;
 };
 
 void http::EventProcessor::processWrite( pollfd &pfd, Client *client, int index ) {
@@ -211,11 +210,11 @@ void http::EventProcessor::processClientEvents( int index ) {
 		return;
 	}
 
-	if ( _allSockets[index].revents & POLLIN || _allSockets[index].revents & POLLOUT ||
-		 ( _allSockets[index].revents & POLLHUP && cgi ) ) {
-		if ( client )
-			client->setLastAction();
-	}
+	// if ( _allSockets[index].revents & POLLIN || _allSockets[index].revents & POLLOUT ||
+	// 	 ( _allSockets[index].revents & POLLHUP && cgi ) ) {
+	// 	if ( client )
+	// 		client->setLastAction();
+	// }
 }
 
 void http::EventProcessor::registerCgi( http::Cgi *cgi ) {
@@ -288,10 +287,10 @@ void http::EventProcessor::checkIdleConnections( size_t index ) {
 	if ( !client )
 		return;
 
-	if ( getActualTime() - client->getLastAction() >
-		 static_cast< long >( client->getServer().getServerInfo().alive_timeout ) ) {
-		closeClientConnection( index );
-	}
+	// if ( getActualTime() - client->getLastAction() >
+	// 	 static_cast< long >( client->getServer().getServerInfo().alive_timeout ) ) {
+	// 	closeClientConnection( index );
+	// }
 }
 
 void http::EventProcessor::closeClientConnection( size_t index ) {
@@ -341,80 +340,45 @@ void http::EventProcessor::setSession( Client *client ) {
 }
 
 void http::EventProcessor::readFromCgi( SocketFD fd, std::string &readBuffer, IN_OUT_STATE &state ) {
+    char buffer[BUFFER_SIZE];
 
-	char buffer[BUFFER_SIZE];
-	bool dataWasReadInThisCall = false;
+    // Removemos o while(true). Fazemos apenas UM read por cada notificação do poll().
+    ssize_t bytesReceived = read( fd, buffer, BUFFER_SIZE ); 
 
-	while ( true ) {
-		ssize_t bytesReceived = read( fd, buffer, BUFFER_SIZE - 1 );
-		if ( bytesReceived > 0 ) {
-			readBuffer.append( buffer, bytesReceived );
-			dataWasReadInThisCall = true;
-			continue;
-		} else if ( bytesReceived == 0 ) {
-			state = CGI_COMPLETED;
-			break;
-		} else {
-			if ( errno == EAGAIN || errno == EWOULDBLOCK ) {
-				if ( dataWasReadInThisCall ) {
-					state = READ_SUCCESS;
-				}
-				break;
-			} else {
-				Logs::log( LOGS_ERROR, "Error reading from CGI pipe" );
-				state = READ_ERROR;
-				break;
-			}
-		}
-	}
+    if ( bytesReceived > 0 ) {
+        readBuffer.append( buffer, bytesReceived );
+        state = READ_SUCCESS; 
+    } 
+    else if ( bytesReceived == 0 ) {
+        state = CGI_COMPLETED;
+    } 
+    else {
+        Logs::log( LOGS_ERROR, "Error reading from CGI pipe" );
+        state = READ_ERROR;
+    }
 }
 
 bool http::EventProcessor::readFromSocket( SocketFD fd, std::string &readBuffer, IN_OUT_STATE &state ) {
+    char buffer[BUFFER_SIZE]; 
 
-	char buffer[BUFFER_SIZE];
-	int readCount = 0;
-	bool dataReceived = false;
+    ssize_t bytesReceived = read( fd, buffer, BUFFER_SIZE );
 
-	// Read up to MAX_READS_PER_EVENT times per poll event
-	while ( readCount < MAX_READS_PER_EVENT ) {
-
-		std::memset( buffer, 0, BUFFER_SIZE );
-		ssize_t bytesReceived = read( fd, buffer, BUFFER_SIZE - 1 );
-
-		if ( bytesReceived > 0 ) {
-			readBuffer.append( buffer, bytesReceived );
-			dataReceived = true;
-			readCount++;
-			continue; // Try to read more data
-		}
-
-		// if (bytesReceived == 0) {
-		// 	break;
-		// }
-
-		if ( errno == EAGAIN || errno == EWOULDBLOCK ) {
-			// No more data available, this is normal
-			break;
-		}
-
-		if ( bytesReceived == 0 /*  && readCount == 0 */ ) {
-			state = READ_EMPTY;
-			return false;
-		}
-		// bytesReceived < 0
-
-		// Fatal error
-		Logs::log( LOGS_ERROR, "Error: recv()" );
-		state = READ_ERROR;
-		return false;
-	}
-
-	if ( dataReceived ) {
-		state = READ_SUCCESS;
-		return true;
-	}
-	state = READ_EMPTY;
-	return false;
+    if ( bytesReceived > 0 ) {
+        readBuffer.append( buffer, bytesReceived );
+        state = READ_SUCCESS;
+        return true;
+    } 
+    else if ( bytesReceived == 0 ) {
+		// Client closed the browser
+        state = READ_EMPTY; 
+        return false;
+    } 
+    else {
+		// Something went wrong with socket
+        Logs::log( LOGS_ERROR, "Error: read() from socket" );
+        state = READ_ERROR;
+        return false;
+    }
 }
 
 void http::EventProcessor::handleCgiIO( Client *client ) {
