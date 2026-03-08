@@ -259,22 +259,26 @@ std::string createUploadBody() {
 }
 
 ssize_t writeAll(int fd, const char *buf, size_t len) {
-	size_t total = 0;
+    size_t total = 0;
 
-	while (total < len) {
-		ssize_t ret = write(fd, buf + total, len - total);
+    while (total < len) {
+        ssize_t ret = write(fd, buf + total, len - total);
 
-		if (ret < 0) {
-			if (errno == EINTR)
-				continue; // retry
-			Logs::log(LOGS_ERROR, "Write on fd failed");
-			return -1; // error
-		}
-		total += ret;
-	}
-	return total;
+        if (ret < 0) {
+            // Fatal error
+            Logs::log(LOGS_ERROR, "Write on fd failed");
+            return -1;
+        }
+        
+        // If for some reason the write function writes 0 bytes ... it can happen
+		if (ret == 0) {
+            break;
+        }
+
+        total += ret;
+    }
+    return total;
 }
-
 
 void removeComment(std::string &line)
 {
