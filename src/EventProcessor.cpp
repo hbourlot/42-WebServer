@@ -158,7 +158,7 @@ void http::EventProcessor::shutDownProcessor() {
 void http::EventProcessor::processRead( pollfd &pfd, Client *client, Cgi *cgi ) {
 
 	if ( cgi )
-		return readFromCgi( pfd.fd, cgi->gitgetReadBuffer(), cgi->getState() );
+		return readFromCgi( pfd.fd, cgi->getReadBuffer(), cgi->getState() );
 
 	if ( !readFromSocket( pfd.fd, client->getReadBuffer(), client->getState() ) ) {
 		return;
