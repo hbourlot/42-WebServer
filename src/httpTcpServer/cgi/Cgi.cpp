@@ -1,14 +1,5 @@
 #include "httpTcpServer/Cgi.hpp"
 #include "httpTcpServer/HttpTcpServerLinux.hpp"
-#include <cstddef>
-#include <cstdlib>
-#include <map>
-#include <netinet/in.h>
-#include <signal.h>
-#include <sstream>
-#include <string>
-#include <sys/poll.h>
-#include <vector>
 
 http::Cgi::Cgi(const http::Request &request, const ServerConfig &serverInfo, Client *client)
     : _request(request), _serverInfo(serverInfo), _client(client), _pid(-1), _status(0), _stdinFd(-1),
@@ -261,6 +252,36 @@ std::string &http::Cgi::getReadBuffer()
 {
 	return _outputBuffer;
 };
+
+void http::Cgi::appendOutputToResponse(Response &response)
+{
+	response.appendCgiChunk(_outputBuffer);
+}
+
+void http::Cgi::appendFinalOutputToResponse(Response &response)
+{
+	response.appendCgiChunk(_outputBuffer, true);
+}
+
+bool http::Cgi::readFromPipe()
+{
+	char buffer[ BUFFER_SIZE ];
+
+	ssize_t bytesReceived = read( getOutputPipeFd(), buffer, BUFFER_SIZE );
+
+	if ( bytesReceived > 0 ) {
+		_outputBuffer.append( buffer, bytesReceived );
+		_state = READ_SUCCESS;
+		return true;
+	} else if ( bytesReceived == 0 ) {
+		_state = CGI_COMPLETED;
+		return false;
+	} else {
+		Logs::log( LOGS_ERROR, "Error reading from CGI pipe" );
+		_state = READ_ERROR;
+		return false;
+	}
+}
 
 void http::Cgi::dumpEnvStrings() const
 {

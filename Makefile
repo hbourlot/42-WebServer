@@ -32,11 +32,11 @@ OBJ_DIR         = obj/
 COMPILED_FILES  = 0
 LEN             = 0
 
-CLIENT_FUNC		= client clientManager parseRequestData cookies
+CLIENT_FUNC		= client clientManager cookies
 CGI_FUNC		= Cgi buildEnvStrings
 UTILS_FUNC		= utils getLocationFieldAsString debug
 FILE_FUNC		= CheckConf ReadConfig ConfigUtils SetLocations SetFile
-HTTP_FUNC	    = HttpTcpServerLinux Router autoIndex Request Response Logs
+HTTP_FUNC	    = HttpTcpServerLinux Router autoIndex Request Response Logs RequestParser
 UPL_FUNC		= UploadManager parseMultipart
 SESSION_FUNC	= Session SessionManager
 SRC_FUNC		= main EventProcessor
