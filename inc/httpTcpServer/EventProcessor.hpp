@@ -34,9 +34,9 @@ namespace http {
 
 		void processRead(pollfd& pfd, Client* client, Cgi* cgi);
 
-		void processWrite(pollfd& pfd, Client* client, int index);
+		bool processWrite(pollfd& pfd, Client* client, int index);
 
-		void processClientEvents(int index);
+		bool processClientEvents(int index);
 
 		void registerCgi(http::Cgi* cgi);
 
@@ -60,6 +60,7 @@ namespace http {
 		size_t _clientIndex;
 
 		bool closeIdleConnection(size_t index);
+		bool handleClientIndex(size_t& index);
 
 		void setSession(Client* client);
 

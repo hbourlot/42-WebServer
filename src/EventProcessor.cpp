@@ -13,7 +13,7 @@ void http::EventProcessor::run() {
 	if (_allSockets.empty())
 		return;
 
-	int timeOut = 1 * 60 * 1000; // 10s
+	int timeOut = 60 * 1000; // 60s
 
 	try {
 		while (getStopServer() == false) {
@@ -22,22 +22,10 @@ void http::EventProcessor::run() {
 
 			if (ret < 0)
 				std::cerr << "poll() failed" << std::endl;
-			else if (ret == 0) {
-				std::cerr << "poll() timeOut. Closing Server." << std::endl;
-				break;
-			}
 
-			// Checking for new Connections
 			acceptConnections();
 			for (size_t i = _serverSocketSize; i < _allSockets.size(); ++i) {
-				bool erased = removeDeadConnections(i);
-				if (erased) {
-					--i;
-					continue;
-				}
-				this->processClientEvents(i);
-				erased = closeIdleConnection(i);
-				if (erased)
+				if (handleClientIndex(i))
 					--i;
 			}
 		}
@@ -100,6 +88,11 @@ bool http::EventProcessor::removeDeadConnections(size_t& index) {
 			return false;
 		}
 		Client* client = _clientManager.getClient(fd);
+		if (!client) {
+			_allSockets.erase(_allSockets.begin() + index);
+			close(fd);
+			return true;
+		}
 
 		if (client && client->getCgiOutputFd() != -1) {
 			std::map<int, http::Cgi*>::iterator it = _cgi_by_fd.find(client->getCgiOutputFd());
@@ -178,7 +171,7 @@ void http::EventProcessor::processRead(pollfd& pfd, Client* client, Cgi* cgi) {
 	pfd.events = POLLOUT;
 };
 
-void http::EventProcessor::processWrite(pollfd& pfd, Client* client, int index) {
+bool http::EventProcessor::processWrite(pollfd& pfd, Client* client, int index) {
 
 	if (client->getState() == CGI_JUST_STARTED || client->getState() == CGI_COMPLETED) {
 		handleCgiIO(client);
@@ -188,10 +181,12 @@ void http::EventProcessor::processWrite(pollfd& pfd, Client* client, int index) 
 
 	if (handleResponse(pfd, *client)) {
 		this->closeClientConnection(index);
+		return true;
 	}
+	return false;
 };
 
-void http::EventProcessor::processClientEvents(int index) {
+bool http::EventProcessor::processClientEvents(int index) {
 
 	int fd = _allSockets[index].fd;
 	Client* client = _clientManager.getClient(fd);
@@ -208,14 +203,16 @@ void http::EventProcessor::processClientEvents(int index) {
 	}
 
 	if (_allSockets[index].revents & POLLOUT) {
-		processWrite(_allSockets[index], client, index);
+		if (processWrite(_allSockets[index], client, index))
+			return true;
 	}
 
 	if ((_allSockets[index].revents & POLLHUP) && cgi && cgi->hasFinished()) {
 		cgi->readFromPipe();
 		client->setState(CGI_COMPLETED);
-		return;
 	}
+
+	return false;
 }
 
 void http::EventProcessor::registerCgi(http::Cgi* cgi) {
@@ -288,6 +285,9 @@ bool http::EventProcessor::closeIdleConnection(size_t index) {
 	if (!client)
 		return false;
 
+	if (client->getCgiPid() != -1 || client->getCgiOutputFd() != -1)
+		return false;
+
 	if (getActualTime() - client->getLastAction() >
 	    static_cast<long>(client->getServer().getServerInfo().alive_timeout)) {
 		closeClientConnection(index);
@@ -300,12 +300,10 @@ void http::EventProcessor::closeClientConnection(size_t index) {
 	SocketFD fd = _allSockets[index].fd;
 	Client* client = _clientManager.getClient(fd);
 
-	if (client && client->getCgiPid() != -1) {
-		std::map<int, http::Cgi*>::iterator it = _cgi_by_fd.find(fd);
-		if (it != _cgi_by_fd.end()) {
-			delete it->second;
-			_cgi_by_fd.erase(it);
-		}
+	if (client && client->getCgiOutputFd() != -1) {
+		std::map<int, http::Cgi*>::iterator it = _cgi_by_fd.find(client->getCgiOutputFd());
+		if (it != _cgi_by_fd.end())
+			cleanupCgi(it->second);
 	}
 
 	std::string msg("Closing FD => ");
@@ -319,6 +317,14 @@ void http::EventProcessor::closeClientConnection(size_t index) {
 	_clientManager.removeClient(fd);
 	_allSockets.erase(_allSockets.begin() + index);
 	close(fd);
+}
+
+bool http::EventProcessor::handleClientIndex(size_t& index) {
+	if (removeDeadConnections(index))
+		return true;
+	if (processClientEvents(index))
+		return true;
+	return closeIdleConnection(index);
 }
 
 void http::EventProcessor::setSession(Client* client) {
