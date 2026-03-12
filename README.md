@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by hbourlot, joralves, miafonso.*
+e*This project has been created as part of the 42 curriculum by hbourlot, joralves, miafonso.*
 
 # Webserv
 
@@ -53,35 +53,35 @@ The server use a `.conf` file with the follow possibilities:
 
 ### Server configs
 
-* host
-* port
-* server_name
-* client_max_body_size
-* error_page
-* location
-* root
-* index
-* cgi_pass
-* client_body_temp_path
-* client_body_buffer_size
-* keepalive_timeout
-* auth_login_page
+* host  ==> Default value: 127.0.0.1
+* port  ==> Default value:
+* server_name ==> Default value: Default
+* client_max_body_size ==> Default value: 1024
+* error_page ==> Default value: 404 ../../content/defaultError.html
+* location 
+* root (optional)
+* index (optional)
+* cgi_pass (optional)
+* client_body_temp_path ==> Default value: ./tmp
+* client_body_buffer_size ==> Default value: 1048576
+* keepalive_timeout ==> Default value: 3
+* auth_login_page (optional)
 
 ### Locations configs
 
-* methods
-* root
-* redirect
-* cgi_extension
-* cgi_path
-* upload_enable
-* upload_store
-* autoindex
-* index
-* cgi_pass
-* client_body_buffer_size
-* auth_login_page
-* auth
+* methods ==> Default value: GET
+* root ==> Default value: var/www
+* redirect (optional)
+* cgi_extension (optional)
+* cgi_path (optional)
+* upload_enable ==> Default value: false
+* upload_store (optional)
+* autoindex (optional)
+* index (optional)
+* cgi_pass (optional)
+* client_body_buffer_size ==> Default value: 1048576
+* auth_login_page (optional)
+* auth (optional)
 
 Example:
 
