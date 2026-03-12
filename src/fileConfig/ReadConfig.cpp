@@ -216,7 +216,7 @@ bool ReadConfig::setServerConfig(std::ifstream &confFd, std::string &line, Confi
 			}
 
 			case ALIVE_TIMEOUT:
-				if (stringToSizeT(getInfo(noSpaceLine), server.alive_timeout) == false) {
+				if (getMaxRequestBody(noSpaceLine, server.alive_timeout) == -1){
 					std::cerr << "Failed to set the alive_timeout" << std::endl;
 					return false;
 				}
