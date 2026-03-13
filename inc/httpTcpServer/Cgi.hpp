@@ -12,7 +12,6 @@
 #include <unistd.h>
 #include <vector>
 
-
 class Client;
 
 namespace http {
@@ -20,52 +19,52 @@ namespace http {
 	class EventProcessor;
 	class Cgi {
 
-	  public:
-		Cgi(const http::Request& request, const ServerConfig& serverInfo, Client* client);
+		public:
+			Cgi( const http::Request &request, const ServerConfig &serverInfo, Client *client );
 
-		~Cgi();
+			~Cgi();
 
-		bool executeCgi(void);
-		void killProcess();
-		std::string getFilePath() const;
-		pid_t getPid() const;
-		int getStatus() const;
-		int& getStatus();
-		const int* getOutputPipe() const;
-		int getOutputPipeFd() const;
-		Client* getClient() const;
-		IN_OUT_STATE& getState();
-		std::string& getReadBuffer();
-		bool readFromPipe();
-		void appendOutputToResponse(Response &response);
-		void appendFinalOutputToResponse(Response &response);
-		void dumpEnvStrings() const;
-		void dumpEnvp() const;
+			bool executeCgi( void );
+			void killProcess();
+			std::string getFilePath() const;
+			pid_t getPid() const;
+			int getStatus() const;
+			int &getStatus();
+			const int *getOutputPipe() const;
+			int getOutputPipeFd() const;
+			Client *getClient() const;
+			IN_OUT_STATE &getState();
+			std::string &getReadBuffer();
+			bool readFromPipe();
+			void appendOutputToResponse( Response &response );
+			void appendFinalOutputToResponse( Response &response );
+			void dumpEnvStrings() const;
+			void dumpEnvp() const;
 
-		bool hasFinished();
-		bool hasSuccessfullyFinished() const;
+			bool hasFinished();
+			bool hasSuccessfullyFinished() const;
 
-	  private:
-		http::Request _request;
-		ServerConfig _serverInfo;
-		Client* _client; // Back-reference to client
-		pid_t _pid;
-		int _status;
-		int _stdinFd;
-		const sockaddr_in _clientAddress;
-		int _outputPipe[2];
-		std::string _filePath;
-		std::vector<char*> _envp;
-		std::vector<std::string> _envStrings;
-		IN_OUT_STATE _state;
-		bool _hasFinished;
-		std::string _outputBuffer;
-		std::string _bodyFileName;
+		private:
+			http::Request _request;
+			ServerConfig _serverInfo;
+			Client *_client; // Back-reference to client
+			pid_t _pid;
+			int _status;
+			int _stdinFd;
+			const sockaddr_in _clientAddress;
+			int _outputPipe[2];
+			std::string _filePath;
+			std::vector< char * > _envp;
+			std::vector< std::string > _envStrings;
+			IN_OUT_STATE _state;
+			bool _hasFinished;
+			std::string _outputBuffer;
+			std::string _bodyFileName;
 
-		void dupCgiFds();
-		void buildEnvStrings();
-		int prepareCgiInputFile();
-		int validateFilePermision();
+			void dupCgiFds();
+			void buildEnvStrings();
+			int prepareCgiInputFile();
+			int validateFilePermission();
 	};
 
 }; // namespace http

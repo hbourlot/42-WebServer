@@ -84,7 +84,7 @@ namespace http {
 			initializeServer();
 			startListen();
 		} catch ( const TcpServerException &e ) {
-			std::cerr << "Error while starting to listen => " << e.what() << std::endl;
+			Logs::log(LOGS_ERROR, "Error while starting to listen => " + std::string(e.what()));
 			close( _serverSocket );
 			return -1;
 		}

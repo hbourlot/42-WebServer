@@ -5,7 +5,7 @@ e*This project has been created as part of the 42 curriculum by hbourlot, joralv
 ## Description
 
 Webserv is an implementation of an HTTP server in C++, developed as a part of the 42 curriculum.
-The objective of this project is to understand how it works a low-level web page, HTTP protocol, connection management and CGI executions
+The objective of this project is to understand how a low-level web server works, HTTP protocol, connection management and CGI executions
 
 The server can do:
 * Accept TCP connections
@@ -49,12 +49,12 @@ Example:
 
 ### Configuration
 
-The server use a `.conf` file with the follow possibilities:
+The server uses a `.conf` file with the follow possibilities:
 
 ### Server configs
 
 * host  ==> Default value: 127.0.0.1
-* port  ==> Default value:
+* port  ==> Default value: 8080
 * server_name ==> Default value: Default
 * client_max_body_size ==> Default value: 1024
 * error_page ==> Default value: 404 ../../content/defaultError.html
@@ -116,7 +116,7 @@ Or use curl:
 curl http://localhost:port
 ```
 
-Testr POST:
+Test POST:
 
 ```bash
 curl -X POST http://localhost:8080 -d "data=test"
@@ -136,13 +136,15 @@ curl -X POST http://localhost:8080 -d "data=test"
 * Configuration file parsing
 * Video player
 * File upload
+* Session Manager
+* Cookies
 
 ---
 
 ## Technical Choices
 
 * C++98
-* Arquitecture based on:
+* Architecture based on:
 
   * Socket manager
   * Request parser
@@ -167,7 +169,7 @@ curl -X POST http://localhost:8080 -d "data=test"
   * listen
   * accept
   * poll / select / epoll
-  * CGI behaviour
+  * CGI behavior
 
 ### Tutorials & Articles
 
@@ -182,7 +184,7 @@ curl -X POST http://localhost:8080 -d "data=test"
 We used AI tools to help us in some criterions:
 
 * Understand how it works a NGINX
-* CGI behaviour in a web server
+* CGI behavior in a web server
 * NGINX configuration parameters
 * Suggestions to struct the code
 * Helped to correct (README.md)
