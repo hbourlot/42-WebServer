@@ -12,9 +12,11 @@
 #include <unistd.h>
 #include <vector>
 
+
 class Client;
 
 namespace http {
+	class Response;
 	class EventProcessor;
 	class Cgi {
 
@@ -34,6 +36,9 @@ namespace http {
 		Client* getClient() const;
 		IN_OUT_STATE& getState();
 		std::string& getReadBuffer();
+		bool readFromPipe();
+		void appendOutputToResponse(Response &response);
+		void appendFinalOutputToResponse(Response &response);
 		void dumpEnvStrings() const;
 		void dumpEnvp() const;
 

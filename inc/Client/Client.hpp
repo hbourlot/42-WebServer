@@ -2,6 +2,10 @@
 
 #include "httpTcpServer/Request.hpp"
 #include "httpTcpServer/Response.hpp"
+#include "Logs/Logs.hpp"
+#include "httpTcpServer/RequestParser.hpp"
+#include "utils.hpp"
+#include <algorithm>
 #include <signal.h>
 #include <string>
 
@@ -84,6 +88,12 @@ class Client
 
 	time_t getLastAction();
 	void setLastAction();
+
+	bool readFromClientSocket();
+	ssize_t sendToClientSocket();
+	void prepareWriteBuffer();
+	void finalizeChunkedWrite();
+	bool parseRequestBuffer(const ServerConfig &serverInfo);
 
   private:
 	http::TcpServer &_server;

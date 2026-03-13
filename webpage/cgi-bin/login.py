@@ -57,8 +57,6 @@ def main():
     username = data.get("username", "")
     password = data.get("password", "")
 
-    # print(f"username={username}", file=sys.stderr)
-    # print(f"password={password}", file=sys.stderr)
 
 
     # --- Hardcoded credentials for demonstration ---

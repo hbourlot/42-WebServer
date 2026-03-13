@@ -52,7 +52,9 @@ namespace http {
 #include <netinet/in.h> // This pulls sockaddr_in into the http namespace
 
 	class EventProcessor;
-	const int BUFFER_SIZE = 65536;
+	#ifndef BUFFER_SIZE
+	#define BUFFER_SIZE 65536
+	#endif
 	const int MAX_READS_PER_EVENT = 3;
 	const int MAX_SENDS_PER_EVENT = 3;
 
