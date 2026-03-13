@@ -175,12 +175,6 @@ bool checkSplitString(const std::string &line, const std::string &sep, bool &isS
 	return true;
 }
 
-void print(const char *src) {
-
-	std::string a(src);
-	std::cout << a << std::endl;
-};
-
 static std::string getExtension(const std::string &path) {
 	size_t slashPos = path.find_last_of('/');
 	size_t dotPos = path.find_last_of('.');

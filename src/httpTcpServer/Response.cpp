@@ -254,7 +254,6 @@ void http::Response::buildErrorResponse(const HttpStatusCode &status, const Serv
 	if (it != server.errorPage.end()) {
 		std::ifstream file(it->second.c_str());
 		if (file.good()) {
-			std::cout << "Found\n";
 			buildFileResponse(status, it->second, server);
 			return;
 		}

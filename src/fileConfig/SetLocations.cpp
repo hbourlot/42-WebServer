@@ -319,8 +319,6 @@ void SetLocation::setDefaultLocation(ServerConfig &server, Directory &location) 
 	if (location.auth_login_page == "/login" && 
 		server.auth_login_page != "/login")
 	{
-		std::cout << "Entrou aqui" << std::endl;
 		location.auth_login_page = server.auth_login_page;
-		std::cout << "Location nova " << location.auth_login_page << std::endl;
 	}
 }

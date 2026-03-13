@@ -89,7 +89,6 @@ namespace {
 
 		req.setUri(requestLine.substr(posM + 1, posP - posM - 1));
 		decodeURI(req.getUri());
-		// std::cout << "req.getUri():" << req.getUri() << std::endl;
 
 		req.setServerProtocol(requestLine.substr(posP + 1));
 

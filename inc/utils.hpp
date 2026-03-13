@@ -22,8 +22,6 @@ bool isDirectory(const std::string& filePath);
 std::string joinPath(const std::string& base, const std::string& sub);
 bool containBrackets(std::string& line, bool& state,
                      std::string extraWordToFind); // Track if the Server on config is open or closed;
-void print(const char* src);
-
 template <typename T> std::string ft_to_string(const T& value) {
 	std::ostringstream oss;
 	oss << value;
