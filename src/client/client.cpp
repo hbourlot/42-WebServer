@@ -170,15 +170,13 @@ bool Client::readFromClientSocket() {
 
 ssize_t Client::sendToClientSocket() {
 	std::string &writeBuffer = getWriteBuffer();
-
 	if (writeBuffer.empty())
 		return 0;
-
 	ssize_t bytesSent = send(_fd, writeBuffer.c_str(), writeBuffer.size(), MSG_NOSIGNAL);
-
+	
 	if (bytesSent < 0)
-		return -1;
-
+	return -1;
+	
 	if (bytesSent > 0) {
 		setLastAction();
 		writeBuffer.erase(0, bytesSent);

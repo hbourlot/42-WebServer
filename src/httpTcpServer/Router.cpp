@@ -45,6 +45,7 @@ void http::Router::launchCgi()
 		return;
 	}
 
+	_client.setLastAction();
 	// Store CGI info in client
 	_client.setCgiPid(cgi->getPid());
 	_client.setCgiOutputFd(cgi->getOutputPipe()[0]);

@@ -57,8 +57,6 @@ namespace http {
 		SessionManager _sessionManager;
 		std::map<SocketFD, Cgi*> _cgi_by_fd;
 
-		size_t _clientIndex;
-
 		bool closeIdleConnection(size_t index);
 		bool handleClientIndex(size_t& index);
 

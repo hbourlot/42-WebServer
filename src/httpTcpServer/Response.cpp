@@ -250,9 +250,11 @@ static std::string createErrorBody(const HttpStatusCode &status) {
 void http::Response::buildErrorResponse(const HttpStatusCode &status, const ServerConfig &server) {
 	std::map<int, std::string>::const_iterator it;
 	it = server.errorPage.find(atoi(status.code.c_str()));
+	
 	if (it != server.errorPage.end()) {
 		std::ifstream file(it->second.c_str());
 		if (file.good()) {
+			std::cout << "Found\n";
 			buildFileResponse(status, it->second, server);
 			return;
 		}

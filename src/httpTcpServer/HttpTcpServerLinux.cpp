@@ -18,8 +18,6 @@ namespace http {
 
 	int TcpServer::initializeServer() {
 				
-		// sleep(1);
-
 		// Creates a server socket (IPv4, TCP, 0) (domain, type, protocol);
 		_serverSocket = socket( AF_INET, SOCK_STREAM, 0 );
 		if ( _serverSocket < 0 ) {
